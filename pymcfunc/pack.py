@@ -1,18 +1,16 @@
-from pymcfunc.func_handler_java import JavaFuncHandler
-from pymcfunc.func_handler_bedrock import BedrockFuncHandler
 import pymcfunc.errors as errors
 import pymcfunc.internal as internal
+from pymcfunc.func_handler_java import JavaFuncHandler
+from pymcfunc.func_handler_bedrock import BedrockFuncHandler
 
 class Pack:
-    funcs = {}
-    name = None
-    edition = "j"
-
     def __init__(self, edition: str="j"):
         internal.options(edition, ['j','b'])
         if not edition in ['j', 'b']:
             raise errors.OptionError(['j', 'b'], edition)
         self.edition = edition
+        self.funcs = {}
+        self.name = None
 
     def function(self, func):
         m = JavaFuncHandler() if self.edition == 'j' else BedrockFuncHandler()
