@@ -10,6 +10,7 @@ def mcfuncjava(f: pmf.JavaFuncHandler):
     f.setblock("1 2 3", "assefsdaf")
     f.fill('1 2 3', '4 5 6', "assefsdaf")
     f.clone('1 2 3', '4 5 6', '7 8 9')
+    f.kill("@p")
 
 b = pmf.Pack('b')
 
@@ -20,6 +21,7 @@ def mcfuncbedrock(f: pmf.BedrockFuncHandler):
     f.setblock("1 2 3", "assefsdaf")
     f.fill('1 2 3', '4 5 6', "assefsdaf")
     f.clone('1 2 3', '4 5 6', '7 8 9')
+    f.kill("@p")
 
 print(p.funcs)
 print(b.funcs)

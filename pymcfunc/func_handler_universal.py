@@ -20,3 +20,8 @@ class UniversalFuncHandler:
 
     def help(self):
         self.commands.append("help")
+
+    def kill(self, target: str):
+        if " " in target:
+            raise errors.SpaceError('target', target)
+        self.commands.append(f"kill {target}".strip())
