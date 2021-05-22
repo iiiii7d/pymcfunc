@@ -27,3 +27,11 @@ class ReliantError(Exception):
     def __init__(self, indep_name, dep_name):
         msg = f"{dep_name} relies on {indep_name} not being its default value; try specifying parameter {indep_name}"
         super().__init__(msg)
+
+class CaretError(Exception):
+    def __init__(self, coords, cause):
+        if cause == "tilde":
+            msg = f"Tildes and carets cannot be in the same set of coordinates (Got '{coords}')"
+        elif cause == "notall":
+            msg = f"Not all values have '^' (Got '{coords}')"
+        super().__init__(msg)

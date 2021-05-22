@@ -1,8 +1,11 @@
 import pymcfunc.errors as errors
 import pymcfunc.internal as internal
 from pymcfunc.func_handler_universal import UniversalFuncHandler
+from pymcfunc.selectors import JavaSelectors
 
 class JavaFuncHandler(UniversalFuncHandler):
+    sel = JavaSelectors()
+
     def __init__(self):
         self.commands = []
 
@@ -37,3 +40,12 @@ class JavaFuncHandler(UniversalFuncHandler):
         cmd = f"clone {pos1} {pos2} {dest} {optionals}".strip()
         self.commands.append(cmd)
         return cmd
+
+    def give(self, target: str, item: str, count: int=1):
+        internal.check_spaces('target', target)
+        optionals = internal.defaults((count, 1))
+
+        cmd = f"give {target} {item} {optionals}".strip()
+        self.commands.append(cmd)
+        return cmd
+        

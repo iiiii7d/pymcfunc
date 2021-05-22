@@ -44,3 +44,12 @@ def reliant(indep_name, indep_value, indep_default, dep_name, dep_value, dep_def
     # only when both are optional params, and the default value of the indep param is None
     if dep_value != dep_default and indep_value == indep_default:
         raise errors.ReliantError(indep_name, dep_name)
+
+def check_invalid_params(allowed_val, other_param_name, other_val, *params):
+    for name, val, default in params:
+        if other_val != allowed_val and val != default:
+            raise errors.InvalidParameterError(allowed_val, other_param_name, other_val, name)
+
+def check_spaces(name, val):
+    if " " in val:
+        raise errors.SpaceError(name, val)

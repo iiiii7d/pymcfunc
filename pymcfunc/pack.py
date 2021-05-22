@@ -2,6 +2,7 @@ import pymcfunc.errors as errors
 import pymcfunc.internal as internal
 from pymcfunc.func_handler_java import JavaFuncHandler
 from pymcfunc.func_handler_bedrock import BedrockFuncHandler
+import pymcfunc.selectors as selectors
 
 class Pack:
     def __init__(self, edition: str="j"):
@@ -11,6 +12,7 @@ class Pack:
         self.edition = edition
         self.funcs = {}
         self.name = None
+        self.sel = selectors.BedrockSelectors() if edition == "b" else selectors.JavaSelectors()
 
     def function(self, func):
         m = JavaFuncHandler() if self.edition == 'j' else BedrockFuncHandler()
