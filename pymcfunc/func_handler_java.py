@@ -83,3 +83,7 @@ class JavaFuncHandler(UniversalFuncHandler):
         cmd = f"clear {optionals}"
         self.commands.append(cmd)
         return cmd
+
+    def teleport(self):
+        pass #todo
+    tp = teleport

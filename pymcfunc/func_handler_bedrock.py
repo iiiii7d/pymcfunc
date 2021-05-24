@@ -96,4 +96,6 @@ class BedrockFuncHandler(UniversalFuncHandler):
         self.commands.append(cmd)
         return cmd
         
-        
+        def teleport(self):
+            pass #todo
+        tp = teleport
