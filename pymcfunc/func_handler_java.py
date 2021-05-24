@@ -1,6 +1,6 @@
 import pymcfunc.errors as errors
 import pymcfunc.internal as internal
-from pymcfunc.func_handler_universal import UniversalFuncHandler
+from pymcfunc.func_handler_universal import UniversalFuncHandler, UniversalRawCommands
 from pymcfunc.selectors import JavaSelectors
 
 class JavaFuncHandler(UniversalFuncHandler):
@@ -10,7 +10,9 @@ class JavaFuncHandler(UniversalFuncHandler):
 
     def __init__(self):
         self.commands = []
+        self.r = JavaRawCommands(self)
 
+class JavaRawCommands(UniversalRawCommands):
     def setblock(self, pos: str, block: str, mode="replace"):
         """Adds a /setblock command.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFuncHandler.setblock"""
@@ -18,7 +20,7 @@ class JavaFuncHandler(UniversalFuncHandler):
         optionals = internal.defaults((mode, "replace"))
 
         cmd = f"setblock {pos} {block} {optionals}".strip()
-        self.commands.append(cmd)
+        self.fh.commands.append(cmd)
         return cmd
 
     def fill(self, pos1: str, pos2: str, block: str, mode="replace", filterPredicate: str=None):
@@ -30,7 +32,7 @@ class JavaFuncHandler(UniversalFuncHandler):
         optionals = internal.defaults((mode, "replace"), (filterPredicate, None))
 
         cmd = f"fill {pos1} {pos2} {block} {optionals}".strip()
-        self.commands.append(cmd)
+        self.fh.commands.append(cmd)
         return cmd
 
     def clone(self, pos1: str, pos2: str, dest: str, maskMode="replace", filterPredicate: str=None, cloneMode: str="normal"):
@@ -46,7 +48,7 @@ class JavaFuncHandler(UniversalFuncHandler):
             optionals = internal.defaults((maskMode, "replace"), (cloneMode, "normal"))
         
         cmd = f"clone {pos1} {pos2} {dest} {optionals}".strip()
-        self.commands.append(cmd)
+        self.fh.commands.append(cmd)
         return cmd
 
     def give(self, target: str, item: str, count: int=1):
@@ -56,7 +58,7 @@ class JavaFuncHandler(UniversalFuncHandler):
         optionals = internal.defaults((count, 1))
 
         cmd = f"give {target} {item} {optionals}".strip()
-        self.commands.append(cmd)
+        self.fh.commands.append(cmd)
         return cmd
         
     def gamemode(self, mode: str, target: int="@s"):
@@ -65,14 +67,14 @@ class JavaFuncHandler(UniversalFuncHandler):
         internal.options(mode, ['survival', 'creative', 'adventure', 'spectator'])
 
         cmd = f"gamemode {mode} {optionals}".strip()
-        self.commands.append(cmd)
+        self.fh.commands.append(cmd)
         return cmd
 
     def summon(self, entity: str, pos: str="~ ~ ~", nbt: dict=None):
         optionals = internal.defaults((pos, "~ ~ ~"), (nbt, None))
 
         cmd = f"summon {entity} {optionals}".strip()
-        self.commands.append(cmd)
+        self.fh.commands.append(cmd)
         return cmd
 
     def clear(self, target: str="@s", item: str=None, maxCount: int=None):
@@ -81,7 +83,7 @@ class JavaFuncHandler(UniversalFuncHandler):
         optionals = internal.defaults((target, "@s"), (item, None), (maxCount, None))
 
         cmd = f"clear {optionals}"
-        self.commands.append(cmd)
+        self.fh.commands.append(cmd)
         return cmd
 
     def teleport(self):

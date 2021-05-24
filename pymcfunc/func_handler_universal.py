@@ -8,7 +8,7 @@ class UniversalFuncHandler:
     """The function handler which includes commands that are the same for both Java and Bedrock edition.
     More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalFuncHandler"""
     def __init__(self):
-        self.commands = []
+        self.r = UniversalRawCommands(self)
 
     def __str__(self):
         return "\n".join(self.commands)
@@ -17,11 +17,15 @@ class UniversalFuncHandler:
         for i in self.commands:
             yield i
 
+class UniversalRawCommands:
+    def __init__(self, fh):
+        self.fh = fh
+
     def say(self, message: str):
         """Adds a /say command.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalFuncHandler.say"""
         cmd = f"say {message}".strip()
-        self.commands.append(cmd)
+        self.fh.commands.append(cmd)
         return cmd
 
     def tell(self, target: str, message: str):
@@ -29,7 +33,7 @@ class UniversalFuncHandler:
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalFuncHandler.tell"""
         internal.check_spaces('target', target)
         cmd = f"tell {target} {message}".strip()
-        self.commands.append(cmd)
+        self.fh.commands.append(cmd)
         return cmd
     w = tell
     msg = tell
@@ -37,7 +41,7 @@ class UniversalFuncHandler:
     def help(self):
         """Adds a /help command.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalFuncHandler.help"""
-        self.commands.append("help")
+        self.fh.commands.append("help")
         return "help"
 
     def kill(self, target: str):
@@ -45,7 +49,7 @@ class UniversalFuncHandler:
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalFuncHandler.kill"""
         internal.check_spaces('target', target)
         cmd = f"kill {target}".strip()
-        self.commands.append(cmd)
+        self.fh.commands.append(cmd)
         return cmd
 
     def gamerule(self, rule: str, value: Union[bool, int]=None):
@@ -67,7 +71,7 @@ class UniversalFuncHandler:
         }
         from pymcfunc.func_handler_bedrock import BedrockFuncHandler
 
-        rules = BEDROCK if isinstance(self, BedrockFuncHandler) else JAVA
+        rules = BEDROCK if isinstance(self.fh, BedrockFuncHandler) else JAVA
         rulelist = itertools.chain.from_iterable(rules.values())
         internal.options(rule, rulelist)
 
@@ -81,9 +85,9 @@ class UniversalFuncHandler:
             cmd = f"gamerule {rule} {value}".strip()
         else:
             cmd = f"gamerule {rule}".strip()
-        self.commands.append(cmd)
+        self.fh.commands.append(cmd)
         return cmd
 
     def seed(self):
-        self.commands.append("seed")
+        self.fh.commands.append("seed")
         return "seed"
