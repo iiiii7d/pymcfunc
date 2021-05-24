@@ -4,12 +4,16 @@ from pymcfunc.func_handler_universal import UniversalFuncHandler
 from pymcfunc.selectors import JavaSelectors
 
 class JavaFuncHandler(UniversalFuncHandler):
+    """The Java Edition function handler.
+    More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFuncHandler"""
     sel = JavaSelectors()
 
     def __init__(self):
         self.commands = []
 
     def setblock(self, pos: str, block: str, mode="replace"):
+        """Adds a /setblock command.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFuncHandler.setblock"""
         internal.options(mode, ['destroy', 'keep', 'replace'])
         optionals = internal.defaults((mode, "replace"))
 
@@ -18,6 +22,8 @@ class JavaFuncHandler(UniversalFuncHandler):
         return cmd
 
     def fill(self, pos1: str, pos2: str, block: str, mode="replace", filterPredicate: str=None):
+        """Adds a /fill command.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFuncHandler.fill"""
         internal.options(mode, ['destroy', 'hollow', 'keep', 'outline', 'replace'])
         if mode != 'replace' and filterPredicate != None:
             raise errors.InvalidParameterError(mode, 'mode', filterPredicate, 'filterPredicate')
@@ -28,6 +34,8 @@ class JavaFuncHandler(UniversalFuncHandler):
         return cmd
 
     def clone(self, pos1: str, pos2: str, dest: str, maskMode="replace", filterPredicate: str=None, cloneMode: str="normal"):
+        """Adds a /clone command.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFuncHandler.clone"""
         internal.options(maskMode, ['masked', 'filtered', 'replace'])
         internal.options(cloneMode, ['forced', 'move', 'normal'])
         if maskMode != 'filtered' and filterPredicate != None:
@@ -42,6 +50,8 @@ class JavaFuncHandler(UniversalFuncHandler):
         return cmd
 
     def give(self, target: str, item: str, count: int=1):
+        """Adds a /give command.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFuncHandler.give"""
         internal.check_spaces('target', target)
         optionals = internal.defaults((count, 1))
 

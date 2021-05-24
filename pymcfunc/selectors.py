@@ -3,27 +3,38 @@ import pymcfunc.errors as errors
 from math import inf
 
 class UniversalSelectors:
+    """The universal selector class.
+       Every function has a **kwargs, which is used for selector arguments. The list of selector arguemnts are in the respective specialised classes.
+       If an argument is repeatable, you can express multiple values of the same argument in lists, sets, or tuples.
+       More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalSelectors"""
     def select(self, var: str, **kwargs):
+        """Returns a selector, given the selector variable and optional arguments.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalSelectors.select"""
         internal.options(var, ['p','r','a','e','s'])
         return "@"+var+self._sel_args(**kwargs)
 
     def nearest_player(self, **kwargs):
+        """Alias of select('p', **kwargs)."""
         return self.select('p', **kwargs)
     p = nearest_player
     
     def random_player(self, **kwargs):
+        """Alias of select('r', **kwargs)."""
         return self.select('p', **kwargs)
     r = random_player
 
     def all_players(self, **kwargs):
+        """Alias of select('a', **kwargs)."""
         return self.select('a', **kwargs)
     a = all_players
 
     def all_entities(self, **kwargs):
+        """Alias of select('e', **kwargs)."""
         return self.select('e', **kwargs)
     e = all_entities
 
     def executor(self, **kwargs):
+        """Alias of select('s', **kwargs)."""
         return self.select('s', **kwargs)
     s = executor
 
@@ -84,15 +95,21 @@ class UniversalSelectors:
 
 
 class BedrockSelectors(UniversalSelectors):
+    """The Bedrock Edition selector class.
+    More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockSelectors"""
     def __init__(self):
         pass
 
 
 class JavaSelectors(UniversalSelectors):
+    """The Java Edition selector class.
+    More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaSelectors"""
     def __init__(self):
         pass
 
     def range(self, minv: int=0, maxv: int=inf):
+        """Returns a range of values, as it is represented in Minecraft commands.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaSelectors.range"""
         if minv > maxv:
             raise ValueError(f"{maxv} is greater than {minv}")
         if minv == 0:

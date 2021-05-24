@@ -2,7 +2,7 @@ Reference
 =========
 .. py:currentmodule:: pymcfunc
 
-.. py:property:: __version__
+.. py:attribute:: __version__
    :type: str
       
       The version.
