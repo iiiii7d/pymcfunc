@@ -53,9 +53,3 @@ def check_invalid_params(allowed_val, other_param_name, other_val, *params):
 def check_spaces(name, val):
     if " " in val:
         raise errors.SpaceError(name, val)
-
-def unspace(val):
-    if " " in val:
-        return "\""+val+"\""
-    else:
-        return val

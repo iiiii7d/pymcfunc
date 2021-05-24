@@ -13,6 +13,8 @@ def test_pytest():
         f.clone('1 2 3', '4 5 6', '7 8 9')
         f.kill("@p")
         f.give("@p", "a")
+        f.gamemode("survival")
+        f.gamerule("doDaylightCycle", True)
 
     b = pmf.Pack('b')
 
@@ -25,6 +27,8 @@ def test_pytest():
         f.clone('1 2 3', '4 5 6', '7 8 9')
         f.kill("@p")
         f.give("@p", "3")
+        f.gamemode(0)
+        f.gamerule("maxCommandChainLength", 3)
 
     print(p.funcs)
     print(b.funcs)

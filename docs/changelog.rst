@@ -1,6 +1,10 @@
 Changelog
 =========
 
+* **v0.1 ()**
+
+  * Added /gamemode, /gamerule, /seed, /summon, /clear
+
 * **v0.0 (24/5/21)**
 
   * Added Pack, FuncHandlers, Selectors, coords

@@ -59,3 +59,27 @@ class JavaFuncHandler(UniversalFuncHandler):
         self.commands.append(cmd)
         return cmd
         
+    def gamemode(self, mode: str, target: int="@s"):
+        internal.check_spaces('target', target)
+        optionals = internal.defaults((target, "@s"))
+        internal.options(mode, ['survival', 'creative', 'adventure', 'spectator'])
+
+        cmd = f"gamemode {mode} {optionals}".strip()
+        self.commands.append(cmd)
+        return cmd
+
+    def summon(self, entity: str, pos: str="~ ~ ~", nbt: dict=None):
+        optionals = internal.defaults((pos, "~ ~ ~"), (nbt, None))
+
+        cmd = f"summon {entity} {optionals}".strip()
+        self.commands.append(cmd)
+        return cmd
+
+    def clear(self, target: str="@s", item: str=None, maxCount: int=None):
+        internal.reliant('item', maxCount, None, 'data', maxCount, None)
+        internal.check_spaces('target', target)
+        optionals = internal.defaults((target, "@s"), (item, None), (maxCount, None))
+
+        cmd = f"clear {optionals}"
+        self.commands.append(cmd)
+        return cmd

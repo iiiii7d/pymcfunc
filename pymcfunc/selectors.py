@@ -1,6 +1,7 @@
+from math import inf
+
 import pymcfunc.internal as internal
 import pymcfunc.errors as errors
-from math import inf
 
 class UniversalSelectors:
     """The universal selector class.

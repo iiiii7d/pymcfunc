@@ -1,3 +1,5 @@
+from typing import Union
+
 import pymcfunc.errors as errors
 import pymcfunc.internal as internal
 from pymcfunc.func_handler_universal import UniversalFuncHandler
@@ -60,4 +62,38 @@ class BedrockFuncHandler(UniversalFuncHandler):
         cmd = f"give {target} {item} {optionals}".strip()
         self.commands.append(cmd)
         return cmd
+
+    def gamemode(self, mode: Union[int, str], target: str="@s"):
+        internal.check_spaces('target', target)
+        optionals = internal.defaults((target, "@s"))
+        internal.options(mode, ['survival', 'creative', 'adventure', 's', 'c', 'a', 0, 1, 2])
+
+        cmd = f"gamemode {mode} {optionals}".strip()
+        self.commands.append(cmd)
+        return cmd
+
+    def summon(self, entity: str, pos: str="~ ~ ~", event: str=None, nameTag: str=None):
+        if event == None:
+            optionals = internal.defaults((pos, "~ ~ ~"))
+            nameTag = internal.unspace(nameTag)
+            cmd = f"summon {entity} {nameTag} {optionals}".strip()
+        else:
+            optionals = internal.defaults((pos, "~ ~ ~"), (event, None), (nameTag, None))
+            if event != None: event = internal.unspace(event)
+            if nameTag != None: nameTag = internal.unspace(nameTag)
+            cmd = f"summon {entity} {optionals}".strip()
+        
+        self.commands.append(cmd)
+        return cmd
+
+    def clear(self, target: str="@s", item: str=None, data: int=-1, maxCount: int=-1):
+        internal.reliant('item', item, None, 'data', data, -1)
+        internal.reliant('item', maxCount, None, 'data', maxCount, -1)
+        internal.check_spaces('target', target)
+        optionals = internal.defaults((target, "@s"), (item, None), (data, -1), (maxCount, -1))
+
+        cmd = f"clear {optionals}"
+        self.commands.append(cmd)
+        return cmd
+        
         

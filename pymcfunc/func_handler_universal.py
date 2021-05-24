@@ -1,3 +1,6 @@
+from typing import Union
+import itertools
+
 import pymcfunc.errors as errors
 import pymcfunc.internal as internal
 
@@ -44,3 +47,43 @@ class UniversalFuncHandler:
         cmd = f"kill {target}".strip()
         self.commands.append(cmd)
         return cmd
+
+    def gamerule(self, rule: str, value: Union[bool, int]=None):
+        BEDROCK = {
+            bool: ['commandBlocksEnabled', 'commandBlockOutput', 'doDaylightCycle', 'doEntityDrops', 'doFireTick', 'doInsomnia',
+                   'doImmediateRespawn', 'doMobLoot', 'doMobSpawning', 'doTileDrops', 'doWeatherCycle', 'drowningDamage',
+                   'fallDamage', 'fireDamage', 'freezeDamage', 'keepInventory', 'mobGriefing', 'naturalRegeneration', 'pvp'
+                   'sendCommandFeedback', 'showCoordinates', 'showDeathMessages', 'tntExplodes', 'showTags'],
+            int: ['functionCommandLimit', 'maxCommandChainLength', 'randomTickSpeed', 'spawnRadius']
+        }
+        JAVA = {
+            bool: ['announceAdvancements', 'commandBlockOutput', 'disableElytraMovementCheck', 'disableRaids', 'doDaylightCycle',
+                   'doEntityDrops', 'doFireTick', 'doInsomnia', 'doImmediateRespawn', 'doLimitedCrafting', 'doMobLoot', 'doMobSpawning',
+                   'doPatrolSpawning', 'doTileDrops', 'doTraderSpawning', 'doWeatherCycle', 'drowningDamage', 'fallDamage', 'fireDamage',
+                   'forgiveDeadPlayers', 'freezeDamage', 'keepInventory', 'logAdminCommands', 'mobGriefing', 'naturalRegeneration'
+                   'randomTickSpeed', 'reducedDebugInfo', 'sendCommandFeedback', 'showDeathMessages', 'spectatorsGenerateChunks',
+                   'universalAnger'],
+            int: ['maxCommandChainLength', 'maxEntityCramming', 'playersSleepingPercentage', 'spawnRadius']
+        }
+        from pymcfunc.func_handler_bedrock import BedrockFuncHandler
+
+        rules = BEDROCK if isinstance(self, BedrockFuncHandler) else JAVA
+        rulelist = itertools.chain.from_iterable(rules.values())
+        internal.options(rule, rulelist)
+
+        if value != None:
+            other = int if isinstance(value, bool) else bool
+            if rule in rules[other]:
+                raise ValueError(f"{rule} is of type {other.__name__} and not {type(value).__name__}")
+
+            if isinstance(value, bool):
+                value = "true" if value else "false"
+            cmd = f"gamerule {rule} {value}".strip()
+        else:
+            cmd = f"gamerule {rule}".strip()
+        self.commands.append(cmd)
+        return cmd
+
+    def seed(self):
+        self.commands.append("seed")
+        return "seed"
