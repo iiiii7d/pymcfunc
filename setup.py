@@ -17,7 +17,7 @@ setup(
   url = 'https://github.com/iiiii7d/pymcfunc',
   download_url = f'https://github.com/iiiii7d/pymcfunc/archive/refs/tags/v{pymcfunc.__version__}.tar.gz',
   keywords = ['pymcfunc', 'minecraft', 'commands', 'function'],
-  python_requires='',
+  python_requires='>=3.6',
   #package_data={
   #  'pymcfunc': [''],
   #},
@@ -29,6 +29,7 @@ setup(
     'Natural Language :: English',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
+    "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
