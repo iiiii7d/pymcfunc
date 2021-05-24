@@ -115,7 +115,7 @@ Function Handlers
 
       .. versionadded:: 0.0
 
-      **Syntax:** ``say <message>``
+      **Syntax:** *say <message>*
 
       :param str message: ``message``
       :returns: The command
@@ -129,7 +129,7 @@ Function Handlers
 
       .. versionadded:: 0.0
 
-      **Syntax:** ``tell <target> <message>``
+      **Syntax:** *tell <target> <message>*
 
       :param str target: ``target``
       :param str message: ``message``
@@ -142,7 +142,7 @@ Function Handlers
 
       .. versionadded:: 0.0
 
-      **Syntax:** ``help``
+      **Syntax:** *help*
 
       :returns: The command
       :rtype: str
@@ -153,7 +153,7 @@ Function Handlers
 
       .. versionadded:: 0.0
 
-      **Syntax:** ``kill <target>``
+      **Syntax:** *kill <target>*
 
       :param str target: ``target``
       :returns: The command
@@ -164,9 +164,9 @@ Function Handlers
    The Beckrock Edition function handler.
 
    .. py:attribute:: sel
-   :type: UniversalSelectors
+   :type: BedrockSelectors
 
-      A UniversalSelectors object. Will be :py:class:`BedrockSelectors` for Bedrock, :py:class:`JavaSelectors` for Java.
+      A Selectors object.
       
       .. versionadded:: 0.0
 
@@ -176,7 +176,7 @@ Function Handlers
 
       .. versionadded:: 0.0
 
-      **Syntax:** ``setblock <pos> <tileName> [tileData/blockStates] [mode:destroy|keep|replace]``
+      **Syntax:** *setblock <pos> <tileName> [tileData/blockStates] [mode:destroy|keep|replace]*
 
       :param str pos: ``pos``
       :param str tileName: ``tileName``
@@ -192,7 +192,7 @@ Function Handlers
 
       .. versionadded:: 0.0
 
-      **Syntax:** ``fill <pos1> <pos2> <tileName> [tileData/blockStates] [mode:destroy|hollow|keep|outline|replace] [mode=replace:replaceTileName] [mode=replace:replaceDataValue]``
+      **Syntax:** *fill <pos1> <pos2> <tileName> [tileData/blockStates] [mode:destroy|hollow|keep|outline|replace] [mode=replace:replaceTileName] [mode=replace:replaceDataValue]*
 
       :param str pos: ``pos``
       :param str tileName: ``tileName``
@@ -210,7 +210,7 @@ Function Handlers
 
       .. versionadded:: 0.0
 
-      **Syntax:** ``clone <pos1> <pos2> <dest> [maskMode:replace|masked] [cloneMode:force|move|normal] <maskMode=filtered:tileName> <maskMode=filtered:tileData/blockStates>``
+      **Syntax:** *clone <pos1> <pos2> <dest> [maskMode:replace|masked] [cloneMode:force|move|normal] <maskMode=filtered:tileName> <maskMode=filtered:tileData/blockStates>*
 
       :param str pos1: ``pos1``
       :param str pos2: ``pos2``
@@ -229,7 +229,7 @@ Function Handlers
 
       .. versionadded:: 0.0
 
-      **Syntax:** ``give <target> <item> [amount] [data] [components]``
+      **Syntax:** *give <target> <item> [amount] [data] [components]*
 
       :param str target: ``target``
       :param str item: ``item``
@@ -244,9 +244,9 @@ Function Handlers
    The Java Edition function handler.
 
    .. py:attribute:: sel
-   :type: UniversalSelectors
+   :type: JavaSelectors
 
-      A UniversalSelectors object. Will be :py:class:`BedrockSelectors` for Bedrock, :py:class:`JavaSelectors` for Java.
+      A Selectors object.
       
       .. versionadded:: 0.0
 
@@ -256,7 +256,7 @@ Function Handlers
 
       .. versionadded:: 0.0
 
-      **Syntax:** ``setblock <pos> <block> [mode:destroy|keep|replace]``
+      **Syntax:** *setblock <pos> <block> [mode:destroy|keep|replace]*
 
       :param str pos: ``pos``
       :param str block: ``block``
@@ -270,7 +270,7 @@ Function Handlers
 
       .. versionadded:: 0.0
 
-      **Syntax:** ``fill <pos1> <pos2> <block> [mode:destroy|hollow|keep|outline|replace] [mode=replace:filterPredicate]
+      **Syntax:** *fill <pos1> <pos2> <block> [mode:destroy|hollow|keep|outline|replace] [mode=replace:filterPredicate]*
 
       :param str pos1: ``pos1``
       :param str pos2: ``pos2``
@@ -286,7 +286,7 @@ Function Handlers
 
       .. versionadded:: 0.0
 
-      **Syntax:** ``clone <pos1> <pos2> <dest> [maskMode:replace|masked] <maskMode=masked:filterPredicate> [cloneMode:force|move|normal]``
+      **Syntax:** *clone <pos1> <pos2> <dest> [maskMode:replace|masked] <maskMode=masked:filterPredicate> [cloneMode:force|move|normal]*
 
       :param str pos1: ``pos1``
       :param str pos2: ``pos2``
@@ -303,7 +303,7 @@ Function Handlers
 
       .. versionadded:: 0.0
 
-      **Syntax:** ``give <target> <item> [count]``
+      **Syntax:** *give <target> <item> [count]*
 
       :param str target: ``target``
       :param str item: ``item``
@@ -320,7 +320,7 @@ Coords
 
    .. note::
       It might be better to input values asking for coordinates directly in a string.
-      This is more for dynamic values.
+      This function is more for dynamic values.
 
    .. versionadded:: 0.0
 
@@ -443,6 +443,8 @@ Selectors
 
 Errors
 ------
+
+.. py:currentmodule:: pymcfunc.errors
 
 .. py:exception:: SpaceError
 
