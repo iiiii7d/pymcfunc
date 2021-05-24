@@ -19,5 +19,3 @@ class Pack:
         func(m)
         fname = func.__name__
         self.funcs.update({fname: str(m)})
-        
-        

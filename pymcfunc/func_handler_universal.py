@@ -8,6 +8,10 @@ class UniversalFuncHandler:
     def __str__(self):
         return "\n".join(self.commands)
 
+    def __iter__(self):
+        for i in self.commands:
+            yield i
+
     def say(self, message: str):
         cmd = f"say {message}".strip()
         self.commands.append(cmd)

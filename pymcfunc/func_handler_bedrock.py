@@ -18,7 +18,7 @@ class BedrockFuncHandler(UniversalFuncHandler):
         self.commands.append(cmd)
         return cmd
 
-    def fill(self, pos1: str, pos2: str, block: str, tileData: int=0, blockStates: list=None, mode="replace", replaceTileName: str=None, replaceDataValue: int=None):
+    def fill(self, pos1: str, pos2: str, tileName: str, tileData: int=0, blockStates: list=None, mode="replace", replaceTileName: str=None, replaceDataValue: int=None):
         internal.options(mode, ['destroy', 'hollow', 'keep', 'outline', 'replace'])
         if mode != 'replace':
             internal.check_invalid_params('replace', mode, 'mode', ('replaceTileName', replaceTileName, None), ('replaceDataValue', replaceDataValue, None))
@@ -26,7 +26,7 @@ class BedrockFuncHandler(UniversalFuncHandler):
         tileData_blockStates = internal.pick_one_arg((tileData, 0, "tileData"), (blockStates, None, "blockStates"))
         optionals = internal.defaults((tileData_blockStates, None), (mode, "replace"), (replaceTileName, None), (replaceDataValue, None))
 
-        cmd = f"fill {pos1} {pos2} {block} {optionals}".strip()
+        cmd = f"fill {pos1} {pos2} {tileName} {optionals}".strip()
         self.commands.append(cmd)
         return cmd
 
