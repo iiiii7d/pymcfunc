@@ -65,15 +65,6 @@ class BedrockRawCommands(UniversalRawCommands):
         self.fh.commands.append(cmd)
         return cmd
 
-    def gamemode(self, mode: Union[int, str], target: str="@s"):
-        internal.check_spaces('target', target)
-        optionals = internal.defaults((target, "@s"))
-        internal.options(mode, ['survival', 'creative', 'adventure', 's', 'c', 'a', 0, 1, 2])
-
-        cmd = f"gamemode {mode} {optionals}".strip()
-        self.fh.commands.append(cmd)
-        return cmd
-
     def summon(self, entity: str, pos: str="~ ~ ~", event: str=None, nameTag: str=None):
         if event == None:
             optionals = internal.defaults((pos, "~ ~ ~"))
@@ -94,10 +85,65 @@ class BedrockRawCommands(UniversalRawCommands):
         internal.check_spaces('target', target)
         optionals = internal.defaults((target, "@s"), (item, None), (data, -1), (maxCount, -1))
 
-        cmd = f"clear {optionals}"
+        cmd = f"clear {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd
         
-        def teleport(self):
-            pass #todo
-        tp = teleport
+    def teleport(self, destxyz: str=None, destentity: str=None, target: str="@s", facing: str=None, rotation: str=None, checkForBlocks: bool=False):
+        internal.check_spaces('target', target)
+        dest = internal.pick_one_arg((destxyz, None, 'destxyz'), (destentity, None, 'destentity'), optional=False)
+        target = "" if target == "@s" else target+" "
+        if destentity == None:
+            rotation_facing = internal.pick_one_arg((rotation, None, 'rotation'), (facing, None, 'facing'))
+            if rotation_facing != None:
+                if facing != None: rotation_facing = "facing "+rotation_facing
+                optionals = f"{rotation_facing} {internal.defaults((checkForBlocks, False))}"
+            else:
+                optionals = internal.defaults((checkForBlocks, False))
+        else:
+            optionals = internal.defaults((checkForBlocks, False))
+
+        cmd = f"teleport {target}{dest} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+    tp = teleport
+
+    def experience(self, amount: int, level: bool=False, target: str="@s"):
+        internal.check_spaces('target', target)
+        level = "L" if level else ""
+        optionals = internal.defaults((target, "@s"))
+
+        cmd = f"experience {amount}{level} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+    xp = experience
+
+    def effect_give(self, target: str, effect: str, seconds: int=30, amplifier: int=0, hideParticles: bool=False):
+        internal.check_spaces('target', target)
+        optionals = internal.defaults((seconds, 30), (amplifier, 0), (hideParticles, False))
+
+        cmd = f"effect {target} {effect} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+        
+    def effect_clear(self, target: str):
+        internal.check_spaces('target', target)
+
+        cmd = f"effect {target} clear".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def setworldspawn(self, pos: str="~ ~ ~"):
+        optionals = internal.defaults((pos, "~ ~ ~"))
+
+        cmd = f"setworldspawn {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def spawnpoint(self, target: str="@s", pos: str="~ ~ ~"):
+        internal.check_spaces('target', target)
+        optionals = internal.defaults((pos, "~ ~ ~"))
+
+        cmd = f"spawnpoint {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd

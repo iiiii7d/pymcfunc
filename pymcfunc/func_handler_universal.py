@@ -38,6 +38,12 @@ class UniversalRawCommands:
     w = tell
     msg = tell
 
+    def tellraw(self, target: str, message: dict):
+        internal.check_spaces('target', target)
+        cmd = f"tell {target} {str(message)}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
     def help(self):
         """Adds a /help command.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalFuncHandler.help"""
@@ -49,6 +55,20 @@ class UniversalRawCommands:
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalFuncHandler.kill"""
         internal.check_spaces('target', target)
         cmd = f"kill {target}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def gamemode(self, mode: Union[int, str], target: str="@s"):
+        JAVA = ['survival', 'creative', 'adventure', 'spectator']
+        BEDROCK = ['survival', 'creative', 'adventure', 's', 'c', 'a', 0, 1, 2]
+        from pymcfunc.func_handler_bedrock import BedrockFuncHandler
+
+        options = BEDROCK if isinstance(self.fh, BedrockFuncHandler) else JAVA
+        internal.check_spaces('target', target)
+        optionals = internal.defaults((target, "@s"))
+        internal.options(mode, options)
+
+        cmd = f"gamemode {mode} {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd
 
@@ -91,3 +111,21 @@ class UniversalRawCommands:
     def seed(self):
         self.fh.commands.append("seed")
         return "seed"
+
+    def enchant(self, target: str, enchantment: str, level: int=1):
+        internal.check_spaces('target', target)
+        optionals = internal.defaults((level, 1))
+
+        cmd = f"enchant {target} {enchantment} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def function(self, name: str):
+        cmd = f"function {name}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def locate(self, name: str):
+        cmd = f"locate {name}".strip()
+        self.fh.commands.append(cmd)
+        return cmd

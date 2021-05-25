@@ -60,15 +60,6 @@ class JavaRawCommands(UniversalRawCommands):
         cmd = f"give {target} {item} {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd
-        
-    def gamemode(self, mode: str, target: int="@s"):
-        internal.check_spaces('target', target)
-        optionals = internal.defaults((target, "@s"))
-        internal.options(mode, ['survival', 'creative', 'adventure', 'spectator'])
-
-        cmd = f"gamemode {mode} {optionals}".strip()
-        self.fh.commands.append(cmd)
-        return cmd
 
     def summon(self, entity: str, pos: str="~ ~ ~", nbt: dict=None):
         optionals = internal.defaults((pos, "~ ~ ~"), (nbt, None))
@@ -82,10 +73,77 @@ class JavaRawCommands(UniversalRawCommands):
         internal.check_spaces('target', target)
         optionals = internal.defaults((target, "@s"), (item, None), (maxCount, None))
 
-        cmd = f"clear {optionals}"
+        cmd = f"clear {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd
 
-    def teleport(self):
-        pass #todo
+    def teleport(self, destentity: str=None, destxyz: str=None, target: str="@s", rotation: str=None, faceMode: str=None, facing: str=None, anchor: str="eyes"):
+        internal.check_spaces('target', target)
+        dest = internal.pick_one_arg((destentity, None, 'destentity'), (destxyz, None, 'destxyz'), optional=False)
+        target = "" if target == "@s" else target+" "
+        internal.check_invalid_params('entity', 'faceMode', faceMode, ('anchor', anchor, "eyes"))
+        internal.reliant('destxyz', destxyz, None, 'rotation', rotation, None)
+        internal.reliant('destxyz', destxyz, None, 'faceMode', faceMode, None)
+        if destentity == None:
+            if faceMode != None:
+                internal.options(faceMode, ['location', 'entity'])
+                if facing == None:
+                    raise ValueError("facing must not be None if faceMode is specified")
+                internal.options(anchor, ['eyes', 'feet'])
+                faceMode = "facing" if faceMode == "location" else "facing entity"
+                optionals = f"{faceMode} {facing} {internal.defaults((anchor, 'eyes'))}"
+            else:
+                optionals = ""
+        else:
+            optionals = ""
+
+        cmd = f"teleport {target}{dest} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
     tp = teleport
+
+    def experience(self, mode: str, target: str="@s", amount: int=None, measurement="points"):
+        internal.options(measurement, ['points', 'levels'])
+        internal.options(mode, ['add', 'set', 'query'])
+        if mode == "query" and amount != None:
+            raise errors.InvalidParameterError("add or set", "mode", amount, "amount")
+        elif mode != "query" and amount == None:
+            raise ValueError("amount must not be None if mode is add or set")
+        amount = "" if amount == None else str(amount)+" "
+        if mode != "query": measurement = internal.defaults((measurement, 'points'))
+        cmd = f"experience {mode} {target} {amount}{measurement}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+    xp = experience
+        
+    def effect_give(self, target: str, effect: str, seconds: int=30, amplifier: int=0, hideParticles: bool=False):
+        internal.check_spaces('target', target)
+        optionals = internal.defaults((seconds, 30), (amplifier, 0), (hideParticles, False))
+
+        cmd = f"effect give {target} {effect} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+        
+    def effect_clear(self, target: str="@s", effect: str=None):
+        internal.check_spaces('target', target)
+        optionals = internal.defaults((effect, None))
+
+        cmd = f"effect clear {target} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def setworldspawn(self, pos: str="~ ~ ~", angle: str=None):
+        optionals = internal.defaults((pos, "~ ~ ~"), (angle, None))
+
+        cmd = f"setworldspawn {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def spawnpoint(self, target: str="@s", pos: str="~ ~ ~", angle: str=None):
+        internal.check_spaces('target', target)
+        optionals = internal.defaults((pos, "~ ~ ~"), (angle, None))
+
+        cmd = f"spawnpoint {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+        
