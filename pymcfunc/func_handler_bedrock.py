@@ -172,6 +172,36 @@ class BedrockRawCommands(UniversalRawCommands):
             suffix = f"{center} {radius} {path}"
         else:
             suffix = f"{tickingAreaName} {path}"
-        cmd = f"schedule on_area_loaded add {suffix}"
+        cmd = f"schedule on_area_loaded add {suffix}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def playsound(self, sound: str, target: str="@p", pos: str="~ ~ ~", volume: float=1.0, pitch: float=1.0, minVolume: float=None):
+        internal.check_spaces('target', target)
+        optionals = internal.defaults((target, "@p"), (pos, "~ ~ ~"), (volume, 1.0), (pitch, 1.0), (minVolume, None))
+        cmd = f"playsound {sound} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def stopsound(self, target: str, sound: str=None):
+        internal.check_spaces('target', target)
+        optionals = internal.defaults((sound, None))
+
+        cmd = f"stopsound {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def weather(self, mode: str, duration: str=5):
+        internal.options(mode, ['clear', 'rain', 'thunder', 'query'])
+        if mode == "query":
+            cmd = "weather query"
+        else:
+            cmd = f"weather {mode} {duration}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def difficulty(self, difficulty: Union[str, int]):
+        internal.options(difficulty, ['easy', 'hard', 'normal', 'peaceful', 'e', 'h', 'n', 'p', 0, 1, 2, 3])
+        cmd = f"difficulty {difficulty}"
         self.fh.commands.append(cmd)
         return cmd

@@ -163,3 +163,36 @@ class JavaRawCommands(UniversalRawCommands):
             cmd = f"schedule function {name} {duration} {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd
+
+    def playsound(self, sound: str, source: str, target: str, pos: str="~ ~ ~", volume: float=1.0, pitch: float=1.0, minVolume: float=None):
+        internal.check_spaces('target', target)
+        internal.options(source, ['master', 'music', 'record', 'weather', 'block', 'hostile', 'neutral', 'player', 'ambient', 'voice'])
+        optionals = internal.defaults((pos, "~ ~ ~"), (volume, 1.0), (pitch, 1.0), (minVolume, None))
+        
+        cmd = f"playsound {sound} {source} {target} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def stopsound(self, target: str, source: str="*", sound: str=None):
+        internal.check_spaces('target', target)
+        internal.options(source, ['master', 'music', 'record', 'weather', 'block', 'hostile', 'neutral', 'player', 'ambient', 'voice', '*'])
+        optionals = internal.defaults((source, "*"), (sound, None))
+
+        cmd = f"stopsound {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def weather(self, mode: str, duration: str=5):
+        internal.options(mode, ['clear', 'rain', 'thunder'])
+        cmd = f"weather {mode} {duration}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def difficulty(self, difficulty: str=None):
+        if difficulty == None:
+            cmd = "difficulty"
+        else:
+            internal.options(difficulty, ['easy', 'hard', 'normal', 'peaceful', 'e', 'h', 'n', 'p'])
+        cmd = f"difficulty {difficulty}"
+        self.fh.commands.append(cmd)
+        return cmd

@@ -5,7 +5,8 @@ Changelog
 
   * Added /gamemode, /gamerule, /seed, /summon, /clear, /tellraw, /teleport, /experience,
     /effect give, /effect clear, /enchant, /setworldspawn, /spawnpoint, /function, /locate,
-    /time, /particle, /schedule
+    /time, /particle, /schedule, /playsound, /stopsound, /weather, /difficulty
+    * and all aliases
 
 * **v0.0 (24/5/21)**
 

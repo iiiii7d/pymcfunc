@@ -32,6 +32,10 @@ def test_pytest():
         f.r.time_set('midnight')
         f.r.particle("asdfasd", 100, 100)
         f.r.schedule("asdfaf", duration="3")
+        f.r.playsound("asdf", "neutral", "@p", minVolume=0.5)
+        f.r.stopsound("@p")
+        f.r.weather("clear")
+        f.r.difficulty("h")
 
     b = pmf.Pack('b')
 
@@ -64,8 +68,13 @@ def test_pytest():
         f.r.time_set('midnight')
         f.r.particle("asdfasd", "1 2 3")
         f.r.schedule("asdfaf", mode="cuboid", pos1="1 2 3", pos2="4 5 6")
+        f.r.playsound("asdf", minVolume=0.5)
+        f.r.stopsound("@p")
+        f.r.weather("clear")
+        f.r.difficulty(3)
 
     print(p.funcs['mcfuncjava'])
+    print("======================")
     print(b.funcs['mcfuncbedrock'])
 
     print(p.sel.e(distance=p.sel.range(4, 5)))
@@ -74,3 +83,5 @@ def test_pytest():
     print(pmf.coords(4, "~5", 6))
 
 test_pytest()
+
+# kick deop list me op reload replaceitem scoreboard execute spreadplayers tag
