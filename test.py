@@ -47,6 +47,8 @@ def test_pytest():
         f.r.tag("@p", "add", name="234")
         f.r.spreadplayers("1 2", 3.0, 3.0, True, "@p")
         f.r.replaceitem("entity", "3", 3, target="@p")
+        f.r.whitelist('on')
+        f.r.stop()
 
     b = pmf.Pack('b')
 
@@ -92,6 +94,8 @@ def test_pytest():
         f.r.tag("@p", "add", name="234")
         f.r.spreadplayers("1 2", 3.0, 3.0, "@p")
         f.r.replaceitem("block", 3, "asdfaf", pos="2 3 3")
+        f.r.whitelist('remove', target="@p")
+        f.r.stop()
 
     print(p.funcs['mcfuncjava'])
     print("======================")

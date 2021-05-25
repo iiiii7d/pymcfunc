@@ -221,3 +221,18 @@ class UniversalRawCommands:
             cmd = f"tag {target} {mode} {name}".strip()
         self.fh.commands.append(cmd)
         return cmd
+
+    def whitelist(self, mode: str, target: str=None):
+        internal.options(mode, ['add', 'list', 'on', 'off', 'reload', 'remove'])
+        internal.multi_check_invalid_params(['add', 'remove'], 'mode', mode,
+            ('target', target, None),
+            dep_mandatory=True)
+        target = "" if target == None else target
+
+        cmd = f"whitelist {mode} {target}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+        
+    def stop(self):
+        self.fh.commands.append("stop")
+        return "stop"
