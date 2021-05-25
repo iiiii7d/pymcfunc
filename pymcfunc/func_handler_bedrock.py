@@ -1,4 +1,5 @@
 from typing import Union
+import json
 
 import pymcfunc.errors as errors
 import pymcfunc.internal as internal
@@ -59,6 +60,7 @@ class BedrockRawCommands(UniversalRawCommands):
         """Adds a /give command.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockFuncHandler.give"""
         internal.check_spaces('target', target)
+        components = json.dumps(components) if isinstance(components, dict) else components
         optionals = internal.defaults((amount, 1), (data, 0), (components, None))
 
         cmd = f"give {target} {item} {optionals}".strip()
@@ -203,5 +205,37 @@ class BedrockRawCommands(UniversalRawCommands):
     def difficulty(self, difficulty: Union[str, int]):
         internal.options(difficulty, ['easy', 'hard', 'normal', 'peaceful', 'e', 'h', 'n', 'p', 0, 1, 2, 3])
         cmd = f"difficulty {difficulty}"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def list(self):
+        self.fh.commands.append("list")
+        return "list"
+
+    def spreadplayers(self, center: str, dist: float, maxRange: float, target: str):
+        cmd = f"spreadplayers {center} {dist} {maxRange} {target}"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def replaceitem(self, mode: str, slotId: int, itemName: str, pos: str=None, target: str=None, slotType: str=None, itemHandling: str=None, amount: int=1, data: int=0, components: json=None):
+        internal.check_invalid_params('block', 'mode', mode,
+            ('pos', pos, None),
+            dep_mandatory=True)
+        internal.check_invalid_params('entity', 'mode', mode,
+            ('target', target, None),
+            ('slotType', slotType, None),
+            dep_mandatory=True)
+        if slotType == None and mode == "block":
+            slotType = "slot.container"
+        if itemHandling == None:
+            itemHandling = ""
+        else:
+            internal.options(itemHandling, ['destroy', 'keep'])
+            itemHandling += " "
+        if components != None: components = json.dumps(components)
+        pos_target = target if target != None else pos
+        optionals = internal.defaults((amount, 1), (data, 0), (components, None))
+
+        cmd = f"replaceitem {mode} {pos_target} {slotType} {slotId} {itemHandling}{itemName} {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd

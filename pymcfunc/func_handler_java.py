@@ -1,3 +1,5 @@
+import json
+
 import pymcfunc.errors as errors
 import pymcfunc.internal as internal
 from pymcfunc.func_handler_universal import UniversalFuncHandler, UniversalRawCommands
@@ -62,6 +64,7 @@ class JavaRawCommands(UniversalRawCommands):
         return cmd
 
     def summon(self, entity: str, pos: str="~ ~ ~", nbt: dict=None):
+        nbt = json.dumps(nbt) if isinstance(nbt, dict) else nbt
         optionals = internal.defaults((pos, "~ ~ ~"), (nbt, None))
 
         cmd = f"summon {entity} {optionals}".strip()
@@ -194,5 +197,34 @@ class JavaRawCommands(UniversalRawCommands):
         else:
             internal.options(difficulty, ['easy', 'hard', 'normal', 'peaceful', 'e', 'h', 'n', 'p'])
         cmd = f"difficulty {difficulty}"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def list(self, uuid: bool=False):
+        cmd = "list" if not uuid else "list uuid"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def spreadplayers(self, center: str, dist: float, maxRange: float, respectTeams: bool, target: str, maxHeight: float=None):
+        if maxHeight != None:
+            maxHeight = "under "+maxHeight+" "
+        else:
+            maxHeight = ""
+        cmd = f"spreadplayers {center} {dist} {maxRange} {maxHeight}{respectTeams} {target}"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def replaceitem(self, mode: str, slot: str, item: int, pos: str=None, target: str=None, count: int=1):
+        internal.options(mode, ['block', 'entity'])
+        internal.check_invalid_params('block', 'mode', mode,
+            ('pos', pos, None),
+            dep_mandatory=True)
+        internal.check_invalid_params('entity', 'mode', mode,
+            ('target', target, None),
+            dep_mandatory=True)
+
+        pos_target = target if target != None else pos
+        optionals = internal.defaults((count, 1))
+        cmd = f"replaceitem {mode} {pos_target} {slot} {item} {optionals}"
         self.fh.commands.append(cmd)
         return cmd

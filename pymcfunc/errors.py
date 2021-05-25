@@ -9,23 +9,23 @@ class OptionError(Exception):
     def __init__(self, choices, choice):
         if choice != None:
             choice = "'"+str(choice)+"'"
-        msg = f"Choices allowed: {', '.join(choices)} (Got {choice})"
+        msg = f"Choices allowed: {', '.join(choices)} (Got '{choice}')"
         super().__init__(msg)
 
 class OnlyOneAllowed(Exception):
     def __init__(self, params, param):
-        msg = f"Parameters: {', '.join(params)} (Got {param})"
+        msg = f"Parameters: {', '.join(params)} (Got '{param}'')"
         super().__init__(msg)
 
 class InvalidParameterError(Exception):
     def __init__(self, allowed_val, other_param_name, other_val, param_name):
-        msg = dedent(f"""The parameter {param_name} is not available because of {other_param_name} being '{other_val}'
-                         To make {param_name} valid, switch {other_param_name} to {allowed_val}""")
+        msg = dedent(f"""The parameter '{param_name}' is not available because of '{other_param_name}' being '{other_val}'
+                         To make '{param_name}' valid, switch '{other_param_name}' to '{allowed_val}'""")
         super().__init__(msg)
 
 class ReliantError(Exception):
     def __init__(self, indep_name, dep_name):
-        msg = f"{dep_name} relies on {indep_name} not being its default value; try specifying parameter {indep_name}"
+        msg = f"'{dep_name}'' relies on '{indep_name}'' not being its default value; try specifying parameter '{indep_name}'"
         super().__init__(msg)
 
 class CaretError(Exception):
@@ -38,5 +38,5 @@ class CaretError(Exception):
 
 class MissingError(Exception):
     def __init__(self, dep_name, indep_name, indep_val):
-        msg = f"Variable {dep_name} must be stated as {indep_name}'s value is '{indep_val}'"
+        msg = f"Variable '{dep_name}' must be stated as '{indep_name}''s value is '{indep_val}'"
         super().__init__(msg)

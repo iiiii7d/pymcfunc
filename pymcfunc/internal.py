@@ -1,6 +1,7 @@
 import pymcfunc.errors as errors
 
 def defaults(*vals: tuple):
+    """(v, dv)"""
     args = ""
     not_default_detected = False
     for v, dv in reversed(vals):
@@ -16,6 +17,7 @@ def options(var, options):
         raise errors.OptionError(options, var)
 
 def pick_one_arg(*vars: tuple, optional=True):
+    """(v, dv, varname)"""
     sameCount = 0
     diffFound = False
     diff = None
@@ -46,6 +48,7 @@ def reliant(indep_name, indep_value, indep_default, dep_name, dep_value, dep_def
         raise errors.ReliantError(indep_name, dep_name)
 
 def check_invalid_params(allowed_val, other_param_name, other_val, *params, dep_mandatory=False):
+    """(name, val, default)"""
     for name, val, default in params:
         if other_val != allowed_val and val != default:
             raise errors.InvalidParameterError(allowed_val, other_param_name, other_val, name)
@@ -54,6 +57,7 @@ def check_invalid_params(allowed_val, other_param_name, other_val, *params, dep_
             raise errors.MissingError(name, other_param_name, other_val)
 
 def multi_check_invalid_params(allowed_vals, other_param_name, other_val, *params, dep_mandatory=False):
+    """(name, val, default)"""
     for name, val, default in params:
         for allowed_val in allowed_vals:
             if (other_val == allowed_val and val != default) or (other_val != allowed_val and val == default):

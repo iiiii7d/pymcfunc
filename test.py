@@ -1,6 +1,8 @@
 import pymcfunc as pmf
+import time
 
 def test_pytest():
+    start = time.time()
     p = pmf.Pack()
 
     @p.function
@@ -36,6 +38,15 @@ def test_pytest():
         f.r.stopsound("@p")
         f.r.weather("clear")
         f.r.difficulty("h")
+        f.r.kick("@s", "asfasfasdf")
+        f.r.deop("@s")
+        f.r.op("@s")
+        f.r.list(uuid=True)
+        f.r.reload()
+        f.r.me("asdf")
+        f.r.tag("@p", "add", name="234")
+        f.r.spreadplayers("1 2", 3.0, 3.0, True, "@p")
+        f.r.replaceitem("entity", "3", 3, target="@p")
 
     b = pmf.Pack('b')
 
@@ -72,6 +83,15 @@ def test_pytest():
         f.r.stopsound("@p")
         f.r.weather("clear")
         f.r.difficulty(3)
+        f.r.kick("@s", "asfasfasdf")
+        f.r.deop("@s")
+        f.r.op("@s")
+        f.r.list()
+        f.r.reload()
+        f.r.me("asdf")
+        f.r.tag("@p", "add", name="234")
+        f.r.spreadplayers("1 2", 3.0, 3.0, "@p")
+        f.r.replaceitem("block", 3, "asdfaf", pos="2 3 3")
 
     print(p.funcs['mcfuncjava'])
     print("======================")
@@ -82,6 +102,8 @@ def test_pytest():
 
     print(pmf.coords(4, "~5", 6))
 
+    print(time.time()-start)
+
 test_pytest()
 
-# kick deop list me op reload replaceitem scoreboard execute spreadplayers tag
+# scoreboard execute

@@ -1,5 +1,6 @@
 from typing import Union
 import itertools
+import json
 
 import pymcfunc.errors as errors
 import pymcfunc.internal as internal
@@ -40,7 +41,7 @@ class UniversalRawCommands:
 
     def tellraw(self, target: str, message: dict):
         internal.check_spaces('target', target)
-        cmd = f"tell {target} {str(message)}".strip()
+        cmd = f"tell {target} {json.dumps(message)}".strip()
         self.fh.commands.append(cmd)
         return cmd
 
@@ -60,6 +61,8 @@ class UniversalRawCommands:
             text = {"text": text}
         elif issubclass(type(self.fh), BedrockFuncHandler) and isinstance(text, dict):
             raw = "raw"
+        if isinstance(text, dict):
+            text = json.dumps(text)
         if mode in ['title', 'subtitle', 'actionbar']:
             cmd = f"title{raw} {mode} {text}"
         elif mode == "times":
@@ -178,4 +181,43 @@ class UniversalRawCommands:
         self.fh.commands.append(cmd)
         return cmd
 
-    
+    def kick(self, target: str, reason: str=None):
+        internal.check_spaces('target', target)
+        optionals = internal.defaults((reason, None))
+        cmd = f"kick {target} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def op(self, target: str):
+        internal.check_spaces('target', target)
+        cmd = f"op {target}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def deop(self, target: str):
+        internal.check_spaces('target', target)
+        cmd = f"deop {target}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def reload(self):
+        self.fh.commands.append("reload")
+        return "reload"
+
+    def me(self, text: str):
+        cmd = f"me {text}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def tag(self, target: str, mode: str, name: str=None):
+        internal.check_spaces('target', target)
+        internal.options(mode, ['add', 'list', 'remove'])
+        internal.multi_check_invalid_params(['add', 'remove'], 'mode', mode,
+            ('name', name, None),
+            dep_mandatory=True)
+        if mode == 'list':
+            cmd = f"tag {target} list"
+        else:
+            cmd = f"tag {target} {mode} {name}".strip()
+        self.fh.commands.append(cmd)
+        return cmd

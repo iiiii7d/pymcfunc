@@ -1,4 +1,5 @@
 from math import inf
+import json
 
 import pymcfunc.internal as internal
 import pymcfunc.errors as errors
@@ -84,11 +85,14 @@ class UniversalSelectors:
                 args.append(f"{ALIASES[k]}={v}")
             elif k in EXPAND and type(self) == BedrockSelectors:
                 for i in EXPAND[k]:
+                    v = json.dumps(v) if isinstance(v, dict) else v
                     args.append(f"{i}={v}")
             elif k in CAN_REPEAT and isinstance(v, (tuple, list, set)):
                 for i in v:
+                    i = json.dumps(i) if isinstance(i, dict) else i
                     args.append(f"{k}={i}")
             else:
+                v = json.dumps(v) if isinstance(v, dict) else v
                 args.append(f"{k}={v}")
         result = "["+",".join(args)+"]"
         if result == "[]": result = ""
