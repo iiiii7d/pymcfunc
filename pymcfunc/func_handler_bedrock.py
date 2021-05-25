@@ -239,3 +239,5 @@ class BedrockRawCommands(UniversalRawCommands):
         cmd = f"replaceitem {mode} {pos_target} {slotType} {slotId} {itemHandling}{itemName} {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd
+
+    allowlist = UniversalRawCommands.whitelist
