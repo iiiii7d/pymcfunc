@@ -45,10 +45,26 @@ def reliant(indep_name, indep_value, indep_default, dep_name, dep_value, dep_def
     if dep_value != dep_default and indep_value == indep_default:
         raise errors.ReliantError(indep_name, dep_name)
 
-def check_invalid_params(allowed_val, other_param_name, other_val, *params):
+def check_invalid_params(allowed_val, other_param_name, other_val, *params, dep_mandatory=False):
     for name, val, default in params:
         if other_val != allowed_val and val != default:
             raise errors.InvalidParameterError(allowed_val, other_param_name, other_val, name)
+        # only when default is None
+        if dep_mandatory and other_val == allowed_val and val == default:
+            raise errors.MissingError(name, other_param_name, other_val)
+
+def multi_check_invalid_params(allowed_vals, other_param_name, other_val, *params, dep_mandatory=False):
+    for name, val, default in params:
+        for allowed_val in allowed_vals:
+            if (other_val == allowed_val and val != default) or (other_val != allowed_val and val == default):
+                break
+        else:
+            raise errors.InvalidParameterError(", ".join(allowed_vals), other_param_name, other_val, name)
+    for allowed_val in allowed_vals:
+    # only when default is None
+        if dep_mandatory and other_val == allowed_val and val == default:
+            raise errors.MissingError(name, other_param_name, other_val)
+
 
 def check_spaces(name, val):
     if " " in val:
@@ -59,3 +75,11 @@ def unspace(val):
         return "\""+val+"\""
     else:
         return val
+
+def unstated(indep_name, indep_value, indep_reqvals, dep_name, dep_value, dep_default):
+    #only when the dep is mandatory due to the indep, and the dep's default is None
+    for indep_reqval in indep_reqvals:
+        if indep_value == indep_reqval and dep_value != dep_default:
+            break
+    else:
+        raise errors.MissingError(dep_name, indep_name, indep_value)

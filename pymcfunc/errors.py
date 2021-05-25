@@ -35,3 +35,8 @@ class CaretError(Exception):
         elif cause == "notall":
             msg = f"Not all values have '^' (Got '{coords}')"
         super().__init__(msg)
+
+class MissingError(Exception):
+    def __init__(self, dep_name, indep_name, indep_val):
+        msg = f"Variable {dep_name} must be stated as {indep_name}'s value is '{indep_val}'"
+        super().__init__(msg)

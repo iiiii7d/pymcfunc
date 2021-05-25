@@ -147,3 +147,31 @@ class BedrockRawCommands(UniversalRawCommands):
         cmd = f"spawnpoint {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd
+
+    def particle(self, name: str, pos: str):
+        cmd = f"particle {name} {pos}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def schedule(self, path: str, mode: str, pos1: str=None, pos2: str=None, center: str=None, radius: int=None, tickingAreaName: str=None):
+        internal.options(mode, ['cuboid', 'circle', 'tickingarea'])
+        internal.check_invalid_params("cuboid", "mode", mode,
+            ('pos1', pos1, None),
+            ('pos2', pos2, None),
+            dep_mandatory=True)
+        internal.check_invalid_params("circle", "mode", mode,
+            ('center', center, None),
+            ('radius', radius, None),
+            dep_mandatory=True)
+        internal.check_invalid_params("tickingarea", "mode", mode,
+            ('tickingAreaName', tickingAreaName, None),
+            dep_mandatory=True)
+        if mode == "cuboid":
+            suffix = f"{pos1} {pos2} {path}"
+        elif mode == "circle":
+            suffix = f"{center} {radius} {path}"
+        else:
+            suffix = f"{tickingAreaName} {path}"
+        cmd = f"schedule on_area_loaded add {suffix}"
+        self.fh.commands.append(cmd)
+        return cmd

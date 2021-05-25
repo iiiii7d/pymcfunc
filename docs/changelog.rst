@@ -4,7 +4,8 @@ Changelog
 * **v0.1 ()**
 
   * Added /gamemode, /gamerule, /seed, /summon, /clear, /tellraw, /teleport, /experience,
-    /effect give, /effect clear, /enchant, /setworldspawn, /spawnpoint, /function, /locate
+    /effect give, /effect clear, /enchant, /setworldspawn, /spawnpoint, /function, /locate,
+    /time, /particle, /schedule
 
 * **v0.0 (24/5/21)**
 

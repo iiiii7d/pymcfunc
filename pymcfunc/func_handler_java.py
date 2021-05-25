@@ -105,9 +105,8 @@ class JavaRawCommands(UniversalRawCommands):
     def experience(self, mode: str, target: str="@s", amount: int=None, measurement="points"):
         internal.options(measurement, ['points', 'levels'])
         internal.options(mode, ['add', 'set', 'query'])
-        if mode == "query" and amount != None:
-            raise errors.InvalidParameterError("add or set", "mode", amount, "amount")
-        elif mode != "query" and amount == None:
+        internal.multi_check_invalid_params(['add', 'set'], "mode", mode, ("amount", amount, None))
+        if mode != "query" and amount == None:
             raise ValueError("amount must not be None if mode is add or set")
         amount = "" if amount == None else str(amount)+" "
         if mode != "query": measurement = internal.defaults((measurement, 'points'))
@@ -146,4 +145,21 @@ class JavaRawCommands(UniversalRawCommands):
         cmd = f"spawnpoint {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd
-        
+    
+    def particle(self, name: str, speed: float, count: int, params: str=None, pos: str="~ ~ ~", delta: str="~ ~ ~", mode: str="normal", viewers: str=None):
+        optionals = internal.defaults((mode, "normal"), (viewers, None))
+        if params != None:
+            name = f"{name} {params}"
+        cmd = f"particle {name} {pos} {delta} {speed} {count} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def schedule(self, name: str, clear=False, duration: str=None, mode: str="replace"):
+        internal.check_invalid_params(False, 'clear', clear, ('duration', duration, None), dep_mandatory=True)
+        if clear:
+            cmd = f"schedule clear {name}".strip()
+        else:
+            optionals = internal.defaults((mode, 'replace'))
+            cmd = f"schedule function {name} {duration} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd

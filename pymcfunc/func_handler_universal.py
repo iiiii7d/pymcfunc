@@ -44,6 +44,31 @@ class UniversalRawCommands:
         self.fh.commands.append(cmd)
         return cmd
 
+    def title(self, target: str, mode: str, text: Union[str, dict]=None, fadeIn: str=None, stay: str=None, fadeOut: str=None):
+        internal.options(mode, ['clear', 'reset', 'times', 'title', 'subtitle', 'actionbar'])
+        internal.multi_check_invalid_params(['title', 'subtitle', 'actionbar'], 'mode', mode, ('text', text, None), dep_mandatory=True)
+        internal.check_invalid_params('times', 'mode', mode, 
+            ('fadeIn', fadeIn, None),
+            ('stay', stay, None),
+            ('fadeOut', fadeOut, None),
+            dep_mandatory=True)
+
+        from pymcfunc.func_handler_java import JavaFuncHandler
+        from pymcfunc.func_handler_bedrock import BedrockFuncHandler
+        raw = ""
+        if issubclass(type(self.fh), JavaFuncHandler) and isinstance(text, str):
+            text = {"text": text}
+        elif issubclass(type(self.fh), BedrockFuncHandler) and isinstance(text, dict):
+            raw = "raw"
+        if mode in ['title', 'subtitle', 'actionbar']:
+            cmd = f"title{raw} {mode} {text}"
+        elif mode == "times":
+            cmd = f"title{raw} {mode} {fadeIn} {stay} {fadeOut}"
+        elif mode in ['clear', 'reset']:
+            cmd = f"title{raw} {mode}"
+        self.fh.commands.append(cmd)
+        return cmd
+
     def help(self):
         """Adds a /help command.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalFuncHandler.help"""
@@ -129,3 +154,28 @@ class UniversalRawCommands:
         cmd = f"locate {name}".strip()
         self.fh.commands.append(cmd)
         return cmd
+
+    def time_add(self, amount: int):
+        cmd = f"time add {amount}"
+        self.fh.commands.append(cmd)
+        return cmd
+    
+    def time_query(self, query: str):
+        internal.options(query, ['daytime', 'gametime', 'day'])
+        cmd = f"time query {query}"
+        self.fh.commands.append(cmd)
+        return cmd
+    
+    def time_set(self, amount: Union[int, str]):
+        BEDROCK = ['day', 'night', 'noon', 'midnight', 'sunrise', 'sunset']
+        JAVA = ['day', 'night', 'noon', 'midnight']
+        from pymcfunc.func_handler_bedrock import BedrockFuncHandler
+
+        options = BEDROCK if isinstance(self.fh, BedrockFuncHandler) else JAVA
+        if isinstance(amount, str):
+            internal.options(amount, options)
+        cmd = f"time set {amount}"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    
