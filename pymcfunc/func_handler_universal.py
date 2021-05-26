@@ -236,3 +236,36 @@ class UniversalRawCommands:
     def stop(self):
         self.fh.commands.append("stop")
         return "stop"
+
+    def scoreboard_objectives(self, mode: str, objective: str=None, criterion: str=None, displayName: str=None, renderType: str=None, slot: str=None):
+        internal.options(mode, ['add', 'list', 'modify_displayname', 'modify_rendertype', 'remove', 'setdisplay'])
+        internal.multi_check_invalid_params(['add', 'modify_displayname', 'modify_rendertype', 'remove', 'setdisplay'], 'mode', mode, ('objective', objective, None))
+        if mode == 'setdisplay' and objective == None:
+            raise errors.MissingError('objective', 'mode', mode)
+        internal.check_invalid_params('add', 'mode', mode, ('criterion', criterion, None))
+        internal.multi_check_invalid_params(['add', 'modify_displayname'], 'mode', mode, ('displayName', displayName, None))
+        if mode == 'add' and displayName == None:
+            raise errors.MissingError('displayName', 'mode', mode)
+        internal.check_invalid_params('modify_rendertype', 'mode', mode, ('renderType', renderType, None), dep_mandatory=True)
+        if renderType != None:
+            internal.options(renderType, ['hearts', 'integer'])
+        internal.check_invalid_params('setdisplay', 'mode', mode, ('slot', slot, None))
+
+        if mode == "list":
+            suffix = ""
+        elif mode == "add":
+            optionals = internal.defaults((displayName, None))
+            suffix = f"{objective} {criterion} {optionals}"
+        elif mode == "modify_displayname":
+            suffix = f"{objective} displayName {displayName}"
+        elif mode == "modify_rendertype":
+            suffix = f"{objective} renderType {renderType}"
+        elif mode == "remove":
+            suffix = objective
+        elif mode == "setdisplay":
+            optionals = internal.defaults((objective, None))
+            suffix = f"{slot} {objective}"
+
+        cmd = f"scoreboard objectives {mode} {suffix}"
+        self.fh.commands.append(cmd)
+        return cmd
