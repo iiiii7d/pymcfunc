@@ -49,6 +49,8 @@ def test_pytest():
         f.r.replaceitem("entity", "3", 3, target="@p")
         f.r.whitelist('on')
         f.r.stop()
+        f.r.scoreboard_objectives("modify_displayname", objective="asdf", displayName="234523")
+        f.r.scoreboard_players("operation", target="@p", objective="asdfasdf", operation="><", source="@r", sourceObjective="32")
 
     b = pmf.Pack('b')
 
@@ -96,6 +98,8 @@ def test_pytest():
         f.r.replaceitem("block", 3, "asdfaf", pos="2 3 3")
         f.r.whitelist('remove', target="@p")
         f.r.stop()
+        f.r.scoreboard_objectives("add", objective="asdf", displayName="234523")
+        f.r.scoreboard_players("operation", target="@p", objective="asdfasdf", operation="><", selector="@r", selectorObjective="32")
 
     print(p.funcs['mcfuncjava'])
     print("======================")

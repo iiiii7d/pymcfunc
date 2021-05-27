@@ -241,3 +241,73 @@ class BedrockRawCommands(UniversalRawCommands):
         return cmd
 
     allowlist = UniversalRawCommands.whitelist
+
+    def scoreboard_objectives(self, mode: str, objective: str=None, displayName: str=None, slot: str=None, sortOrder: str=None):
+        internal.options(mode, ['add', 'list', 'remove', 'setdisplay'])
+        internal.multi_check_invalid_params(['add', 'remove', 'setdisplay'], 'mode', mode, ('objective', objective, None))
+        if mode in ['add', 'remove'] and objective == None:
+            raise errors.MissingError('objective', 'mode', mode)
+        internal.check_invalid_params('add', 'mode', mode, ('displayName', displayName, None), dep_mandatory=True)
+        internal.check_invalid_params('setdisplay', 'mode', mode, ('slot', slot, None), dep_mandatory=True)
+        if slot != None:
+            internal.options(slot, ['list', 'sidebar', 'belowname'])
+            internal.multi_check_invalid_params(['list', 'sidebar'], 'mode', mode, ('sortOrder', sortOrder, None))
+            if sortOrder != None:
+                internal.options(sortOrder, ['ascending', 'descending'])
+        
+        if mode == "add":
+            suffix = f"{objective} dummy {displayName}"
+        elif mode == "list":
+            suffix = ""
+        elif mode == "remove":
+            suffix = objective
+        elif mode == "setdisplay":
+            optionals = internal.defaults((objective, None), (sortOrder, None))
+            suffix = f"{slot} {optionals}"
+        
+        cmd = f"scoreboard objectives {mode} {suffix}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def scoreboard_players(self, mode: str, target: str=None, objective: str=None, minv: Union[int, str]=None, maxv: Union[int, str]=None, count: int=None, operation: str=None, selector: str=None, selectorObjective: str=None):
+        internal.options(mode, ['list', 'reset', 'test', 'random', 'set', 'add', 'remove', 'operation'])
+        if mode in ['reset', 'test', 'random', 'set', 'add', 'remove', 'operation'] and target == None:
+            raise errors.MissingError('target', 'mode', mode)
+        internal.multi_check_invalid_params(['reset', 'test', 'random', 'set', 'add', 'remove', 'operation'], 'mode', mode, ('objective', objective, None))
+        if mode in ['test', 'random', 'set', 'add', 'remove', 'operation'] and objective == None:
+            raise errors.MissingError('objective', 'mode', mode)
+        internal.multi_check_invalid_params(['test', 'random'], 'mode', mode,
+            ('minv', minv, None),
+            dep_mandatory=True)
+        internal.multi_check_invalid_params(['test', 'params'], 'mode', mode,
+            ('maxv', maxv, None))
+        internal.multi_check_invalid_params(['add', 'set', 'remove'], 'mode', mode,
+            ('count', count, None),
+            dep_mandatory=True)
+        internal.check_invalid_params('operation', 'mode', mode, 
+            ('operation', operation, None),
+            ('selector', selector, None),
+            ('selectorObjective', selectorObjective, None),
+            dep_mandatory=True)
+        if operation != None:
+            internal.options(operation, ['+=', '-=', '*=', '/=', '%=', '<', '>', '><'])
+
+        if mode == "list":
+            optionals = internal.defaults((target, None))
+            suffix = optionals
+        elif mode == "reset":
+            optionals = internal.defaults((objective, None))
+            suffix = f"{target} {optionals}"
+        elif mode in ['test', 'random']:
+            optionals = internal.default((maxv, None))
+            suffix = f"{target} {objective} {minv} {optionals}"
+        elif mode in ['add', 'set', 'remove']:
+            suffix = f"{target} {objective} {count}"
+        elif mode == "operation":
+            suffix = f"{target} {objective} {operation} {selector} {selectorObjective}"
+
+        cmd = f"scoreboard players {mode} {suffix}"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    

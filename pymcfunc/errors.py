@@ -2,7 +2,7 @@ from textwrap import dedent
 
 class SpaceError(Exception):
     def __init__(self, varname, value):
-        msg = f"No spaces allowed in parameter '{varname}' (Got '{value}'')"
+        msg = f"No spaces allowed in parameter '{varname}' (Got '{value}')"
         super().__init__(msg)
 
 class OptionError(Exception):

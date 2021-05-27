@@ -228,3 +228,71 @@ class JavaRawCommands(UniversalRawCommands):
         cmd = f"replaceitem {mode} {pos_target} {slot} {item} {optionals}"
         self.fh.commands.append(cmd)
         return cmd
+
+    def scoreboard_objectives(self, mode: str, objective: str=None, criterion: str=None, displayName: str=None, renderType: str=None, slot: str=None):
+        internal.options(mode, ['add', 'list', 'modify_displayname', 'modify_rendertype', 'remove', 'setdisplay'])
+        internal.multi_check_invalid_params(['add', 'modify_displayname', 'modify_rendertype', 'remove', 'setdisplay'], 'mode', mode, ('objective', objective, None))
+        if mode != 'setdisplay' and objective == None:
+            raise errors.MissingError('objective', 'mode', mode)
+        internal.check_invalid_params('add', 'mode', mode, ('criterion', criterion, None), dep_mandatory=True)
+        internal.multi_check_invalid_params(['add', 'modify_displayname'], 'mode', mode, ('displayName', displayName, None))
+        if mode != 'add' and displayName == None:
+            raise errors.MissingError('displayName', 'mode', mode)
+        internal.check_invalid_params('modify_rendertype', 'mode', mode, ('renderType', renderType, None), dep_mandatory=True)
+        if renderType != None:
+            internal.options(renderType, ['hearts', 'integer'])
+        internal.check_invalid_params('setdisplay', 'mode', mode, ('slot', slot, None), dep_mandatory=True)
+
+        if mode == "list":
+            suffix = ""
+        elif mode == "add":
+            optionals = internal.defaults((displayName, None))
+            suffix = f"{objective} {criterion} {optionals}"
+        elif mode == "modify_displayname":
+            suffix = f"{objective} displayName {displayName}"
+        elif mode == "modify_rendertype":
+            suffix = f"{objective} renderType {renderType}"
+        elif mode == "remove":
+            suffix = objective
+        elif mode == "setdisplay":
+            optionals = internal.defaults((objective, None))
+            suffix = f"{slot} {objective}"
+
+        cmd = f"scoreboard objectives {mode} {suffix}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def scoreboard_players(self, mode: str, target: str=None, objective: str=None, score: int=None, operation: str=None, source: str=None, sourceObjective: str=None):
+        internal.options(mode, ['add', 'enable', 'get', 'list', 'operation', 'remove', 'reset', 'set'])
+        if mode in ['add', 'enable', 'get', 'operation', 'remove', 'reset', 'set'] and target == None:
+            raise errors.MissingError('target', 'mode', mode)
+        internal.multi_check_invalid_params(['add', 'enable', 'get', 'operation', 'remove', 'reset', 'set'], 'mode', mode, ('objective', objective, None))
+        if mode in ['add', 'enable', 'get', 'operation', 'remove', 'set'] and objective == None:
+            raise errors.MissingError('objective', 'mode', mode)
+        internal.multi_check_invalid_params(['add', 'remove', 'set'], 'mode', mode, ('score', score, None), dep_mandatory=True)
+        internal.check_invalid_params('operation', 'mode', mode, 
+            ('operation', operation, None),
+            ('source', source, None),
+            ('sourceObjective', sourceObjective, None),
+            dep_mandatory=True)
+        if operation != None:
+            internal.options(operation, ['+=', '-=', '*=', '/=', '%=', '<', '>', '><'])
+
+        if mode == "add":
+            suffix = f"{target} {objective} {score}"
+        elif mode == "enable" or mode == "get":
+            suffix = f"{target} {objective}"
+        elif mode == "list":
+            optionals = internal.defaults((target, None))
+            suffix = optionals
+        elif mode == "operation":
+            suffix = f"{target} {objective} {operation} {source} {sourceObjective}"
+        elif mode == "remove" or mode == "set":
+            suffix = f"{target} {objective} {score}"
+        elif mode == "reset":
+            optionals = internal.defaults((objective, None))
+            suffix = f"{target} {optionals}"
+
+        cmd = f"scoreboard objectives {mode} {suffix}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
