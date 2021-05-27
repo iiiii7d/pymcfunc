@@ -1,4 +1,5 @@
 import json
+import re
 
 import pymcfunc.errors as errors
 import pymcfunc.internal as internal
@@ -296,3 +297,168 @@ class JavaRawCommands(UniversalRawCommands):
         cmd = f"scoreboard objectives {mode} {suffix}".strip()
         self.fh.commands.append(cmd)
         return cmd
+
+    def execute(self, **subcommands):
+        """
+        **subcommands kwargs format:
+        ```
+        align = axes: str,
+        anchored = anchor: str (eyes|feet),
+        as_/at = target: str,
+        facingxyz = pos: str,
+        facingentity = {
+            "target": str,
+            "anchor": str
+        },
+        in_ = dimension: str,
+        positionedxyz/rotatedxyz = pos: str,
+        positionedentity/rotatedxyz = target: str,
+        store = {
+            "store": str (result|success),
+            "mode": str (block|bossbar|entity|score|storage),
+            "pos": str (when mode=block),
+            "entity": str (when mode=entity,score,storage),
+            "id": str (when mode=bossbar),
+            "value": str (value|max when mode=bossbar),
+            "objective": str (when mode=score),
+            "path": str (when mode=block,entity,storage),
+            "type": str (when mode=block,entity,storage),
+            "scale": str (when mode=block,entity,storage)
+        },
+        if_/unless = {
+            "mode": str (block|blocks|data|entity|predicate|score),
+            "pos": str (when mode=block),
+            "block": str (when mode=block),
+            "pos1": str (when mode=blocks),
+            "pos2": str (when mode=blocks),
+            "destination": str (when mode=blocks),
+            "scanMode": str (all|masked when mode=blocks),
+            "check": str (block|entity|storage when mode=data),
+            "sourcexyz": str (when check=block),
+            "sourceentity": str (when check=entity/storage),
+            "path": str (when mode=data),
+            "entity": str (when mode=entity),
+            "predicate": str (when mode=predicate),
+            "target": str (when mode=score),
+            "objective": str (when mode=score),
+            "comparer": str (<|<=|=|>|>=|matches when mode=score),
+            "source": str (when comparer!=matches),
+            "sourceObjective": str (when comparer!=matches),
+            "range": Union[int, str] (when comparer=matches)
+        },
+        run = function(sf): ...```
+        """
+        if "run" in subcommands.keys() and list(subcommands.keys()).index('run') != len(subcommands.keys())-1:
+            raise ValueError("'run' subcommand must be last subcommand")
+        
+        class subcommandhandler:
+            @staticmethod
+            def s_align(v):
+                if not re.search(r"^(?!.*(.).*\1)[xyz]+$", v):
+                    raise ValueError(f"Axes are invalid (Got '{v}')")
+                return v+" "
+            
+            @staticmethod
+            def s_anchor(v):
+                internal.options(v, ['eyes', 'feet'])
+                return v+" "
+
+            @staticmethod
+            def s_as_(v):
+                internal.check_spaces('as', v)
+                return v+" "
+            @staticmethod
+            def s_at(v):
+                internal.check_spaces('at', v)
+                return v+" "
+
+            @staticmethod
+            def s_facingxyz(v):
+                return v+" "
+            @staticmethod
+            def s_facingentity(v):
+                internal.options(v['anchor'], ['eyes', 'feet'])
+                return f"entity {v['target']} {v['anchor']} "
+
+            s_in_ = s_facingxyz
+            s_positionedxyz = s_facingxyz
+            s_rotatedxyz = s_facingxyz
+
+            @staticmethod
+            def s_positionedentity(v):
+                internal.check_spaces('positionedentity', v)
+                return f"as {v} "
+            s_rotatedentity = s_positionedentity
+
+            @staticmethod
+            def s_store(v):
+                internal.options(v['store'], ['result', 'success'])
+                internal.options(v['mode'], ['block', 'bossbar', 'entity', 'score', 'storage'])
+                prefix = f"{v['store']} {v['mode']}"
+                if v['mode'] == 'block':
+                    return f"{prefix} {v['pos']} {v['path']} {v['type']} {v['scale']} "
+                elif v['mode'] == 'bossbar':
+                    internal.options(v['value'], ['max', 'value'])
+                    return f"{prefix} {v['id']} {v['value']} "
+                elif v['mode'] in ['entity', 'storage']:
+                    return f"{prefix} {v['target']} {v['path']} {v['type']} {v['scale']} "
+                elif v['mode'] == 'score':
+                    return f"{prefix} {v['target']} {v['objective']} "
+
+            @staticmethod
+            def s_if_(v):
+                internal.options(v['mode'], ['block', 'blocks', 'data', 'entity', 'predicate', 'score'])
+                prefix = v['mode']
+                if v['mode'] == "block":
+                    return f"{prefix} {v['pos']} {v['block']} "
+                elif v['mode'] == "blocks":
+                    return f"{prefix} {v['pos1']} {v['pos2']} {v['dest']} {v['scanMode']} "
+                elif v['mode'] == "entity":
+                    return f"{prefix} {v['entity']} "
+                elif v['mode'] == "predicate":
+                    return f"{prefix} {v['predicate']} "
+                elif v['mode'] == "data":
+                    internal.options(v['check'], ['block', 'entity', 'storage'])
+                    source_sourcePos = v['sourcePos'] if v['check'] == 'block' else v['source']
+                    return f"{prefix} {v['check']} {source_sourcePos} {v['path']} "
+                elif v['mode'] == "score":
+                    internal.options(v['comparer'], ['<', '<=', '=', '>', '>=', 'matches'])
+                    internal.check_spaces('target', v['target'])
+                    if v['comparer'] == "range":
+                        return f"{prefix} matches {v['range']} "
+                    else:
+                        return f"{prefix} {v['comparer']} {v['source']} {v['sourceObjective']} "
+            s_unless = s_if_
+
+            @staticmethod
+            def s_run(v):
+                return ""
+
+
+        cmd = "execute "
+        for k, v in subcommands.items():
+            scn = k if not k.endswith("_") else k[:-1]
+            if scn.endswith("xyz") or scn.endswith("entity"):
+                scn = scn.replace("xyz", "").replace("entity", "")
+            cmd += scn + " " + getattr(subcommandhandler, 's_'+k)(v)
+
+        if 'run' in subcommands.keys():
+            sf = JavaFuncHandler()
+            result = subcommands['run'](sf)
+            if isinstance(result, (list, tuple, set)):
+                result = map(lambda j: (cmd+j).strip(), result)
+                self.fh.commands.extend(result)
+                return result
+            elif isinstance(result, str):
+                self.fh.commands.append((cmd+result).strip())
+                return result
+            else:
+                result = sf.commands
+                result = map(lambda j: (cmd+j).strip(), result)
+                self.fh.commands.extend(result)
+                return result
+            
+
+        else:
+            self.fh.commands.append(cmd.strip())
+            return cmd.strip()

@@ -51,6 +51,30 @@ def test_pytest():
         f.r.stop()
         f.r.scoreboard_objectives("modify_displayname", objective="asdf", displayName="234523")
         f.r.scoreboard_players("operation", target="@p", objective="asdfasdf", operation="><", source="@r", sourceObjective="32")
+        f.r.execute(
+            as_="@p",
+            in_="overworld",
+            align="xyz",
+            facingentity={
+                "target": "@r",
+                "anchor": "eyes"
+            },
+            store={
+                "store": "result",
+                "mode": "bossbar",
+                "id": "abc",
+                "value": "max"
+            },
+            if_={
+                "mode": "score",
+                "target": "@r",
+                "objective": "abc",
+                "comparer": ">",
+                "source": "@s",
+                "sourceObjective": "3"
+            },
+            run=lambda sf: [sf.r.say("yes"), sf.r.say("no")]
+        )
 
     b = pmf.Pack('b')
 
