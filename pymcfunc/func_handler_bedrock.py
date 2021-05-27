@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Callable, Optional
 import json
 
 import pymcfunc.errors as errors
@@ -310,4 +310,25 @@ class BedrockRawCommands(UniversalRawCommands):
         self.fh.commands.append(cmd)
         return cmd
 
-    
+    def execute(self, target: str, pos: str, run: Callable[[BedrockFuncHandler], Union[Union[list, tuple], None]], detectPos: str=None, block: str=None, data: int=None):
+        internal.check_spaces('target', target)
+        cmd = f"execute {target} {pos} "
+        internal.reliant('detectPos', detectPos, None, 'block', block, None)
+        internal.reliant('block', block, None, 'data', data, None)
+        if detectPos != None:
+            cmd += f"detect {detectPos} {block} {data} "
+
+        sf = BedrockFuncHandler()
+        result = run(sf)
+        if isinstance(result, (list, tuple)):
+            result = map(lambda j: (cmd+j).strip(), result)
+            self.fh.commands.extend(result)
+            return result
+        elif isinstance(result, str):
+            self.fh.commands.append((cmd+result).strip())
+            return result
+        else:
+            result = sf.commands
+            result = map(lambda j: (cmd+j).strip(), result)
+            self.fh.commands.extend(result)
+            return result

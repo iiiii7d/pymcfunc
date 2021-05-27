@@ -445,7 +445,7 @@ class JavaRawCommands(UniversalRawCommands):
         if 'run' in subcommands.keys():
             sf = JavaFuncHandler()
             result = subcommands['run'](sf)
-            if isinstance(result, (list, tuple, set)):
+            if isinstance(result, (list, tuple)):
                 result = map(lambda j: (cmd+j).strip(), result)
                 self.fh.commands.extend(result)
                 return result

@@ -124,6 +124,8 @@ def test_pytest():
         f.r.stop()
         f.r.scoreboard_objectives("add", objective="asdf", displayName="234523")
         f.r.scoreboard_players("operation", target="@p", objective="asdfasdf", operation="><", selector="@r", selectorObjective="32")
+        f.r.execute("@s", "1 2 3", 
+            lambda sf: [sf.r.say("yes"), sf.r.say("no")])
 
     print(p.funcs['mcfuncjava'])
     print("======================")
