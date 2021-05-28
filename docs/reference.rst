@@ -913,7 +913,7 @@ Function Handlers
       .. versionadded:: 0.0
 
    .. py:attribute:: r
-    :type: JavaRawCommands
+   :type: JavaRawCommands
 
        A JavaRawCommands instance.
 
