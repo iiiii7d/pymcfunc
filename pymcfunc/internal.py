@@ -75,7 +75,7 @@ def check_spaces(name, val):
         raise errors.SpaceError(name, val)
 
 def unspace(val):
-    if " " in val:
+    if val != None and " " in val:
         return "\""+val+"\""
     else:
         return val

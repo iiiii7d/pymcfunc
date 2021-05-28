@@ -21,19 +21,21 @@ class UniversalFuncHandler:
             yield i
 
 class UniversalRawCommands:
+    """A container for raw Minecraft commands that are the same for both Java and Bedrock.
+    More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands"""
     def __init__(self, fh):
         self.fh = fh
 
     def say(self, message: str):
-        """Adds a /say command.
-        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalFuncHandler.say"""
+        """**Syntax:** *say <message>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.say"""
         cmd = f"say {message}".strip()
         self.fh.commands.append(cmd)
         return cmd
 
     def tell(self, target: str, message: str):
-        """Adds a /tell command.
-        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalFuncHandler.tell"""
+        """**Syntax:** *tell <target> <message>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.tell"""
         internal.check_spaces('target', target)
         cmd = f"tell {target} {message}".strip()
         self.fh.commands.append(cmd)
@@ -42,12 +44,19 @@ class UniversalRawCommands:
     msg = tell
 
     def tellraw(self, target: str, message: dict):
+        """**Syntax:** *tellraw <target> <message>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.tellraw"""
         internal.check_spaces('target', target)
         cmd = f"tell {target} {json.dumps(message)}".strip()
         self.fh.commands.append(cmd)
         return cmd
 
     def title(self, target: str, mode: str, text: Union[str, dict]=None, fadeIn: int=None, stay: int=None, fadeOut: int=None):
+        """**Syntax:** *title <target> ...*\n
+        * *... <mode\:clear|reset>*
+        * *... <mode\:title|subtitle|actionbar> <text>*
+        * *... <mode\:times> <fadeIn> <stay> <fadeOut>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.title"""
         internal.options(mode, ['clear', 'reset', 'times', 'title', 'subtitle', 'actionbar'])
         internal.multi_check_invalid_params(['title', 'subtitle', 'actionbar'], 'mode', mode, ('text', text, None), dep_mandatory=True)
         internal.check_invalid_params('times', 'mode', mode, 
@@ -75,20 +84,22 @@ class UniversalRawCommands:
         return cmd
 
     def help(self):
-        """Adds a /help command.
-        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalFuncHandler.help"""
+        """**Syntax:** *help*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.help"""
         self.fh.commands.append("help")
         return "help"
 
     def kill(self, target: str):
-        """Adds a /kill command.
-        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalFuncHandler.kill"""
+        """**Syntax:** *kill <target>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.kill"""
         internal.check_spaces('target', target)
         cmd = f"kill {target}".strip()
         self.fh.commands.append(cmd)
         return cmd
 
     def gamemode(self, mode: Union[int, str], target: str="@s"):
+        """**Syntax:** *gamemode <mode> [target]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.gamemode"""
         JAVA = ['survival', 'creative', 'adventure', 'spectator']
         BEDROCK = ['survival', 'creative', 'adventure', 's', 'c', 'a', 0, 1, 2]
         from pymcfunc.func_handler_bedrock import BedrockFuncHandler
@@ -103,6 +114,9 @@ class UniversalRawCommands:
         return cmd
 
     def gamerule(self, rule: str, value: Union[bool, int]=None):
+        """**Syntax:** *gamerule <rule> [value]*\n
+        A complete list of game rules are available at https://minecraft.fandom.com/wiki/Game_rule#List_of_game_rules\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.gamerule"""
         BEDROCK = {
             bool: ['commandBlocksEnabled', 'commandBlockOutput', 'doDaylightCycle', 'doEntityDrops', 'doFireTick', 'doInsomnia',
                    'doImmediateRespawn', 'doMobLoot', 'doMobSpawning', 'doTileDrops', 'doWeatherCycle', 'drowningDamage',
@@ -139,10 +153,14 @@ class UniversalRawCommands:
         return cmd
 
     def seed(self):
+        """**Syntax:** *seed*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.seed"""
         self.fh.commands.append("seed")
         return "seed"
 
     def enchant(self, target: str, enchantment: str, level: int=1):
+        """**Syntax:** *enchant <target> <enchantment> [level]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.enchant"""
         internal.check_spaces('target', target)
         optionals = internal.defaults((level, 1))
 
@@ -151,27 +169,37 @@ class UniversalRawCommands:
         return cmd
 
     def function(self, name: str):
+        """**Syntax:** *function <name>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.function"""
         cmd = f"function {name}".strip()
         self.fh.commands.append(cmd)
         return cmd
 
     def locate(self, name: str):
+        """**Syntax:** *locate <name>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.locate"""
         cmd = f"locate {name}".strip()
         self.fh.commands.append(cmd)
         return cmd
 
     def time_add(self, amount: int):
+        """**Syntax:** *time add <amount>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.time_add"""
         cmd = f"time add {amount}"
         self.fh.commands.append(cmd)
         return cmd
     
     def time_query(self, query: str):
+        """**Syntax:** *time query <query\:daytime|gametime|day>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.time_query"""
         internal.options(query, ['daytime', 'gametime', 'day'])
         cmd = f"time query {query}"
         self.fh.commands.append(cmd)
         return cmd
     
     def time_set(self, amount: Union[int, str]):
+        """**Syntax:** *time set <amount>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.time_set"""
         BEDROCK = ['day', 'night', 'noon', 'midnight', 'sunrise', 'sunset']
         JAVA = ['day', 'night', 'noon', 'midnight']
         from pymcfunc.func_handler_bedrock import BedrockFuncHandler
@@ -184,6 +212,8 @@ class UniversalRawCommands:
         return cmd
 
     def kick(self, target: str, reason: str=None):
+        """**Syntax:** *kick <target> [reason]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.kick"""
         internal.check_spaces('target', target)
         optionals = internal.defaults((reason, None))
         cmd = f"kick {target} {optionals}".strip()
@@ -191,27 +221,37 @@ class UniversalRawCommands:
         return cmd
 
     def op(self, target: str):
+        """**Syntax:** *op <target>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.op"""
         internal.check_spaces('target', target)
         cmd = f"op {target}".strip()
         self.fh.commands.append(cmd)
         return cmd
 
     def deop(self, target: str):
+        """**Syntax:** *deop <target>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.deop"""
         internal.check_spaces('target', target)
         cmd = f"deop {target}".strip()
         self.fh.commands.append(cmd)
         return cmd
 
     def reload(self):
+        """**Syntax:** *reload*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.reload"""
         self.fh.commands.append("reload")
         return "reload"
 
     def me(self, text: str):
+        """**Syntax:** *me <text>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.me"""
         cmd = f"me {text}".strip()
         self.fh.commands.append(cmd)
         return cmd
 
     def tag(self, target: str, mode: str, name: str=None):
+        """**Syntax:** *tag <target> <mode\:add|list|remove> <mode=add|remove:name>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.tag"""
         internal.check_spaces('target', target)
         internal.options(mode, ['add', 'list', 'remove'])
         internal.multi_check_invalid_params(['add', 'remove'], 'mode', mode,
@@ -225,6 +265,8 @@ class UniversalRawCommands:
         return cmd
 
     def whitelist(self, mode: str, target: str=None):
+        """**Syntax:** *whitelist <mode\:add|list|on|off|reload|remove> <mode=add|remove:target>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.whitelist"""
         internal.options(mode, ['add', 'list', 'on', 'off', 'reload', 'remove'])
         internal.multi_check_invalid_params(['add', 'remove'], 'mode', mode,
             ('target', target, None),
@@ -236,6 +278,8 @@ class UniversalRawCommands:
         return cmd
         
     def stop(self):
+        """**Syntax:** *stop*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.stop"""
         self.fh.commands.append("stop")
         return "stop"
 

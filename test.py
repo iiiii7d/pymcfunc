@@ -16,6 +16,8 @@ def test_pytest():
         f.r.setblock("1 2 3", "assefsdaf")
         f.r.fill('1 2 3', '4 5 6', "assefsdaf")
         f.r.clone('1 2 3', '4 5 6', '7 8 9')
+        f.r.summon("asdfasdf")
+        f.r.clear("@p")
         f.r.kill("@p")
         f.r.give("@p", "a")
         f.r.gamemode("survival")
@@ -89,6 +91,8 @@ def test_pytest():
         f.r.setblock("1 2 3", "assefsdaf")
         f.r.fill('1 2 3', '4 5 6', "assefsdaf")
         f.r.clone('1 2 3', '4 5 6', '7 8 9')
+        f.r.summon("asdfasdf")
+        f.r.clear("@p", "asdfa", maxCount=3)
         f.r.kill("@p")
         f.r.give("@p", "3")
         f.r.gamemode(0)
@@ -139,5 +143,3 @@ def test_pytest():
     print(time.time()-start)
 
 test_pytest()
-
-# scoreboard execute

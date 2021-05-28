@@ -447,11 +447,11 @@ Function Handlers
       .. versionadded:: 0.0
 
    .. py:attribute:: r
-       :type: BedrockRawCommands
+      :type: BedrockRawCommands
 
-       A BedrockRawCommands instance.
+      A BedrockRawCommands instance.
 
-       .. versionadded:: 0.1
+      .. versionadded:: 0.1
 
 .. py:class:: BedrockRawCommands(UniversalRawCommands)
 
@@ -538,7 +538,7 @@ Function Handlers
       :returns: The command
       :rtype: str
 
-   .. py:method: summon(entity: str, pos: str="~ ~ ~", event: str=None, nameTag: str=None)
+   .. py:method:: summon(entity: str, pos: str="~ ~ ~", event: str=None, nameTag: str=None)
 
       Adds a ``summon`` command.
 
@@ -644,7 +644,7 @@ Function Handlers
       :returns: The command
       :rtype: str
 
-   .. py:method:: setworldspawn(pos: str="~ ~ ~"):
+   .. py:method:: setworldspawn(pos: str="~ ~ ~")
 
       Adds a ``setworldspawn`` command.
 
@@ -849,7 +849,7 @@ Function Handlers
       * *<mode:reset> <target> [objective]*
       * *<mode:test|random> <target> <objective> <minv> [maxv]*
       * *<mode:set|add|remove> <target> <objective> <count>*
-      * *<mode:operation> <target> <objective> <operation:+=|-=|*=|/=|%=|<|>|><> <selector> <selectorObjective>
+      * *<mode:operation> <target> <objective> <operation:+=|-=|*=|/=|%=|<|>|><> <selector> <selectorObjective>*
 
       :param str mode: ``mode:list|reset|test|random|set|add|remove|operation``
       :param str target: ``target``
@@ -899,7 +899,7 @@ Function Handlers
 
              def chargeCreepers(sf: pmf.BedrockFuncHandler):
                  sf.r.summon("lightning_bolt")
-             f.r.execute("@e[type=creeper], "~ ~ ~", chargeCreepers)
+             f.r.execute("@e[type=creeper]", "~ ~ ~", chargeCreepers)
 
 .. py:class:: JavaFuncHandler(UniversalFuncHandler)
 
@@ -1129,14 +1129,14 @@ Function Handlers
 
       .. versionadded:: 0.1
 
-      **Syntax:** *particle <name> [params] [pos] [delta] <speed> <count> [mode:force|normal] [viewers]
+      **Syntax:** *particle <name> [params] [pos] [delta] <speed> <count> [mode:force|normal] [viewers]*
 
       :param str name: ``name``
       :param float speed: ``speed``
       :param int count: ``count``
       :param str params: ``params``
       :param str pos: ``pos``
-      :param str delta: ``delta``,
+      :param str delta: ``delta``
       :param str mode: ``mode:force|normal``
       :param str viewers: ``viewers``
       :return: The command
@@ -1254,7 +1254,7 @@ Function Handlers
 
       .. versionadded:: 0.1
 
-      **Syntax**: *replaceitem <mode:block|entity> <pos/target> <slot> <item> [count]
+      **Syntax**: *replaceitem <mode:block|entity> <pos/target> <slot> <item> [count]*
 
       :param str mode: ``mode:block|entity``
       :param str slot: ``slot``
@@ -1277,11 +1277,11 @@ Function Handlers
       * *<mode:list>*
       * *<mode:modify(_displayname)|modify(_rendertype)> <objective> ...*
 
-        * *displayName <displayName>* when mode=modify_displayname
-        * *renderType <renderType:hearts|integer>* when mode=modify_rendertype
+        * *displayName <displayName>* when mode=modify_displayname*
+        * *renderType <renderType:hearts|integer>* when mode=modify_rendertype*
 
-      * <mode:remove> <objective>
-      * <mode:setdisplay> <slot> [objective]
+      * *<mode:remove> <objective>*
+      * *<mode:setdisplay> <slot> [objective]*
 
       :param str mode: ``mode:add|list|modify|remove|setdisplay``
       :param str objective: ``objective``

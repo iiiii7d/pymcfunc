@@ -17,8 +17,8 @@ class JavaFuncHandler(UniversalFuncHandler):
 
 class JavaRawCommands(UniversalRawCommands):
     def setblock(self, pos: str, block: str, mode="replace"):
-        """Adds a /setblock command.
-        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFuncHandler.setblock"""
+        """**Syntax:** *setblock <pos> <block> [mode:destroy|keep|replace]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.setblock"""
         internal.options(mode, ['destroy', 'keep', 'replace'])
         optionals = internal.defaults((mode, "replace"))
 
@@ -27,8 +27,8 @@ class JavaRawCommands(UniversalRawCommands):
         return cmd
 
     def fill(self, pos1: str, pos2: str, block: str, mode="replace", filterPredicate: str=None):
-        """Adds a /fill command.
-        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFuncHandler.fill"""
+        """**Syntax:** *fill <pos1> <pos2> <block> [mode:destroy|hollow|keep|outline|replace] [mode=replace:filterPredicate]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.fill"""
         internal.options(mode, ['destroy', 'hollow', 'keep', 'outline', 'replace'])
         if mode != 'replace' and filterPredicate != None:
             raise errors.InvalidParameterError(mode, 'mode', filterPredicate, 'filterPredicate')
@@ -39,8 +39,8 @@ class JavaRawCommands(UniversalRawCommands):
         return cmd
 
     def clone(self, pos1: str, pos2: str, dest: str, maskMode="replace", filterPredicate: str=None, cloneMode: str="normal"):
-        """Adds a /clone command.
-        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFuncHandler.clone"""
+        """**Syntax:** *clone <pos1> <pos2> <dest> [maskMode:replace|masked] <maskMode=masked:filterPredicate> [cloneMode:force|move|normal]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.clone"""
         internal.options(maskMode, ['masked', 'filtered', 'replace'])
         internal.options(cloneMode, ['forced', 'move', 'normal'])
         if maskMode != 'filtered' and filterPredicate != None:
@@ -55,8 +55,8 @@ class JavaRawCommands(UniversalRawCommands):
         return cmd
 
     def give(self, target: str, item: str, count: int=1):
-        """Adds a /give command.
-        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFuncHandler.give"""
+        """**Syntax:** *give <target> <item> [count]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.give"""
         internal.check_spaces('target', target)
         optionals = internal.defaults((count, 1))
 
@@ -65,6 +65,8 @@ class JavaRawCommands(UniversalRawCommands):
         return cmd
 
     def summon(self, entity: str, pos: str="~ ~ ~", nbt: dict=None):
+        """**Syntax:** *summon <entity> [pos] [nbt]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.summon"""
         nbt = json.dumps(nbt) if isinstance(nbt, dict) else nbt
         optionals = internal.defaults((pos, "~ ~ ~"), (nbt, None))
 
@@ -73,6 +75,8 @@ class JavaRawCommands(UniversalRawCommands):
         return cmd
 
     def clear(self, target: str="@s", item: str=None, maxCount: int=None):
+        """**Syntax:** *clear [target] [item] [maxCount]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.clear"""
         internal.reliant('item', maxCount, None, 'data', maxCount, None)
         internal.check_spaces('target', target)
         optionals = internal.defaults((target, "@s"), (item, None), (maxCount, None))
@@ -82,6 +86,12 @@ class JavaRawCommands(UniversalRawCommands):
         return cmd
 
     def teleport(self, destentity: str=None, destxyz: str=None, target: str="@s", rotation: str=None, faceMode: str=None, facing: str=None, anchor: str="eyes"):
+        """**Syntax:** *teleport <target> ...* / *teleport ...*
+        * *<destentity>*
+        * *<destxyz> [rotation]*
+        * *<destxyz> facing <facing>* when faceMode=entity
+        * *<destxyz> facing entity <facing> [anchor:eyes|feet]* when faceMode=location\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.teleport"""
         internal.check_spaces('target', target)
         dest = internal.pick_one_arg((destentity, None, 'destentity'), (destxyz, None, 'destxyz'), optional=False)
         target = "" if target == "@s" else target+" "
@@ -107,6 +117,10 @@ class JavaRawCommands(UniversalRawCommands):
     tp = teleport
 
     def experience(self, mode: str, target: str="@s", amount: int=None, measurement="points"):
+        """**Syntax:** *experience ...*
+        * *<mode\:add|set> <target> <amount> [measurement:levels|points]*
+        * *<mode\:query> <target> <measurement\:levels|points>*\n
+        https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.experience"""
         internal.options(measurement, ['points', 'levels'])
         internal.options(mode, ['add', 'set', 'query'])
         internal.multi_check_invalid_params(['add', 'set'], "mode", mode, ("amount", amount, None))
@@ -120,6 +134,8 @@ class JavaRawCommands(UniversalRawCommands):
     xp = experience
         
     def effect_give(self, target: str, effect: str, seconds: int=30, amplifier: int=0, hideParticles: bool=False):
+        """**Syntax:** *effect give <target> <effect> [seconds] [amplifier] [hideParticles]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.effect_give"""
         internal.check_spaces('target', target)
         optionals = internal.defaults((seconds, 30), (amplifier, 0), (hideParticles, False))
 
@@ -128,6 +144,8 @@ class JavaRawCommands(UniversalRawCommands):
         return cmd
         
     def effect_clear(self, target: str="@s", effect: str=None):
+        """**Syntax:** *effect clear [target] [effect]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.effect_clear"""
         internal.check_spaces('target', target)
         optionals = internal.defaults((effect, None))
 
@@ -136,6 +154,8 @@ class JavaRawCommands(UniversalRawCommands):
         return cmd
 
     def setworldspawn(self, pos: str="~ ~ ~", angle: str=None):
+        """**Syntax:** *setworldspawn [pos] [angle]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.spawnpoint"""
         optionals = internal.defaults((pos, "~ ~ ~"), (angle, None))
 
         cmd = f"setworldspawn {optionals}".strip()
@@ -143,6 +163,8 @@ class JavaRawCommands(UniversalRawCommands):
         return cmd
 
     def spawnpoint(self, target: str="@s", pos: str="~ ~ ~", angle: str=None):
+        """**Syntax:** *spawnpoint [target] [pos] [angle]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.spawnpoint"""
         internal.check_spaces('target', target)
         optionals = internal.defaults((pos, "~ ~ ~"), (angle, None))
 
@@ -151,6 +173,8 @@ class JavaRawCommands(UniversalRawCommands):
         return cmd
     
     def particle(self, name: str, speed: float, count: int, params: str=None, pos: str="~ ~ ~", delta: str="~ ~ ~", mode: str="normal", viewers: str=None):
+        """**Syntax:** *particle <name> [params] [pos] [delta] <speed> <count> [mode:force|normal] [viewers]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.particle"""
         optionals = internal.defaults((mode, "normal"), (viewers, None))
         if params != None:
             name = f"{name} {params}"
@@ -159,6 +183,10 @@ class JavaRawCommands(UniversalRawCommands):
         return cmd
 
     def schedule(self, name: str, clear: bool=False, duration: str=None, mode: str="replace"):
+        """**Syntax:** *schedule ...*
+        * *function <name> <duration> [mode:append|replace]*
+        * *clear <name>*\n
+        https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.schedule"""
         internal.check_invalid_params(False, 'clear', clear, ('duration', duration, None), dep_mandatory=True)
         if clear:
             cmd = f"schedule clear {name}".strip()
@@ -169,6 +197,8 @@ class JavaRawCommands(UniversalRawCommands):
         return cmd
 
     def playsound(self, sound: str, source: str, target: str, pos: str="~ ~ ~", volume: float=1.0, pitch: float=1.0, minVolume: float=None):
+        """**Syntax:** *playsound <sound> <source\:master|music|record|weather|block|hostile|neutral|player|ambient|voice> <targets> <pos> <volume> <pitch> <minVolume>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.playsound"""
         internal.check_spaces('target', target)
         internal.options(source, ['master', 'music', 'record', 'weather', 'block', 'hostile', 'neutral', 'player', 'ambient', 'voice'])
         optionals = internal.defaults((pos, "~ ~ ~"), (volume, 1.0), (pitch, 1.0), (minVolume, None))
@@ -178,6 +208,8 @@ class JavaRawCommands(UniversalRawCommands):
         return cmd
 
     def stopsound(self, target: str, source: str="*", sound: str=None):
+        """**Syntax:** *stopsound <target> [source:master|music|record|weather|block|hostile|neutral|player|ambient|voice] [sound]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.stopsound"""
         internal.check_spaces('target', target)
         internal.options(source, ['master', 'music', 'record', 'weather', 'block', 'hostile', 'neutral', 'player', 'ambient', 'voice', '*'])
         optionals = internal.defaults((source, "*"), (sound, None))
@@ -187,12 +219,16 @@ class JavaRawCommands(UniversalRawCommands):
         return cmd
 
     def weather(self, mode: str, duration: str=5):
+        """**Syntax:** *weather <mode\:clear|rain|thunder> [duration]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.weather"""
         internal.options(mode, ['clear', 'rain', 'thunder'])
         cmd = f"weather {mode} {duration}".strip()
         self.fh.commands.append(cmd)
         return cmd
 
     def difficulty(self, difficulty: str=None):
+        """**Syntax:** *difficulty <difficulty>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.difficulty"""
         if difficulty == None:
             cmd = "difficulty"
         else:
@@ -202,11 +238,17 @@ class JavaRawCommands(UniversalRawCommands):
         return cmd
 
     def list_(self, uuid: bool=False):
+        """**Syntax** *list* if uuid=False; *list uuid* if uuid=True\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.list_"""
         cmd = "list" if not uuid else "list uuid"
         self.fh.commands.append(cmd)
         return cmd
 
     def spreadplayers(self, center: str, dist: float, maxRange: float, respectTeams: bool, target: str, maxHeight: float=None):
+        """**Syntax**: *spreadplayers <center> <dist> <maxRange> ...*
+        * *<respectTeams> <targets>*
+        * *under <maxHeight> <respectTeams>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.spreadplayers"""
         if maxHeight != None:
             maxHeight = "under "+maxHeight+" "
         else:
@@ -216,6 +258,8 @@ class JavaRawCommands(UniversalRawCommands):
         return cmd
 
     def replaceitem(self, mode: str, slot: str, item: str, pos: str=None, target: str=None, count: int=1):
+        """**Syntax**: *replaceitem <mode\:block|entity> <pos/target> <slot> <item> [count]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.replaceitem"""
         internal.options(mode, ['block', 'entity'])
         internal.check_invalid_params('block', 'mode', mode,
             ('pos', pos, None),
@@ -231,6 +275,15 @@ class JavaRawCommands(UniversalRawCommands):
         return cmd
 
     def scoreboard_objectives(self, mode: str, objective: str=None, criterion: str=None, displayName: str=None, renderType: str=None, slot: str=None):
+        """**Syntax**: *scoreboard objectives ...*
+        * *<mode\:add> <objective> <criterion> [displayName]*
+        * *<mode\:list>*
+        * *<mode\:modify(_displayname)|modify(_rendertype)> <objective> ...*
+          * *displayName <displayName>* when mode=modify_displayname*
+          * *renderType <renderType\:hearts|integer>* when mode=modify_rendertype*
+        * *<mode\:remove> <objective>*
+        * *<mode\:setdisplay> <slot> [objective]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.scoreboard_objectives"""
         internal.options(mode, ['add', 'list', 'modify_displayname', 'modify_rendertype', 'remove', 'setdisplay'])
         internal.multi_check_invalid_params(['add', 'modify_displayname', 'modify_rendertype', 'remove', 'setdisplay'], 'mode', mode, ('objective', objective, None))
         if mode != 'setdisplay' and objective == None:
@@ -264,6 +317,13 @@ class JavaRawCommands(UniversalRawCommands):
         return cmd
 
     def scoreboard_players(self, mode: str, target: str=None, objective: str=None, score: int=None, operation: str=None, source: str=None, sourceObjective: str=None):
+        """**Syntax**: *scoreboard players ...*
+        * *<mode\:add|set|remove> <target> <objective> <score>*
+        * *<mode\:enable|get> <target> <objective>*
+        * *<mode\:reset> <target> [objective]*
+        * *<mode\:list> [target]*
+        * *<mode\:operation> <target> <objective> <operation:+=|-=|*=|/=|%=|<|>|><> <source> <sourceObjective>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.scoreboard_players"""
         internal.options(mode, ['add', 'enable', 'get', 'list', 'operation', 'remove', 'reset', 'set'])
         if mode in ['add', 'enable', 'get', 'operation', 'remove', 'reset', 'set'] and target == None:
             raise errors.MissingError('target', 'mode', mode)
@@ -300,6 +360,30 @@ class JavaRawCommands(UniversalRawCommands):
 
     def execute(self, **subcommands):
         """
+        **Syntax:** *execute ...*
+        * Key is *mode*, value is *value-NAME*, subvalue is *value.SUBVAL*, next subcommand is *-> sc*
+        * *<mode\:align> <value-axes> -> sc*
+        * *<mode\:anchored> <value-anchor\:eyes|feet> -> sc*
+        * *<mode\:as(_)|at|positionedentity|rotatedentity> <value-target> -> sc*
+        * *<mode\:facing(xyz)|positionedxyz|rotatedxyz> <value-pos> -> sc*
+        * *<mode\:facing(entity)> entity <value.target> <value.anchor\:eyes|feet> -> sc*
+        * *<mode\:in(_)> <value-dimension> -> sc*
+        * *<mode\:store> <value.store\:result|success> ...*
+          * *<value.mode\:block> <value.pos> <value.path> <value.type\:byte|short|int|long|float|double> <value.scale> -> sc*
+          * *<value.mode\:bossbar> <value.id> <value.value\:value|max> -> sc*
+          * *<value.mode\:score> <value.target> <value.objective> -> sc*
+          * *<value.mode\:entity|storage> <value.target> <value.path> <value.type\:byte|short|int|long|float|double> <value.scale> -> sc*
+        * *<mode\:if(_)|unless> ...*
+          * *<value.mode\:block> <value.pos> <value.block> -> sc*
+          * *<value.mode\:blocks> <value.pos1> <value.pos2> <value.destination> <value.scanMode\:all|masked> -> sc*
+          * *<value.mode\:data> <value.check\:block> <value.sourcexyz> <value.path> -> sc*
+          * *<value.mode\:data> <value.check\:entity|storage> <value.path> -> sc*
+          * *<value.mode\:entity> <value.entity> -> sc*
+          * *<value.mode\:predicate> <value.predicate> -> sc*
+          * *<value.mode\:score> <value.target> <value.targetObjective> <value.comparer:<|<=|=|>|>=> <value.source> <value.sourceObjective> -> sc*
+          * *<value.mode\:score> <value.target> <value.targetObjective> <value.comparer\:matches> <value.range> -> sc*
+        * *<mode\:run> <value-function> -> sc*
+
         **subcommands kwargs format:
         ```
         align = axes: str,
@@ -346,7 +430,8 @@ class JavaRawCommands(UniversalRawCommands):
             "sourceObjective": str (when comparer!=matches),
             "range": Union[int, str] (when comparer=matches)
         },
-        run = function(sf): ...```
+        run = function(sf): ...```\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.execute
         """
         if "run" in subcommands.keys() and list(subcommands.keys()).index('run') != len(subcommands.keys())-1:
             raise ValueError("'run' subcommand must be last subcommand")
