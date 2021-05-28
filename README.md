@@ -17,7 +17,8 @@
 
 Minecraft functions, pythonised. Made by 7d
 
-**Current version: v0.0**
+**Current version: v0.1**
+Changelogs: https://pymcfunc.readthedocs.io/en/latest/changelog.html
 
 **Documentation: https://pymcfunc.readthedocs.io/en/latest/**
 
@@ -40,8 +41,18 @@ p = pmf.Pack()
 
 @p.function
 def diamond(f: pmf.JavaFuncHandler):
-    f.tell("@s", "Enjoy your free diamonds! :D")
-    f.give("@s", "diamond", 64)
+    f.r.tell("@s", "Enjoy your free diamonds! :D")
+    f.r.give("@s", "diamond", 64)
+
+@p.function
+def make_sheep_jump(f: pmf.JavaFuncHandler):
+    f.r.execute(
+      as_="@e[type=sheep]",
+      run=lambda sf: [
+        sf.r.tp(destxyz="~ ~1 ~"),
+        sf.r.say("boingg")
+      ]
+    )
 
 print(p.funcs)
 ```
