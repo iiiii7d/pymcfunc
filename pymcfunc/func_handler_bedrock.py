@@ -110,15 +110,14 @@ class BedrockRawCommands(UniversalRawCommands):
         return cmd
     tp = teleport
 
-    def experience(self, amount: int, level: bool=False, target: str="@s"):
+    def xp(self, amount: int, level: bool=False, target: str="@s"):
         internal.check_spaces('target', target)
         level = "L" if level else ""
         optionals = internal.defaults((target, "@s"))
 
-        cmd = f"experience {amount}{level} {optionals}".strip()
+        cmd = f"xp {amount}{level} {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd
-    xp = experience
 
     def effect_give(self, target: str, effect: str, seconds: int=30, amplifier: int=0, hideParticles: bool=False):
         internal.check_spaces('target', target)
@@ -144,7 +143,7 @@ class BedrockRawCommands(UniversalRawCommands):
 
     def spawnpoint(self, target: str="@s", pos: str="~ ~ ~"):
         internal.check_spaces('target', target)
-        optionals = internal.defaults((pos, "~ ~ ~"))
+        optionals = internal.defaults((target, "@s"), (pos, "~ ~ ~"))
 
         cmd = f"spawnpoint {optionals}".strip()
         self.fh.commands.append(cmd)
@@ -217,7 +216,7 @@ class BedrockRawCommands(UniversalRawCommands):
         self.fh.commands.append(cmd)
         return cmd
 
-    def replaceitem(self, mode: str, slotId: int, itemName: str, pos: str=None, target: str=None, slotType: str=None, itemHandling: str=None, amount: int=1, data: int=0, components: json=None):
+    def replaceitem(self, mode: str, slotId: int, itemName: str, pos: str=None, target: str=None, slotType: str=None, itemHandling: str=None, amount: int=1, data: int=0, components: dict=None):
         internal.check_invalid_params('block', 'mode', mode,
             ('pos', pos, None),
             dep_mandatory=True)

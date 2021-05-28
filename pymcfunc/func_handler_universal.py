@@ -4,10 +4,12 @@ import json
 
 import pymcfunc.errors as errors
 import pymcfunc.internal as internal
+from pymcfunc.selectors import UniversalSelectors
 
 class UniversalFuncHandler:
     """The function handler which includes commands that are the same for both Java and Bedrock edition.
     More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalFuncHandler"""
+    sel = UniversalSelectors()
     def __init__(self):
         self.r = UniversalRawCommands(self)
 
@@ -45,7 +47,7 @@ class UniversalRawCommands:
         self.fh.commands.append(cmd)
         return cmd
 
-    def title(self, target: str, mode: str, text: Union[str, dict]=None, fadeIn: str=None, stay: str=None, fadeOut: str=None):
+    def title(self, target: str, mode: str, text: Union[str, dict]=None, fadeIn: int=None, stay: int=None, fadeOut: int=None):
         internal.options(mode, ['clear', 'reset', 'times', 'title', 'subtitle', 'actionbar'])
         internal.multi_check_invalid_params(['title', 'subtitle', 'actionbar'], 'mode', mode, ('text', text, None), dep_mandatory=True)
         internal.check_invalid_params('times', 'mode', mode, 

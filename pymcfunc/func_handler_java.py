@@ -158,7 +158,7 @@ class JavaRawCommands(UniversalRawCommands):
         self.fh.commands.append(cmd)
         return cmd
 
-    def schedule(self, name: str, clear=False, duration: str=None, mode: str="replace"):
+    def schedule(self, name: str, clear: bool=False, duration: str=None, mode: str="replace"):
         internal.check_invalid_params(False, 'clear', clear, ('duration', duration, None), dep_mandatory=True)
         if clear:
             cmd = f"schedule clear {name}".strip()
@@ -215,7 +215,7 @@ class JavaRawCommands(UniversalRawCommands):
         self.fh.commands.append(cmd)
         return cmd
 
-    def replaceitem(self, mode: str, slot: str, item: int, pos: str=None, target: str=None, count: int=1):
+    def replaceitem(self, mode: str, slot: str, item: str, pos: str=None, target: str=None, count: int=1):
         internal.options(mode, ['block', 'entity'])
         internal.check_invalid_params('block', 'mode', mode,
             ('pos', pos, None),
@@ -322,7 +322,7 @@ class JavaRawCommands(UniversalRawCommands):
             "value": str (value|max when mode=bossbar),
             "objective": str (when mode=score),
             "path": str (when mode=block,entity,storage),
-            "type": str (when mode=block,entity,storage),
+            "type": str (byte|short|int|long|float|double when mode=block,entity,storage),
             "scale": str (when mode=block,entity,storage)
         },
         if_/unless = {
@@ -395,6 +395,8 @@ class JavaRawCommands(UniversalRawCommands):
                 internal.options(v['store'], ['result', 'success'])
                 internal.options(v['mode'], ['block', 'bossbar', 'entity', 'score', 'storage'])
                 prefix = f"{v['store']} {v['mode']}"
+                if v['type'] != None:
+                    internal.options(v['type'], ['byte', 'short', 'int', 'long', 'float', 'double'])
                 if v['mode'] == 'block':
                     return f"{prefix} {v['pos']} {v['path']} {v['type']} {v['scale']} "
                 elif v['mode'] == 'bossbar':

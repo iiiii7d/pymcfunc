@@ -77,8 +77,8 @@ Pack
          p = pmf.Pack()
          
          @p.function
-         def mcfuncjava(f: pmf.JavaFuncHandler):
-             f.say('a')
+         def func(f: pmf.JavaFuncHandler):
+             f.r.say('a')
              # youf commands here...
 
       .. versionadded:: 0.0
@@ -90,7 +90,7 @@ Function Handlers
 
    The function handler that is inherited by both :py:class:`JavaFuncHandler` and :py:class:`BedrockFuncHandler`.
 
-   This includes commands that are the same for both Java and Bedrock edition.
+   This includes commands and features that are the same for both Java and Bedrock edition.
 
    .. warning::
       It is highly recommended to use either :py:class:`BedrockFuncHandler` or :py:class:`JavaFuncHandler` for extended support of commands for your edition.
@@ -108,6 +108,31 @@ Function Handlers
       The list of Minecraft commands.
 
       .. versionadded:: 0.0
+
+   .. py:attribute:: sel
+   :type: UniversalSelectors
+
+      A UniversalSelectors instance.
+
+      .. versionadded:: 0.1
+
+    .. py:attribute:: r
+    :type: UniversalRawCommands
+
+       A UniversalRawCommands instance.
+
+       .. versionadded:: 0.1
+
+.. py:class:: UniversalRawCommands
+
+   A container for raw Minecraft commands that are the same for both Java and Bedrock.
+
+   .. py:attribute:: fh
+   :type: UniversalFuncHandler
+
+      References back to the function handler that it is in.
+
+      .. versionadded:: 0.1
 
    .. py:method:: say(message: str)
       
@@ -136,6 +161,41 @@ Function Handlers
       :returns: The command
       :rtype: str
 
+   .. py:method:: tellraw(target: str, message: dict)
+
+      Adds a ``tellraw`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *tellraw <target> <message>*
+
+      :param str target: ``target``
+      :param dict message: ``message``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: title(target: str, mode: str, text: Union[str, dict]=None, fadeIn: int=None, stay: int=None, fadeOut: int=None)
+
+      Adds a ``title`` or ``titleraw`` (BE only) command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *title <target> ...*
+    
+      * *... <mode:clear|reset>*
+      * *... <mode:title|subtitle|actionbar> <text>*
+      * *... <mode:times> <fadeIn> <stay> <fadeOut>*
+
+      :param str target: ``target``
+      :param str mode: ``mode:clear|reset|title|subtitle|actionbar|times``
+      :param text: ``text`` (can be str in BE only)
+      :type text: dict or str
+      :param int fadeIn: ``fadeIn``
+      :param int stay: ``stay``
+      :param int fadeOut: ``fadeOut``
+      :returns: The command
+      :rtype: str
+
    .. py:method:: help()
 
       Adds a ``help`` command.
@@ -159,6 +219,217 @@ Function Handlers
       :returns: The command
       :rtype: str
 
+   .. py:method:: gamemode(mode: Union[int, str], target: str="@s")
+
+      Adds a ``gamemode`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *gamemode <mode> [target]**
+
+      :param str mode: ``mode``
+      :param str target: ``target``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: gamerule(rule: str, value: Union[bool, int]=None)
+
+      Adds a ``gamerule`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *gamerule <rule> [value]*
+
+      A complete list of game rules are available at https://minecraft.fandom.com/wiki/Game_rule#List_of_game_rules.
+
+      :param str rule: ``rule``
+      :param value: ``value``
+      :type value: bool or int
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: seed()
+
+      Adds a ``seed`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *seed*
+
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: enchant(target: str, enchantment: str, level: int=1)
+
+      Adds an ``enchant`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *enchant <target> <enchantment> [level]*
+
+      :param str target: ``target``
+      :param str enchantment: ``enchantment``
+      :param int level: ``level``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: function(name: str)
+
+      Adds a ``function`` command.
+      
+      .. versionadded:: 0.1
+
+      **Syntax:** *function <name>*
+
+      :param str name: ``name``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: locate(name: str)
+
+      Adds a ``locate`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *locate <name>*
+
+      :param str name: ``name``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: time_add(amount: int)
+
+      Adds a ``time add`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *time add <amount>*
+
+      :param str name: ``amount``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: time_query(query: str)
+
+      Adds a ``time query`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *time query <query:daytime|gametime|day>
+
+      :param str name: ``query:daytime|gametime|day``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: time_set(amount: Union[int, str])
+
+      Adds a ``time set`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *time set <amount>*
+
+      :param str amount: ``amount`` (day|night|noon|midnight, + |sunrise|sunset for BE)
+      :param int amount: ``amount``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: kick(target: str, reason: str=None)
+
+      Adds a ``kick`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *kick <target> [reason]*
+
+      :param str target: ``target``
+      :param str reason: ``reason``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: op(target: str)
+
+      Adds an ``op`` command.
+   
+      .. versionadded:: 0.1
+   
+      **Syntax:** *op <target>*
+
+      :param str target: ``target``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: deop(target: str)
+
+      Adds an ``deop`` command.
+   
+      .. versionadded:: 0.1
+   
+      **Syntax:** *deop <target>*
+
+      :param str target: ``target``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: reload()
+
+      Adds a ``reload`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *reload*
+
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: me(text: str)
+
+      Adds a ``me`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *me <text>*
+
+      :param str text: ``text``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: tag(target: str, mode: str, name: str=None)
+
+      Adds a ``tag`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *tag <target> <mode:add|list|remove> <mode=add|remove:name>*
+
+      :param str target: ``target``
+      :param str mode: ``mode:add|list|remove``
+      :param str name: ``mode=add|remove:name``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: whitelist(mode: str, target: str=None)
+
+      Adds a ``whitelist`` command.
+
+      .. versionadded:: 0.1
+   
+      **Syntax:** *whitelist <mode:add|list|on|off|reload|remove> <mode=add|remove:target>*
+   
+      :param str mode: ``mode:add|list|on|off|reload|remove``
+      :param str target: ``mode=add|remove:target``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: stop()
+
+      Adds a ``stop`` command.
+
+      **Syntax:** *stop*
+
+      :returns: The command
+      :rtype: str
+
 .. py:class:: BedrockFuncHandler(UniversalFuncHandler)
 
    The Beckrock Edition function handler.
@@ -169,6 +440,24 @@ Function Handlers
       A Selectors object.
       
       .. versionadded:: 0.0
+
+   .. py:attribute:: r
+    :type: BedrockRawCommands
+
+       A BedrockRawCommands instance.
+
+       .. versionadded:: 0.1
+
+.. py:class:: BedrockRawCommands
+
+   A container for raw Minecraft commands that are specially for Bedrock Edition.
+
+   .. py:attribute:: fh
+   :type: BedrockFuncHandler
+
+      References back to the function handler that it is in.
+
+      .. versionadded:: 0.1
 
    .. py:method:: setblock(pos: str, tileName: str, tileData: int=0, blockStates: list=None, mode="replace")
 
@@ -239,6 +528,369 @@ Function Handlers
       :returns: The command
       :rtype: str
 
+   .. py:method: summon(entity: str, pos: str="~ ~ ~", event: str=None, nameTag: str=None)
+
+      Adds a ``summon`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *summon <entity> ...*
+
+      * *[pos] [event] [nameTag]*
+      * *<nameTag> [pos]*
+
+      :param str entity: ``entity``
+      :param str pos: ``pos``
+      :param str event: ``event``
+      :param str nameTag: ``nameTag``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: clear(target: str="@s", item: str=None, data: int=-1, maxCount: int=-1)
+
+      Adds a ``clear`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *clear [target] [item] [data] [maxCount]*
+
+      :param str target: ``target``
+      :param str item: ``item``
+      :param int data: ``data``
+      :param int maxCount: ``maxCount``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: teleport(destxyz: str=None, destentity: str=None, target: str="@s", facing: str=None, rotation: str=None, checkForBlocks: bool=False)
+                  tp(destxyz: str=None, destentity: str=None, target: str="@s", facing: str=None, rotation: str=None, checkForBlocks: bool=False)
+
+      Adds a ``teleport`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:**
+
+      * *teleport <destxyz> ...* / *teleport <target> <destxyz>...*
+
+        * *[checkForBlocks]*
+        * *[rotation] [checkForBlocks]*
+        * *facing [facing] [checkForBlocks]*
+    
+      * *teleport <destentity> ...* / *teleport <target> <destentity>...*
+
+        * *[checkForBlocks]*
+
+      :param str destxyz: ``destxyz``
+      :param str destentity: ``destentity``
+      :param str target: ``target``
+      :param str facing: ``facing``
+      :param str rotation: ``rotation``
+      :param bool checkForBlocks: ``checkForBlocks``
+      :returns: The commmand
+      :rtype: str
+
+   .. py:method:: xp(amount: int, level: bool=False, target: str="@s")
+
+      Adds an ``xp`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:**
+      
+      * *xp <amount> [target]* if level=False
+      * *xp <amount>L [target]* if level=True
+
+      :param str amount: ``amount``
+      :param bool level: Appends 'L' at the end of ``amount``
+      :param str target: ``target``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: effect_give(target: str, effect: str, seconds: int=30, amplifier: int=0, hideParticles: bool=False)
+
+      Adds an ``effect`` (give) command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *<target> <effect> [seconds] [amplifier] [hideParticles]*
+
+      :param str target: ``target``
+      :param str effect: ``effect``
+      :param int seconds: ``seconds``
+      :param int amplifier: ``amplifier``
+      :param bool hideParticles: ``hideParticles``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: effect_clear(target: str)
+
+      Adds an ``effect`` (clear) command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *effect <target> clear*
+
+      :param str target: ``target``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: setworldspawn(pos: str="~ ~ ~"):
+
+      Adds a ``setworldspawn`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *setworldspawn [pos]*
+
+      :param str pos: ``pos``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: spawnpoint(target: str="@s", pos: str="~ ~ ~")
+
+      Adds a ``spawnpoint`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *spawnpoint [target] [pos]*
+
+      :param str target: ``target``
+      :param str pos: ``pos``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: particle(name: str, pos: str)
+
+      Adds a ``particle`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *particle <name> <pos>*
+
+      :param str name: ``name``
+      :param str pos: ``pos``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: schedule(path: str, mode: str, pos1: str=None, pos2: str=None, center: str=None, radius: int=None, tickingAreaName: str=None)
+
+      Adds a ``schedule`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *schedule on_area_loaded add ...*
+
+      * *<pos1> <pos2> <path>* when mode=cuboid
+      * *<mode:circle> <center> <radius> <path>*
+      * *<mode:tickingarea> <tickingAreaName> <path>*
+
+      :param str path: ``path``
+      :param str mode: ``mode``
+      :param str pos1: ``pos1``
+      :param str pos2: ``pos2``
+      :param str center: ``center``
+      :param int radius: ``radius``
+      :param str tickingAreaName: ``tickingAreaName``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: playsound(sound: str, target: str="@p", pos: str="~ ~ ~", volume: float=1.0, pitch: float=1.0, minVolume: float=None)
+
+      Adds a ``playsound`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *<sound> [target] [pos] [volume] [pitch] [minVolume]*
+
+      :param str sound: ``sound``
+      :param str target: ``target``
+      :param str pos: ``pos``
+      :param str volume: ``volume``
+      :param str pitch: ``pitch``
+      :param str minVolume: ``minVolume``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: stopsound(target: str, sound: str=None)
+
+      Adds a ``stopsound`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *stopsound <target> [sound]*
+
+      :param str target: ``target``
+      :param str sound: ``sound``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: weather(mode: str, duration: str=5)
+
+      Adds a ``weather`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *weather <mode:clear|rain|thunder|query> <mode=clear|rain|thunder:duration>*
+
+      :param str mode: ``mode:clear|rain|thunder|query``
+      :param int duration: ``mode=clear|rain|thunder:duration``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: difficulty(difficulty: Union[str, int])
+
+      Adds a ``difficulty`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *difficulty <difficulty>*
+
+      :param str difficulty: ``difficulty``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: list()
+
+      Adds a ``list`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *list*
+
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: spreadplayers(center: str, dist: float, maxRange: float, target: str)
+
+      Adds a ``spreadplayers`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *spreadplayers <center> <dist> <maxRange> <target>*
+
+      :param str center: ``center``
+      :param float dist: ``float``
+      :param float maxRange: ``maxRange``
+      :param str target: ``target``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: replaceitem(self, mode: str, slotId: int, itemName: str, pos: str=None, target: str=None, slotType: str=None, itemHandling: str=None, amount: int=1, data: int=0, components: dict=None)
+
+      Adds a ``replaceitem`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *replaceitem <mode:block|entity> <pos/target> ...*
+
+        * *slot.container <slotId> <itemName> [amount] [data] [components]* or
+        * *slot.container <slotId> <replaceMode:destroy|keep> <itemName> [amount] [data] [components]* when mode=block
+        * *<slotType> <slotId> <itemName> [amount] [data] [components]* or
+        * *<slotType> <slotId> <itemHandling:destroy|keep> <itemName> [amount] [data] [components]* when mode=entity
+
+        :param str mode: ``mode:block|entity``
+        :param str slotId: ``slotId``
+        :param str pos: ``pos``
+        :param str target: ``target``
+        :param str slotType: ``slotType``
+        :param str itemHandling: ``itemHandling:destroy|keep``
+        :param int amount: ``amount``
+        :param int data: ``data``
+        :param dict components: ``components``
+        :returns: The command
+        :rtype: str
+
+   .. py:method:: allowlist(mode: str, target: str=None)
+
+      Alias of :py:func:`UniversalRawCommands.whitelist`.
+
+      .. versionadded:: 0.1
+
+   .. py:method:: scoreboard_objectives(mode: str, objective: str=None, displayName: str=None, slot: str=None, sortOrder: str=None)
+
+      Adds a ``scoreboard objectives`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *scoreboard objectives ...*
+
+      * *<mode:add> <objective> dummy [displayName]*
+      * *<mode:list>*
+      * *<mode:remove> <objective>*
+      * *<mode:setdisplay> <slot:list|sidebar|belowname> [objective] [slot=list|sidebar:sortOrder:ascending|descending]
+
+      :param str mode: ``mode:add|list|remove|setdisplay``
+      :param str objective: ``objective``
+      :param str displayName: ``displayName``
+      :param str slot: ``slot:list|sidebar|belowname``
+      :param str sortOrder: ``slot=list|sidebar:sortOrder:ascending|descending``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: scoreboard_players(mode: str, target: str=None, objective: str=None, minv: Union[int, str]=None, maxv: Union[int, str]=None, count: int=None, operation: str=None, selector: str=None, selectorObjective: str=None)
+
+      Adds a ``scoreboard players`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *scoreboard players ...*
+
+      * *<mode:list> [target]*
+      * *<mode:reset> <target> [objective]*
+      * *<mode:test|random> <target> <objective> <minv> [maxv]*
+      * *<mode:set|add|remove> <target> <objective> <count>*
+      * *<mode:operation> <target> <objective> <operation:+=|-=|*=|/=|%=|<|>|><> <selector> <selectorObjective>
+
+      :param str mode: ``mode:list|reset|test|random|set|add|remove|operation``
+      :param str target: ``target``
+      :param str objective: ``objective``
+      :param int minv: ``minv`` (can be * when mode=test)
+      :param int maxv: ``maxv`` (can be * when mode=test)
+      :param int count: ``count``
+      :param str operation: ``operation:+=|-=|*=|/=|%=|<|>|><``
+      :param str selector: ``selector``
+      :param str selectorObjective: ``selectorObjective``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: execute(target: str, pos: str, run: Callable[[BedrockFuncHandler], Union[Union[list, tuple], None]], detectPos: str=None, block: str=None, data: int=None)
+
+      Adds an ``execute`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax** *execute <target> <pos> ...*
+
+      * *<run>*
+      * *detect <detectPos> <block> <data> <run>*
+
+      :param str target: ``target``
+      :param str pos: ``pos``
+      :param str run: ``run``
+      :param str detectPos: ``detectPos``
+      :param str block: ``block``
+      :param int data: ``data``
+
+      .. code-block:: python
+         
+         import pymcfunc as pmf
+         p = pmf.Pack('b')
+    
+         @p.function
+         def func(f: pmf.BedrockFuncHandler):
+             f.r.execute("@e[type=sheep]", "~ ~ ~", 
+                 lambda sf: sf.r.say("baah"))
+
+             f.r.execute("@e[type=cow]", "~ ~ ~",
+                 lambda sf: [
+                     sf.r.say("moo")
+                     sf.r.tp(destxyz="~ ~5 ~")
+                 ])
+
+             def chargeCreepers(sf: pmf.BedrockFuncHandler):
+                 sf.r.summon("lightning_bolt")
+             f.r.execute("@e[type=creeper], "~ ~ ~", chargeCreepers)
+
 .. py:class:: JavaFuncHandler(UniversalFuncHandler)
 
    The Java Edition function handler.
@@ -249,6 +901,24 @@ Function Handlers
       A Selectors object.
       
       .. versionadded:: 0.0
+
+   .. py:attribute:: r
+    :type: JavaRawCommands
+
+       A JavaRawCommands instance.
+
+       .. versionadded:: 0.1
+
+.. py:class:: JavaRawCommands
+
+   A container for raw Minecraft commands that are specially for Java Edition.
+
+   .. py:attribute:: fh
+   :type: JavaFuncHandler
+
+      References back to the function handler that it is in.
+
+      .. versionadded:: 0.1
 
    .. py:method:: setblock(pos: str, block: str, mode="replace")
 
@@ -310,6 +980,439 @@ Function Handlers
       :param int count: ``count``
       :returns: The command
       :rtype: str
+
+   .. py:method:: summon(entity: str, pos: str="~ ~ ~", nbt: dict=None)
+
+      Adds a ``summon`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *summon <entity> [pos] [nbt]*
+
+      :param str entity: ``entity``
+      :param str pos: ``pos``
+      :param dict nbt: ``nbt``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: clear(target: str="@s", item: str=None, maxCount: int=None)
+
+      Adds a ``clear`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *clear [target] [item] [maxCount]*
+
+      :param str target: ``target``
+      :param str item: ``item``
+      :param int maxCount: ``maxCount``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: teleport(destentity: str=None, destxyz: str=None, target: str="@s", rotation: str=None, faceMode: str=None, facing: str=None, anchor: str="eyes")
+                  tp(destentity: str=None, destxyz: str=None, target: str="@s", rotation: str=None, faceMode: str=None, facing: str=None, anchor: str="eyes")
+
+      Adds a ``teleport`` command.
+   
+      .. versionadded:: 0.1
+   
+      **Syntax:** *teleport <target> ...* / *teleport ...*
+   
+      * *<destentity>*
+      * *<destxyz> [rotation]*
+      * *<destxyz> facing <facing>* when faceMode=entity
+      * *<destxyz> facing entity <facing> [anchor:eyes|feet]* when faceMode=location
+   
+      :param str destentity: ``destentity``
+      :param str destxyz: ``destxyz``
+      :param str target: ``target``
+      :param str rotation: ``rotation``
+      :param str faceMode: ``faceMode:entity|location``
+      :param str facing: ``facing``
+      :param str anchor: ``anchor:eyes|plant``
+      :return: The command
+      :rtype: str
+
+   .. py:method:: experience(mode: str, target: str="@s", amount: int=None, measurement="points")
+                  xp(mode: str, target: str="@s", amount: int=None, measurement="points")
+
+      Adds an ``experience`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *experience ...*
+
+      * *<mode:add|set> <target> <amount> [measurement:levels|points]*
+      * *<mode:query> <target> <measurement:levels|points>*
+
+      :param str mode: ``mode:add|set|query``
+      :param str target: ``target``
+      :param int amount: ``amount``
+      :param str measurement: ``measurement:levels|points``
+      :return: The command
+      :rtype: str
+
+   .. py:method:: effect_give(target: str, effect: str, seconds: int=30, amplifier: int=0, hideParticles: bool=False)
+
+      Adds an ``effect give`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *effect give <target> <effect> [seconds] [amplifier] [hideParticles]*
+
+      :param str target: ``target``
+      :param str effect: ``effect``
+      :param int seconds: ``seconds``
+      :param int amplifier: ``amplifier``
+      :param bool hideParticles: ``hideParticles``
+      :return: The command
+      :rtype: str
+
+   .. py:method:: effect_clear(target: str="@s", effect: str=None)
+
+      Adds an ``effect clear`` method.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *effect clear [target] [effect]*
+
+      :param str target: ``target``
+      :param str effect: ``effect``
+      :return: The command
+      :rtype: str
+
+   .. py:method:: setworldspawn(pos: str="~ ~ ~", angle: str=None)
+
+      Adds a ``setworldspawn`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *setworldspawn [pos] [angle]*
+
+      :param str pos: ``pos``
+      :param str angle: ``angle``
+      :return: The command
+      :rtype: str
+
+   .. py:method:: spawnpoint(target: str="@s", pos: str="~ ~ ~", angle: str=None)
+
+      Adds a ``spawnpoint`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *spawnpoint [target] [pos] [angle]*
+
+      :param str target: ``target``
+      :param str pos: ``pos``
+      :param str angle: ``angle``
+      :return: The command
+      :rtype: str
+
+   .. py:method:: particle(self, name: str, speed: float, count: int, params: str=None, pos: str="~ ~ ~", delta: str="~ ~ ~", mode: str="normal", viewers: str=None)
+
+      Adds a ``particle`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *particle <name> [params] [pos] [delta] <speed> <count> [mode:force|normal] [viewers]
+
+      :param str name: ``name``
+      :param float speed: ``speed``
+      :param int count: ``count``
+      :param str params: ``params``
+      :param str pos: ``pos``
+      :param str delta: ``delta``,
+      :param str mode: ``mode:force|normal``
+      :param str viewers: ``viewers``
+      :return: The command
+      :rtype: str
+
+   .. py:method:: schedule(name: str, clear: bool=False, duration: str=None, mode: str="replace")
+
+      Adds a ``schedule`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *schedule ...*
+
+      * *function <name> <duration> [mode:append|replace]*
+      * *clear <name>*
+
+      :param str name: ``name``
+      :param bool clear: ``clear``
+      :param str mode: ``mode:append|replace``
+      :return: The command
+      :rtype: str
+
+   .. py:method:: playsound(sound: str, source: str, target: str, pos: str="~ ~ ~", volume: float=1.0, pitch: float=1.0, minVolume: float=None)
+
+      Adds a ``playsound`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *playsound <sound> <source:master|music|record|weather|block|hostile|neutral|player|ambient|voice> <targets> <pos> <volume> <pitch> <minVolume>*
+
+      :param str sound: ``sound``
+      :param str source: ``source:master|music|record|weather|block|hostile|neutral|player|ambient|voice``
+      :param str target: ``target``
+      :param str pos: ``pos``
+      :param float volume: ``volume``
+      :param float pitch: ``pitch``
+      :param float minVolume: ``minVolume``
+      :return: The command
+      :rtype: str
+
+   .. py:method:: stopsound(target: str, source: str="*", sound: str=None)
+
+      Adds a ``stopsound`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *stopsound <target> [source:master|music|record|weather|block|hostile|neutral|player|ambient|voice] [sound]*
+
+      :param str target: ``target``
+      :param str source: ``source``
+      :param str sound: ``sound``
+      :return: The command
+      :rtype: str
+
+   .. py:method:: weather(mode: str, duration: str=5)
+
+      Adds a ``weather`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *weather <mode:clear|rain|thunder> [duration]
+
+      :param str mode: ``mode``
+      :param int duration: ``duration``
+      :return: The command
+      :rtype: str
+
+   .. py:method:: difficulty(difficulty: str)
+
+      Adds a ``difficulty`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *difficulty <difficulty>*
+
+      :param str difficulty: ``difficulty``
+      :return: The command
+      :rtype: str
+
+   .. py:method:: list(uuid: bool=False)
+
+      Adds a ``list`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax** *list* if uuid=False; *list uuid* if uuid=True
+
+      :param bool uuid: ``uuid``
+      :return: The command
+      :rtype: str
+
+   .. py:method:: spreadplayers(center: str, dist: float, maxRange: float, respectTeams: bool, target: str, maxHeight: float=None)
+
+      Adds a ``spreadplayers`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax**: *spreadplayers <center> <dist> <maxRange> ...*
+
+      * *<respectTeams> <targets>*
+      * *under <maxHeight> <respectTeams>*
+
+      :param str center: ``center``
+      :param float dist: ``dist``
+      :param float maxRange: ``maxRange``
+      :param bool respectTeams: ``respectTeams``
+      :param str target: ``target``
+      :param float maxHeight: ``maxheight``
+      :return: The command
+      :rtype: str
+
+   .. py:method:: replaceitem(mode: str, slot: str, item: str, pos: str=None, target: str=None, count: int=1)
+
+      Adds a ``replaceitem`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax**: *replaceitem <mode:block|entity> <pos/target> <slot> <item> [count]
+
+      :param str mode: ``mode:block|entity``
+      :param str slot: ``slot``
+      :param str item: ``item``
+      :param str pos: ``pos``
+      :param str target: ``target``
+      :param int count: ``count``
+      :return: The command
+      :rtype: str
+
+   .. py:method:: scoreboard_objectives(mode: str, objective: str=None, criterion: str=None, displayName: str=None, renderType: str=None, slot: str=None)
+
+      Adds a ``scoreboard objectives`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax**: *scoreboard objectives ...*
+
+      * *<mode:add> <objective> <criterion> [displayName]*
+      * *<mode:list>*
+      * *<mode:modify(_displayname)|modify(_rendertype)> <objective> ...*
+
+        * *displayName <displayName>* when mode=modify_displayname
+        * *renderType <renderType:hearts|integer>* when mode=modify_rendertype
+
+      * <mode:remove> <objective>
+      * <mode:setdisplay> <slot> [objective]
+
+      :param str mode: ``mode:add|list|modify|remove|setdisplay``
+      :param str objective: ``objective``
+      :param str criterion: ``criterion``
+      :param str displayName: ``displayName``
+      :param str renderType: ``renderType``
+      :param str slot: ``slot``
+      :return: The command
+      :rtype: str
+
+   .. py:method:: scoreboard_players(mode: str, target: str=None, objective: str=None, score: int=None, operation: str=None, source: str=None, sourceObjective: str=None)
+
+      Adds a ``scoreboard players`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax**: *scoreboard players ...*
+
+      * *<mode:add|set|remove> <target> <objective> <score>*
+      * *<mode:enable|get> <target> <objective>*
+      * *<mode:reset> <target> [objective]*
+      * *<mode:list> [target]*
+      * *<mode:operation> <target> <objective> <operation:+=|-=|*=|/=|%=|<|>|><> <source> <sourceObjective>*
+
+      :param str mode: ``mode:add|set|remove|enable|get|reset|list|operation``
+      :param str target: ``target``
+      :param str objective: `objective``
+      :param int score: ``score``
+      :param str operation: ``operation:+=|-=|*=|/=|%=|<|>|><``
+      :param str source: ``source``
+      :param str sourceObjective: ``sourceObjective``
+      :return: The command
+      :rtype: str
+
+   .. py:method:: execute(**subcommands)
+      
+      Adds an ``execute`` command.
+
+      .. versionadded:: 0.1
+
+      **Syntax:** *execute ...*
+
+      * Key is *mode*, value is *value-NAME*, subvalue is *value.SUBVAL*, next subcommand is *-> sc*
+      * *<mode:align> <value-axes> -> sc*
+      * *<mode:anchored> <value-anchor:eyes|feet> -> sc*
+      * *<mode:as(_)|at|positionedentity|rotatedentity> <value-target> -> sc*
+      * *<mode:facing(xyz)|positionedxyz|rotatedxyz> <value-pos> -> sc*
+      * *<mode:facing(entity)> entity <value.target> <value.anchor:eyes|feet> -> sc*
+      * *<mode:in(_)> <value-dimension> -> sc*
+      * *<mode:store> <value.store:result|success> ...
+
+        * *<value.mode:block> <value.pos> <value.path> <value.type:byte|short|int|long|float|double> <value.scale> -> sc*
+        * *<value.mode:bossbar> <value.id> <value.value:value|max> -> sc*
+        * *<value.mode:score> <value.target> <value.objective> -> sc*
+        * *<value.mode:entity|storage> <value.target> <value.path> <value.type:byte|short|int|long|float|double> <value.scale> -> sc*
+
+      * *<mode:if(_)|unless> ...*
+
+        * *<value.mode:block> <value.pos> <value.block> -> sc*
+        * *<value.mode:blocks> <value.pos1> <value.pos2> <value.destination> <value.scanMode:all|masked> -> sc*
+        * *<value.mode:data> <value.check:block> <value.sourcexyz> <value.path> -> sc*
+        * *<value.mode:data> <value.check:entity|storage> <value.path> -> sc*
+        * *<value.mode:entity> <value.entity> -> sc*
+        * *<value.mode:predicate> <value.predicate> -> sc*
+        * *<value.mode:score> <value.target> <value.targetObjective> <value.comparer:<|<=|=|>|>=> <value.source> <value.sourceObjective> -> sc*
+        * *<value.mode:score> <value.target> <value.targetObjective> <value.comparer:matches> <value.range> -> sc*
+      * *<mode:run> <value-function> -> sc*
+
+      **subcommands kwargs format:**
+
+      .. code-block :: Python
+         align = axes: str,
+         anchored = anchor: str (eyes|feet),
+         as_/at = target: str,
+         facingxyz = pos: str,
+         facingentity = {
+             "target": str,
+             "anchor": str
+         },
+         in_ = dimension: str,
+         positionedxyz/rotatedxyz = pos: str,
+         positionedentity/rotatedentity = target: str,
+         store = {
+             "store": str (result|success),
+             "mode": str (block|bossbar|entity|score|storage),
+             "pos": str (when mode=block),
+             "entity": str (when mode=entity,score,storage),
+             "id": str (when mode=bossbar),
+             "value": str (value|max when mode=bossbar),
+             "objective": str (when mode=score),
+             "path": str (when mode=block,entity,storage),
+             "type": str (byte|short|int|long|float|double when mode=block,entity,storage),
+             "scale": str (when mode=block,entity,storage)
+         },
+         if_/unless = {
+             "mode": str (block|blocks|data|entity|predicate|score),
+             "pos": str (when mode=block),
+             "block": str (when mode=block),
+             "pos1": str (when mode=blocks),
+             "pos2": str (when mode=blocks),
+             "destination": str (when mode=blocks),
+             "scanMode": str (all|masked when mode=blocks),
+             "check": str (block|entity|storage when mode=data),
+             "sourcexyz": str (when check=block),
+             "sourceentity": str (when check=entity/storage),
+             "path": str (when mode=data),
+             "entity": str (when mode=entity),
+             "predicate": str (when mode=predicate),
+             "target": str (when mode=score),
+             "objective": str (when mode=score),
+             "comparer": str (<|<=|=|>|>=|matches when mode=score),
+             "source": str (when comparer!=matches),
+             "sourceObjective": str (when comparer!=matches),
+             "range": Union[int, str] (when comparer=matches)
+         },
+         run = function(sf): ...
+
+      :param dict **subcommands: The subcommands to run. If the ``run`` subcommand is included, make sure it is the last kwarg.
+      :returns: The command(s).
+      :rtype: list or tuple or str
+
+      .. code-block:: python
+         
+         import pymcfunc as pmf
+         p = pmf.Pack()
+    
+         @p.function
+         def func(f: pmf.JavaFuncHandler):
+             f.r.execute(
+                 as = "@e[type=sheep]",
+                 run = lambda sf: say.r.say("baah")
+             )
+
+             f.r.execute(
+                 as = "@e[type=cow]",
+                 run = lambda sf: [
+                     sf.r.say("moo")
+                     sf.r.tp(destxyz="~ ~5 ~")
+                 ])
+
+             def chargeCreepers(sf: pmf.JavaFuncHandler):
+                 sf.r.summon("lightning_bolt")
+             f.r.execute(
+                 as = "@e[type=sheep]",
+                 run = chargeCreepers
+             )
 
 Coords
 ------
