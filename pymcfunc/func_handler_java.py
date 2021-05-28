@@ -201,7 +201,7 @@ class JavaRawCommands(UniversalRawCommands):
         self.fh.commands.append(cmd)
         return cmd
 
-    def list(self, uuid: bool=False):
+    def list_(self, uuid: bool=False):
         cmd = "list" if not uuid else "list uuid"
         self.fh.commands.append(cmd)
         return cmd
@@ -395,7 +395,7 @@ class JavaRawCommands(UniversalRawCommands):
                 internal.options(v['store'], ['result', 'success'])
                 internal.options(v['mode'], ['block', 'bossbar', 'entity', 'score', 'storage'])
                 prefix = f"{v['store']} {v['mode']}"
-                if v['type'] != None:
+                if 'type' in v.keys():
                     internal.options(v['type'], ['byte', 'short', 'int', 'long', 'float', 'double'])
                 if v['mode'] == 'block':
                     return f"{prefix} {v['pos']} {v['path']} {v['type']} {v['scale']} "

@@ -207,7 +207,7 @@ class BedrockRawCommands(UniversalRawCommands):
         self.fh.commands.append(cmd)
         return cmd
 
-    def list(self):
+    def list_(self):
         self.fh.commands.append("list")
         return "list"
 

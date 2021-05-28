@@ -116,16 +116,21 @@ Function Handlers
 
       .. versionadded:: 0.1
 
-    .. py:attribute:: r
-    :type: UniversalRawCommands
+   .. py:attribute:: r
+   :type: UniversalRawCommands
 
-       A UniversalRawCommands instance.
+      A UniversalRawCommands instance.
 
-       .. versionadded:: 0.1
+      .. versionadded:: 0.1
 
 .. py:class:: UniversalRawCommands
 
    A container for raw Minecraft commands that are the same for both Java and Bedrock.
+
+   .. versionadded:: 0.1
+
+   .. warning::
+      do not instantiate UniversalRawCommands directly; use a FuncHandler and access the commands via the 'r' attribute.
 
    .. py:attribute:: fh
    :type: UniversalFuncHandler
@@ -225,7 +230,7 @@ Function Handlers
 
       .. versionadded:: 0.1
 
-      **Syntax:** *gamemode <mode> [target]**
+      **Syntax:** *gamemode <mode> [target]*
 
       :param str mode: ``mode``
       :param str target: ``target``
@@ -315,7 +320,7 @@ Function Handlers
 
       .. versionadded:: 0.1
 
-      **Syntax:** *time query <query:daytime|gametime|day>
+      **Syntax:** *time query <query:daytime|gametime|day>*
 
       :param str name: ``query:daytime|gametime|day``
       :returns: The command
@@ -448,9 +453,14 @@ Function Handlers
 
        .. versionadded:: 0.1
 
-.. py:class:: BedrockRawCommands
+.. py:class:: BedrockRawCommands(UniversalRawCommands)
 
    A container for raw Minecraft commands that are specially for Bedrock Edition.
+
+   .. versionadded:: 0.1
+
+   .. warning::
+      do not instantiate BedrockRawCommands directly; use a FuncHandler and access the commands via the 'r' attribute.
 
    .. py:attribute:: fh
    :type: BedrockFuncHandler
@@ -749,7 +759,7 @@ Function Handlers
       :returns: The command
       :rtype: str
 
-   .. py:method:: list()
+   .. py:method:: list_()
 
       Adds a ``list`` command.
 
@@ -783,22 +793,22 @@ Function Handlers
 
       **Syntax:** *replaceitem <mode:block|entity> <pos/target> ...*
 
-        * *slot.container <slotId> <itemName> [amount] [data] [components]* or
-        * *slot.container <slotId> <replaceMode:destroy|keep> <itemName> [amount] [data] [components]* when mode=block
-        * *<slotType> <slotId> <itemName> [amount] [data] [components]* or
-        * *<slotType> <slotId> <itemHandling:destroy|keep> <itemName> [amount] [data] [components]* when mode=entity
+      * *slot.container <slotId> <itemName> [amount] [data] [components]* or
+      * *slot.container <slotId> <replaceMode:destroy|keep> <itemName> [amount] [data] [components]* when mode=block
+      * *<slotType> <slotId> <itemName> [amount] [data] [components]* or
+      * *<slotType> <slotId> <itemHandling:destroy|keep> <itemName> [amount] [data] [components]* when mode=entity
 
-        :param str mode: ``mode:block|entity``
-        :param str slotId: ``slotId``
-        :param str pos: ``pos``
-        :param str target: ``target``
-        :param str slotType: ``slotType``
-        :param str itemHandling: ``itemHandling:destroy|keep``
-        :param int amount: ``amount``
-        :param int data: ``data``
-        :param dict components: ``components``
-        :returns: The command
-        :rtype: str
+      :param str mode: ``mode:block|entity``
+      :param str slotId: ``slotId``
+      :param str pos: ``pos``
+      :param str target: ``target``
+      :param str slotType: ``slotType``
+      :param str itemHandling: ``itemHandling:destroy|keep``
+      :param int amount: ``amount``
+      :param int data: ``data``
+      :param dict components: ``components``
+      :returns: The command
+      :rtype: str
 
    .. py:method:: allowlist(mode: str, target: str=None)
 
@@ -817,7 +827,7 @@ Function Handlers
       * *<mode:add> <objective> dummy [displayName]*
       * *<mode:list>*
       * *<mode:remove> <objective>*
-      * *<mode:setdisplay> <slot:list|sidebar|belowname> [objective] [slot=list|sidebar:sortOrder:ascending|descending]
+      * *<mode:setdisplay> <slot:list|sidebar|belowname> [objective] [slot=list|sidebar:sortOrder:ascending|descending]*
 
       :param str mode: ``mode:add|list|remove|setdisplay``
       :param str objective: ``objective``
@@ -909,9 +919,14 @@ Function Handlers
 
        .. versionadded:: 0.1
 
-.. py:class:: JavaRawCommands
+.. py:class:: JavaRawCommands(UniversalRawCommands)
 
    A container for raw Minecraft commands that are specially for Java Edition.
+
+   .. versionadded:: 0.1
+
+   .. warning::
+      do not instantiate JavaRawCommands directly; use a FuncHandler and access the commands via the 'r' attribute.
 
    .. py:attribute:: fh
    :type: JavaFuncHandler
@@ -1182,7 +1197,7 @@ Function Handlers
 
       .. versionadded:: 0.1
 
-      **Syntax:** *weather <mode:clear|rain|thunder> [duration]
+      **Syntax:** *weather <mode:clear|rain|thunder> [duration]*
 
       :param str mode: ``mode``
       :param int duration: ``duration``
@@ -1201,7 +1216,7 @@ Function Handlers
       :return: The command
       :rtype: str
 
-   .. py:method:: list(uuid: bool=False)
+   .. py:method:: list_(uuid: bool=False)
 
       Adds a ``list`` command.
 
@@ -1293,7 +1308,7 @@ Function Handlers
 
       :param str mode: ``mode:add|set|remove|enable|get|reset|list|operation``
       :param str target: ``target``
-      :param str objective: `objective``
+      :param str objective: ``objective``
       :param int score: ``score``
       :param str operation: ``operation:+=|-=|*=|/=|%=|<|>|><``
       :param str source: ``source``
@@ -1316,7 +1331,7 @@ Function Handlers
       * *<mode:facing(xyz)|positionedxyz|rotatedxyz> <value-pos> -> sc*
       * *<mode:facing(entity)> entity <value.target> <value.anchor:eyes|feet> -> sc*
       * *<mode:in(_)> <value-dimension> -> sc*
-      * *<mode:store> <value.store:result|success> ...
+      * *<mode:store> <value.store:result|success> ...*
 
         * *<value.mode:block> <value.pos> <value.path> <value.type:byte|short|int|long|float|double> <value.scale> -> sc*
         * *<value.mode:bossbar> <value.id> <value.value:value|max> -> sc*
@@ -1337,7 +1352,8 @@ Function Handlers
 
       **subcommands kwargs format:**
 
-      .. code-block :: Python
+      .. code-block :: python
+
          align = axes: str,
          anchored = anchor: str (eyes|feet),
          as_/at = target: str,
@@ -1553,18 +1569,34 @@ Errors
 
    No spaces are allowed in a specific parameter.
 
+   .. versionadded:: 0.0
+
 .. py:exception:: OptionError
 
    The option given is not in the list of allowed options.
+
+   .. versionadded:: 0.0
 
 .. py:exception:: OnlyOneAllowed
 
    Only one parameter is allowed, but two were given.
 
+   .. versionadded:: 0.0
+
 .. py:exception:: InvalidParameterError
 
    The parameter is invalid because another parameter is at its default value of None.
 
+   .. versionadded:: 0.0
+
 .. py:exception:: CaretError
 
    Not all coordinates of a set use '^'.
+
+   .. versionadded:: 0.0
+
+.. py:exception:: MissingError
+
+   A parameter that had been made mandatory due to another parameter is not stated, and that parameter has a default value of None.
+
+   .. versionadded: 0.1
