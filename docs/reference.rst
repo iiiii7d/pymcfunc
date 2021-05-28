@@ -3,7 +3,7 @@ Reference
 .. py:currentmodule:: pymcfunc
 
 .. py:attribute:: __version__
-   :type: str
+      :type: str
       
       The version.
 
@@ -26,26 +26,26 @@ Pack
    .. versionadded:: 0.0
 
    .. py:attribute:: edition
-   :type: str
+      :type: str
 
       The edition of the pack. Either 'j' or 'b'.
 
       .. versionadded:: 0.0
 
    .. py:attribute:: funcs
-   :type: dict
+      :type: dict
 
       The list of functions, denoted by ``{func_name: commands}``
 
       .. versionadded:: 0.0
 
    .. py:attribute:: name
-   :type: str
+      :type: str
 
       For future use
 
    .. py:attribute:: sel
-   :type: UniversalSelectors
+      :type: UniversalSelectors
 
       A UniversalSelectors object. Will be :py:class:`BedrockSelectors` for Bedrock, :py:class:`JavaSelectors` for Java.
       
@@ -103,21 +103,21 @@ Function Handlers
    * **set(a) list(a) tuple(a)** - Returns a list of Minecraft commands.
 
    .. py:attribute:: commands
-   :type: list
+      :type: list
 
       The list of Minecraft commands.
 
       .. versionadded:: 0.0
 
    .. py:attribute:: sel
-   :type: UniversalSelectors
+      :type: UniversalSelectors
 
       A UniversalSelectors instance.
 
       .. versionadded:: 0.1
 
    .. py:attribute:: r
-   :type: UniversalRawCommands
+      :type: UniversalRawCommands
 
       A UniversalRawCommands instance.
 
@@ -133,7 +133,7 @@ Function Handlers
       Do not instantiate UniversalRawCommands directly; use a FuncHandler and access the commands via the 'r' attribute.
 
    .. py:attribute:: fh
-   :type: UniversalFuncHandler
+      :type: UniversalFuncHandler
 
       References back to the function handler that it is in.
 
@@ -440,14 +440,14 @@ Function Handlers
    The Beckrock Edition function handler.
 
    .. py:attribute:: sel
-   :type: BedrockSelectors
+      :type: BedrockSelectors
 
       A Selectors object.
       
       .. versionadded:: 0.0
 
    .. py:attribute:: r
-    :type: BedrockRawCommands
+       :type: BedrockRawCommands
 
        A BedrockRawCommands instance.
 
@@ -463,7 +463,7 @@ Function Handlers
       Do not instantiate BedrockRawCommands directly; use a FuncHandler and access the commands via the 'r' attribute.
 
    .. py:attribute:: fh
-   :type: BedrockFuncHandler
+      :type: BedrockFuncHandler
 
       References back to the function handler that it is in.
 
@@ -906,14 +906,14 @@ Function Handlers
    The Java Edition function handler.
 
    .. py:attribute:: sel
-   :type: JavaSelectors
+      :type: JavaSelectors
 
       A Selectors object.
       
       .. versionadded:: 0.0
 
    .. py:attribute:: r
-   :type: JavaRawCommands
+      :type: JavaRawCommands
 
        A JavaRawCommands instance.
 
@@ -929,7 +929,7 @@ Function Handlers
       Do not instantiate JavaRawCommands directly; use a FuncHandler and access the commands via the 'r' attribute.
 
    .. py:attribute:: fh
-   :type: JavaFuncHandler
+      :type: JavaFuncHandler
 
       References back to the function handler that it is in.
 
