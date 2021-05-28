@@ -130,7 +130,7 @@ Function Handlers
    .. versionadded:: 0.1
 
    .. warning::
-      do not instantiate UniversalRawCommands directly; use a FuncHandler and access the commands via the 'r' attribute.
+      Do not instantiate UniversalRawCommands directly; use a FuncHandler and access the commands via the 'r' attribute.
 
    .. py:attribute:: fh
    :type: UniversalFuncHandler
@@ -460,7 +460,7 @@ Function Handlers
    .. versionadded:: 0.1
 
    .. warning::
-      do not instantiate BedrockRawCommands directly; use a FuncHandler and access the commands via the 'r' attribute.
+      Do not instantiate BedrockRawCommands directly; use a FuncHandler and access the commands via the 'r' attribute.
 
    .. py:attribute:: fh
    :type: BedrockFuncHandler
@@ -926,7 +926,7 @@ Function Handlers
    .. versionadded:: 0.1
 
    .. warning::
-      do not instantiate JavaRawCommands directly; use a FuncHandler and access the commands via the 'r' attribute.
+      Do not instantiate JavaRawCommands directly; use a FuncHandler and access the commands via the 'r' attribute.
 
    .. py:attribute:: fh
    :type: JavaFuncHandler
