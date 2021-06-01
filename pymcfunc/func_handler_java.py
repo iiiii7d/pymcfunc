@@ -972,4 +972,111 @@ class JavaRawCommands(UniversalRawCommands):
         cmd = f"spectate {optionals}".strip()
         return cmd
 
-    
+    def team(self, mode: str, team: str=None, members: str=None, displayName: str=None, option: str=None, value=None):
+        internal.options(mode, ['add', 'empty', 'join', 'leave', 'list', 'modify', 'remove'])
+        internal.multi_check_invalid_params(['add', 'empty', 'join', 'list', 'modify', 'remove'], 'mode', mode,
+            ('team', team, None))
+        if mode in ['add', 'empty', 'join', 'modify', 'remove'] and team == None:
+            raise errors.MissingError('team', 'mode', mode)
+        internal.multi_check_invalid_params(['join', 'leave'], 'mode', mode,
+            ('members', members, None))
+        if mode == 'leave' and members == None:
+            raise errors.MissingError('members', 'mode', mode)
+        internal.check_invalid_params('add', 'mode', mode,
+            ('displayName', displayName, None))
+        internal.check_invalid_params('modify', 'mode', mode,
+            ('option', option, None),
+            ('value', value, None),
+            dep_mandatory=True)
+        if option != None:
+            internal.options(option, ['collisionRule', 'color', 'deathMessageVisibility', 'displayName', 'friendlyFire', 'nametagVisibility', 'prefix', 'seeFriendlyInvisibles', 'suffix'])
+            VALS = {
+                "collisionRule": ['always', 'never', 'pushOtherTeams', 'pushOwnTeam'],
+                "color": ['aqua', 'black', 'blue', 'gold', 'gray', 'green', 'light_purple', 'red', 'reset', 'yellow', 'white', 'dark_aqua', 'dark_blue', 'dark_gray', 'dark_green', 'dark_purle', 'dark_red'],
+                "deathMessageVisibility": ['always', 'never', 'hideForOtherTeams', 'hideForOwnTeam'],
+                "nameTagVisibility": ['always', 'never', 'hideForOtherTeams', 'hideForOwnTeam'],
+            }
+            if option in VALS.keys():
+                internal.options(value, VALS[option])
+        
+        if mode == "add":
+            optionals = internal.defaults((displayName, None))
+            suffix = f"{team} {optionals}"
+        elif mode in ['empty', 'remove']:
+            suffix = team
+        elif mode == "join":
+            optionals = internal.defaults((members, None))
+            suffix = f"{team} {optionals}"
+        elif mode == "leave":
+            suffix = members
+        elif mode == "list":
+            suffix = internal.defaults((team, None))
+        else:
+            suffix = f"{team} {option} {value}"
+
+        cmd = f"team {mode} {suffix}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def teammsg(self, message: str):
+        cmd = f"teammsg {message}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+    tm = teammsg
+
+    def trigger(self, objective: str, mode: str=None, value: int=None):
+        internal.reliant('mode', mode, None, 'value', value, None)
+        internal.unstated('mode', mode, ['add', 'set'], 'value', value, None)
+        if mode != None:
+            internal.options(mode, ['add', 'set'])
+        optionals = internal.defaults((mode, None), (value, None))
+        cmd = f"trigger {objective} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def worldborder_add(self, distance: float, duration: int=0):
+        optionals = internal.defaults((duration, 0))
+        cmd = f"worldborder add {distance} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def worldborder_center(self, pos: str):
+        cmd = f"worldborder center {pos}"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def worldborder_damage(self, damagePerBlock: float=None, distance: float=None):
+        value = internal.pick_one_arg(
+            (damagePerBlock, None, 'damagePerBlock'),
+            (distance, None, 'distance'),
+            optional=False
+        )
+
+        middle = "amount" if damagePerBlock != None else "buffer"
+        cmd = f"worldborder damage {middle} {value}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def worldborder_get(self):
+        cmd = "worldborder get"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def worldborder_set(self, distance: float=None, duration: int=0):
+        optionals = internal.defaults((duration, 0))
+        cmd = f"worldborder add {distance} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def worldborder_warning(self, distance: float=None, duration: int=None):
+        value = internal.pick_one_arg(
+            (distance, None, 'distance'),
+            (duration, None, 'duration'),
+            optional=False
+        )
+
+        middle = "distance" if distance != None else "time"
+        cmd = f"worldborder warning {middle} {value}".strip()
+        cmd = "worldborder get"
+        self.fh.commands.append(cmd)
+        return cmd

@@ -90,6 +90,15 @@ def test_pytest():
         f.r.save_off()
         f.r.setidletimeout(3)
         f.r.spectate("@p", "@r")
+        f.r.team('modify', team='asdfasf', option='color', value='gray')
+        f.r.tm("asdfa")
+        f.r.trigger("asdfa", 'set', 7)
+        f.r.worldborder_add(1, 2)
+        f.r.worldborder_center("1 2 3")
+        f.r.worldborder_damage(distance=3)
+        f.r.worldborder_get()
+        f.r.worldborder_set(1, 2)
+        f.r.worldborder_warning(3)
 
     b = pmf.Pack('b')
 

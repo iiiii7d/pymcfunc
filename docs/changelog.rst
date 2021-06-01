@@ -5,7 +5,7 @@ Changelog
 
   * Added /advancement, /attribute, /ban, /ban-ip, /banlist, /bossbar, /data, /datapack, /debug,
     /defaultgamemode, /forceload, /locatebiome, /loot, /pardon, /pardon-ip, /publish, /recipe, /save-all,
-    /save-on, /save-off, /setidletimeout, /spectate
+    /save-on, /save-off, /setidletimeout, /spectate, /team, /teammsg, /trigger, /worldborder
 
 * **v0.1 (28/5/21)**
 
