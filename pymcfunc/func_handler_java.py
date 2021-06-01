@@ -549,3 +549,427 @@ class JavaRawCommands(UniversalRawCommands):
         else:
             self.fh.commands.append(cmd.strip())
             return cmd.strip()
+
+    def item(self, mode: str, slot: str, pos: str=None, target: str=None, replaceMode: str=None, item: str=None, count: str=None, sourcexyz: str=None, sourceentity: str=None, sourceSlot: str=None, modifier: str=None):
+        internal.options(mode, ['modify', 'replace'])
+        if mode == "modify" and modifier == None:
+            raise errors.MissingError('modifier', 'mode', mode)
+        
+        internal.check_invalid_params('replace', 'mode', mode,
+            ('replaceMode', replaceMode, None))
+        if replaceMode != None:
+            internal.options(replaceMode, ['from', 'with'])
+        internal.check_invalid_params('with', 'replaceMode', replaceMode,
+            ('item', item, None),
+            dep_mandatory=True)
+        internal.check_invalid_params('with', 'replaceMode', replaceMode,
+            ('count', count, None))
+        internal.check_invalid_params('from', 'replaceMode', replaceMode,
+            ('sourceSlot', sourceSlot, None),
+            dep_mandatory=True)
+        internal.check_invalid_params('from', 'replaceMode', replaceMode,
+            ('sourceSlot', sourceSlot, None))
+
+        target_pos = internal.pick_one_arg((target, None, 'target'), (pos, None, 'pos'), optional=False)
+        
+        target_pos = ("block " if pos != None else "entity ") + target_pos
+        
+
+        if mode == "modify":
+            suffix = modifier
+        elif replaceMode == "with":
+            optionals = internal.defaults((count, None))
+            suffix = f"with {item} {optionals}"
+        else:
+            source = internal.pick_one_arg((sourcexyz, None, 'sourcexyz'), (sourceentity, None, 'sourceentity'), optional=True)
+            source = ("block " if sourcexyz != None else "entity ") + source
+            optionals = internal.defaults((modifier, None))
+            suffix = f"from {source} {sourceSlot} {optionals}"
+
+        cmd = f"item {mode} {target_pos} {slot} {suffix}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+        
+    def advancement(self, task: str, target: str, mode: str, advancement: str=None, criterion: str=None):
+        internal.options(task, ['grant', 'revoke'])
+        internal.options(mode, ['everything', 'only', 'from', 'through', 'until'])
+        internal.multi_check_invalid_params(['only', 'from', 'through', 'until'], 'mode', mode, 
+            ('advancement', advancement, None),
+            dep_mandatory=True)
+        internal.check_invalid_params('only', 'mode', mode, ('criterion', criterion, None))
+        
+        if mode == "everything":
+            suffix = ""
+        else:
+            optionals = internal.defaults((criterion, None))
+            suffix = f"{advancement} {optionals}"
+        cmd = f"advancement {task} {target} {mode} {suffix}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def attribute(self, target: str, attribute: str, mode: str, scale: int=None, uuid: str=None, name: str=None, value: str=None, addMode: str=None):
+        internal.options(mode, ['get', 'base_get', 'base_set', 'modifier_add', 'modifier_remove', 'modifier_value_get'])
+        internal.multi_check_invalid_params(['get', 'base_get', 'modifier_value_get'], 'mode', mode,
+            ('scale', scale, None))
+        internal.multi_check_invalid_params(['modifier_add', 'modifier_remove', 'modifier_value_get'], 'mode', mode,
+            ('uuid', uuid, None),
+            dep_mandatory=True)
+        internal.check_invalid_params('modifier_add', 'mode', mode,
+            ('name', name, None),
+            ('addMode', addMode, None),
+            dep_mandatory=True)
+        internal.multi_check_invalid_params(['base_set', 'modifier_add'], 'mode', mode,
+            ('value', value, None),
+            dep_mandatory=True)
+        if addMode != None:
+            internal.options(addMode, ['add', 'multiply', 'multiply_base'])
+        
+        if mode == "modifier_add":
+            suffix = f"{uuid} {name} {value} {addMode}"
+        elif mode in ['modifier_remove', 'modifier_value_get']:
+            optionals = internal.defaults((scale, None))
+            suffix = f"{uuid} {optionals}"
+        elif mode in ['get', 'base_get']:
+            suffix = internal.defaults((scale, None))
+        elif mode == "base_set":
+            suffix = value
+        mode = mode.replace('_', ' ')
+        cmd = f"attribute {target} {attribute} {mode} {suffix}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def ban(self, target: str, reason: str=None):
+        internal.check_spaces('target', target)
+        optionals = internal.defaults((reason, None))
+        cmd = f"ban {target} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def ban_ip(self, target: str, reason: str=None):
+        internal.check_spaces('target', target)
+        optionals = internal.defaults((reason, None))
+        cmd = f"ban-ip {target} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def banlist(self, get="players"):
+        internal.options(get, ['ips', 'players'])
+        optionals = internal.defaults((get, "players"))
+        cmd = f"banlist {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def bossbar_add(self, barId: str, name: str):
+        cmd = f"bossbar add {barId} {name}"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def bossbar_get(self, barId: str, get: str):
+        internal.options(get, ['max', 'players', 'value', 'visible'])
+        cmd = f"bossbar get {barId} {get}"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def bossbar_list(self):
+        cmd = "bossbar list"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def bossbar_remove(self, barId: str):
+        cmd = f"bossbar remove {barId}"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def bossbar_set(self, barId: str, mode: str, color: str=None, maxv: int=None, name: str=None, target: str=None, style: str=None, value: int=None, visible: bool=None):
+        internal.options(mode, ['color', 'max', 'name', 'players', 'style', 'value', 'visible'])
+        internal.check_invalid_params('color', 'mode', mode,
+            ('color', color, None),
+            dep_mandatory=True)
+        if color != None:
+            internal.options(color, ['blue', 'green', 'pink', 'purple', 'red', 'white', 'yellow'])
+        internal.check_invalid_params('max', 'mode', mode,
+            ('maxv', maxv, None),
+            dep_mandatory=True)
+        internal.check_invalid_params('name', 'mode', mode,
+            ('name', name, None),
+            dep_mandatory=True)
+        internal.check_invalid_params('players', 'mode', mode,
+            ('target', target, None))
+        internal.check_invalid_params('style', 'mode', mode,
+            ('style', style, None),
+            dep_mandatory=True)
+        if style != None:
+            internal.options(style, ['notched_6', 'notched_10', 'notched_12', 'notched_20', 'progress'])
+        internal.check_invalid_params('value', 'mode', mode,
+            ('value', value, None),
+            dep_mandatory=True)
+        internal.check_invalid_params('visible', 'mode', mode,
+            ('visible', visible, None),
+            dep_mandatory=True)
+
+        v = internal.pick_one_arg(
+            (color, None, 'color'),
+            (maxv, None, 'maxv'),
+            (name, None, 'name'),
+            (target, None, 'target'),
+            (style, None, 'style'),
+            (value, None, 'value'),
+            (visible, None, 'visible')
+        )
+        cmd = f"bossbar set {barId} {mode} {v}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def data_get(self, block: str=None, entity: str=None, storage: str=None, path: str=None, scale: float=None):
+        target = internal.pick_one_arg(
+            (block, None, 'block'),
+            (entity, None, 'entity'),
+            (storage, None, 'storage'),
+            optional=False
+        )
+        target = ('block ' if block != None else 'entity ' if entity != None else 'storage') + target
+        internal.reliant('path', path, None, 'scale', scale, None)
+        optionals = internal.defaults((path, None), (scale, None))
+
+        cmd = f"data get {target} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def data_remove(self, path: str, block: str=None, entity: str=None, storage: str=None):
+        target = internal.pick_one_arg(
+            (block, None, 'block'),
+            (entity, None, 'entity'),
+            (storage, None, 'storage'),
+            optional=False
+        )
+        target = ('block ' if block != None else 'entity ' if entity != None else 'storage') + target
+        cmd = f"data get {target} {path}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def data_merge(self, nbt: dict, block: str=None, entity: str=None, storage: str=None):
+        target = internal.pick_one_arg(
+            (block, None, 'block'),
+            (entity, None, 'entity'),
+            (storage, None, 'storage'),
+            optional=False
+        )
+        target = ('block ' if block != None else 'entity ' if entity != None else 'storage') + target
+        cmd = f"data merge {target} {json.dumps(nbt)}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def data_modify(self, mode: str, sourceMode: str, path: str, block: str=None, entity: str=None, storage: str=None, index: str=None, sourceBlock: str=None, sourceEntity: str=None, sourceStorage: str=None, sourcePath: str=None, value: str=None):
+        target = internal.pick_one_arg(
+            (block, None, 'block'),
+            (entity, None, 'entity'),
+            (storage, None, 'storage'),
+            optional=False
+        )
+        source = internal.pick_one_arg(
+            (sourceBlock, None, 'block'),
+            (sourceEntity, None, 'entity'),
+            (sourceStorage, None, 'storage')
+        )
+        internal.options(mode, ['append', 'insert', 'merge', 'prepend', 'set'])
+        internal.check_invalid_params('insert', 'mode', mode,
+            ('index', index, None),
+            dep_mandatory=True)
+        internal.options(sourceMode, ['from', 'value'])
+        internal.check_invalid_params('from', 'sourceMode', sourceMode,
+            ('source', source, None),
+            dep_mandatory=True)
+        internal.check_invalid_params('from', 'sourceMode', sourceMode,
+            ('sourcePath', sourcePath, None))
+        internal.check_invalid_params('value', 'sourceMode', sourceMode,
+            ('value', value, None))
+        
+        if sourceMode == "from":
+            optionals = internal.defaults((sourcePath, None))
+            suffix = f"{source} {optionals}"
+        else:
+            suffix = value
+        if mode == "index":
+            mode = f"{mode} {index}"
+        target = ('block ' if block != None else 'entity ' if entity != None else 'storage') + target
+        source = ('block ' if sourceBlock != None else 'entity ' if sourceEntity != None else 'storage') + source
+        cmd = f"data modify {target} {path} {mode} {sourceMode} {suffix}"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def datapack(self, mode: str, name: str=None, priority: str=None, existing: str=None, listMode: str=None):
+        internal.options(mode, ['disable', 'enable', 'list'])
+        internal.multi_check_invalid_params(['disable', 'enable'], 'mode', mode,
+            ('name', name, None),
+            dep_mandatory=True)
+        internal.check_invalid_params('enable', 'mode', mode,
+            ('priority', priority, None),
+            dep_mandatory=None)
+        if priority != None:
+            internal.options(priority, ['first', 'last', 'before', 'after'])
+        internal.multi_check_invalid_params(['before', 'after'], 'priority', priority,
+            ('existing', existing, None),
+            dep_mandatory=True)
+        internal.check_invalid_params('list', 'mode', listMode,
+            ('listMode', listMode, None),
+            dep_mandatory=True)
+        if listMode != None:
+            internal.options(listMode, ['available', 'ended'])
+
+        if mode == "list":
+            suffix = listMode
+        elif mode == "disable":
+            suffix = name
+        else:
+            optionals = internal.defaults((priority, None), (existing, None))
+            suffix = f"{name} {optionals}"
+        cmd = f"datapack {mode} {suffix}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def debug(self, mode: str):
+        internal.options(mode, ['start', 'stop', 'report', 'function'])
+        cmd = f"debug {mode}"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def defaultgamemode(self, mode: str):
+        internal.options(mode, ['survival', 'creative', 'adventure', 'spectator'])
+        cmd = f"defaultgamemode {mode}"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def forceload(self, mode: str, chunk: str=None, chunk2: str=None):
+        internal.options(mode, ['add', 'remove', 'remove_all', 'query'])
+        internal.multi_check_invalid_params(['add', 'remove', 'query'], 'mode', mode,
+            ('chunk', chunk, None))
+        if mode in ['add', 'remove'] and chunk == None:
+            raise errors.MissingError('chunk', 'mode', mode)
+        internal.multi_check_invalid_params(['add', 'remove'], 'mode', mode,
+            ('chunk2', chunk2, None))
+
+        if mode == "remove_all":
+            suffix = ""
+        elif mode == "query":
+            suffix = internal.defaults((chunk, None))
+        else:
+            optionals = internal.defaults((chunk2, None))
+            suffix = f"{chunk} {optionals}"
+
+        mode = mode.replace('_', ' ')
+        cmd = f"forceload {mode} {suffix}"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def locatebiome(self, biomeId: str):
+        cmd = f"locatebiome {biomeId}"
+        self.fh.commands.append(cmd)
+        return cmd
+    
+    def loot(self, targetMode: str, sourceMode: str, targetPos: str=None, targetEntity: str=None, targetSlot: str=None, \
+             targetCount: int=None, sourceLootTable: str=None, sourcePos: str=None, sourceEntity: str=None, sourceTool: str=None):
+        internal.options(targetMode, ['spawn', 'replace', 'give', 'insert'])
+        internal.multi_check_invalid_params(['spawn', 'replace', 'insert'], 'targetMode', targetMode,
+            ('targetPos', targetPos, None))
+        if targetMode in ['spawn', 'insert'] and targetPos == None:
+            raise errors.MissingError('targetPos', 'targetMode', targetMode)
+        internal.multi_check_invalid_params(['give', 'replace'], 'targetMode', targetMode,
+            ('targetEntity', targetEntity, None))
+        if targetMode == 'give' and targetEntity == None:
+            raise errors.MissingError('targetEntity', 'targetMode', targetMode)
+        internal.check_invalid_params('replace', 'targetMode', targetMode,
+            ('targetSlot', targetSlot, None),
+            dep_mandatory=True)
+        internal.check_invalid_params('replace', 'targetMode', targetMode,
+            ('targetCount', targetCount, None))
+        targetPosEntity = internal.pick_one_arg(
+            (targetPos, None, 'targetPos'),
+            (targetEntity, None, 'targetEntity')
+        )
+        targetPosEntity = ('block ' if targetPos != None else 'entity ') + targetPosEntity
+
+        if targetMode in ['spawn', 'insert']:
+            target = f"{targetMode}, {targetPos}".strip()
+        elif targetMode == "give":
+            target = f"{targetMode} {targetEntity}".strip()
+        else:
+            optionals = internal.defaults((targetCount, None))
+            target = f"{targetMode} {targetPosEntity} {targetSlot} {optionals}".strip()
+
+        internal.multi_check_invalid_params(['fish', 'loot'], 'sourceMode', sourceMode,
+            ('sourceLootTable', sourceLootTable, None),
+            dep_mandatory=True)
+        internal.multi_check_invalid_params(['fish', 'mine'], 'sourceMode', sourceMode,
+            ('sourcePos', sourcePos, None),
+            dep_mandatory=True)
+        internal.check_invalid_params('kill', 'sourceMode', sourceMode,
+            ('sourceEntity', sourceEntity, None),
+            dep_mandatory=True)
+        internal.multi_check_invalid_params(['fish', 'mine'], 'sourceMode', sourceMode,
+            ('sourceTool', sourceTool, None))
+
+        if sourceMode == 'fish':
+            optionals = internal.defaults((sourceTool, None))
+            source = f"{sourceMode} {sourceLootTable} {sourcePos} {optionals}".strip()
+        elif sourceMode == 'loot':
+            source = f"{sourceMode} {sourceLootTable}".strip()
+        elif sourceMode == 'kill':
+            source = f"{sourceMode} {sourceEntity}".strip()
+        else:
+            optionals = internal.defaults((sourceTool, None))
+            source = f"{sourceMode} {optionals}".strip()
+
+        cmd = f"loot {target} {source}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def pardon(self, target: str, reason: str=None):
+        internal.check_spaces('target', target)
+        cmd = f"pardon {target}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def pardon_ip(self, target: str, reason: str=None):
+        internal.check_spaces('target', target)
+        cmd = f"pardon-ip {target}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def publish(self, port: int):
+        cmd = f"publish {port}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def recipe(self, mode: str, target: str, recipe: str):
+        internal.options(mode, ['give', 'take'])
+        internal.check_spaces('target', target)
+        cmd = f"recipe {mode} {target} {recipe}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def save_all(self, flush: bool=False):
+        if flush: cmd = "save-all flush"
+        else: cmd = "save-all"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def save_on(self):
+        self.fh.commands.append("save-on")
+        return "save-on"
+
+    def save_off(self):
+        self.fh.commands.append("save-off")
+        return "save-off"
+
+    def setidletimeout(self, mins: int):
+        cmd = f"setidletimeout {mins}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def spectate(self, target: str=None, spectator: str=None):
+        internal.reliant('target', target, None, 'spectator', spectator, None)
+        optionals = internal.defaults((target, None), (spectator, None))
+        cmd = f"spectate {optionals}".strip()
+        return cmd
+
+    

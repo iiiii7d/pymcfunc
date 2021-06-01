@@ -17,7 +17,7 @@
 
 Minecraft functions, pythonised. Made by 7d
 
-**Current version: v0.1**
+**Latest release version: v0.1**
 Changelogs: https://pymcfunc.readthedocs.io/en/latest/changelog.html
 
 **Documentation: https://pymcfunc.readthedocs.io/en/latest/**

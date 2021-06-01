@@ -1,4 +1,3 @@
-
 from typing import Union
 import pymcfunc.errors as errors
 

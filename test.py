@@ -53,30 +53,43 @@ def test_pytest():
         f.r.stop()
         f.r.scoreboard_objectives("modify_displayname", objective="asdf", displayName="234523")
         f.r.scoreboard_players("operation", target="@p", objective="asdfasdf", operation="><", source="@r", sourceObjective="32")
-        f.r.execute(
-            as_="@p",
-            in_="overworld",
-            align="xyz",
-            facingentity={
-                "target": "@r",
-                "anchor": "eyes"
-            },
-            store={
-                "store": "result",
-                "mode": "bossbar",
-                "id": "abc",
-                "value": "max"
-            },
-            if_={
-                "mode": "score",
-                "target": "@r",
-                "objective": "abc",
-                "comparer": ">",
-                "source": "@s",
-                "sourceObjective": "3"
-            },
+        f.r.execute(as_="@p", in_="overworld", align="xyz",
+            facingentity={"target": "@r", "anchor": "eyes"},
+            store={"store": "result", "mode": "bossbar", "id": "abc", "value": "max"},
+            if_={"mode": "score", "target": "@r", "objective": "abc",
+                "comparer": ">", "source": "@s", "sourceObjective": "3"},
             run=lambda sf: [sf.r.say("yes"), sf.r.say("no")]
         )
+
+        f.r.advancement("grant", '@p', 'only', 'asf', '4')
+        f.r.attribute('@p', 'asdf', 'modifier_value_get', uuid="asdfsdf")
+        f.r.ban('@p')
+        f.r.ban_ip('2345')
+        f.r.banlist()
+        f.r.bossbar_add("asdf", "we")
+        f.r.bossbar_get("asdfasd", "max")
+        f.r.bossbar_list()
+        f.r.bossbar_remove("asdf"),
+        f.r.bossbar_set("asdf", "color", color="white")
+        f.r.data_get(block="asdfsd")
+        f.r.data_merge({}, block="3")
+        f.r.data_remove("sdf", block="12431")
+        f.r.data_modify("prepend", "from", "asasdfds", block="2 3 4", sourceBlock="5 6 7")
+        f.r.datapack('enable', 'asdfs', priority='after', existing='egefwewerre')
+        f.r.debug('start')
+        f.r.defaultgamemode('survival')
+        f.r.forceload('add', chunk="1 2", chunk2="3 4")
+        f.r.locatebiome("desert")
+        f.r.loot("replace", "fish", targetEntity="@p", targetSlot="asdf", sourceLootTable="sdfa", sourcePos="1 2 4", sourceTool="j")
+        f.r.pardon('@p')
+        f.r.pardon_ip('2345')
+        f.r.publish('8080')
+        f.r.recipe('give', '@p', 'asdf')
+        f.r.save_all()
+        f.r.save_on()
+        f.r.save_off()
+        f.r.setidletimeout(3)
+        f.r.spectate("@p", "@r")
 
     b = pmf.Pack('b')
 
