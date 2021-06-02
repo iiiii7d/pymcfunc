@@ -109,7 +109,6 @@ def test_pytest():
         f.r.tellraw('@p', {})
         f.r.title("@s", "title", text={})
         f.r.help()
-        f.r.seed()
         f.r.setblock("1 2 3", "assefsdaf")
         f.r.fill('1 2 3', '4 5 6', "assefsdaf")
         f.r.clone('1 2 3', '4 5 6', '7 8 9')

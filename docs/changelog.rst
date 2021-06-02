@@ -1,7 +1,7 @@
 Changelog
 =========
 
-* **v0.2 ()**
+* **v0.2 (2/6/21)**
 
   * Added /advancement, /attribute, /ban, /ban-ip, /banlist, /bossbar, /data, /datapack, /debug,
     /defaultgamemode, /forceload, /locatebiome, /loot, /pardon, /pardon-ip, /publish, /recipe, /save-all,

@@ -70,9 +70,11 @@ class BedrockRawCommands(UniversalRawCommands):
         return cmd
 
     def summon(self, entity: str, pos: str="~ ~ ~", event: str=None, nameTag: str=None):
-        """**Syntax:** *summon <entity> ...*\n
+        """**Syntax:** *summon <entity> ...*
+        * *[pos] [event] [nameTag]*
+        * *<nameTag> [pos]*\n
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.summon"""
-        if event is None:
+        if nameTag is not None:
             optionals = internal.defaults((pos, "~ ~ ~"))
             nameTag = internal.unspace(nameTag)
             cmd = f"summon {entity} {nameTag} {optionals}".strip()
@@ -681,7 +683,8 @@ class BedrockRawCommands(UniversalRawCommands):
         internal.reliant('fadeSeconds', fadeSeconds, None, 'repeatMode', repeatMode, None)
         if repeatMode is not None:
             internal.options(repeatMode, ['loop', 'play_once'])
-        cmd = f"music add {name} {volume} {fadeSeconds} {repeatMode}".strip()
+        optionals = internal.defaults((volume, None), (fadeSeconds, None), (repeatMode, None))
+        cmd = f"music add {name} {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd
     
