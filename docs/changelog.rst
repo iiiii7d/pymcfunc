@@ -5,7 +5,12 @@ Changelog
 
   * Added /advancement, /attribute, /ban, /ban-ip, /banlist, /bossbar, /data, /datapack, /debug,
     /defaultgamemode, /forceload, /locatebiome, /loot, /pardon, /pardon-ip, /publish, /recipe, /save-all,
-    /save-on, /save-off, /setidletimeout, /spectate, /team, /teammsg, /trigger, /worldborder
+    /save-on, /save-off, /setidletimeout, /spectate, /team, /teammsg, /trigger, /worldborder in JavaRawCommands
+  * Added /ability, /agent, /alwaysday, /camerashake, /changesetting, /clearspawnpoint, /closewebsocket, /connect,
+    /event, /fog, /gametest, /getchunkdata, /getchunks, /getspawnpoint, /globalpause, /immutableworld, /listd,
+    /mobevent, /music, /permissions, /playanimation, /querytarget, /ride, /save, /setmaxplayers, /structure, /testfor,
+    /testforblock, /testforblocks, /tickingarea, /toggledownfall, /worldbuilder in BedrockRawCommands
+  * basically added all the other commands (except for Edu Edition commands)
 
 * **v0.1 (28/5/21)**
 

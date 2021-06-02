@@ -400,3 +400,397 @@ class BedrockRawCommands(UniversalRawCommands):
             result = map(lambda j: (cmd+j).strip(), result)
             self.fh.commands.extend(result)
             return result
+
+    def ability(self, target: str, ability: str=None, value: bool=None):
+        internal.reliant('ability', ability, None, 'value', value, None)
+        optionals = internal.defaults((ability, None), (value, None))
+        cmd = f"ability {target} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def agent(self, mode: str, direction: str=None, slotNum: str=None, destSlotNum: str=None, pos: str=None, item: str=None, quantity: int=None, turnDirection: str=None):
+        internal.options(mode, ['move', 'turn', 'attack', 'destroy', 'drop', 'dropall', 'inspect', 'inspectdata', 'detect', 'detectredstone', 'transfer',
+                                'create', 'tp', 'collect', 'till', 'place', 'getitemcount', 'getitemspace', 'getitemdetail'])
+        internal.multi_check_invalid_params(['move', 'attack', 'destroy', 'drop', 'dropall', 'inspect', 'inspectdata', 'detect', 'detectredstone', 'till', 'place'], 'mode', mode,
+            ('direction', direction, None),
+            dep_mandatory=True)
+        internal.multi_check_invalid_params(['drop', 'transfer', 'place', 'getitemcount', 'getitemspace', 'getitemdetail'], 'mode', mode,
+            ('slotNum', slotNum, None),
+            dep_mandatory=True)
+        internal.check_invalid_params('transfer', 'mode', mode,
+            ('destSlotNum', destSlotNum, None),
+            dep_mandatory=True)
+        internal.check_invalid_params('tp', 'mode', mode,
+            ('pos', pos, None),
+            dep_mandatory=True)
+        internal.check_invalid_params('collect', 'mode', mode,
+            ('item', item, None),
+            dep_mandatory=True)
+        internal.multi_check_invalid_params(['drop', 'transfer'], 'mode', mode,
+            ('quantity', quantity, None),
+            dep_mandatory=True)
+        internal.check_invalid_params('turn', 'mode', mode,
+            ('turnDirection', turnDirection, None),
+            dep_mandatory=True)
+        if direction != None:
+            internal.options(direction, ['forward', 'back', 'left', 'right', 'up', 'down'])
+        elif turnDirection != None:
+            internal.options(direction, ['left', 'right'])
+        
+        if mode == 'turn':
+            suffix = turnDirection
+        elif mode == 'drop':
+            suffix = f"{slotNum} {quantity} {direction}"
+        elif mode == 'transfer':
+            suffix = f"{slotNum} {quantity} {destSlotNum}"
+        elif mode == 'create':
+            suffix = ""
+        elif mode == 'tp':
+            suffix = pos
+        elif mode == 'collect':
+            suffix = item
+        elif mode == 'place':
+            suffix = f"{slotNum} {direction}"
+        elif mode.startswith('getitem'):
+            suffix = slotNum
+        else:
+            suffix = direction
+        cmd = f"agent {mode} {suffix}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+    
+    def alwaysday(self, lock: bool=None):
+        internal.defaults((lock, None))
+        cmd = f"alwaysday {lock}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+    daylock = alwaysday
+
+    def camerashake_add(self, target: str, intensity: float=1, seconds: float=1, shakeType: str=None):
+        if shakeType != None:
+            internal.options(shakeType, ['positional', 'rotational'])
+        internal.check_spaces('target', target)
+        optionals = internal.defaults((intensity, 1), (seconds, 1), (shakeType, None))
+        cmd = f"camerashake add {target} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def camerashake_stop(self, target: str):
+        internal.check_spaces('target', target)
+        cmd = f"camerashake stop {target}"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def changesetting(self, allow_cheats: bool=None, difficulty: Union[str, int]=None):
+        if difficulty != None:
+            internal.options(difficulty, ['peaceful', 'easy', 'normal', 'hard', 'p', 'e', 'n', 'h', 0, 1, 2, 3])
+        value = internal.pick_one_arg(
+            (allow_cheats, None, 'allow_cheats'),
+            (difficulty, None, 'difficulty'),
+            optional=False
+        )
+        middle = 'allow-cheats' if allow_cheats != None else difficulty
+        cmd = f"changesetting {middle} {value}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def clearspawnpoint(self, target: str):
+        internal.check_spaces('target', target)
+        cmd = f"clearspawnpoint {target}"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def closewebsocket(self):
+        self.fh.commands.append("closewebsocket")
+        return "closewebsocket"
+
+    def connect(self, serverUri: str):
+        cmd = f"connect {serverUri}"
+        self.fh.commands.append(cmd)
+        return cmd
+    wsserver = connect
+
+    # dedicatedwssever
+
+    # enableencryption
+
+    def event(self, target: str, event: str):
+        internal.check_spaces('target', target)
+        cmd = f"event entity {target} {event}"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def fog(self, target: str, mode: str, userProvidedId: str, fogId: str=None):
+        internal.check_spaces('target', target)
+        internal.options(mode, ['push', 'pop', 'remove'])
+        internal.check_invalid_params('push', 'mode', mode,
+            ('fogId', fogId, None),
+            dep_mandatory=True
+        )
+
+        if mode == 'push':
+            mode = f"push {fogId}"
+        cmd = f"{target} {mode} {userProvidedId}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def gametest_runthis(self):
+        self.fh.commands.append('gametest runthis')
+        return 'gametest runthis'
+
+    def gametest_run(self, name: str, rotationSteps: int=None):
+        optionals = internal.defaults((rotationSteps, None))
+        cmd = f"gametest run {name} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def gametest_runall(self, tag: str, rotationSteps: int=None):
+        optionals = internal.defaults((rotationSteps, None))
+        cmd = f"gametest runall {tag} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+    gametest_runset = gametest_runall
+
+    def gametest_clearall(self, radius: int=None):
+        optionals = internal.defaults((radius, None))
+        cmd = f"gametest clearall {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def gametest_pos(self):
+        self.fh.commands.append('gametest pos')
+        return 'gametest pos'
+
+    def gametest_create(self, name: str, width: int=None, height: int=None, depth: int=None):
+        internal.reliant('width', width, None, 'height', height, None)
+        internal.reliant('height', height, None, 'depth', depth, None)
+        optionals = internal.defaults((width, None), (height, None), (depth, None))
+        cmd = f"gametest create {name} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def gametest_runthese(self):
+        self.fh.commands.append('gametest runthese')
+        return 'gametest runthese'
+
+    def getchunkdata(self, dimension: str, chunkPos: str, height: int):
+        cmd = f"getchunkdata {dimension} {chunkPos} {height}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def getchunks(self, dimension: str):
+        cmd = f"getchunks {dimension}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    # getlocalplayername
+
+    def getspawnpoint(self, target: str):
+        cmd = f"getspawnpoint {target}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    #gettopsolidblock
+
+    def globalpause(self, pause: bool):
+        cmd = f"globalpause {pause}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def immutableworld(self, immutable: bool=None):
+        optionals = internal.defaults((immutable, None))
+        cmd = f"immutableworld {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def listd(self):
+        self.fh.commands.append("listd")
+        return "listd"
+
+    def mobevent(self, event: str, value: bool=None):
+        optionals = internal.defaults((value, None))
+        cmd = f"mobevent {event} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def music_add(self, name: str, volume: float=None, fadeSeconds: float=None, repeatMode: str=None):
+        internal.reliant('volume', volume, None, 'fadeSeconds', fadeSeconds, None)
+        internal.reliant('fadeSeconds', fadeSeconds, None, 'repeatMode', repeatMode, None)
+        if repeatMode != None:
+            internal.options(repeatMode, ['loop', 'play_once'])
+        cmd = f"music add {name} {volume} {fadeSeconds} {repeatMode}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+    
+    def music_queue(self, name: str, volume: float=None, fadeSeconds: float=None, repeatMode: str=None):
+        internal.reliant('volume', volume, None, 'fadeSeconds', fadeSeconds, None)
+        internal.reliant('fadeSeconds', fadeSeconds, None, 'repeatMode', repeatMode, None)
+        if repeatMode != None:
+            internal.options(repeatMode, ['loop', 'play_once'])
+        cmd = f"music queue {name} {volume} {fadeSeconds} {repeatMode}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def music_stop(self, fadeSeconds: float=None):
+        optionals = internal.defaults((fadeSeconds, None))
+        cmd = f"music stop {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def music_volume(self, volume: float):
+        cmd = f"music volume {volume}"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def permissions(self, mode: str):
+        internal.options(mode, ['list', 'reload'])
+        cmd = f"permissions {mode}"
+        self.fh.commands.append(cmd)
+        return cmd
+    ops = permissions
+
+    def playanimation(self, target: str, animation: str, next_state: str=None, blend_out_time: float=None, stop_expression: str=None, controller: str=None):
+        internal.reliant('next_state', next_state, None, 'blend_out_time', blend_out_time, None)
+        internal.reliant('blend_out_time', blend_out_time, None, 'stop_expression', stop_expression, None)
+        internal.reliant('stop_expression', stop_expression, None, 'controller', controller, None)
+        optionals = internal.defaults((next_state, None), (blend_out_time, None), (stop_expression, None), (controller, None))
+        cmd = f"playanimation {target} {animation} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def querytarget(self, target: str):
+        cmd = f"querytaret {target}"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def ride_start_riding(self, rider: str, ride: str, teleportWhich: str="teleport_rider", fillMode: str="until_full"):
+        internal.options(teleportWhich, ['teleport_ride', 'teleport_rider'])
+        internal.options(fillMode, ['if_group_fits', 'until_full'])
+        optionals = internal.defaults((teleportWhich, "teleport_rider"), (fillMode, "until_full"))
+        cmd = f"ride {rider} start_riding {ride} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def ride_stop_riding(self, rider: str):
+        cmd = f"ride {rider} stop_riding".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def ride_evict_riders(self, ride: str):
+        cmd = f"ride {ride} evict_riders".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def ride_summon_rider(self, ride: str, entity: str, event: str=None, nameTag: str=None):
+        internal.reliant('event', event, None, 'nameTag', nameTag, None)
+        optionals = internal.defaults((event, None), (nameTag, None))
+        cmd = f"ride {ride} summon_rider {entity} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def ride_summon_ride(self, rider: str, entity: str, event: str=None, nameTag: str=None):
+        internal.reliant('event', event, None, 'nameTag', nameTag, None)
+        optionals = internal.defaults((event, None), (nameTag, None))
+        cmd = f"ride {rider} summon_ride {entity} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def save(self, mode: str):
+        internal.options(mode, ['hold', 'query', 'resume'])
+        cmd = f"save {mode}"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def setmaxplayers(self, maxPlayers: int):
+        cmd = f"setmaxplayers {maxPlayers}"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def structure_save(self, name: str, pos1: str, pos2: str, includesEntities: bool=True, saveMode: str='disk', includesBlocks: bool=True):
+        internal.options(saveMode, ['disk', 'memory'])
+        optionals = internal.defaults((includesEntities, True), (saveMode, 'disk'), (includesBlocks, True))
+        cmd = f"structue save {name} {pos1} {pos2} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def structure_load(self, name: str, pos: str, rotation: str='0_degrees', mirror: str='none', animationMode: str=None, \
+                       animationSeconds: str=1, includesEntities: bool=True, includesBlocks: bool=True, integrity: float=100, seed: str=None):
+        internal.options(rotation, ['0_degrees', '90_degrees', '180_degrees', '270_degrees'])
+        internal.options(mirror, ['x', 'z', 'xz', 'none'])
+        if animationMode != None:
+            internal.options(animationMode, ['block_by_block', 'layer_by_layer'])
+            optional_list = [(rotation, '0_degrees'), (mirror, 'none'), (animationMode, None), (animationSeconds, 1), (includesEntities, True), (includesBlocks, True), (integrity, 100), (seed, None)]
+        else:
+            optional_list = [(rotation, '0_degrees'), (mirror, 'none'), (includesEntities, True), (includesBlocks, True), (integrity, 100), (seed, None)]
+
+        optionals = internal.defaults(*optional_list)
+        cmd = f"structure load {name} {pos} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def structure_delete(self, name: str):
+        cmd = f"structure delete {name}"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    #takepicture
+
+    def testfor(self, target: str):
+        cmd = f"testfor {target}"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def testforblock(self, pos: str, name: str, dataValue: int=None):
+        optionals = internal.defaults((dataValue, None))
+        cmd = f"testforblock {pos} {name} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+        
+    def testforblocks(self, pos1: str, pos2: str, dest: str, mode: str='all'):
+        internal.options(mode, ['all', 'masked'])
+        optionals = internal.defaults((mode, 'all'))
+        cmd = f"testforblocks {pos1} {pos2} {dest} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def tickingarea_add_cuboid(self, pos1: str, pos2: str, name: str=None):
+        optionals = internal.defaults((name, None))
+        cmd = f"tickingarea add {pos1} {pos2} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def tickingarea_add_circle(self, pos: str, radius: int, name: str=None):
+        optionals = internal.defaults((name, None))
+        cmd = f"tickingarea add circle {pos} {radius} {optionals}".strip()
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def tickingarea_remove(self, name: str=None, pos: str=None, all_: bool=False):
+        if not all_:
+            name_pos = internal.pick_one_arg(
+                (name, None, 'name'),
+                (pos, None, 'pos'),
+                optional = False
+            )
+            cmd = f"tickingarea remove {name_pos}".strip()
+        else:
+            cmd = "tickingarea remove_all"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def tickingarea_list(self, all_dimensions: bool=False):
+        if all_dimensions:
+            cmd = "tickingarea list all-dimensions"
+        else:
+            cmd = "tickingarea list"
+        self.fh.commands.append(cmd)
+        return cmd
+
+    def toggledownfall(self):
+        self.fh.commands.append('toggledownfall')
+        return 'toggledownfall'
+
+    def worldbuilder(self):
+        self.fh.commands.append('worldbuilder')
+        return 'worldbuilder'
+    wb = worldbuilder
