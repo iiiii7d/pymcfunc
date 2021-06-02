@@ -11,6 +11,7 @@ Changelog
     /mobevent, /music, /permissions, /playanimation, /querytarget, /ride, /save, /setmaxplayers, /structure, /testfor,
     /testforblock, /testforblocks, /tickingarea, /toggledownfall, /worldbuilder in BedrockRawCommands
   * basically added all the other commands (except for Edu Edition commands)
+  * moved /seed from UniversalRawCommands to JavaRawCommands
 
 * **v0.1 (28/5/21)**
 

@@ -152,12 +152,6 @@ class UniversalRawCommands:
         self.fh.commands.append(cmd)
         return cmd
 
-    def seed(self):
-        """**Syntax:** *seed*\n
-        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.seed"""
-        self.fh.commands.append("seed")
-        return "seed"
-
     def enchant(self, target: str, enchantment: str, level: int=1):
         """**Syntax:** *enchant <target> <enchantment> [level]*\n
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.enchant"""

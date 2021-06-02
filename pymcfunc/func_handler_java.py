@@ -961,6 +961,12 @@ class JavaRawCommands(UniversalRawCommands):
         self.fh.commands.append("save-off")
         return "save-off"
 
+    def seed(self):
+        """**Syntax:** *seed*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.seed"""
+        self.fh.commands.append("seed")
+        return "seed"
+
     def setidletimeout(self, mins: int):
         cmd = f"setidletimeout {mins}".strip()
         self.fh.commands.append(cmd)

@@ -688,9 +688,10 @@ class BedrockRawCommands(UniversalRawCommands):
         self.fh.commands.append(cmd)
         return cmd
 
-    def ride_summon_ride(self, rider: str, entity: str, event: str=None, nameTag: str=None):
+    def ride_summon_ride(self, rider: str, entity: str, rideMode: str='reassign_rides', event: str=None, nameTag: str=None):
         internal.reliant('event', event, None, 'nameTag', nameTag, None)
-        optionals = internal.defaults((event, None), (nameTag, None))
+        internal.options(rideMode, ['skip_riders', 'no_ride_change', 'reassign_rides'])
+        optionals = internal.defaults((rideMode, 'reassign_rides'), (event, None), (nameTag, None))
         cmd = f"ride {rider} summon_ride {entity} {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd
@@ -714,7 +715,7 @@ class BedrockRawCommands(UniversalRawCommands):
         return cmd
 
     def structure_load(self, name: str, pos: str, rotation: str='0_degrees', mirror: str='none', animationMode: str=None, \
-                       animationSeconds: str=1, includesEntities: bool=True, includesBlocks: bool=True, integrity: float=100, seed: str=None):
+                       animationSeconds: float=1, includesEntities: bool=True, includesBlocks: bool=True, integrity: float=100, seed: str=None):
         internal.options(rotation, ['0_degrees', '90_degrees', '180_degrees', '270_degrees'])
         internal.options(mirror, ['x', 'z', 'xz', 'none'])
         if animationMode is not None:

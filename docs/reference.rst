@@ -901,6 +901,704 @@ Function Handlers
                  sf.r.summon("lightning_bolt")
              f.r.execute("@e[type=creeper]", "~ ~ ~", chargeCreepers)
 
+   .. py:method:: ability(target: str, ability: str=None, value: bool=None)
+
+      Adds an ``ability`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *ability <target> [ability] [value]*
+
+      :param str target: ``target``
+      :param str abililty: ``ability``
+      :param str value: ``value``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: agent(mode: str, direction: str=None, slotNum: str=None, destSlotNum: str=None, pos: str=None, item: str=None, quantity: int=None, turnDirection: str=None)
+
+      Adds an ``agent`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *agent ...*
+
+      * *<mode:move|attack|destroy|dropall|inspect|inspectdata|detect|detectredstone|till> <direction:forward|back|left|right|up|down>*
+      * *<mode:turn> <turnDirection:left|right>*
+      * *<mode:drop> <slotNum> <quantity> <directon:forward|back|left|right|up|down>*
+      * *<mode:transfer> <slotNum> <quantity> <destSlotNum>*
+      * *<mode:create>*
+      * *<mode:tp> <pos>*
+      * *<mode:collect> <item>*
+      * *<mode:place> <slotNum> <direction:forward|back|left|right|up|down>*
+      * *<mode:getitemcount|getitemspace|getitemdetail> <slotNum>*
+
+      :param str directon: ``direction:forward|back|left|right|up|down``
+      :param str slotNum: ``slotNum``
+      :param str destSlotNum: ``destSlotNum``
+      :param str item: ``item``
+      :param int quantity: ``quantity``
+      :param str turnDirection: ``turnDirection``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: alwaysday(lock: bool=None)
+                  daylock(lock: bool=None)
+
+      Adds an ``alwaysday`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *alwaysday [lock]**
+
+      :param bool lock: ``lock``
+      :return: The command
+      :rtype: str
+
+   .. py:method:: camerashake_add(target: str, intensity: float=1, seconds: float=1, shakeType: str=None)
+
+      Adds a ``camerashake add`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *camerashake add <target> [intensity] [seconds] [shakeType:positional|rotational]*
+
+      :param str target: ``target``
+      :param float intensity: ``intensity``
+      :param float seconds: ``seconds``
+      :param str shakeType: ``shakeType:positional|rotational``
+      :return: The command
+      :rtype: str
+
+   .. py:method:: camerashake_stop(target: str)
+
+      Adds a ``camerashake stop`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *camerashake stop <target>*
+
+      :param str target: ``target``
+      :return: The command
+      :rtype: str
+
+   .. py:method:: changesetting(allow_cheats: bool=None, difficulty: Union[str, int]=None)
+
+      Adds a ``changesetting`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *changesetting ...*
+
+      * *allow-cheats <allow_cheats>*
+      * *difficulty <difficulty>*
+
+      :param bool allow_cheats: ``allow_cheats``
+      :param difficulty: ``difficulty``
+      :type difficulty: str or int
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: clearspawnpoint(target: str)
+
+      Adds a ``clearspawnpoint`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *clearspawnpoint <target>*
+
+      :param str target: ``target``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: closwebsocket()
+
+      Adds a ``closewebsocket`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *closewebsocket*
+
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: connect(serverUri: str)
+
+      Adds a ``connect`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *connect <serverUri>*
+
+      :param str serverUri: ``serverUri``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: event(target: str, event: str)
+
+      Adds an ``event`` method.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *event <target> <event>*
+
+      :param str target: ``target``
+      :param str event: ``event``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: fog(target: str, mode: str, userProvidedId: str, fogId: str=None)
+
+      Adds a ``fog`` method.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *fog <target> <mode:push|pop|remove> <mode=push:fogId> <userProvidedId>*
+
+      :param str target: ```target``
+      :param str mode: ``mode:push|pop|remove``
+      :param str userProvidedId: ``userProvidedId``
+      :param str fogId: ``mode=push:fogId``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: gametest_runthis()
+
+      Adds a ``gametest runthis`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *gametest runthis*
+
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: gametest_run(name: str, rotationSteps: int=None)
+
+      Adds a ``gametest run`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *gametest run <name> [rotationSteps]*
+
+      :param str name: ``name``
+      :param int rotationSteps: ``rotationSteps``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: gametest_runall(tag: str, rotationSteps: int=None)
+                  gametest_runset(tag: str, rotationSteps: int=None)
+
+      Adds a ``gametest runall`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *gametest runall <tag> [rotationSteps]*
+
+      :param str tag: ``tag``
+      :param int rotationSteps: ``rotationSteps``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: gametest_clearall(self, radius: int=None)
+
+      Adds a ``gametest clearall`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *gametest [radius]*
+
+      :param int radius: ``radius``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: gametest_pos()
+
+      Adds a ``gametest pos``` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *gametest pos*
+
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: gametest_create(name: str, width: int=None, height: int=None, depth: int=None)
+
+      Adds a ``gametest create`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:**  *gametest create <name> [wdth] [height] [depth]*
+
+      :param str name: ``name``
+      :param int width: ``width``
+      :param int height: ``height``
+      :param int depth: ``depth``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: gametest_runthese()
+
+      Adds a ``gametest runthese`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *gametest runthese*
+
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: getchunkdata(dimension: str, chunkPos: str, height: int)
+
+      Adds a ``getchunkdata`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *getchunkdata <dimension> <chunkPos> <height>*
+
+      :param str dimension: ``dimension``
+      :param str chunkPos: ``chunkPos``
+      :param int height: ``height```
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: getchunks(dimension: str)
+
+      Adds a ``getchunks`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *getchunks <dimension>*
+
+      :param str dimension: ``dimension``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: getspawnpoint(target: str)
+
+      Adds a ``getspawnpoint`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *getspawnpoint <target>*
+
+      :param str target: ``target``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: globalpause(pause: bool)
+
+      Adds a ``globalpause`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *globalpause <pause>*
+
+      :param bool pause: ``pause``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: immutableworld(immutable: bool=None)
+
+      Adds an ``immutableworld`` command.
+      
+      .. versionadded:: 0.2
+
+      **Syntax:** *immutableworld [immutable]*
+
+      :param bool immutable: ``immutable``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: listd()
+
+      Adds a ``listd`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *listd*
+
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: mobevent(event: str, value: bool=None)
+
+      Adds a ``mobevent`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *mobevent <event> [value]*
+
+      :param str event: ``event``
+      :param bool value: ``value``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: music_add(name: str, volume: float=None, fadeSeconds: float=None, repeatMode: str=None)
+
+      Adds a ``music add`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *music add <name> [volume] [fadeSeconds] [repeatMode:loop|play_once]*
+
+      :param str name: ``name``
+      :param float volume: ``volume``
+      :param float fadeSeconds: ``fadeSeconds``
+      :param str repeatMode: ``repeatMode:loop|play_once``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: music_queue(name: str, volume: float=None, fadeSeconds: float=None, repeatMode: str=None)
+
+      Adds a ``music queue`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *music queue <name> [volume] [fadeSeconds] [repeatMode:loop|play_once]*
+
+      :param str name: ``name``
+      :param float volume: ``volume``
+      :param float fadeSeconds: ``fadeSeconds``
+      :param str repeatMode: ``repeatMode:loop|play_once``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: music_stop(fadeSeconds: float=None)
+
+      Adds a ``music stop`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *music stop [fadeSeconds]*
+
+      :param float fadeSeconds: ``fadeSeconds``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: music_volume(volume: float)
+
+      Adds a ``music volume`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *music float <volume>*
+
+      :param float volume: ``volume``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: permissions(mode: str)
+
+      Adds a ``permissions`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *permissions <mode>*
+
+      :param str mode: ``mode``
+      :returns: The command
+      :rtype: str
+   
+   .. py:method:: playanimation(target: str, animation: str, next_state: str=None, blend_out_time: float=None, stop_expression: str=None, controller: str=None)
+
+      Adds a ``playanimation`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *playanimation <target> <animation> [next_state] [blend_out_time] [stop_expression] [controller]
+
+      :param str target: ``target``
+      :param str animation: ``animation``
+      :param str next_state: ``next_state``
+      :param float blend_out_time: ``blend_out_time``
+      :param str controller: ``controller``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: querytarget(target: str)
+
+      Adds a ``querytarget`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *querytarget <target>*
+
+      :param str target: ``target``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: ride_start_riding(rider: str, ride: str, teleportWhich: str="teleport_rider", fillMode: str="until_full")
+
+      Adds a ``ride start_riding`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *ride <rider> start_riding <ride> [teleportWhich:teleport_ride|teleport_rider] [fillMode:if_group_fits|until_full]*
+
+      :param str rider: ``rider``
+      :param str ride: ``ride``
+      :param str teleportWhich: ``teleportWhich:teleport_ride|teleport_rider``
+      :param str fillMode: ``fillMode:if_group_fits|until_full``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: ride_stop_riding(rider: str)
+
+      Adds a ``ride stop_riding`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *ride <rider> stop_riding*
+
+      :param str rider: ``rider``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: ride_evict_riders(ride: str)
+
+      Adds a ``ride evict_riders`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *ride <ride> evict_riders*
+
+      :param str ride: ``ride``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: ride_summon_rider(self, ride: str, entity: str, event: str=None, nameTag: str=None)
+
+      Adds a ``ride summon_riders`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *ride <ride> summon_rider <entity> [event] [nameTag]*
+
+      :param str ride: ``ride``
+      :param str entity: ``entity``
+      :param str event: ``event``
+      :param str nameTag: ``nameTag``
+      :returns: The command
+      :rtype: str
+      
+   .. py:method:: ride_summon_ride(self, rider: str, entity: str, rideMode: str='reassign_rides', event: str=None, nameTag: str=None)
+
+      Adds a ``ride summon_ride`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *ride <rider> summon_ride <entity> [rideMode:skip_riders|no_ride_change|reassign_rides] [event] [nameTag]*
+
+      :param str rider: ``rider``
+      :param str entity: ``entity``
+      :param str rideMode: ``rideMode:skip_riders|no_ride_change|reassign_rides``
+      :param str event: ``event``
+      :param str nameTag: ``nameTag``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: save(mode: str)
+
+      Adds a ``save`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *save <mode:hold|query|resume>*
+
+      :param str mode: ``mode:hold|query|resume``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: setmaxplayers(maxPlayers: int):
+
+      Adds a ``setmaxplayers`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *setmaxplayers <maxPlayers>*
+
+      :param str maxPlayers: ``maxPlayers``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: structure_save(name: str, pos1: str, pos2: str, includesEntities: bool=True, saveMode: str='disk', includesBlocks: bool=True)
+
+      Adds a ``structure save`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *structure save <name> <pos1> <pos2> [includesEntities] [saveMode:disk|memory] [includesBlocks]*
+
+      :param str name: ``name``
+      :param str pos1: ``pos1``
+      :param str pos2: ``pos2``
+      :param str includesEntities: ``includesEntities``
+      :param str saveMode: ``saveMode:disk|memory``
+      :param str includesBlocks: ``includesBlocks``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: structure_load(self, name: str, pos: str, rotation: str='0_degrees', mirror: str='none', animationMode: str=None, \
+                                 animationSeconds: float=1, includesEntities: bool=True, includesBlocks: bool=True, integrity: float=100, seed: str=None)
+
+      Adds a ``strcture load`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *structure load <name> <pos> [rotation:0_degrees|90_degrees|180_degrees|270_degrees] [mirror:x|z|xz|none] ...*
+
+      * *...*
+      * *[animationMode:block_by_block|layer_by_layer] [animationSeconds] ...*
+
+      *[includesEntities] [includesBlocks] [integrity] [seed]*
+
+      :param str name: ``name``
+      :param str pos: ``pos``
+      :param str rotation: ``rotation:0_degrees|90_degrees|180_degrees|270_degrees`` 
+      :param str mirror: ``mirror:x|z|xz|none``
+      :param str animationMode: ``animationMode:block_by_block|layer_by_layer``
+      :param float animationSeconds: ``animationSeconds``
+      :param bool includesEntities: ``includesEntities``
+      :param bool includesBlocks: ``includesBlocks``
+      :param float integrity: ``integrity``
+      :param str seed: ``seed``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: structure_delete(name: str)
+
+      Adds a ``structure delete``
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *structure delete <name>*
+
+      :param str name: ``name``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: testfor(target: str)
+
+      Adds a ``testfor`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *testfor <target>*
+
+      :param str target: ``target``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: testforblock(pos: str, name: str, dataValue: int=None)
+
+      Adds a ``testforblock`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *testforblock <pos> <name> [dataValue]*
+
+      :param str pos: ``pos``
+      :param str name: ``name``
+      :param str dataValue: ``dataValue``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: testforblocks(pos1: str, pos2: str, dest: str, mode: str='all')
+
+      Adds a ``testforblocks`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *testforblocks <pos1> <pos2> <dest> <mode:all|masked>*
+
+      :param str pos1: ``pos1``
+      :param str pos2: ``pos2``
+      :param str dest: ``dest``
+      :param str mode: ``mode:all|masked``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: tickingarea_add_cuboid(pos1: str, pos2: str, name: str=None)
+
+      Adds a ``tickingarea add`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *tickingarea add <pos1> <pos2> [name]*
+
+      :param str pos1: ``pos1``
+      :param str pos2: ``pos2``
+      :param str name: ``name``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: tickingarea_add_circle(pos: str, radius: int, name: str=None)
+
+      Adds a ``tickingarea add circle`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *tickingarea add circle <pos> <radius> [name]*
+
+      :param str pos: ``pos``
+      :param int radius: ``radius``
+      :param str name: ``name``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: tickingarea_remove(name: str=None, pos: str=None, all_: bool=False)
+
+      Adds a ``tickingarea remove`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *tickingarea ...*
+
+      * *remove_all* if all_=True
+      * *<name/pos>* if all_=False
+
+      :param str name: ``name``
+      :param str pos: ``pos``
+      :param bool all_: ``all_``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: tickingarea_list(all_dimensions: bool=False)
+
+      Adds a ``tickingarea list`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *tickingarea ...*
+      
+      * *list all-dimensions* if all_dimensions=True
+      * *list* if all_dimensions=False
+
+      :param bool all_dimensions: ``all_dimensions``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: toggledownfall()
+
+      Adds a ``toggledownfall`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *toggledownfall*
+
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: worldbuilder()
+                  wb()
+
+      Adds a ``worldbuilder`` command.
+
+      .. versio
+
+
 .. py:class:: JavaFuncHandler(UniversalFuncHandler)
 
    The Java Edition function handler.
