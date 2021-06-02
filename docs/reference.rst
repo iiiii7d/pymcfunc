@@ -1119,7 +1119,7 @@ Function Handlers
 
       .. versionadded:: 0.2
 
-      **Syntax:**  *gametest create <name> [wdth] [height] [depth]*
+      **Syntax:**  *gametest create <name> [width] [height] [depth]*
 
       :param str name: ``name``
       :param int width: ``width``
@@ -1285,9 +1285,9 @@ Function Handlers
 
       .. versionadded:: 0.2
 
-      **Syntax:** *permissions <mode>*
+      **Syntax:** *permissions <mode:list|reload>*
 
-      :param str mode: ``mode``
+      :param str mode: ``mode:list|reload``
       :returns: The command
       :rtype: str
    
@@ -1401,7 +1401,7 @@ Function Handlers
       :returns: The command
       :rtype: str
 
-   .. py:method:: setmaxplayers(maxPlayers: int):
+   .. py:method:: setmaxplayers(maxPlayers: int)
 
       Adds a ``setmaxplayers`` command.
 
@@ -2178,9 +2178,9 @@ Function Handlers
 
       * *<mode:get|base(_)get> [scale]*
       * *<mode:base(_)set> <value>*
-      * *<mode:modifier(_)add> <uuid> <name> <value> <addMode:add|multiply|multiply_base>
-      * *<mode:modifier(_)remove> <uuid>
-      * *<mode:modifier(_)value(_)get> <uuid> [scale]
+      * *<mode:modifier(_)add> <uuid> <name> <value> <addMode:add|multiply|multiply_base>*
+      * *<mode:modifier(_)remove> <uuid>*
+      * *<mode:modifier(_)value(_)get> <uuid> [scale]*
 
       :param str target: ``target``
       :param str attribute: ``attribute``

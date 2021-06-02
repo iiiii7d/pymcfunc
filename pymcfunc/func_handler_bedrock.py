@@ -402,6 +402,8 @@ class BedrockRawCommands(UniversalRawCommands):
             return result
 
     def ability(self, target: str, ability: str=None, value: bool=None):
+        """**Syntax:** *ability <target> [ability] [value]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.ability"""
         internal.reliant('ability', ability, None, 'value', value, None)
         optionals = internal.defaults((ability, None), (value, None))
         cmd = f"ability {target} {optionals}".strip()
@@ -409,6 +411,17 @@ class BedrockRawCommands(UniversalRawCommands):
         return cmd
 
     def agent(self, mode: str, direction: str=None, slotNum: str=None, destSlotNum: str=None, pos: str=None, item: str=None, quantity: int=None, turnDirection: str=None):
+        """**Syntax:** *agent ...*
+        * *<mode\:move|attack|destroy|dropall|inspect|inspectdata|detect|detectredstone|till> <direction\:forward|back|left|right|up|down>*
+        * *<mode\:turn> <turnDirection\:left|right>*
+        * *<mode\:drop> <slotNum> <quantity> <directon\:forward|back|left|right|up|down>*
+        * *<mode\:transfer> <slotNum> <quantity> <destSlotNum>*
+        * *<mode\:create>*
+        * *<mode\:tp> <pos>*
+        * *<mode\:collect> <item>*
+        * *<mode\:place> <slotNum> <direction\:forward|back|left|right|up|down>*
+        * *<mode\:getitemcount|getitemspace|getitemdetail> <slotNum>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.agent"""
         internal.options(mode, ['move', 'turn', 'attack', 'destroy', 'drop', 'dropall', 'inspect', 'inspectdata', 'detect', 'detectredstone', 'transfer',
                                 'create', 'tp', 'collect', 'till', 'place', 'getitemcount', 'getitemspace', 'getitemdetail'])
         internal.multi_check_invalid_params(['move', 'attack', 'destroy', 'drop', 'dropall', 'inspect', 'inspectdata', 'detect', 'detectredstone', 'till', 'place'], 'mode', mode,
@@ -460,6 +473,8 @@ class BedrockRawCommands(UniversalRawCommands):
         return cmd
     
     def alwaysday(self, lock: bool=None):
+        """**Syntax:** *alwaysday [lock]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.alwaysday"""
         internal.defaults((lock, None))
         cmd = f"alwaysday {lock}".strip()
         self.fh.commands.append(cmd)
@@ -467,6 +482,8 @@ class BedrockRawCommands(UniversalRawCommands):
     daylock = alwaysday
 
     def camerashake_add(self, target: str, intensity: float=1, seconds: float=1, shakeType: str=None):
+        """**Syntax:** *camerashake add <target> [intensity] [seconds] [shakeType:positional|rotational]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.camerashake_add"""
         if shakeType is not None:
             internal.options(shakeType, ['positional', 'rotational'])
         internal.check_spaces('target', target)
@@ -476,12 +493,18 @@ class BedrockRawCommands(UniversalRawCommands):
         return cmd
 
     def camerashake_stop(self, target: str):
+        """**Syntax:** *camerashake stop <target>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.camerashake_stop"""
         internal.check_spaces('target', target)
         cmd = f"camerashake stop {target}"
         self.fh.commands.append(cmd)
         return cmd
 
     def changesetting(self, allow_cheats: bool=None, difficulty: Union[str, int]=None):
+        """**Syntax:** *changesetting ...*
+        * *allow-cheats <allow_cheats>*
+        * *difficulty <difficulty>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.changesetting"""
         if difficulty is not None:
             internal.options(difficulty, ['peaceful', 'easy', 'normal', 'hard', 'p', 'e', 'n', 'h', 0, 1, 2, 3])
         value = internal.pick_one_arg(
@@ -495,16 +518,22 @@ class BedrockRawCommands(UniversalRawCommands):
         return cmd
 
     def clearspawnpoint(self, target: str):
+        """**Syntax:** *clearspawnpoint <target>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.clearspawnpoint"""
         internal.check_spaces('target', target)
         cmd = f"clearspawnpoint {target}"
         self.fh.commands.append(cmd)
         return cmd
 
     def closewebsocket(self):
+        """**Syntax:** *closewebsocket*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.closewebsocket"""
         self.fh.commands.append("closewebsocket")
         return "closewebsocket"
 
     def connect(self, serverUri: str):
+        """**Syntax:** *connect <serverUri>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.connect"""
         cmd = f"connect {serverUri}"
         self.fh.commands.append(cmd)
         return cmd
@@ -515,12 +544,16 @@ class BedrockRawCommands(UniversalRawCommands):
     # enableencryption
 
     def event(self, target: str, event: str):
+        """**Syntax:** *event <target> <event>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.event"""
         internal.check_spaces('target', target)
         cmd = f"event entity {target} {event}"
         self.fh.commands.append(cmd)
         return cmd
 
     def fog(self, target: str, mode: str, userProvidedId: str, fogId: str=None):
+        """**Syntax:** *fog <target> <mode\:push|pop|remove> <mode=push:fogId> <userProvidedId>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.fog"""
         internal.check_spaces('target', target)
         internal.options(mode, ['push', 'pop', 'remove'])
         internal.check_invalid_params('push', 'mode', mode,
@@ -535,16 +568,22 @@ class BedrockRawCommands(UniversalRawCommands):
         return cmd
 
     def gametest_runthis(self):
+        """**Syntax:** *gametest runthis*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.gametest_runthis"""
         self.fh.commands.append('gametest runthis')
         return 'gametest runthis'
 
     def gametest_run(self, name: str, rotationSteps: int=None):
+        """**Syntax:** *gametest run <name> [rotationSteps]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.gametest_run"""
         optionals = internal.defaults((rotationSteps, None))
         cmd = f"gametest run {name} {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd
 
     def gametest_runall(self, tag: str, rotationSteps: int=None):
+        """**Syntax:** *gametest runall <tag> [rotationSteps]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.gametest_runall"""
         optionals = internal.defaults((rotationSteps, None))
         cmd = f"gametest runall {tag} {optionals}".strip()
         self.fh.commands.append(cmd)
@@ -552,16 +591,22 @@ class BedrockRawCommands(UniversalRawCommands):
     gametest_runset = gametest_runall
 
     def gametest_clearall(self, radius: int=None):
+        """**Syntax:** *gametest [radius]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.gametest_clearall"""
         optionals = internal.defaults((radius, None))
         cmd = f"gametest clearall {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd
 
     def gametest_pos(self):
+        """**Syntax:** *gametest pos*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.gametest_pos"""
         self.fh.commands.append('gametest pos')
         return 'gametest pos'
 
     def gametest_create(self, name: str, width: int=None, height: int=None, depth: int=None):
+        """**Syntax:**  *gametest create <name> [width] [height] [depth]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.gametest_create"""
         internal.reliant('width', width, None, 'height', height, None)
         internal.reliant('height', height, None, 'depth', depth, None)
         optionals = internal.defaults((width, None), (height, None), (depth, None))
@@ -570,15 +615,21 @@ class BedrockRawCommands(UniversalRawCommands):
         return cmd
 
     def gametest_runthese(self):
+        """**Syntax:** *gametest runthese*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.gametest_runthese"""
         self.fh.commands.append('gametest runthese')
         return 'gametest runthese'
 
     def getchunkdata(self, dimension: str, chunkPos: str, height: int):
+        """**Syntax:** *getchunkdata <dimension> <chunkPos> <height>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.getchunkdata"""
         cmd = f"getchunkdata {dimension} {chunkPos} {height}".strip()
         self.fh.commands.append(cmd)
         return cmd
 
     def getchunks(self, dimension: str):
+        """**Syntax:** *getchunks <dimension>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.getchunks"""
         cmd = f"getchunks {dimension}".strip()
         self.fh.commands.append(cmd)
         return cmd
@@ -586,6 +637,8 @@ class BedrockRawCommands(UniversalRawCommands):
     # getlocalplayername
 
     def getspawnpoint(self, target: str):
+        """**Syntax:** *getspawnpoint <target>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.getspawnpoint"""
         cmd = f"getspawnpoint {target}".strip()
         self.fh.commands.append(cmd)
         return cmd
@@ -593,27 +646,37 @@ class BedrockRawCommands(UniversalRawCommands):
     #gettopsolidblock
 
     def globalpause(self, pause: bool):
+        """**Syntax:** *globalpause <pause>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.getspawnpoint"""
         cmd = f"globalpause {pause}".strip()
         self.fh.commands.append(cmd)
         return cmd
 
     def immutableworld(self, immutable: bool=None):
+        """**Syntax:** *immutableworld [immutable]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.immutableworld"""
         optionals = internal.defaults((immutable, None))
         cmd = f"immutableworld {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd
 
     def listd(self):
+        """**Syntax:** *listd*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.listd"""
         self.fh.commands.append("listd")
         return "listd"
 
     def mobevent(self, event: str, value: bool=None):
+        """**Syntax:** *mobevent <event> [value]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.mobevent"""
         optionals = internal.defaults((value, None))
         cmd = f"mobevent {event} {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd
 
     def music_add(self, name: str, volume: float=None, fadeSeconds: float=None, repeatMode: str=None):
+        """**Syntax:** *music add <name> [volume] [fadeSeconds] [repeatMode:loop|play_once]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.music_add"""
         internal.reliant('volume', volume, None, 'fadeSeconds', fadeSeconds, None)
         internal.reliant('fadeSeconds', fadeSeconds, None, 'repeatMode', repeatMode, None)
         if repeatMode is not None:
@@ -623,6 +686,8 @@ class BedrockRawCommands(UniversalRawCommands):
         return cmd
     
     def music_queue(self, name: str, volume: float=None, fadeSeconds: float=None, repeatMode: str=None):
+        """**Syntax:** *music queue <name> [volume] [fadeSeconds] [repeatMode:loop|play_once]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.music_queue"""
         internal.reliant('volume', volume, None, 'fadeSeconds', fadeSeconds, None)
         internal.reliant('fadeSeconds', fadeSeconds, None, 'repeatMode', repeatMode, None)
         if repeatMode is not None:
@@ -632,17 +697,23 @@ class BedrockRawCommands(UniversalRawCommands):
         return cmd
 
     def music_stop(self, fadeSeconds: float=None):
+        """**Syntax:** *music stop [fadeSeconds]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.music_stop"""
         optionals = internal.defaults((fadeSeconds, None))
         cmd = f"music stop {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd
 
     def music_volume(self, volume: float):
+        """**Syntax:** *music float <volume>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.music_volume"""
         cmd = f"music volume {volume}"
         self.fh.commands.append(cmd)
         return cmd
 
     def permissions(self, mode: str):
+        """**Syntax:** *permissions <mode\:list|reload>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.permissions"""
         internal.options(mode, ['list', 'reload'])
         cmd = f"permissions {mode}"
         self.fh.commands.append(cmd)
@@ -650,6 +721,8 @@ class BedrockRawCommands(UniversalRawCommands):
     ops = permissions
 
     def playanimation(self, target: str, animation: str, next_state: str=None, blend_out_time: float=None, stop_expression: str=None, controller: str=None):
+        """**Syntax:** *playanimation <target> <animation> [next_state] [blend_out_time] [stop_expression] [controller]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.playanimation"""
         internal.reliant('next_state', next_state, None, 'blend_out_time', blend_out_time, None)
         internal.reliant('blend_out_time', blend_out_time, None, 'stop_expression', stop_expression, None)
         internal.reliant('stop_expression', stop_expression, None, 'controller', controller, None)
@@ -659,11 +732,15 @@ class BedrockRawCommands(UniversalRawCommands):
         return cmd
 
     def querytarget(self, target: str):
+        """**Syntax:** *querytarget <target>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.querytarget"""
         cmd = f"querytaret {target}"
         self.fh.commands.append(cmd)
         return cmd
 
     def ride_start_riding(self, rider: str, ride: str, teleportWhich: str="teleport_rider", fillMode: str="until_full"):
+        """**Syntax:** *ride <rider> start_riding <ride> [teleportWhich:teleport_ride|teleport_rider] [fillMode:if_group_fits|until_full]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.ride_start_riding"""
         internal.options(teleportWhich, ['teleport_ride', 'teleport_rider'])
         internal.options(fillMode, ['if_group_fits', 'until_full'])
         optionals = internal.defaults((teleportWhich, "teleport_rider"), (fillMode, "until_full"))
@@ -672,16 +749,22 @@ class BedrockRawCommands(UniversalRawCommands):
         return cmd
 
     def ride_stop_riding(self, rider: str):
+        """**Syntax:** *ride <rider> stop_riding*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.ride_stop_riding"""
         cmd = f"ride {rider} stop_riding".strip()
         self.fh.commands.append(cmd)
         return cmd
 
     def ride_evict_riders(self, ride: str):
+        """**Syntax:** *ride <ride> evict_riders*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.ride_evict_riders"""
         cmd = f"ride {ride} evict_riders".strip()
         self.fh.commands.append(cmd)
         return cmd
 
     def ride_summon_rider(self, ride: str, entity: str, event: str=None, nameTag: str=None):
+        """**Syntax:** *ride <ride> summon_rider <entity> [event] [nameTag]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.ride_summon_rider"""
         internal.reliant('event', event, None, 'nameTag', nameTag, None)
         optionals = internal.defaults((event, None), (nameTag, None))
         cmd = f"ride {ride} summon_rider {entity} {optionals}".strip()
@@ -689,6 +772,8 @@ class BedrockRawCommands(UniversalRawCommands):
         return cmd
 
     def ride_summon_ride(self, rider: str, entity: str, rideMode: str='reassign_rides', event: str=None, nameTag: str=None):
+        """**Syntax:** *ride <rider> summon_ride <entity> [rideMode:skip_riders|no_ride_change|reassign_rides] [event] [nameTag]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.ride_summon_ride"""
         internal.reliant('event', event, None, 'nameTag', nameTag, None)
         internal.options(rideMode, ['skip_riders', 'no_ride_change', 'reassign_rides'])
         optionals = internal.defaults((rideMode, 'reassign_rides'), (event, None), (nameTag, None))
@@ -697,17 +782,23 @@ class BedrockRawCommands(UniversalRawCommands):
         return cmd
 
     def save(self, mode: str):
+        """**Syntax:** *save <mode\:hold|query|resume>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.save"""
         internal.options(mode, ['hold', 'query', 'resume'])
         cmd = f"save {mode}"
         self.fh.commands.append(cmd)
         return cmd
 
     def setmaxplayers(self, maxPlayers: int):
+        """**Syntax:** *setmaxplayers <maxPlayers>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.setmaxplayers"""
         cmd = f"setmaxplayers {maxPlayers}"
         self.fh.commands.append(cmd)
         return cmd
 
     def structure_save(self, name: str, pos1: str, pos2: str, includesEntities: bool=True, saveMode: str='disk', includesBlocks: bool=True):
+        """**Syntax:** *structure save <name> <pos1> <pos2> [includesEntities] [saveMode:disk|memory] [includesBlocks]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.structure_save"""
         internal.options(saveMode, ['disk', 'memory'])
         optionals = internal.defaults((includesEntities, True), (saveMode, 'disk'), (includesBlocks, True))
         cmd = f"structue save {name} {pos1} {pos2} {optionals}".strip()
@@ -716,6 +807,11 @@ class BedrockRawCommands(UniversalRawCommands):
 
     def structure_load(self, name: str, pos: str, rotation: str='0_degrees', mirror: str='none', animationMode: str=None, \
                        animationSeconds: float=1, includesEntities: bool=True, includesBlocks: bool=True, integrity: float=100, seed: str=None):
+        """**Syntax:** *structure load <name> <pos> [rotation:0_degrees|90_degrees|180_degrees|270_degrees] [mirror:x|z|xz|none] ...*
+        * *...*
+        * *[animationMode:block_by_block|layer_by_layer] [animationSeconds] ...*\n
+        *[includesEntities] [includesBlocks] [integrity] [seed]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.structure_load"""
         internal.options(rotation, ['0_degrees', '90_degrees', '180_degrees', '270_degrees'])
         internal.options(mirror, ['x', 'z', 'xz', 'none'])
         if animationMode is not None:
@@ -730,6 +826,8 @@ class BedrockRawCommands(UniversalRawCommands):
         return cmd
 
     def structure_delete(self, name: str):
+        """**Syntax:** *structure delete <name>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.structure_delete"""
         cmd = f"structure delete {name}"
         self.fh.commands.append(cmd)
         return cmd
@@ -737,17 +835,23 @@ class BedrockRawCommands(UniversalRawCommands):
     #takepicture
 
     def testfor(self, target: str):
+        """**Syntax:** *testfor <target>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.testfor"""
         cmd = f"testfor {target}"
         self.fh.commands.append(cmd)
         return cmd
 
     def testforblock(self, pos: str, name: str, dataValue: int=None):
+        """**Syntax:** *testforblock <pos> <name> [dataValue]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.testforblock"""
         optionals = internal.defaults((dataValue, None))
         cmd = f"testforblock {pos} {name} {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd
         
     def testforblocks(self, pos1: str, pos2: str, dest: str, mode: str='all'):
+        """**Syntax:** *testforblocks <pos1> <pos2> <dest> <mode\:all|masked>*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.testforblocks"""
         internal.options(mode, ['all', 'masked'])
         optionals = internal.defaults((mode, 'all'))
         cmd = f"testforblocks {pos1} {pos2} {dest} {optionals}".strip()
@@ -755,18 +859,26 @@ class BedrockRawCommands(UniversalRawCommands):
         return cmd
 
     def tickingarea_add_cuboid(self, pos1: str, pos2: str, name: str=None):
+        """**Syntax:** *tickingarea add <pos1> <pos2> [name]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.tickingarea_add_cuboid"""
         optionals = internal.defaults((name, None))
         cmd = f"tickingarea add {pos1} {pos2} {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd
 
     def tickingarea_add_circle(self, pos: str, radius: int, name: str=None):
+        """**Syntax:** *tickingarea add circle <pos> <radius> [name]*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.tickingarea_add_circle"""
         optionals = internal.defaults((name, None))
         cmd = f"tickingarea add circle {pos} {radius} {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd
 
     def tickingarea_remove(self, name: str=None, pos: str=None, all_: bool=False):
+        """**Syntax:** *tickingarea ...*
+        * *remove_all* if all_=True
+        * *<name/pos>* if all_=False\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.tickingarea_remove"""
         if not all_:
             name_pos = internal.pick_one_arg(
                 (name, None, 'name'),
@@ -780,6 +892,10 @@ class BedrockRawCommands(UniversalRawCommands):
         return cmd
 
     def tickingarea_list(self, all_dimensions: bool=False):
+        """**Syntax:** *tickingarea ...*
+        * *list all-dimensions* if all_dimensions=True
+        * *list* if all_dimensions=False\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.tickingarea_list"""
         if all_dimensions:
             cmd = "tickingarea list all-dimensions"
         else:
@@ -788,10 +904,14 @@ class BedrockRawCommands(UniversalRawCommands):
         return cmd
 
     def toggledownfall(self):
+        """**Syntax:** *toggledownfall*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.toggledownfall"""
         self.fh.commands.append('toggledownfall')
         return 'toggledownfall'
 
     def worldbuilder(self):
+        """**Syntax:** *worldbuilder*\n
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.worldbuilder"""
         self.fh.commands.append('worldbuilder')
         return 'worldbuilder'
     wb = worldbuilder
