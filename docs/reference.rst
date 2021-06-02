@@ -14,7 +14,8 @@ Syntax Guide
 * **[arg]** - Optional argument
 * **arg1/arg2** - Pick one argument
 * **arg:val1|val2** - Pick one value
-* **arg1=val:arg2** Only valid if another argument is a specific value
+* **arg1=val:arg2** - Only valid if another argument is a specific value
+* **{const <arg>}** - A group
 
 Pack
 ----
@@ -250,17 +251,6 @@ Function Handlers
       :param str rule: ``rule``
       :param value: ``value``
       :type value: bool or int
-      :returns: The command
-      :rtype: str
-
-   .. py:method:: seed()
-
-      Adds a ``seed`` command.
-
-      .. versionadded:: 0.1
-
-      **Syntax:** *seed*
-
       :returns: The command
       :rtype: str
 
@@ -2132,6 +2122,625 @@ Function Handlers
                  as = "@e[type=sheep]",
                  run = chargeCreepers
              )
+
+   .. py:method:: item(mode: str, slot: str, pos: str=None, target: str=None, replaceMode: str=None, item: str=None, count: int=None, sourcexyz: str=None, sourceentity: str=None, sourceSlot: str=None, modifier: str=None)
+      
+      Adds an ``item`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *item <mode:modify|replace> {block <pos>|entity <target>} <slot> ...*
+
+      * *<modifier>* if mode=modify
+      * *<replaceMode:with> <item> [count]* if mode=replace
+      * *<replaceMode:from> {block <sourcexyz>|entity <sourceentity>} <sourceSlot> [modifier]* if mode=replace
+
+      :param str mode: ``mode:modify|replace``
+      :param str pos: ``pos``
+      :param str target: ``target``
+      :param str replaceMode: ``replaceMode:with|from``
+      :param str item: ``item``
+      :param int coutn: ``count``
+      :param str sourcexyz: ``sourcexyz``
+      :param str sourceentiy: `sourceentity``
+      :param str sourceSlot: ``sourceSlot``
+      :param str modifier: ``modifier``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: advancement(task: str, target: str, mode: str, advancement: str=None, criterion: str=None)
+      
+      Adds an ``advancement`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *advancement <task:grant|revoke> <target> ...*
+
+      * *<mode:everything>*
+      * *<mode:only> <advancement> [criterion]*
+      * *<mode:from|through|until> <advancement>*
+      
+      :param str task: ``task:grant|revoke``
+      :param str target: ``target``
+      :param str mode: ``mode:everything|only|from|through|until``
+      :param str advancement: ``advancement``
+      :param str criterion: ``criterion``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: attribute(self, target: str, attribute: str, mode: str, scale: int=None, uuid: str=None, name: str=None, value: str=None, addMode: str=None)
+
+      Adds an ``attribute`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *attribute <target> <attribute> ...*
+
+      * *<mode:get|base(_)get> [scale]*
+      * *<mode:base(_)set> <value>*
+      * *<mode:modifier(_)add> <uuid> <name> <value> <addMode:add|multiply|multiply_base>
+      * *<mode:modifier(_)remove> <uuid>
+      * *<mode:modifier(_)value(_)get> <uuid> [scale]
+
+      :param str target: ``target``
+      :param str attribute: ``attribute``
+      :param str mode: ``mode:get|base(_)get|base(_)set|modifier(_)add|modifier(_)remove|modifier(_)value(_)get``
+      :param int scale: ``scale``
+      :param str uuid: ``uuid``
+      :param str name: ``name``
+      :param str value: ``value``
+      :param str addMode: ``addMode:add|multiply|multiply_base``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: ban(target: str, reason: str=None)
+
+      Adds a ``ban`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *ban <target> [reason]*
+
+      :param str target: ``target``
+      :param str reason: ``reason``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: ban_ip(target: str, reason: str=None)
+
+      Adds a ``ban-ip`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *ban-ip <target> [reason]*
+
+      :param str target: ``target``
+      :param str reason: ``reason``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: banlist(get="players")
+
+      Adds a ``banlist`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *banlist <get:players|ips>*
+
+      :param str get: ``get:players|ips``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: bossbar_add(barId: str, name: str)
+
+      Adds a ``bossbar add`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *bossbar add {barId} {name}*
+
+      :param str barId: ``barId``
+      :param str name: ``name``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: bossbar_get(barId: str, get: str)
+
+      Adds a ``bossbar get`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *bossbar get {barId} {get:max|players|value|visible}*
+
+      :param str barId: ``barId``
+      :param str get: ``get``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: bossbar_list()
+
+      Adds a ``bossbar list`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *bossbar list*
+
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: bossbar_remove(barId: str)
+
+      Adds a ``bossbar remove`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *bossbar remove <barId>*
+
+      :param str barId: ``barId``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: bossbar_set(barId: str, mode: str, color: str=None, maxv: int=None, name: str=None, target: str=None, style: str=None, value: int=None, visible: bool=None)
+
+      Adds a ``bossbar set`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *bossbar set <barId>*
+
+      * *<mode:color> <color:blue|green|pink|purple|red|white|yellow>*
+      * *<mode:max> <maxv>
+      * *<mode:name> <name>
+      * *<mode:players> [target]
+      * *<mode:style> <style:notched_6|notched_10|notched_12|notched_20|progress>
+      * *<mode:value> <value>
+      * *<mode:visible> <visible>
+
+      :param str barId: ``barId``
+      :param str mode: ``mode:color|max|name|players|style|value|visible``
+      :param str color: ``color:blue|green|pink|purple|red|white|yellow``
+      :param str maxv: ``maxv``
+      :param str name: ``name``
+      :param str target: ``target``
+      :param str style: ``style:notched_6|notched_10|notched_12|notched_20|progress``
+      :param str value: ``value``
+      :param str visible: ``visible``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: data_get(block: str=None, entity: str=None, storage: str=None, path: str=None, scale: float=None)
+
+      Adds a ``data get`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *data get {block <pos>|entity <target>|storage <storage>} [path] [scale]*
+
+      :param str block: ``block``
+      :param str entity: ``entity``
+      :param str storage: ``storage``
+      :param str path: ``path``
+      :param str scale: ``scale``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: data_remove(path: str, block: str=None, entity: str=None, storage: str=None)
+
+      Adds a ``data remove`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *data remove {block <pos>|entity <target>|storage <storage>} <path>*
+
+      :param str path: ``path``
+      :param str block: ``block``
+      :param str entity: ``entity``
+      :param str storage: ``storage``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: data_merge(nbt: dict, block: str=None, entity: str=None, storage: str=None)
+
+      Adds a ``data merge`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *data merge {block <pos>|entity <target>|storage <storage>} <nbt>*
+
+      :param str nbt: ``nbt``
+      :param str block: ``block``
+      :param str entity: ``entity``
+      :param str storage: ``storage``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: data_modify(self, mode: str, sourceMode: str, path: str, block: str=None, entity: str=None, storage: str=None, index: str=None, sourceBlock: str=None, sourceEntity: str=None, sourceStorage: str=None, sourcePath: str=None, value: str=None)
+
+      Adds a ``data modify`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *data modify {block <pos>|entity <target>|storage <storage>} <path> <mode:append|insert|merge|prepend|set> <mode=insert:index> ...*
+
+      * *<sourceMode:from> {block <sourcePos>|entity <sourceTarget>|storage <sourceStorage>} [sourcePath]*
+      * *<sourceMode:value> <value>*
+
+      :param str mode: ``mode:append|insert|merge|prepend|set``
+      :param str sourceMode: ``sourceMode:from|value``
+      :param str path: ``path``
+      :param str block: ``block``
+      :param str entity: ``entity``
+      :param str storage: ``storage``
+      :param str index: ``mode=insert:index``
+      :param str sourceBlock: ``sourceBlock``
+      :param str sourceEntity: ``sourceEntity``
+      :param str sourceStorage: ``sourceStorage`` 
+      :param str sourcePath: ``sourcePath``
+      :param str value: ``value``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: datapack(mode: str, name: str=None, priority: str=None, existing: str=None, listMode: str=None)
+
+      Adds a ``datapack`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *datapack ...*
+
+      * *<mode:disable> <name>*
+      * *<mode:enable> <name> [priority:first|last|before|after] [priority=before|after:existing]*
+      * *<mode:list> [listMode:available|enabled]*
+
+      :param str mode: ``mode:disable|enable|list``
+      :param str name: ``name``
+      :param str priority: ``priority:first|last|before|after``
+      :param str existing: ``existing``
+      :param str listMode: ``listMode:available|enabled``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: debug(mode: str)
+
+      Adds a ``debug`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *debug <mode:start|stop|report|function>*
+
+      :param str mode: ``mode:start|stop|report|function``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: defaultgamemode(mode: str)
+
+      Adds a ``defaultgamemode`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *defaultgamemode <mode:survival|creative|adventure|spectator>*
+
+      :param str mode: ``mode:survival|creative|adventure|spectator``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: forceload(mode: str, chunk: str=None, chunk2: str=None)
+
+      Adds a ``forceload`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *forceload ...*
+
+      * *<mode:add|remove> <chunk> [chunk2]*
+      * *<mode:remove(_)all>*
+      * *<mode:query> [chunk]*
+
+      :param str mode: ``mode:add|remove|remove_all|query``
+      :param str chunk: ``chunk``
+      :param str chunk2: ``chunk2``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: locatebiome(self, biomeId: str)
+
+      Adds a ``locatebiome`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *locatebiome <biomeId>*
+
+      :param str biomeId: ``biomeId``
+      :returns: The command
+      :rtype: str
+    
+   .. py:method:: loot(targetMode: str, sourceMode: str, targetPos: str=None, targetEntity: str=None, targetSlot: str=None, \
+                  targetCount: int=None, sourceLootTable: str=None, sourcePos: str=None, sourceEntity: str=None, sourceTool: str=None)
+      
+      Adds a ``loot`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *loot ...*
+
+      * *<targetMode:spawn> <targetPos>...*
+      * *<targetMode:replace> {entity <targetEntity>|block <targetPos>}...*
+      * *<targetMode:give> <targetEntity>...*
+      * *<targetMode:insert> <targetPos>...*
+
+      * *<sourceMode:fish> <sourceLootTable> <sourcePos> [sourceTool]*
+      * *<sourceMode:loot> <sourceLootTable>*
+      * *<sourceMode:kill> <sourceEntity>*
+      * *<sourceMode:mine> <sourcePos> [sourceTool]*
+
+      :param str targetMode: ``targetMode:spawn|replace|give|insert``
+      :param str targetPos: ``targetPos``
+      :param str targetEntity: ``targetEntity``
+      :param str targetSlot: ``targetSlot``
+      :param int targetCount: ``targetCount``
+      :param str sourceMode: ``sourceMode:fish|loot|kill|mine``
+      :param str sourceLootTable: ``sourceLootTable``
+      :param str sourcePos: ``sourcePos``
+      :param str sourceEntity: ``sourceEntity``
+      :param str sourceTool: ``sourceTool``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: pardon(target: str, reason: str=None)
+
+      Adds a ``pardon`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *pardon <target> [reason]*
+
+      :param str target: ``target``
+      :param str reason: ``reason``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: pardon_ip(target: str, reason: str=None)
+
+      Adds a ``pardon-ip`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *pardon-ip <target> [reason]*
+
+      :param str target: ``target``
+      :param str reason: ``reason``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: publish(port: int)
+
+      Adds a ``publish`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *publish <port>*
+
+      :param int port: ``port``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: recipe(mode: str, target: str, recipe: str)
+
+      Adds a ``recipe`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *recipe <mode:give|take> <target> <recipe>*
+
+      :param str mode: ``mode:give|take``
+      :param str target: ``target``
+      :param str recipe: ``recipe`` (can be *)
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: save_all(flush: bool=False)
+
+      Adds a ``save all`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:**
+
+      * *save-all flush* if flush=True
+      * *save-all* if flush=False
+
+      :param bool flush: ``flush``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: save_on()
+
+      Adds a ``save-on`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *save-on*
+
+      :param bool flush: ``flush``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: save_off()
+
+      Adds a ``save-off`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *save-off*
+
+      :param bool flush: ``flush``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: seed()
+
+      Adds a ``seed`` command.
+
+      .. versionadded:: 0.1
+
+      .. versionchanged:: 0.2
+         Shifted from :py:class:`UniversalRawCommands` to :py:class:`JavaRawCommands`
+
+      **Syntax:** *seed*
+
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: setidletimeout(mins: int)
+
+      Adds a ``setidletimeout`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *setidletimeout <mins>*
+
+      :param int mins: ``mins``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: spectate(target: str=None, spectator: str=None)
+
+      Adds a ``spectate`` command.
+
+      .. versionadded:: 0.2
+   
+      **Syntax:** *spectate [target] [spectator]*
+
+      :param str target: ``target``
+      :param str specttaor: ``spectator``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: team(mode: str, team: str=None, members: str=None, displayName: str=None, option: str=None, value=None)
+
+      Adds a ``team`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *team ...*
+
+      * *<mode:add> [displayName]*
+      * *<mode:empty|remove> <team>*
+      * *<mode:join> <team> [members]*
+      * *<mode:list> [team]*
+      * *<mode:modify> [team] ...*
+        
+        * *<option:collisionRule> <value:always|never|pushOtherTeams|pushOwnTeam>*
+        * *<option:color> <value:aqua|black|blue|gold|gray|green|light_purple|red|reset|yellow|white|dark_aqua|dark_blue|dark_gray|dark_green|dark_purle|dark_red>*
+        * *<option:deathMessageVisibility|nametagVisibility> <value:always|never|hideForOtherTeams|hideForOwnTeam>*
+        * *<option:friendlyFire|seeFriendlyInvisibles> <value:True|False>*
+        * *<option:displayName|prefix|suffix> <value>*
+
+      :param str mode: ``mode:add|empty|remove|join|list|team``
+      :param str team: ``team``
+      :param str members: ``members``
+      :param str displayName: ``displayName``
+      :param str option: ``option:collisionRule|color|deathMessageVisibility|nametagVisibility|friendlyFire|seeFriendlyInvisibles|displayName|prefix|suffix``
+      :param str value: ``value``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: teammsg(message: str)
+                  tm(message: str)
+      
+      Adds a ``teammsg`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *teammsg <message>*
+
+      :param str message: ``message``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: trigger(objective: str, mode: str=None, value: int=None)
+
+      Adds a ``trigger`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *trigger <objective> ...*
+
+      * *<mode:(None)>*
+      * *<mode:add|set> <value>*
+
+      :param str objective: ``objective``
+      :param str mode: ``mode``
+      :param inr value: ``value``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: worldborder_add(distance: float, duration: int=0)
+
+      Adds a ``worldborder add`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *worldborder add <distance> [duration]*
+
+      :param float distance: ``distance``
+      :param int duration: ``duration``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: worldborder_center(pos: str)
+
+      Adds a ``worldborder center`` command.
+
+      .. versionadded:: 0.2
+
+      **Syntax:** *worldborder center <pos>*
+
+      :param str pos: ``pos``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: worldborder_damage(damagePerBlock: float=None, distance: float=None)
+
+      Adds a ``worldborder damage`` command.
+
+      **Syntax:** *worldborder damage {amount <damagePerBlock>|buffer <distance>}*
+
+      :param str damagePerBlock: ``damagePerBlock``
+      :param str distance: ``distance``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: worldborder_get()
+
+      Adds a ``worldborder get`` command.
+
+      **Syntax:** *worldborder get*
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: worldborder_set(distance: float=None, duration: int=0)
+
+      Adds a ``worldborder set`` command.
+
+      **Syntax:** *worldborder set <distance> [duration]*
+
+      :param float distance: ``distance``
+      :param int duration: ``duration``
+      :returns: The command
+      :rtype: str
+
+   .. py:method:: worldborder_warning(distance: float=None, duration: int=None)
+
+      Adds a ``worldborder warning`` command.
+
+      **Syntax:** *worldborder warning {distance <distance>|time <duration>}
+
+      :param float distance: ``distance``
+      :param int duration: ``duration``
+      :returns: The command
+      :rtype: str
+
 
 Coords
 ------

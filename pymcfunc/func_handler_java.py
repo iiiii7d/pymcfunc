@@ -550,7 +550,7 @@ class JavaRawCommands(UniversalRawCommands):
             self.fh.commands.append(cmd.strip())
             return cmd.strip()
 
-    def item(self, mode: str, slot: str, pos: str=None, target: str=None, replaceMode: str=None, item: str=None, count: str=None, sourcexyz: str=None, sourceentity: str=None, sourceSlot: str=None, modifier: str=None):
+    def item(self, mode: str, slot: str, pos: str=None, target: str=None, replaceMode: str=None, item: str=None, count: int=None, sourcexyz: str=None, sourceentity: str=None, sourceSlot: str=None, modifier: str=None):
         internal.options(mode, ['modify', 'replace'])
         if mode == "modify" and modifier is None:
             raise errors.MissingError('modifier', 'mode', mode)
