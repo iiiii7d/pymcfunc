@@ -939,7 +939,7 @@ Function Handlers
 
       .. versionadded:: 0.2
 
-      **Syntax:** *alwaysday [lock]**
+      **Syntax:** *alwaysday [lock]*
 
       :param bool lock: ``lock``
       :return: The command
@@ -1001,7 +1001,7 @@ Function Handlers
       :returns: The command
       :rtype: str
 
-   .. py:method:: closwebsocket()
+   .. py:method:: closewebsocket()
 
       Adds a ``closewebsocket`` command.
 
@@ -1104,7 +1104,7 @@ Function Handlers
 
    .. py:method:: gametest_pos()
 
-      Adds a ``gametest pos``` command.
+      Adds a ``gametest pos`` command.
 
       .. versionadded:: 0.2
 
@@ -1297,7 +1297,7 @@ Function Handlers
 
       .. versionadded:: 0.2
 
-      **Syntax:** *playanimation <target> <animation> [next_state] [blend_out_time] [stop_expression] [controller]
+      **Syntax:** *playanimation <target> <animation> [next_state] [blend_out_time] [stop_expression] [controller]*
 
       :param str target: ``target``
       :param str animation: ``animation``
@@ -2142,7 +2142,7 @@ Function Handlers
       :param str item: ``item``
       :param int coutn: ``count``
       :param str sourcexyz: ``sourcexyz``
-      :param str sourceentiy: `sourceentity``
+      :param str sourceentity: ``sourceentity``
       :param str sourceSlot: ``sourceSlot``
       :param str modifier: ``modifier``
       :returns: The command
@@ -2237,7 +2237,7 @@ Function Handlers
 
       .. versionadded:: 0.2
 
-      **Syntax:** *bossbar add {barId} {name}*
+      **Syntax:** *bossbar add <barId> <name>*
 
       :param str barId: ``barId``
       :param str name: ``name``
@@ -2250,7 +2250,7 @@ Function Handlers
 
       .. versionadded:: 0.2
 
-      **Syntax:** *bossbar get {barId} {get:max|players|value|visible}*
+      **Syntax:** *bossbar get <barId> <get:max|players|value|visible>*
 
       :param str barId: ``barId``
       :param str get: ``get``
@@ -2289,12 +2289,12 @@ Function Handlers
       **Syntax:** *bossbar set <barId>*
 
       * *<mode:color> <color:blue|green|pink|purple|red|white|yellow>*
-      * *<mode:max> <maxv>
-      * *<mode:name> <name>
-      * *<mode:players> [target]
-      * *<mode:style> <style:notched_6|notched_10|notched_12|notched_20|progress>
-      * *<mode:value> <value>
-      * *<mode:visible> <visible>
+      * *<mode:max> <maxv>*
+      * *<mode:name> <name>*
+      * *<mode:players> [target]*
+      * *<mode:style> <style:notched_6|notched_10|notched_12|notched_20|progress>*
+      * *<mode:value> <value>*
+      * *<mode:visible> <visible>*
 
       :param str barId: ``barId``
       :param str mode: ``mode:color|max|name|players|style|value|visible``
@@ -2467,6 +2467,8 @@ Function Handlers
       * *<targetMode:replace> {entity <targetEntity>|block <targetPos>}...*
       * *<targetMode:give> <targetEntity>...*
       * *<targetMode:insert> <targetPos>...*
+
+      *...*
 
       * *<sourceMode:fish> <sourceLootTable> <sourcePos> [sourceTool]*
       * *<sourceMode:loot> <sourceLootTable>*
@@ -2704,6 +2706,8 @@ Function Handlers
 
       Adds a ``worldborder damage`` command.
 
+      .. versionadded:: 0.2
+
       **Syntax:** *worldborder damage {amount <damagePerBlock>|buffer <distance>}*
 
       :param str damagePerBlock: ``damagePerBlock``
@@ -2715,13 +2719,18 @@ Function Handlers
 
       Adds a ``worldborder get`` command.
 
+      .. versionadded:: 0.2
+
       **Syntax:** *worldborder get*
+
       :returns: The command
       :rtype: str
 
    .. py:method:: worldborder_set(distance: float=None, duration: int=0)
 
       Adds a ``worldborder set`` command.
+
+      .. versionadded:: 0.2
 
       **Syntax:** *worldborder set <distance> [duration]*
 
@@ -2734,7 +2743,9 @@ Function Handlers
 
       Adds a ``worldborder warning`` command.
 
-      **Syntax:** *worldborder warning {distance <distance>|time <duration>}
+      .. versionadded:: 0.2
+
+      **Syntax:** *worldborder warning {distance <distance>|time <duration>}*
 
       :param float distance: ``distance``
       :param int duration: ``duration``
