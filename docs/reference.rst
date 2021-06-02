@@ -1596,7 +1596,12 @@ Function Handlers
 
       Adds a ``worldbuilder`` command.
 
-      .. versio
+      .. versionadded:: 0.2
+
+      **Syntax:** *worldbuilder*
+
+      :returns: The command
+      :rtype: str
 
 
 .. py:class:: JavaFuncHandler(UniversalFuncHandler)
