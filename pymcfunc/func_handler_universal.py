@@ -6,6 +6,8 @@ import pymcfunc.errors as errors
 import pymcfunc.internal as internal
 from pymcfunc.selectors import UniversalSelectors
 
+_b = lambda x: 'true' if x == True else 'false' if x == False else x
+
 class UniversalFuncHandler:
     """The function handler which includes commands that are the same for both Java and Bedrock edition.
     More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalFuncHandler"""

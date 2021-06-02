@@ -6,6 +6,8 @@ import pymcfunc.internal as internal
 from pymcfunc.func_handler_universal import UniversalFuncHandler, UniversalRawCommands
 from pymcfunc.selectors import BedrockSelectors
 
+_b = lambda x: 'true' if x == True else 'false' if x == False else x
+
 class BedrockFuncHandler(UniversalFuncHandler):
     """The Beckrock Edition function handler.
     More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockFuncHandler"""
@@ -115,11 +117,11 @@ class BedrockRawCommands(UniversalRawCommands):
             rotation_facing = internal.pick_one_arg((rotation, None, 'rotation'), (facing, None, 'facing'))
             if rotation_facing is not None:
                 if facing is not None: rotation_facing = "facing "+rotation_facing
-                optionals = f"{rotation_facing} {internal.defaults((checkForBlocks, False))}"
+                optionals = f"{rotation_facing} {internal.defaults((_b(checkForBlocks), 'false'))}"
             else:
-                optionals = internal.defaults((checkForBlocks, False))
+                optionals = internal.defaults((_b(checkForBlocks), 'false'))
         else:
-            optionals = internal.defaults((checkForBlocks, False))
+            optionals = internal.defaults((_b(checkForBlocks), 'false'))
 
         cmd = f"teleport {target}{dest} {optionals}".strip()
         self.fh.commands.append(cmd)
@@ -143,7 +145,7 @@ class BedrockRawCommands(UniversalRawCommands):
         """**Syntax:** *<target> <effect> [seconds] [amplifier] [hideParticles]*\n
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.effect_give"""
         internal.check_spaces('target', target)
-        optionals = internal.defaults((seconds, 30), (amplifier, 0), (hideParticles, False))
+        optionals = internal.defaults((seconds, 30), (amplifier, 0), (_b(hideParticles), 'false'))
 
         cmd = f"effect {target} {effect} {optionals}".strip()
         self.fh.commands.append(cmd)
@@ -407,7 +409,7 @@ class BedrockRawCommands(UniversalRawCommands):
         """**Syntax:** *ability <target> [ability] [value]*\n
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.ability"""
         internal.reliant('ability', ability, None, 'value', value, None)
-        optionals = internal.defaults((ability, None), (value, None))
+        optionals = internal.defaults((ability, None), (_b(value), None))
         cmd = f"ability {target} {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd
@@ -477,8 +479,8 @@ class BedrockRawCommands(UniversalRawCommands):
     def alwaysday(self, lock: bool=None):
         """**Syntax:** *alwaysday [lock]*\n
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.alwaysday"""
-        internal.defaults((lock, None))
-        cmd = f"alwaysday {lock}".strip()
+        optionals = internal.defaults((_b(lock), None))
+        cmd = f"alwaysday {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd
     daylock = alwaysday
@@ -510,7 +512,7 @@ class BedrockRawCommands(UniversalRawCommands):
         if difficulty is not None:
             internal.options(difficulty, ['peaceful', 'easy', 'normal', 'hard', 'p', 'e', 'n', 'h', 0, 1, 2, 3])
         value = internal.pick_one_arg(
-            (allow_cheats, None, 'allow_cheats'),
+            (_b(allow_cheats), None, 'allow_cheats'),
             (difficulty, None, 'difficulty'),
             optional=False
         )
@@ -650,14 +652,14 @@ class BedrockRawCommands(UniversalRawCommands):
     def globalpause(self, pause: bool):
         """**Syntax:** *globalpause <pause>*\n
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.getspawnpoint"""
-        cmd = f"globalpause {pause}".strip()
+        cmd = f"globalpause {_b(pause)}".strip()
         self.fh.commands.append(cmd)
         return cmd
 
     def immutableworld(self, immutable: bool=None):
         """**Syntax:** *immutableworld [immutable]*\n
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.immutableworld"""
-        optionals = internal.defaults((immutable, None))
+        optionals = internal.defaults((_b(immutable), None))
         cmd = f"immutableworld {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd
@@ -671,7 +673,7 @@ class BedrockRawCommands(UniversalRawCommands):
     def mobevent(self, event: str, value: bool=None):
         """**Syntax:** *mobevent <event> [value]*\n
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.mobevent"""
-        optionals = internal.defaults((value, None))
+        optionals = internal.defaults((_b(value), None))
         cmd = f"mobevent {event} {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd
@@ -803,7 +805,7 @@ class BedrockRawCommands(UniversalRawCommands):
         """**Syntax:** *structure save <name> <pos1> <pos2> [includesEntities] [saveMode:disk|memory] [includesBlocks]*\n
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.structure_save"""
         internal.options(saveMode, ['disk', 'memory'])
-        optionals = internal.defaults((includesEntities, True), (saveMode, 'disk'), (includesBlocks, True))
+        optionals = internal.defaults((_b(includesEntities), 'true'), (saveMode, 'disk'), (_b(includesBlocks), 'true'))
         cmd = f"structue save {name} {pos1} {pos2} {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd
@@ -819,9 +821,9 @@ class BedrockRawCommands(UniversalRawCommands):
         internal.options(mirror, ['x', 'z', 'xz', 'none'])
         if animationMode is not None:
             internal.options(animationMode, ['block_by_block', 'layer_by_layer'])
-            optional_list = [(rotation, '0_degrees'), (mirror, 'none'), (animationMode, None), (animationSeconds, 1), (includesEntities, True), (includesBlocks, True), (integrity, 100), (seed, None)]
+            optional_list = [(rotation, '0_degrees'), (mirror, 'none'), (animationMode, None), (animationSeconds, 1), (_b(includesEntities), 'true'), (_b(includesBlocks), 'true'), (integrity, 100), (seed, None)]
         else:
-            optional_list = [(rotation, '0_degrees'), (mirror, 'none'), (includesEntities, True), (includesBlocks, True), (integrity, 100), (seed, None)]
+            optional_list = [(rotation, '0_degrees'), (mirror, 'none'), (_b(includesEntities), 'true'), (_b(includesBlocks), 'true'), (integrity, 100), (seed, None)]
 
         optionals = internal.defaults(*optional_list)
         cmd = f"structure load {name} {pos} {optionals}".strip()

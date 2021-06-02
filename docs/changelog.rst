@@ -1,6 +1,11 @@
 Changelog
 =========
 
+* **v0.3 ()**
+
+  * All booleans should be lowercase now
+  
+
 * **v0.2 (2/6/21)**
 
   * Added /advancement, /attribute, /ban, /ban-ip, /banlist, /bossbar, /data, /datapack, /debug,

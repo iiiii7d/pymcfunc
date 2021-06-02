@@ -6,6 +6,8 @@ import pymcfunc.internal as internal
 from pymcfunc.func_handler_universal import UniversalFuncHandler, UniversalRawCommands
 from pymcfunc.selectors import JavaSelectors
 
+_b = lambda x: 'true' if x == True else 'false' if x == False else x
+
 class JavaFuncHandler(UniversalFuncHandler):
     """The Java Edition function handler.
     More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFuncHandler"""
@@ -137,7 +139,7 @@ class JavaRawCommands(UniversalRawCommands):
         """**Syntax:** *effect give <target> <effect> [seconds] [amplifier] [hideParticles]*\n
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.effect_give"""
         internal.check_spaces('target', target)
-        optionals = internal.defaults((seconds, 30), (amplifier, 0), (hideParticles, False))
+        optionals = internal.defaults((seconds, 30), (amplifier, 0), (_b(hideParticles), 'false'))
 
         cmd = f"effect give {target} {effect} {optionals}".strip()
         self.fh.commands.append(cmd)
@@ -187,7 +189,7 @@ class JavaRawCommands(UniversalRawCommands):
         * *function <name> <duration> [mode:append|replace]*
         * *clear <name>*\n
         https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.schedule"""
-        internal.check_invalid_params(False, 'clear', clear, ('duration', duration, None), dep_mandatory=True)
+        internal.check_invalid_params('false', 'clear', _b(clear), ('duration', duration, None), dep_mandatory=True)
         if clear:
             cmd = f"schedule clear {name}".strip()
         else:
@@ -253,7 +255,7 @@ class JavaRawCommands(UniversalRawCommands):
             maxHeight = "under "+maxHeight+" "
         else:
             maxHeight = ""
-        cmd = f"spreadplayers {center} {dist} {maxRange} {maxHeight}{respectTeams} {target}"
+        cmd = f"spreadplayers {center} {dist} {maxRange} {maxHeight}{_b(respectTeams)} {target}"
         self.fh.commands.append(cmd)
         return cmd
 
@@ -754,7 +756,7 @@ class JavaRawCommands(UniversalRawCommands):
             (target, None, 'target'),
             (style, None, 'style'),
             (value, None, 'value'),
-            (visible, None, 'visible')
+            (_b(visible), None, 'visible')
         )
         cmd = f"bossbar set {barId} {mode} {v}".strip()
         self.fh.commands.append(cmd)
