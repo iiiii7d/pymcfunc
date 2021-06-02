@@ -30,7 +30,7 @@ class JavaRawCommands(UniversalRawCommands):
         """**Syntax:** *fill <pos1> <pos2> <block> [mode:destroy|hollow|keep|outline|replace] [mode=replace:filterPredicate]*\n
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.fill"""
         internal.options(mode, ['destroy', 'hollow', 'keep', 'outline', 'replace'])
-        if mode != 'replace' and filterPredicate != None:
+        if mode != 'replace' and filterPredicate is not None:
             raise errors.InvalidParameterError(mode, 'mode', filterPredicate, 'filterPredicate')
         optionals = internal.defaults((mode, "replace"), (filterPredicate, None))
 
@@ -43,9 +43,9 @@ class JavaRawCommands(UniversalRawCommands):
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.clone"""
         internal.options(maskMode, ['masked', 'filtered', 'replace'])
         internal.options(cloneMode, ['forced', 'move', 'normal'])
-        if maskMode != 'filtered' and filterPredicate != None:
+        if maskMode != 'filtered' and filterPredicate is not None:
             raise errors.InvalidParameterError(maskMode, 'maskMode', filterPredicate, 'filterPredicate')
-        if maskMode == 'filtered' and filterPredicate != None:
+        if maskMode == 'filtered' and filterPredicate is not None:
             optionals = f"filtered {filterPredicate} " + internal.defaults((cloneMode, "normal"))
         else:
             optionals = internal.defaults((maskMode, "replace"), (cloneMode, "normal"))
@@ -98,10 +98,10 @@ class JavaRawCommands(UniversalRawCommands):
         internal.check_invalid_params('entity', 'faceMode', faceMode, ('anchor', anchor, "eyes"))
         internal.reliant('destxyz', destxyz, None, 'rotation', rotation, None)
         internal.reliant('destxyz', destxyz, None, 'faceMode', faceMode, None)
-        if destentity == None:
-            if faceMode != None:
+        if destentity is None:
+            if faceMode is not None:
                 internal.options(faceMode, ['location', 'entity'])
-                if facing == None:
+                if facing is None:
                     raise ValueError("facing must not be None if faceMode is specified")
                 internal.options(anchor, ['eyes', 'feet'])
                 faceMode = "facing" if faceMode == "location" else "facing entity"
@@ -124,9 +124,9 @@ class JavaRawCommands(UniversalRawCommands):
         internal.options(measurement, ['points', 'levels'])
         internal.options(mode, ['add', 'set', 'query'])
         internal.multi_check_invalid_params(['add', 'set'], "mode", mode, ("amount", amount, None))
-        if mode != "query" and amount == None:
+        if mode != "query" and amount is None:
             raise ValueError("amount must not be None if mode is add or set")
-        amount = "" if amount == None else str(amount)+" "
+        amount = "" if amount is None else str(amount)+" "
         if mode != "query": measurement = internal.defaults((measurement, 'points'))
         cmd = f"experience {mode} {target} {amount}{measurement}".strip()
         self.fh.commands.append(cmd)
@@ -176,7 +176,7 @@ class JavaRawCommands(UniversalRawCommands):
         """**Syntax:** *particle <name> [params] [pos] [delta] <speed> <count> [mode:force|normal] [viewers]*\n
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.particle"""
         optionals = internal.defaults((mode, "normal"), (viewers, None))
-        if params != None:
+        if params is not None:
             name = f"{name} {params}"
         cmd = f"particle {name} {pos} {delta} {speed} {count} {optionals}".strip()
         self.fh.commands.append(cmd)
@@ -229,7 +229,7 @@ class JavaRawCommands(UniversalRawCommands):
     def difficulty(self, difficulty: str=None):
         """**Syntax:** *difficulty <difficulty>*\n
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.difficulty"""
-        if difficulty == None:
+        if difficulty is None:
             cmd = "difficulty"
         else:
             internal.options(difficulty, ['easy', 'hard', 'normal', 'peaceful', 'e', 'h', 'n', 'p'])
@@ -249,7 +249,7 @@ class JavaRawCommands(UniversalRawCommands):
         * *<respectTeams> <targets>*
         * *under <maxHeight> <respectTeams>*\n
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.spreadplayers"""
-        if maxHeight != None:
+        if maxHeight is not None:
             maxHeight = "under "+maxHeight+" "
         else:
             maxHeight = ""
@@ -268,7 +268,7 @@ class JavaRawCommands(UniversalRawCommands):
             ('target', target, None),
             dep_mandatory=True)
 
-        pos_target = target if target != None else pos
+        pos_target = target if target is not None else pos
         optionals = internal.defaults((count, 1))
         cmd = f"replaceitem {mode} {pos_target} {slot} {item} {optionals}"
         self.fh.commands.append(cmd)
@@ -286,14 +286,14 @@ class JavaRawCommands(UniversalRawCommands):
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.scoreboard_objectives"""
         internal.options(mode, ['add', 'list', 'modify_displayname', 'modify_rendertype', 'remove', 'setdisplay'])
         internal.multi_check_invalid_params(['add', 'modify_displayname', 'modify_rendertype', 'remove', 'setdisplay'], 'mode', mode, ('objective', objective, None))
-        if mode != 'setdisplay' and objective == None:
+        if mode != 'setdisplay' and objective is None:
             raise errors.MissingError('objective', 'mode', mode)
         internal.check_invalid_params('add', 'mode', mode, ('criterion', criterion, None), dep_mandatory=True)
         internal.multi_check_invalid_params(['add', 'modify_displayname'], 'mode', mode, ('displayName', displayName, None))
-        if mode != 'add' and displayName == None:
+        if mode != 'add' and displayName is None:
             raise errors.MissingError('displayName', 'mode', mode)
         internal.check_invalid_params('modify_rendertype', 'mode', mode, ('renderType', renderType, None), dep_mandatory=True)
-        if renderType != None:
+        if renderType is not None:
             internal.options(renderType, ['hearts', 'integer'])
         internal.check_invalid_params('setdisplay', 'mode', mode, ('slot', slot, None), dep_mandatory=True)
 
@@ -325,10 +325,10 @@ class JavaRawCommands(UniversalRawCommands):
         * *<mode\:operation> <target> <objective> <operation:+=|-=|*=|/=|%=|<|>|><> <source> <sourceObjective>*\n
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.scoreboard_players"""
         internal.options(mode, ['add', 'enable', 'get', 'list', 'operation', 'remove', 'reset', 'set'])
-        if mode in ['add', 'enable', 'get', 'operation', 'remove', 'reset', 'set'] and target == None:
+        if mode in ['add', 'enable', 'get', 'operation', 'remove', 'reset', 'set'] and target is None:
             raise errors.MissingError('target', 'mode', mode)
         internal.multi_check_invalid_params(['add', 'enable', 'get', 'operation', 'remove', 'reset', 'set'], 'mode', mode, ('objective', objective, None))
-        if mode in ['add', 'enable', 'get', 'operation', 'remove', 'set'] and objective == None:
+        if mode in ['add', 'enable', 'get', 'operation', 'remove', 'set'] and objective is None:
             raise errors.MissingError('objective', 'mode', mode)
         internal.multi_check_invalid_params(['add', 'remove', 'set'], 'mode', mode, ('score', score, None), dep_mandatory=True)
         internal.check_invalid_params('operation', 'mode', mode, 
@@ -336,7 +336,7 @@ class JavaRawCommands(UniversalRawCommands):
             ('source', source, None),
             ('sourceObjective', sourceObjective, None),
             dep_mandatory=True)
-        if operation != None:
+        if operation is not None:
             internal.options(operation, ['+=', '-=', '*=', '/=', '%=', '<', '>', '><'])
 
         if mode == "add":
@@ -552,12 +552,12 @@ class JavaRawCommands(UniversalRawCommands):
 
     def item(self, mode: str, slot: str, pos: str=None, target: str=None, replaceMode: str=None, item: str=None, count: str=None, sourcexyz: str=None, sourceentity: str=None, sourceSlot: str=None, modifier: str=None):
         internal.options(mode, ['modify', 'replace'])
-        if mode == "modify" and modifier == None:
+        if mode == "modify" and modifier is None:
             raise errors.MissingError('modifier', 'mode', mode)
         
         internal.check_invalid_params('replace', 'mode', mode,
             ('replaceMode', replaceMode, None))
-        if replaceMode != None:
+        if replaceMode is not None:
             internal.options(replaceMode, ['from', 'with'])
         internal.check_invalid_params('with', 'replaceMode', replaceMode,
             ('item', item, None),
@@ -572,7 +572,7 @@ class JavaRawCommands(UniversalRawCommands):
 
         target_pos = internal.pick_one_arg((target, None, 'target'), (pos, None, 'pos'), optional=False)
         
-        target_pos = ("block " if pos != None else "entity ") + target_pos
+        target_pos = ("block " if pos is not None else "entity ") + target_pos
         
 
         if mode == "modify":
@@ -582,7 +582,7 @@ class JavaRawCommands(UniversalRawCommands):
             suffix = f"with {item} {optionals}"
         else:
             source = internal.pick_one_arg((sourcexyz, None, 'sourcexyz'), (sourceentity, None, 'sourceentity'), optional=True)
-            source = ("block " if sourcexyz != None else "entity ") + source
+            source = ("block " if sourcexyz is not None else "entity ") + source
             optionals = internal.defaults((modifier, None))
             suffix = f"from {source} {sourceSlot} {optionals}"
 
@@ -621,7 +621,7 @@ class JavaRawCommands(UniversalRawCommands):
         internal.multi_check_invalid_params(['base_set', 'modifier_add'], 'mode', mode,
             ('value', value, None),
             dep_mandatory=True)
-        if addMode != None:
+        if addMode is not None:
             internal.options(addMode, ['add', 'multiply', 'multiply_base'])
         
         if mode == "modifier_add":
@@ -685,7 +685,7 @@ class JavaRawCommands(UniversalRawCommands):
         internal.check_invalid_params('color', 'mode', mode,
             ('color', color, None),
             dep_mandatory=True)
-        if color != None:
+        if color is not None:
             internal.options(color, ['blue', 'green', 'pink', 'purple', 'red', 'white', 'yellow'])
         internal.check_invalid_params('max', 'mode', mode,
             ('maxv', maxv, None),
@@ -698,7 +698,7 @@ class JavaRawCommands(UniversalRawCommands):
         internal.check_invalid_params('style', 'mode', mode,
             ('style', style, None),
             dep_mandatory=True)
-        if style != None:
+        if style is not None:
             internal.options(style, ['notched_6', 'notched_10', 'notched_12', 'notched_20', 'progress'])
         internal.check_invalid_params('value', 'mode', mode,
             ('value', value, None),
@@ -727,7 +727,7 @@ class JavaRawCommands(UniversalRawCommands):
             (storage, None, 'storage'),
             optional=False
         )
-        target = ('block ' if block != None else 'entity ' if entity != None else 'storage') + target
+        target = ('block ' if block is not None else 'entity ' if entity is not None else 'storage') + target
         internal.reliant('path', path, None, 'scale', scale, None)
         optionals = internal.defaults((path, None), (scale, None))
 
@@ -742,7 +742,7 @@ class JavaRawCommands(UniversalRawCommands):
             (storage, None, 'storage'),
             optional=False
         )
-        target = ('block ' if block != None else 'entity ' if entity != None else 'storage') + target
+        target = ('block ' if block is not None else 'entity ' if entity is not None else 'storage') + target
         cmd = f"data get {target} {path}".strip()
         self.fh.commands.append(cmd)
         return cmd
@@ -754,7 +754,7 @@ class JavaRawCommands(UniversalRawCommands):
             (storage, None, 'storage'),
             optional=False
         )
-        target = ('block ' if block != None else 'entity ' if entity != None else 'storage') + target
+        target = ('block ' if block is not None else 'entity ' if entity is not None else 'storage') + target
         cmd = f"data merge {target} {json.dumps(nbt)}".strip()
         self.fh.commands.append(cmd)
         return cmd
@@ -791,8 +791,8 @@ class JavaRawCommands(UniversalRawCommands):
             suffix = value
         if mode == "index":
             mode = f"{mode} {index}"
-        target = ('block ' if block != None else 'entity ' if entity != None else 'storage') + target
-        source = ('block ' if sourceBlock != None else 'entity ' if sourceEntity != None else 'storage') + source
+        target = ('block ' if block is not None else 'entity ' if entity is not None else 'storage') + target
+        source = ('block ' if sourceBlock is not None else 'entity ' if sourceEntity is not None else 'storage') + source
         cmd = f"data modify {target} {path} {mode} {sourceMode} {suffix}"
         self.fh.commands.append(cmd)
         return cmd
@@ -805,7 +805,7 @@ class JavaRawCommands(UniversalRawCommands):
         internal.check_invalid_params('enable', 'mode', mode,
             ('priority', priority, None),
             dep_mandatory=None)
-        if priority != None:
+        if priority is not None:
             internal.options(priority, ['first', 'last', 'before', 'after'])
         internal.multi_check_invalid_params(['before', 'after'], 'priority', priority,
             ('existing', existing, None),
@@ -813,7 +813,7 @@ class JavaRawCommands(UniversalRawCommands):
         internal.check_invalid_params('list', 'mode', listMode,
             ('listMode', listMode, None),
             dep_mandatory=True)
-        if listMode != None:
+        if listMode is not None:
             internal.options(listMode, ['available', 'ended'])
 
         if mode == "list":
@@ -843,7 +843,7 @@ class JavaRawCommands(UniversalRawCommands):
         internal.options(mode, ['add', 'remove', 'remove_all', 'query'])
         internal.multi_check_invalid_params(['add', 'remove', 'query'], 'mode', mode,
             ('chunk', chunk, None))
-        if mode in ['add', 'remove'] and chunk == None:
+        if mode in ['add', 'remove'] and chunk is None:
             raise errors.MissingError('chunk', 'mode', mode)
         internal.multi_check_invalid_params(['add', 'remove'], 'mode', mode,
             ('chunk2', chunk2, None))
@@ -871,11 +871,11 @@ class JavaRawCommands(UniversalRawCommands):
         internal.options(targetMode, ['spawn', 'replace', 'give', 'insert'])
         internal.multi_check_invalid_params(['spawn', 'replace', 'insert'], 'targetMode', targetMode,
             ('targetPos', targetPos, None))
-        if targetMode in ['spawn', 'insert'] and targetPos == None:
+        if targetMode in ['spawn', 'insert'] and targetPos is None:
             raise errors.MissingError('targetPos', 'targetMode', targetMode)
         internal.multi_check_invalid_params(['give', 'replace'], 'targetMode', targetMode,
             ('targetEntity', targetEntity, None))
-        if targetMode == 'give' and targetEntity == None:
+        if targetMode == 'give' and targetEntity is None:
             raise errors.MissingError('targetEntity', 'targetMode', targetMode)
         internal.check_invalid_params('replace', 'targetMode', targetMode,
             ('targetSlot', targetSlot, None),
@@ -886,7 +886,7 @@ class JavaRawCommands(UniversalRawCommands):
             (targetPos, None, 'targetPos'),
             (targetEntity, None, 'targetEntity')
         )
-        targetPosEntity = ('block ' if targetPos != None else 'entity ') + targetPosEntity
+        targetPosEntity = ('block ' if targetPos is not None else 'entity ') + targetPosEntity
 
         if targetMode in ['spawn', 'insert']:
             target = f"{targetMode}, {targetPos}".strip()
@@ -976,11 +976,11 @@ class JavaRawCommands(UniversalRawCommands):
         internal.options(mode, ['add', 'empty', 'join', 'leave', 'list', 'modify', 'remove'])
         internal.multi_check_invalid_params(['add', 'empty', 'join', 'list', 'modify', 'remove'], 'mode', mode,
             ('team', team, None))
-        if mode in ['add', 'empty', 'join', 'modify', 'remove'] and team == None:
+        if mode in ['add', 'empty', 'join', 'modify', 'remove'] and team is None:
             raise errors.MissingError('team', 'mode', mode)
         internal.multi_check_invalid_params(['join', 'leave'], 'mode', mode,
             ('members', members, None))
-        if mode == 'leave' and members == None:
+        if mode == 'leave' and members is None:
             raise errors.MissingError('members', 'mode', mode)
         internal.check_invalid_params('add', 'mode', mode,
             ('displayName', displayName, None))
@@ -988,7 +988,7 @@ class JavaRawCommands(UniversalRawCommands):
             ('option', option, None),
             ('value', value, None),
             dep_mandatory=True)
-        if option != None:
+        if option is not None:
             internal.options(option, ['collisionRule', 'color', 'deathMessageVisibility', 'displayName', 'friendlyFire', 'nametagVisibility', 'prefix', 'seeFriendlyInvisibles', 'suffix'])
             VALS = {
                 "collisionRule": ['always', 'never', 'pushOtherTeams', 'pushOwnTeam'],
@@ -1027,7 +1027,7 @@ class JavaRawCommands(UniversalRawCommands):
     def trigger(self, objective: str, mode: str=None, value: int=None):
         internal.reliant('mode', mode, None, 'value', value, None)
         internal.unstated('mode', mode, ['add', 'set'], 'value', value, None)
-        if mode != None:
+        if mode is not None:
             internal.options(mode, ['add', 'set'])
         optionals = internal.defaults((mode, None), (value, None))
         cmd = f"trigger {objective} {optionals}".strip()
@@ -1052,7 +1052,7 @@ class JavaRawCommands(UniversalRawCommands):
             optional=False
         )
 
-        middle = "amount" if damagePerBlock != None else "buffer"
+        middle = "amount" if damagePerBlock is not None else "buffer"
         cmd = f"worldborder damage {middle} {value}".strip()
         self.fh.commands.append(cmd)
         return cmd
@@ -1075,7 +1075,7 @@ class JavaRawCommands(UniversalRawCommands):
             optional=False
         )
 
-        middle = "distance" if distance != None else "time"
+        middle = "distance" if distance is not None else "time"
         cmd = f"worldborder warning {middle} {value}".strip()
         cmd = "worldborder get"
         self.fh.commands.append(cmd)

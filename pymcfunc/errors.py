@@ -7,7 +7,7 @@ class SpaceError(Exception):
 
 class OptionError(Exception):
     def __init__(self, choices, choice):
-        if choice != None:
+        if choice is not None:
             choice = "'"+str(choice)+"'"
         msg = f"Choices allowed: {', '.join(choices)} (Got '{choice}')"
         super().__init__(msg)

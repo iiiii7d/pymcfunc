@@ -139,7 +139,7 @@ class UniversalRawCommands:
         rulelist = itertools.chain.from_iterable(rules.values())
         internal.options(rule, rulelist)
 
-        if value != None:
+        if value is not None:
             other = int if isinstance(value, bool) else bool
             if rule in rules[other]:
                 raise ValueError(f"{rule} is of type {other.__name__} and not {type(value).__name__}")
@@ -271,7 +271,7 @@ class UniversalRawCommands:
         internal.multi_check_invalid_params(['add', 'remove'], 'mode', mode,
             ('target', target, None),
             dep_mandatory=True)
-        target = "" if target == None else target
+        target = "" if target is None else target
 
         cmd = f"whitelist {mode} {target}".strip()
         self.fh.commands.append(cmd)

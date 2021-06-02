@@ -72,14 +72,14 @@ class BedrockRawCommands(UniversalRawCommands):
     def summon(self, entity: str, pos: str="~ ~ ~", event: str=None, nameTag: str=None):
         """**Syntax:** *summon <entity> ...*\n
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.summon"""
-        if event == None:
+        if event is None:
             optionals = internal.defaults((pos, "~ ~ ~"))
             nameTag = internal.unspace(nameTag)
             cmd = f"summon {entity} {nameTag} {optionals}".strip()
         else:
             optionals = internal.defaults((pos, "~ ~ ~"), (event, None), (nameTag, None))
-            if event != None: event = internal.unspace(event)
-            if nameTag != None: nameTag = internal.unspace(nameTag)
+            if event is not None: event = internal.unspace(event)
+            if nameTag is not None: nameTag = internal.unspace(nameTag)
             cmd = f"summon {entity} {optionals}".strip()
         
         self.fh.commands.append(cmd)
@@ -109,10 +109,10 @@ class BedrockRawCommands(UniversalRawCommands):
         internal.check_spaces('target', target)
         dest = internal.pick_one_arg((destxyz, None, 'destxyz'), (destentity, None, 'destentity'), optional=False)
         target = "" if target == "@s" else target+" "
-        if destentity == None:
+        if destentity is None:
             rotation_facing = internal.pick_one_arg((rotation, None, 'rotation'), (facing, None, 'facing'))
-            if rotation_facing != None:
-                if facing != None: rotation_facing = "facing "+rotation_facing
+            if rotation_facing is not None:
+                if facing is not None: rotation_facing = "facing "+rotation_facing
                 optionals = f"{rotation_facing} {internal.defaults((checkForBlocks, False))}"
             else:
                 optionals = internal.defaults((checkForBlocks, False))
@@ -275,15 +275,15 @@ class BedrockRawCommands(UniversalRawCommands):
             ('target', target, None),
             ('slotType', slotType, None),
             dep_mandatory=True)
-        if slotType == None and mode == "block":
+        if slotType is None and mode == "block":
             slotType = "slot.container"
-        if itemHandling == None:
+        if itemHandling is None:
             itemHandling = ""
         else:
             internal.options(itemHandling, ['destroy', 'keep'])
             itemHandling += " "
-        if components != None: components = json.dumps(components)
-        pos_target = target if target != None else pos
+        if components is not None: components = json.dumps(components)
+        pos_target = target if target is not None else pos
         optionals = internal.defaults((amount, 1), (data, 0), (components, None))
 
         cmd = f"replaceitem {mode} {pos_target} {slotType} {slotId} {itemHandling}{itemName} {optionals}".strip()
@@ -301,14 +301,14 @@ class BedrockRawCommands(UniversalRawCommands):
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.scoreboard_objectives"""
         internal.options(mode, ['add', 'list', 'remove', 'setdisplay'])
         internal.multi_check_invalid_params(['add', 'remove', 'setdisplay'], 'mode', mode, ('objective', objective, None))
-        if mode in ['add', 'remove'] and objective == None:
+        if mode in ['add', 'remove'] and objective is None:
             raise errors.MissingError('objective', 'mode', mode)
         internal.check_invalid_params('add', 'mode', mode, ('displayName', displayName, None), dep_mandatory=True)
         internal.check_invalid_params('setdisplay', 'mode', mode, ('slot', slot, None), dep_mandatory=True)
-        if slot != None:
+        if slot is not None:
             internal.options(slot, ['list', 'sidebar', 'belowname'])
             internal.multi_check_invalid_params(['list', 'sidebar'], 'mode', mode, ('sortOrder', sortOrder, None))
-            if sortOrder != None:
+            if sortOrder is not None:
                 internal.options(sortOrder, ['ascending', 'descending'])
         
         if mode == "add":
@@ -335,10 +335,10 @@ class BedrockRawCommands(UniversalRawCommands):
         * *<mod\:operation> <target> <objective> <operation:+=|-=|*=|/=|%=|<|>|><> <selector> <selectorObjective>\n
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockRawCommands.scoreboard_players"""
         internal.options(mode, ['list', 'reset', 'test', 'random', 'set', 'add', 'remove', 'operation'])
-        if mode in ['reset', 'test', 'random', 'set', 'add', 'remove', 'operation'] and target == None:
+        if mode in ['reset', 'test', 'random', 'set', 'add', 'remove', 'operation'] and target is None:
             raise errors.MissingError('target', 'mode', mode)
         internal.multi_check_invalid_params(['reset', 'test', 'random', 'set', 'add', 'remove', 'operation'], 'mode', mode, ('objective', objective, None))
-        if mode in ['test', 'random', 'set', 'add', 'remove', 'operation'] and objective == None:
+        if mode in ['test', 'random', 'set', 'add', 'remove', 'operation'] and objective is None:
             raise errors.MissingError('objective', 'mode', mode)
         internal.multi_check_invalid_params(['test', 'random'], 'mode', mode,
             ('minv', minv, None),
@@ -353,7 +353,7 @@ class BedrockRawCommands(UniversalRawCommands):
             ('selector', selector, None),
             ('selectorObjective', selectorObjective, None),
             dep_mandatory=True)
-        if operation != None:
+        if operation is not None:
             internal.options(operation, ['+=', '-=', '*=', '/=', '%=', '<', '>', '><'])
 
         if mode == "list":
@@ -383,7 +383,7 @@ class BedrockRawCommands(UniversalRawCommands):
         cmd = f"execute {target} {pos} "
         internal.reliant('detectPos', detectPos, None, 'block', block, None)
         internal.reliant('block', block, None, 'data', data, None)
-        if detectPos != None:
+        if detectPos is not None:
             cmd += f"detect {detectPos} {block} {data} "
 
         sf = BedrockFuncHandler()
@@ -432,9 +432,9 @@ class BedrockRawCommands(UniversalRawCommands):
         internal.check_invalid_params('turn', 'mode', mode,
             ('turnDirection', turnDirection, None),
             dep_mandatory=True)
-        if direction != None:
+        if direction is not None:
             internal.options(direction, ['forward', 'back', 'left', 'right', 'up', 'down'])
-        elif turnDirection != None:
+        elif turnDirection is not None:
             internal.options(direction, ['left', 'right'])
         
         if mode == 'turn':
@@ -467,7 +467,7 @@ class BedrockRawCommands(UniversalRawCommands):
     daylock = alwaysday
 
     def camerashake_add(self, target: str, intensity: float=1, seconds: float=1, shakeType: str=None):
-        if shakeType != None:
+        if shakeType is not None:
             internal.options(shakeType, ['positional', 'rotational'])
         internal.check_spaces('target', target)
         optionals = internal.defaults((intensity, 1), (seconds, 1), (shakeType, None))
@@ -482,14 +482,14 @@ class BedrockRawCommands(UniversalRawCommands):
         return cmd
 
     def changesetting(self, allow_cheats: bool=None, difficulty: Union[str, int]=None):
-        if difficulty != None:
+        if difficulty is not None:
             internal.options(difficulty, ['peaceful', 'easy', 'normal', 'hard', 'p', 'e', 'n', 'h', 0, 1, 2, 3])
         value = internal.pick_one_arg(
             (allow_cheats, None, 'allow_cheats'),
             (difficulty, None, 'difficulty'),
             optional=False
         )
-        middle = 'allow-cheats' if allow_cheats != None else difficulty
+        middle = 'allow-cheats' if allow_cheats is not None else difficulty
         cmd = f"changesetting {middle} {value}".strip()
         self.fh.commands.append(cmd)
         return cmd
@@ -616,7 +616,7 @@ class BedrockRawCommands(UniversalRawCommands):
     def music_add(self, name: str, volume: float=None, fadeSeconds: float=None, repeatMode: str=None):
         internal.reliant('volume', volume, None, 'fadeSeconds', fadeSeconds, None)
         internal.reliant('fadeSeconds', fadeSeconds, None, 'repeatMode', repeatMode, None)
-        if repeatMode != None:
+        if repeatMode is not None:
             internal.options(repeatMode, ['loop', 'play_once'])
         cmd = f"music add {name} {volume} {fadeSeconds} {repeatMode}".strip()
         self.fh.commands.append(cmd)
@@ -625,7 +625,7 @@ class BedrockRawCommands(UniversalRawCommands):
     def music_queue(self, name: str, volume: float=None, fadeSeconds: float=None, repeatMode: str=None):
         internal.reliant('volume', volume, None, 'fadeSeconds', fadeSeconds, None)
         internal.reliant('fadeSeconds', fadeSeconds, None, 'repeatMode', repeatMode, None)
-        if repeatMode != None:
+        if repeatMode is not None:
             internal.options(repeatMode, ['loop', 'play_once'])
         cmd = f"music queue {name} {volume} {fadeSeconds} {repeatMode}".strip()
         self.fh.commands.append(cmd)
@@ -717,7 +717,7 @@ class BedrockRawCommands(UniversalRawCommands):
                        animationSeconds: str=1, includesEntities: bool=True, includesBlocks: bool=True, integrity: float=100, seed: str=None):
         internal.options(rotation, ['0_degrees', '90_degrees', '180_degrees', '270_degrees'])
         internal.options(mirror, ['x', 'z', 'xz', 'none'])
-        if animationMode != None:
+        if animationMode is not None:
             internal.options(animationMode, ['block_by_block', 'layer_by_layer'])
             optional_list = [(rotation, '0_degrees'), (mirror, 'none'), (animationMode, None), (animationSeconds, 1), (includesEntities, True), (includesBlocks, True), (integrity, 100), (seed, None)]
         else:

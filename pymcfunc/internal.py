@@ -26,7 +26,7 @@ def pick_one_arg(*vars: tuple, optional=True):
     for v, dv, varname in vars:
         if v == dv:
             sameCount += 1
-            if dv != None:
+            if dv is not None:
                 defaultNotNone = dv
         elif v != dv and diffFound:
             raise errors.OnlyOneAllowed([i[2] for i in vars], f"'{varname}' and '{diffname}'")
@@ -35,9 +35,9 @@ def pick_one_arg(*vars: tuple, optional=True):
             diff = v
             diffname = varname
     
-    if diff == None and not optional:
+    if diff is None and not optional:
         raise errors.OptionError([i[2] for i in vars], None)
-    elif diff == None:
+    elif diff is None:
         diff = defaultNotNone
 
     return diff
@@ -75,7 +75,7 @@ def check_spaces(name, val):
         raise errors.SpaceError(name, val)
 
 def unspace(val):
-    if val != None and " " in val:
+    if val is not None and " " in val:
         return "\""+val+"\""
     else:
         return val
