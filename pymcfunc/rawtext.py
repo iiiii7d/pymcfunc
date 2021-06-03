@@ -2,7 +2,48 @@ import re
 import pymcfunc.internal as internal
 #from traceback import format_exc
 
-def rawtext(text: str, formatSymbol="§", contentSymbol="¶"):
+def _compress(out):
+    out = [i for i in out if isinstance(i, str) or 'text' not in i.keys() or ('text' in i.keys() and i['text'] != "")]
+    return out
+
+def _catchparam(c, text):
+        # c is where [ is
+        if c >= len(text) or text[c] != '[':
+            return None, None
+        catcher = ''
+        orig_c = int(c)
+        c += 1
+        pc = c-1
+        ppc = c-2
+        indent = 0
+        while not (text[c] == ']' and indent == 0) or (text[c] == ']' and (text[pc] == '\\' and text[ppc] != '\\')) and c < len(text):
+            catcher += text[c]
+            if text[c] == '[' and (text[pc] != '\\' or (text[pc] == '\\' and text[ppc] == '\\')): indent += 1
+            if text[c] == ']' and (text[pc] != '\\' or (text[pc] == '\\' and text[ppc] == '\\')): indent -= 1
+            c += 1
+            pc += 1
+            ppc += 1
+        if c == len(text):
+            return None, None
+
+        indent = 0
+        params = ['']
+        for i in range(len(catcher)):
+            ch = catcher[i]
+            prev_ch = catcher[i-1] if i-1 > 0 else None
+            prevprev_ch = catcher[i-2] if i-2 > 0 else None
+            next_ch = catcher[i+1] if i+1 < len(catcher) else None
+            if ch == '[' and (prev_ch != '\\' or (prev_ch == '\\' and prevprev_ch == '\\')): indent += 1
+            if ch == ']' and (prev_ch != '\\' or (prev_ch == '\\' and prevprev_ch == '\\')): indent -= 1
+            if ch == '|' and indent == 0 and (prev_ch != '\\' or (prev_ch == '\\' and prevprev_ch == '\\')):
+                params.append('')
+                continue
+            if ch == '\\' and (next_ch == '|' or next_ch == '\\') and (prev_ch != '\\' or (prev_ch == '\\' and prevprev_ch == '\\')) and indent == 0:
+                continue
+            params[-1] += ch
+        return params, c-orig_c+2
+
+def java(text: str, format_symbol="§", content_symbol="¶"):
     format_codes = {
         '#': ('color', None),
         '0': ('color', 'black'),
@@ -54,53 +95,21 @@ def rawtext(text: str, formatSymbol="§", contentSymbol="¶"):
             for k, v in d.items():
                 out[-1][k] = v
 
-    def catchparam(c):
-        # c is where [ is
-        if text[c] != '[':
-            return None, None
-        catcher = ''
-        orig_c = int(c)
-        c += 1
-        pc = c-1
-        ppc = c-2
-        indent = 0
-        while not (text[c] == ']' and indent == 0) or (text[c] == ']' and (text[pc] == '\\' and text[ppc] != '\\')) and c < len(text):
-            catcher += text[c]
-            if text[c] == '[' and (text[pc] != '\\' or (text[pc] == '\\' and text[ppc] == '\\')): indent += 1
-            if text[c] == ']' and (text[pc] != '\\' or (text[pc] == '\\' and text[ppc] == '\\')): indent -= 1
-            c += 1
-            pc += 1
-            ppc += 1
-        if c == len(text):
-            return None, None
-
-        indent = 0
-        params = ['']
-        for i in range(len(catcher)):
-            ch = catcher[i]
-            prev_ch = catcher[i-1] if i-1 > 0 else None
-            prevprev_ch = catcher[i-2] if i-2 > 0 else None
-            next_ch = catcher[i+1] if i+1 < len(catcher) else None
-            if ch == '[' and (prev_ch != '\\' or (prev_ch == '\\' and prevprev_ch == '\\')): indent += 1
-            if ch == ']' and (prev_ch != '\\' or (prev_ch == '\\' and prevprev_ch == '\\')): indent -= 1
-            if ch == '|' and indent == 0 and (prev_ch != '\\' or (prev_ch == '\\' and prevprev_ch == '\\')):
-                params.append('')
-                continue
-            if ch == '\\' and (next_ch == '|' or next_ch == '\\') and (prev_ch != '\\' or (prev_ch == '\\' and prevprev_ch == '\\')) and indent == 0:
-                continue
-            params[-1] += ch
-        return params, c-orig_c+2
-
     while cursor < len(text):
         char = text[cursor]
         next_char = text[cursor+1] if cursor+1 < len(text) else None
-        if char == formatSymbol:
-            params, length = catchparam(cursor+2)
+        if char == format_symbol:
+            if next_char == format_symbol:
+                out[-1]['text'] += char
+                cursor += 2
+                continue
+            params, length = _catchparam(cursor+2, text)
             if (params is None and next_char in format_params_required.split()) \
                or next_char not in format_codes.keys():
                 out[-1]['text'] += char
                 cursor += 1
                 continue
+
             if next_char == '#': #hex
                 hexc = text[cursor+2:cursor+2+6]
                 if re.search(r'^[0-9a-f]{6}$', hexc) is not None:
@@ -135,7 +144,7 @@ def rawtext(text: str, formatSymbol="§", contentSymbol="¶"):
                 v['value'] = params[0]
             elif k == 'hoverEvent':
                 if v['action'] == 'show_text':
-                    v['content'] = rawtext(params[0])
+                    v['content'] = java(params[0], format_symbol, content_symbol)
                 elif v['action'] == 'show_item':
                     v['content'] = {'id': params[0]}
                     if len(params) >= 2: v['content']['count'] = int(params[1])
@@ -146,18 +155,137 @@ def rawtext(text: str, formatSymbol="§", contentSymbol="¶"):
                         cursor += 2 + length
                         continue
                     v['content'] = {'type': params[0], 'id': params[1]}
-                    if len(params) >= 3: v['content']['name'] = rawtext(params[2])
+                    if len(params) >= 3: v['content']['name'] = java(params[2], format_symbol, content_symbol)
             elif next_char in 'ij':
                 v = params[0]
             elif next_char == 'h':
-                v = rawtext(params[0])
+                v = java(params[0], format_symbol, content_symbol)
             kwargs[k] = v
             append_out(kwargs)
             if length is None: length = 0
             cursor += 2 + length
             continue
+        
+        elif char == content_symbol:
+            if next_char == content_symbol:
+                out[-1]['text'] += char
+                cursor += 2
+                continue
+            params, length = _catchparam(cursor+2, text)
+            if params is None:
+                out[-1]['text'] += char
+                cursor += 1
+                continue
+            
+            if next_char == 't':
+                out.append({
+                    'translate': params[0],
+                    **kwargs
+                })
+                if len(params) > 1: out[-1]['with'] = [java(i, format_symbol, content_symbol) for i in params[1:]]
+            elif next_char == 's':
+                if len(params) < 2:
+                    if length is None: length = 0
+                    cursor += 2 + length
+                    continue
+                out.append({'score': {
+                    'name': params[0],
+                    'objective': params[1]},
+                    **kwargs
+                })
+                if len(params) > 2: out[-1]['score']['value'] = params[2]
+            elif next_char == 'e':
+                out.append({
+                    'selector': params[0],
+                    **kwargs
+                })
+                if len(params) > 1: out[-1]['separator'] = java(params[1], format_symbol, content_symbol)
+            elif next_char == 'k':
+                out.append({
+                    'keybind': params[0],
+                    **kwargs
+                })
+            elif next_char == 'n':
+                if len(params) < 3:
+                    if length is None: length = 0
+                    cursor += 2 + length
+                    continue
+                out.append({
+                    'nbt': params[0],
+                    params[1]: params[2],
+                    **kwargs
+                })
+                if len(params) > 3: out[-1]['interpret'] = params[3]
+                if len(params) > 4: out[-1]['separator'] = java(params[4], format_symbol, content_symbol)
+            else:
+                out[-1]['text'] += char
+                cursor += 1
+                continue
+
+            out.append({'text': ''})
+            cursor += 2 + length
+            continue
+            
         out[-1]['text'] += char
         cursor += 1
                 
-                    
+    out = _compress(out)
+    if len(out) == 2: out = out[1]
     return out
+
+def bedrock(text: str, content_symbol="¶"):
+    cursor = 0
+    kwargs = {}
+    out = [{'text': ''}]
+
+    while cursor < len(text):
+        char = text[cursor]
+        next_char = text[cursor+1] if cursor+1 < len(text) else None
+
+        if char == content_symbol:
+            if next_char == content_symbol:
+                out[-1]['text'] += char
+                cursor += 2
+                continue
+            params, length = _catchparam(cursor+2, text)
+            if params is None:
+                out[-1]['text'] += char
+                cursor += 1
+                continue
+            
+            if next_char == 't':
+                out.append({
+                    'translate': params[0],
+                    **kwargs
+                })
+                if len(params) > 1: out[-1]['with'] = [bedrock(i, content_symbol)['rawtext'][0] for i in params[1:]]
+            elif next_char == 's':
+                if len(params) < 2:
+                    if length is None: length = 0
+                    cursor += 2 + length
+                    continue
+                out.append({'score': {
+                    'name': params[0],
+                    'objective': params[1]},
+                    **kwargs
+                })
+                if len(params) > 2: out[-1]['score']['value'] = params[2]
+            elif next_char == 'e':
+                out.append({
+                    'selector': params[0],
+                    **kwargs
+                })
+            else:
+                out[-1]['text'] += char
+                cursor += 1
+                continue
+
+            out.append({'text': ''})
+            cursor += 2 + length
+            continue
+            
+        out[-1]['text'] += char
+        cursor += 1
+
+    out = _compress(out)
+    return {'rawtext': out}

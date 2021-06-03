@@ -215,15 +215,19 @@ def test_pytest():
     print(pmf.coords(4, "~5", 6))
 
     print(
-        pmf.rt.rawtext('§#abcdefHex §eyellow'),
-        pmf.rt.rawtext('§h[extra] Extras'),
-        pmf.rt.rawtext('§i[insert] Insertion §j[abc] Font'),
-        pmf.rt.rawtext('§k§l§m§n§o Formatting'),
-        pmf.rt.rawtext('§t[blah blah] ClickEvent'),
-        pmf.rt.rawtext('§z[minecraft:sheep|uuid|asdfasdf] HoverEvent'),
-        pmf.rt.rawtext('§l§oCancelling formatting§xlabc'),
-        pmf.rt.rawtext('§lResetting §rabc'),
+        pmf.rt.java('§#abcdefHex §eyellow'),
+        pmf.rt.java('§h[extra] Extras'),
+        pmf.rt.java('§i[insert] Insertion §j[abc] Font'),
+        pmf.rt.java('§k§l§m§n§o Formatting'),
+        pmf.rt.java('§t[blah blah] ClickEvent'),
+        pmf.rt.java('§z[minecraft:sheep|uuid|asdfasdf] HoverEvent'),
+        pmf.rt.java('§l§oCancelling formatting§xlabc'),
+        pmf.rt.java('§lResetting §rabc'),
+        pmf.rt.java('¶t[msg|a|b] ¶s[@p|abc] ¶e[@e] ¶k[keybind] ¶n[path|block|~ ~ ~]'),
         sep='\n'
+    )
+    print(
+        pmf.rt.bedrock('¶t[msg|a|b] ¶s[@p|abc] ¶e[@e] normal text')
     )
 
     print(time.time()-start)
