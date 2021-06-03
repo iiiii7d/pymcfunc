@@ -214,6 +214,18 @@ def test_pytest():
 
     print(pmf.coords(4, "~5", 6))
 
+    print(
+        pmf.rt.rawtext('§#abcdefHex §eyellow'),
+        pmf.rt.rawtext('§h[extra] Extras'),
+        pmf.rt.rawtext('§i[insert] Insertion §j[abc] Font'),
+        pmf.rt.rawtext('§k§l§m§n§o Formatting'),
+        pmf.rt.rawtext('§t[blah blah] ClickEvent'),
+        pmf.rt.rawtext('§z[minecraft:sheep|uuid|asdfasdf] HoverEvent'),
+        pmf.rt.rawtext('§l§oCancelling formatting§xlabc'),
+        pmf.rt.rawtext('§lResetting §rabc'),
+        sep='\n'
+    )
+
     print(time.time()-start)
 
 test_pytest()
