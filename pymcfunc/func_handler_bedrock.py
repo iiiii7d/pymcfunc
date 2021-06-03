@@ -920,3 +920,127 @@ class BedrockRawCommands(UniversalRawCommands):
         self.fh.commands.append('worldbuilder')
         return 'worldbuilder'
     wb = worldbuilder
+
+class BedrockVariable:
+    def __init__(self, fh, name: str, target: str):
+        self.fh = fh
+        self.name = name
+        self.target = target
+        self.fh.r.scoreboard_objectives('add', objective=name)
+        self.fh.r.scoreboard_players('set', target=target, objective=name, count=0)
+
+    def __iadd__(self, other: Union['BedrockVariable', int]):
+        if isinstance(other, type(self)):
+            self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
+                                         operation='+=', source=other.target, sourceObjective=other.name)
+        if other < 0:
+            self.__isub__(other)
+        else:
+            self.fh.r.scoreboard_players('add', target=self.target, objective=self.name, score=other)
+        return self
+
+    def __isub__(self, other: Union['BedrockVariable', int]):
+        if isinstance(other, type(self)):
+            self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
+                                         operation='-=', source=other.target, sourceObjective=other.name)
+        elif other < 0:
+            self.__iadd__(other)
+        else:
+            self.fh.r.scoreboard_players('remove', target=self.target, objective=self.name, score=other)
+        return self
+
+    def __imul__(self, other: Union['BedrockVariable', int]):
+        if isinstance(other, type(self)):
+            self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
+                                         operation='*=', source=other.target, sourceObjective=other.name)
+        else:
+            temp = type(self)(self.fh, self.name+'temp', self.target)
+            temp.set(other)
+            self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
+                                         operation='*=', source=temp.target, sourceObjective=temp.name)
+            del temp
+        return self
+
+    def __itruediv__(self, other: Union['BedrockVariable', int]):
+        if isinstance(other, type(self)):
+            self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
+                                         operation='*=', source=other.target, sourceObjective=other.name)
+        else:
+            temp = type(self)(self.fh, self.name+'temp', self.target)
+            temp.set(other)
+            self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
+                                         operation='/=', source=temp.target, sourceObjective=temp.name)
+            del temp
+        return self
+    __ifloordiv__ = __itruediv__
+
+    def __imod__(self, other: Union['BedrockVariable', int]):
+        if isinstance(other, type(self)):
+            self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
+                                         operation='%=', source=other.target, sourceObjective=other.name)
+        else:
+            temp = type(self)(self.fh, self.name+'temp', self.target)
+            temp.set(other)
+            self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
+                                         operation='%=', source=temp.target, sourceObjective=temp.name)
+            del temp
+        return self
+
+    def __del__(self):
+        self.fh.r.scoreboard_players('reset', target=self.target, objective=self.name)
+
+    @staticmethod
+    def _comparers(self, other, mode):
+        rangeTemplates = {
+            '=': f'{other}',
+            '<': f'..{other}',
+            '<=': f'..{other-1}',
+            '>': f'{other}..',
+            '>=': f'{other+1}',
+        }
+        return self.fh.rscoreboard_players('test', target=self.target, objective=self.name, )
+
+    def __eq__(self, other: Union['BedrockVariable', int]):
+        return self._comparers(self, other, '=')
+
+    def __lt__(self, other: Union['BedrockVariable', int]):
+        return self._comparers(self, other, '<')
+
+    def __le__(self, other: Union['BedrockVariable', int]):
+        return self._comparers(self, other, '<=')
+
+    def __gt__(self, other: Union['BedrockVariable', int]):
+        return self._comparers(self, other, '>')
+
+    def __ge__(self, other: Union['BedrockVariable', int]):
+        return self._comparers(self, other, '>=')
+
+    def in_range(self, r: Union[str, int]):
+        return self.__eq__(r)
+
+    def store(self, mode: str):
+        return {
+            'store': mode,
+            'mode': 'score',
+            'target': self.target,
+            'objective': self.name
+        }
+
+    def set(self, other: Union['BedrockVariable', int]):
+        if isinstance(other, type(self)):
+            self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
+                                         operation='=', source=other.target, sourceObjective=other.name)
+        else:
+            self.fh.r.scoreboard_players('set', target=self.target, objective=self.name, score=other)
+
+    def higher(self, other: 'BedrockVariable'):
+        self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
+                                     operation='>', source=other.target, sourceObjective=other.name)
+
+    def lower(self, other: 'BedrockVariable'):
+        self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
+                                     operation='<', source=other.target, sourceObjective=other.name)
+
+    def swap(self, other: 'BedrockVariable'):
+        self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
+                                     operation='><', source=other.target, sourceObjective=other.name)
