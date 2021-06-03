@@ -102,6 +102,24 @@ def test_pytest():
         f.r.worldborder_set(1, 2)
         f.r.worldborder_warning(3)
 
+        val = f.v('val', '@p')
+        val2 = f.v('val2', '@p', trigger=True)
+        val.swap(val2)
+        val += 2
+        val -= 2
+        val2 *= 2
+        val2 /= 2
+        val.higher(val2)
+        val2.lower(val)
+        val %= val2
+        f.r.execute(
+            if_=val > val2,
+            unless=val.in_range('3..4'),
+            store=val2.store('result')
+        )
+        del val
+        del val2
+
     b = pmf.Pack('b')
 
     @b.function

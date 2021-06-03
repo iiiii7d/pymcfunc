@@ -1,5 +1,6 @@
 import json
 import re
+from typing import Union
 
 import pymcfunc.errors as errors
 import pymcfunc.internal as internal
@@ -16,6 +17,9 @@ class JavaFuncHandler(UniversalFuncHandler):
     def __init__(self):
         self.commands = []
         self.r = JavaRawCommands(self)
+
+    def v(self, name: str, target: str, trigger: bool=False):
+        return JavaVariable(self, name, target, trigger=trigger)
 
 class JavaRawCommands(UniversalRawCommands):
     def setblock(self, pos: str, block: str, mode="replace"):
@@ -403,7 +407,7 @@ class JavaRawCommands(UniversalRawCommands):
             "store": str (result|success),
             "mode": str (block|bossbar|entity|score|storage),
             "pos": str (when mode=block),
-            "entity": str (when mode=entity,score,storage),
+            "target": str (when mode=entity,score,storage),
             "id": str (when mode=bossbar),
             "value": str (value|max when mode=bossbar),
             "objective": str (when mode=score),
@@ -513,10 +517,10 @@ class JavaRawCommands(UniversalRawCommands):
                 elif v['mode'] == "score":
                     internal.options(v['comparer'], ['<', '<=', '=', '>', '>=', 'matches'])
                     internal.check_spaces('target', v['target'])
-                    if v['comparer'] == "range":
-                        return f"{prefix} matches {v['range']} "
+                    if v['comparer'] == "matches":
+                        return f"{prefix} {v['target']} {v['objective']} matches {v['range']} "
                     else:
-                        return f"{prefix} {v['comparer']} {v['source']} {v['sourceObjective']} "
+                        return f"{prefix} {v['target']} {v['objective']} {v['comparer']} {v['source']} {v['sourceObjective']} "
             s_unless = s_if_
 
             @staticmethod
@@ -1216,3 +1220,146 @@ class JavaRawCommands(UniversalRawCommands):
         cmd = "worldborder get"
         self.fh.commands.append(cmd)
         return cmd
+
+class JavaVariable:
+    def __init__(self, fh, name: str, target: str, trigger: bool=False):
+        self.fh = fh
+        self.name = name
+        self.target = target
+        criterion = 'dummy' if not trigger else 'trigger'
+        self.fh.r.scoreboard_objectives('add', objective=name, criterion=criterion)
+        self.fh.r.scoreboard_players('set', target=target, objective=name, score=0)
+
+    def __iadd__(self, other: Union['JavaVariable', int]):
+        if isinstance(other, type(self)):
+            self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
+                                         operation='+=', source=other.target, sourceObjective=other.name)
+        if other < 0:
+            self.__isub__(other)
+        else:
+            self.fh.r.scoreboard_players('add', target=self.target, objective=self.name, score=other)
+        return self
+
+    def __isub__(self, other: Union['JavaVariable', int]):
+        if isinstance(other, type(self)):
+            self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
+                                         operation='-=', source=other.target, sourceObjective=other.name)
+        elif other < 0:
+            self.__iadd__(other)
+        else:
+            self.fh.r.scoreboard_players('remove', target=self.target, objective=self.name, score=other)
+        return self
+
+    def __imul__(self, other: Union['JavaVariable', int]):
+        if isinstance(other, type(self)):
+            self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
+                                         operation='*=', source=other.target, sourceObjective=other.name)
+        else:
+            temp = type(self)(self.fh, self.name+'temp', self.target)
+            temp.set(other)
+            self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
+                                         operation='*=', source=temp.target, sourceObjective=temp.name)
+            del temp
+        return self
+
+    def __itruediv__(self, other: Union['JavaVariable', int]):
+        if isinstance(other, type(self)):
+            self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
+                                         operation='*=', source=other.target, sourceObjective=other.name)
+        else:
+            temp = type(self)(self.fh, self.name+'temp', self.target)
+            temp.set(other)
+            self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
+                                         operation='/=', source=temp.target, sourceObjective=temp.name)
+            del temp
+        return self
+    __ifloordiv__ = __itruediv__
+
+    def __imod__(self, other: Union['JavaVariable', int]):
+        if isinstance(other, type(self)):
+            self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
+                                         operation='%=', source=other.target, sourceObjective=other.name)
+        else:
+            temp = type(self)(self.fh, self.name+'temp', self.target)
+            temp.set(other)
+            self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
+                                         operation='%=', source=temp.target, sourceObjective=temp.name)
+            del temp
+        return self
+
+    def __del__(self):
+        self.fh.r.scoreboard_players('reset', target=self.target, objective=self.name)
+
+    @staticmethod
+    def _comparers(self, other, mode):
+        if isinstance(other, type(self)):
+            return {
+                'mode': 'score',
+                'target': self.target,
+                'objective': self.name,
+                'comparer': mode,
+                'source': other.target,
+                'sourceObjective': other.name
+            }
+        else:
+            rangeTemplates = {
+                '=': f'{other}',
+                '<': f'..{other}',
+                '<=': f'..{other-1}',
+                '>': f'{other}..',
+                '>=': f'{other+1}',
+            } if not isinstance(other, str) else {
+                '=': f'{other}'
+            }
+            return {
+                'mode': 'score',
+                'target': self.target,
+                'objective': self.name,
+                'comparer': 'matches',
+                'range': rangeTemplates[mode]
+            }
+
+    def __eq__(self, other: Union['JavaVariable', int]):
+        return self._comparers(self, other, '=')
+
+    def __lt__(self, other: Union['JavaVariable', int]):
+        return self._comparers(self, other, '<')
+
+    def __le__(self, other: Union['JavaVariable', int]):
+        return self._comparers(self, other, '<=')
+
+    def __gt__(self, other: Union['JavaVariable', int]):
+        return self._comparers(self, other, '>')
+
+    def __ge__(self, other: Union['JavaVariable', int]):
+        return self._comparers(self, other, '>=')
+
+    def in_range(self, r: Union[str, int]):
+        return self.__eq__(r)
+
+    def store(self, mode: str):
+        return {
+            'store': mode,
+            'mode': 'score',
+            'target': self.target,
+            'objective': self.name
+        }
+
+    def set(self, other: Union['JavaVariable', int]):
+        if isinstance(other, type(self)):
+            self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
+                                         operation='=', source=other.target, sourceObjective=other.name)
+        else:
+            self.fh.r.scoreboard_players('set', target=self.target, objective=self.name, score=other)
+
+    def higher(self, other: 'JavaVariable'):
+        self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
+                                     operation='>', source=other.target, sourceObjective=other.name)
+
+    def lower(self, other: 'JavaVariable'):
+        self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
+                                     operation='<', source=other.target, sourceObjective=other.name)
+
+    def swap(self, other: 'JavaVariable'):
+        self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
+                                     operation='><', source=other.target, sourceObjective=other.name)

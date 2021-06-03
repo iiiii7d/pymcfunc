@@ -7,6 +7,7 @@ Changelog
   * Added raw text translators (``pymcfunc.rt.java()`` and ``pymcfunc.rt.bedrock()``)
   * Added ``pymcfunc.sel.cuboid()``
   * Added ``pymcfunc.UniversalFuncHandler.clear()`` and ``pymcfunc.UniversalFuncHandler.comment()``
+  * Added variables for Java Edition
 
 * **v0.2 (2/6/21)**
 

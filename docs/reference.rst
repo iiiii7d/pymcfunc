@@ -2062,7 +2062,7 @@ Function Handlers
              "store": str (result|success),
              "mode": str (block|bossbar|entity|score|storage),
              "pos": str (when mode=block),
-             "entity": str (when mode=entity,score,storage),
+             "target": str (when mode=entity,score,storage),
              "id": str (when mode=bossbar),
              "value": str (value|max when mode=bossbar),
              "objective": str (when mode=score),
