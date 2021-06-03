@@ -209,6 +209,7 @@ def test_pytest():
     print("======================")
     print(b.funcs['mcfuncbedrock'])
 
+    print(pmf.sel.cuboid((1, 2, 3), (4, 5, 6)))
     print(p.sel.e(distance=p.sel.range(4, 5)))
     print(b.sel.e(l=5))
 

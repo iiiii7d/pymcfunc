@@ -1,5 +1,7 @@
 from math import inf
 import json
+from typing import Sequence
+import re
 
 import pymcfunc.internal as internal
 import pymcfunc.errors as errors
@@ -126,3 +128,18 @@ class JavaSelectors(UniversalSelectors):
             raise ValueError(f"Invalid range")
         return result
         
+def cuboid(pos1: Sequence[int], pos2: Sequence[int], dims: str='xyz'):
+    if len(pos1) != len(pos2):
+        raise ValueError("Uneven no. of dimensions")
+    elif len(pos1) != len(dims) or len(pos2) != len(dims):
+        raise ValueError(f"Expected {len(dims)} dimensions, got {len(pos1)} and {len(pos2)}")
+    elif not re.search(r"^(?!.*(.).*\1)[xyz]+$", dims):
+        raise ValueError(f"Axes are invalid (Got '{dims}')")
+    out = {}
+    for dim, v1, v2 in zip(dims, pos1, pos2):
+        minv = min(v1, v2)
+        d = max(v1, v2) - minv
+        out[dim] = minv
+        out['d'+dim] = d
+    return out
+

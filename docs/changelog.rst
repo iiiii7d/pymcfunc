@@ -4,7 +4,8 @@ Changelog
 * **v0.3 ()**
 
   * All booleans should be lowercase now
-  
+  * Added raw text translators (``pmf.rt.java()`` and ``pmf.rt.bedrock()``)
+  * Added ``pmf.sel.cuboid()``
 
 * **v0.2 (2/6/21)**
 
