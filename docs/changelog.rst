@@ -4,8 +4,9 @@ Changelog
 * **v0.3 ()**
 
   * All booleans should be lowercase now
-  * Added raw text translators (``pmf.rt.java()`` and ``pmf.rt.bedrock()``)
-  * Added ``pmf.sel.cuboid()``
+  * Added raw text translators (``pymcfunc.rt.java()`` and ``pymcfunc.rt.bedrock()``)
+  * Added ``pymcfunc.sel.cuboid()``
+  * Added ``pymcfunc.UniversalFuncHandler.clear()`` and ``pymcfunc.UniversalFuncHandler.comment()``
 
 * **v0.2 (2/6/21)**
 

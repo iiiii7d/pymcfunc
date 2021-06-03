@@ -22,6 +22,12 @@ class UniversalFuncHandler:
         for i in self.commands:
             yield i
 
+    def clear(self):
+        self.commands = []
+
+    def comment(self, comment: str):
+        self.commands.append('# '+comment.strip())
+
 class UniversalRawCommands:
     """A container for raw Minecraft commands that are the same for both Java and Bedrock.
     More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands"""

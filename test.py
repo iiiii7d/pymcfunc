@@ -7,6 +7,8 @@ def test_pytest():
 
     @p.function
     def mcfuncjava(f: pmf.JavaFuncHandler):
+        f.clear()
+        f.comment("abcd")
         f.r.say('a')
         f.r.tell('@p', 'b')
         f.r.tellraw('@p', {})
@@ -104,6 +106,8 @@ def test_pytest():
 
     @b.function
     def mcfuncbedrock(f: pmf.BedrockFuncHandler):
+        f.clear()
+        f.comment("abcd")
         f.r.say('a')
         f.r.tell('@p', 'b')
         f.r.tellraw('@p', {})
