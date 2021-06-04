@@ -20,7 +20,7 @@ class JavaFuncHandler(UniversalFuncHandler):
 
     def v(self, name: str, target: str, trigger: bool=False):
         """Creates a variable.
-        More info: https://pymcfunc.readthedocs.io/en/latest/reference.html#pymcfunc.JavaFuncHandler.v"""
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFuncHandler.v"""
         return JavaVariable(self, name, target, trigger=trigger)
 
 class JavaRawCommands(UniversalRawCommands):
@@ -1225,7 +1225,7 @@ class JavaRawCommands(UniversalRawCommands):
 
 class JavaVariable:
     """Represents a variable in Java Edition.
-    More info: https://pymcfunc.readthedocs.io/en/latest/reference.html#pymcfunc.JavaVariable"""
+    More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaVariable"""
     def __init__(self, fh, name: str, target: str, trigger: bool=False):
         self.fh = fh
         self.name = name
@@ -1339,9 +1339,13 @@ class JavaVariable:
         return self._comparers(self, other, '>=')
 
     def in_range(self, r: Union[str, int]):
+        """For use in JavaRawCommands.execute(). Finds whether this variable is in a specified range.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaVariable.in_range"""
         return self.__eq__(r)
 
     def store(self, mode: str):
+        """For use in JavaRawCommands.execute(). Stores a result or success in this variable.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaVariable.store"""
         return {
             'store': mode,
             'mode': 'score',
@@ -1350,6 +1354,8 @@ class JavaVariable:
         }
 
     def set(self, other: Union['JavaVariable', int]):
+        """Sets this variable to a value or that of another variable.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaVariable.set"""
         if isinstance(other, type(self)):
             self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
                                          operation='=', source=other.target, sourceObjective=other.name)
@@ -1357,16 +1363,24 @@ class JavaVariable:
             self.fh.r.scoreboard_players('set', target=self.target, objective=self.name, score=other)
 
     def higher(self, other: 'JavaVariable'):
+        """Sets this variable to the higher of the two variables.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaVariable.higher"""
         self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
                                      operation='>', source=other.target, sourceObjective=other.name)
 
     def lower(self, other: 'JavaVariable'):
+        """Sets this variable to the lower of the two variables.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaVariable.lower"""
         self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
                                      operation='<', source=other.target, sourceObjective=other.name)
 
     def swap(self, other: 'JavaVariable'):
+        """Swaps the value of the two variables.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaVariable.swap"""
         self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
                                      operation='><', source=other.target, sourceObjective=other.name)
 
     def show(self, slot: str):
+        """Shows the variable in a slot.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaVariable.show"""
         self.fh.r.scoreboard_objectives('setdisplay', objective=self.name, slot=slot)

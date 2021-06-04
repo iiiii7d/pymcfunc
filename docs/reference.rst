@@ -1003,7 +1003,7 @@ Raw commands
 
    .. py:method:: execute(target: str, pos: str, run: Callable[[BedrockFuncHandler], Union[Union[list, tuple], None]], detectPos: str=None, block: str=None, data: int=None)
 
-      Adds an ``execute`` command.
+      Adds an ``execute` command.
 
       .. versionadded:: 0.1
 
@@ -2140,7 +2140,7 @@ Raw commands
 
    .. py:method:: execute(**subcommands)
       
-      Adds an ``execute`` command.
+      Adds an ``execute` command.
 
       .. versionadded:: 0.1
 
@@ -3026,7 +3026,7 @@ Variables
       * **a /= b** - Divides this variable by a value by another variable (and rounds the result)
       * **a //= b** - ditto
       * **a %= b** - Sets this variable to the remainder of a / b
-      * **a == b** - Returns a dict for use in :py:meth:`JavaRawCommands.execute``
+      * **a == b** - Returns a dict for use in :py:meth:`JavaRawCommands.execute`
       * **a > b** - ditto
       * **a >= b** - ditto
       * **a < b** - ditto
@@ -3064,7 +3064,7 @@ Variables
 
    .. py:method:: in_range(r: Union[str, int])
 
-      For use in :py:meth:`JavaRawCommands.execute``. Finds whether this variable is in a specified range.
+      For use in :py:meth:`JavaRawCommands.execute`. Finds whether this variable is in a specified range.
 
       .. versionadded:: 0.3
 
@@ -3082,7 +3082,7 @@ Variables
     
    .. py:method:: store(mode: str)
 
-       For use in :py:meth:`JavaRawCommands.execute``. Stores a result or success in this variable.
+       For use in :py:meth:`JavaRawCommands.execute`. Stores a result or success in this variable.
 
        .. versionadded:: 0.3
 
@@ -3280,9 +3280,9 @@ Raw JSON text
 
    * **§#XXXXXX** - Hex code
    * **§0-9, a-f** - Colours
-   * **§h[*text*]** - Extras to append after the segment of text
-   * **§i[*text*]** - String to be inserted into chat when clicked
-   * **§j[*text*]** - Sets the font
+   * **§h[text]** - Extras to append after the segment of text
+   * **§i[text]** - String to be inserted into chat when clicked
+   * **§j[text]** - Sets the font
    * **§k** - Obfuscate
    * **§l** - Bold
    * **§m** - Strikethrough

@@ -44,6 +44,37 @@ def _catchparam(c, text):
         return params, c-orig_c+2
 
 def java(text: str, format_symbol="§", content_symbol="¶"):
+    """Converts a string of text into Java raw JSON text.\n
+    **Formatting symbols**
+    * **§#XXXXXX** - Hex code
+    * **§0-9, a-f** - Colours
+    * **§h[text]** - Extras to append after the segment of text
+    * **§i[text]** - String to be inserted into chat when clicked
+    * **§j[text]** - Sets the font
+    * **§k** - Obfuscate
+    * **§l** - Bold
+    * **§m** - Strikethrough
+    * **§n** - Underline
+    * **§o** - Italics
+    * **§p[url]** - Opens URL when text is clicked
+    * **§q[file]** - Opens file (might not work) when text is clicked
+    * **§r** - Reset all formatting
+    * **§s[command]** - Sends a command to chat input / runs the command when text is clicked
+    * **§t[value]** - Appends a value to chat input when text is clicked
+    * **§u[page]** - Changes the page in books when text is clicked
+    * **§v[value]** - Copies value to clipboard when text is clicked
+    * **§w[text]** - Shows text when text is hovered
+    * **§xX** - Removes formatting of X
+    * **§y[item id|optional count|optional tag]** - Shows item when hovered
+    * **§z[entity type|entity uuid|optional entity name]** - Shows entity when hovered
+ 
+    **Content symbols**
+    * **¶t[identifier|params...|...]** - Translated text
+    * **¶s[name|objective|optional value]** - Value from scoreboard
+    * **¶e[selector|optional separator text]** - Entity name
+    * **¶k[identifier]** - Keybind
+    * **¶n[path|type|val|optional interpret|optional separator text]** - NBT value (choose 'type' from block, entity, storage, 'interpet' from true, false)\n
+    More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.rt.java"""
     format_codes = {
         '#': ('color', None),
         '0': ('color', 'black'),
@@ -234,6 +265,12 @@ def java(text: str, format_symbol="§", content_symbol="¶"):
     return out
 
 def bedrock(text: str, content_symbol="¶"):
+    """Converts a string of text into Bedrock raw JSON text.\n
+    **Content symbols**
+    * **¶t[identifier|params...|...]** - Translated text
+    * **¶s[name|objective|optional value]** - Value from scoreboard
+    * **¶e[selector|optional separator text]** - Entity name\n
+    More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.rt.bedrock"""
     cursor = 0
     kwargs = {}
     out = [{'text': ''}]

@@ -18,6 +18,8 @@ class BedrockFuncHandler(UniversalFuncHandler):
         self.r = BedrockRawCommands(self)
 
     def v(self, name: str, target: str):
+        """Creates a variable.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockFuncHandler.v"""
         return BedrockVariable(self, name, target)
 
 class BedrockRawCommands(UniversalRawCommands):
@@ -925,6 +927,8 @@ class BedrockRawCommands(UniversalRawCommands):
     wb = worldbuilder
 
 class BedrockVariable:
+    """Represents a variable in Bedrock Edition.
+    More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockVariable"""
     def __init__(self, fh, name: str, target: str):
         self.fh = fh
         self.name = name
@@ -993,9 +997,13 @@ class BedrockVariable:
         self.fh.r.scoreboard_players('reset', target=self.target, objective=self.name)
 
     def in_range(self, minv: int, maxv: int=None):
+        """Tests a value if it is within a certain range.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockVariable.in_range"""
         self.fh.r.scoreboard_players('test', target=self.target, objective=self.name, minv=minv, maxv=maxv)
 
     def set(self, other: Union['BedrockVariable', int]):
+        """Sets this variable to a value or that of another variable
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockVariable.set"""
         if isinstance(other, type(self)):
             self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
                                          operation='=', source=other.target, sourceObjective=other.name)
@@ -1003,19 +1011,29 @@ class BedrockVariable:
             self.fh.r.scoreboard_players('set', target=self.target, objective=self.name, count=other)
 
     def random(self, minv: int, maxv: int=None):
+        """Sets this variable to a random number.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockVariable.random"""
         self.fh.r.scoreboard_players('random', target=self.target, objective=self.name, minv=minv, maxv=maxv)
 
     def higher(self, other: 'BedrockVariable'):
+        """Sets this variable to the higher of the two variables.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockVariable.higher"""
         self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
                                      operation='>', selector=other.target, selectorObjective=other.name)
 
     def lower(self, other: 'BedrockVariable'):
+        """Sets this variable to the lower of the two variables.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockVariable.lower"""
         self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
                                      operation='<', selector=other.target, selectorObjective=other.name)
 
     def swap(self, other: 'BedrockVariable'):
+        """Swaps the value of the two variables.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockVariable.swap"""
         self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
                                      operation='><', selector=other.target, selectorObjective=other.name)
 
     def show(self, slot: str, sortOrder: str=None):
+        """Shows the variable in a slot.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockVariable.show"""
         self.fh.r.scoreboard_objectives('setdisplay', slot=slot, objective=self.name, sortOrder=sortOrder)

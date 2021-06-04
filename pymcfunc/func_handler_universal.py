@@ -23,9 +23,13 @@ class UniversalFuncHandler:
             yield i
 
     def clear(self):
+        """Clears the command list.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalFuncHandler.clear"""
         self.commands = []
 
     def comment(self, comment: str):
+        """Adds a comment.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalFuncHandler.comment"""
         self.commands.append('# '+comment.strip())
 
 class UniversalRawCommands:

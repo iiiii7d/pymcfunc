@@ -129,6 +129,9 @@ class JavaSelectors(UniversalSelectors):
         return result
         
 def cuboid(pos1: Sequence[int], pos2: Sequence[int], dims: str='xyz'):
+    """Finds the northwest-bottommost corner and the volume/area/length of a cuboid, area or line, given two corners.
+    This function is mainly for selector arguments, namely x, y, z, dx, dy and dz.
+    More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.sel.cuboid"""
     if len(pos1) != len(pos2):
         raise ValueError("Uneven no. of dimensions")
     elif len(pos1) != len(dims) or len(pos2) != len(dims):
