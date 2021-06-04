@@ -296,7 +296,7 @@ class JavaRawCommands(UniversalRawCommands):
             raise errors.MissingError('objective', 'mode', mode)
         internal.check_invalid_params('add', 'mode', mode, ('criterion', criterion, None), dep_mandatory=True)
         internal.multi_check_invalid_params(['add', 'modify_displayname'], 'mode', mode, ('displayName', displayName, None))
-        if mode != 'add' and displayName is None:
+        if mode == 'modify_displayname' and displayName is None:
             raise errors.MissingError('displayName', 'mode', mode)
         internal.check_invalid_params('modify_rendertype', 'mode', mode, ('renderType', renderType, None), dep_mandatory=True)
         if renderType is not None:
@@ -1363,3 +1363,6 @@ class JavaVariable:
     def swap(self, other: 'JavaVariable'):
         self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
                                      operation='><', source=other.target, sourceObjective=other.name)
+
+    def show(self, slot: str):
+        self.fh.r.scoreboard_objectives('setdisplay', objective=self.name, slot=slot)

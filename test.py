@@ -112,6 +112,7 @@ def test_pytest():
         val.higher(val2)
         val2.lower(val)
         val %= val2
+        val.show('sidebar')
         f.r.execute(
             if_=val > val2,
             unless=val.in_range('3..4'),
@@ -226,6 +227,20 @@ def test_pytest():
         f.r.tickingarea_list()
         f.r.toggledownfall()
         f.r.worldbuilder()
+
+        val = f.v('val', '@p')
+        val2 = f.v('val2', '@p')
+        val.swap(val2)
+        val += 2
+        val -= 2
+        val2 *= 2
+        val2 /= 2
+        val.higher(val2)
+        val2.lower(val)
+        val %= val2
+        val.show('sidebar')
+        del val
+        del val2
 
     print(p.funcs['mcfuncjava'])
     print("======================")
