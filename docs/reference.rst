@@ -93,7 +93,7 @@ Pack
 
       .. versionadded:: 0.0
 
-   .. py:method:: build(name: str, pack_format: int, description: str, datapack_folder: str='.')
+   .. py:method:: build(name: str, pack_format: int, describe: str, datapack_folder: str='.')
 
       Builds the pack.
 
@@ -111,7 +111,7 @@ Pack
 
       :param str name: The name of the pack
       :param int format: The format number
-      :param str description: The pack description
+      :param str describe: The pack describe
       :param str datapack_folder: The directory of the datapack folder. Do not include a slash at the end
       :raises TypeError: if the pack is for Bedrock
 
@@ -188,7 +188,7 @@ Function Handlers
 
    .. versionadded:: 0.0
 
-   .. description:: Operations
+   .. describe:: Operations
 
    * **str(a)** - Returns a linebreaked string of Minecraft commands.
    * **set(a) list(a) tuple(a)** - Returns a list of Minecraft commands.
@@ -2099,8 +2099,8 @@ Raw commands
       * *<mode:list>*
       * *<mode:modify(_displayname)|modify(_rendertype)> <objective> ...*
 
-        * *displayName <displayName>* when mode=modify_displayname*
-        * *renderType <renderType:hearts|integer>* when mode=modify_rendertype*
+        * *displayName <displayName>* when mode=modify_displayname
+        * *renderType <renderType:hearts|integer>* when mode=modify_rendertype
 
       * *<mode:remove> <objective>*
       * *<mode:setdisplay> <slot> [objective]*
@@ -2918,7 +2918,7 @@ Variables
    
    .. versionadded: 0.3
 
-   .. description:: Operations   
+   .. describe:: Operations   
 
       * **a += b** - Adds a value or another variable to this variable
       * **a -= b** - Subtracts a value or another variable from this variable
@@ -2984,7 +2984,7 @@ Variables
 
       :param BedrockVariable other: The other variable
 
-    .. py:method:: lower(self, other: 'BedrockVariable')
+   .. py:method:: lower(self, other: 'BedrockVariable')
 
       Sets this variable to the lower of the two variables.
 
@@ -3018,7 +3018,7 @@ Variables
    
    .. versionadded: 0.3
 
-   .. description:: Operations   
+   .. describe:: Operations   
 
       * **a += b** - Adds a value or another variable to this variable
       * **a -= b** - Subtracts a value or another variable from this variable
@@ -3026,7 +3026,7 @@ Variables
       * **a /= b** - Divides this variable by a value by another variable (and rounds the result)
       * **a //= b** - ditto
       * **a %= b** - Sets this variable to the remainder of a / b
-      * **a == b** - Returns a dict for use in `:py:meth:`JavaRawCommands.execute``
+      * **a == b** - Returns a dict for use in :py:meth:`JavaRawCommands.execute``
       * **a > b** - ditto
       * **a >= b** - ditto
       * **a < b** - ditto
@@ -3064,7 +3064,7 @@ Variables
 
    .. py:method:: in_range(r: Union[str, int])
 
-      For use in `:py:meth:`JavaRawCommands.execute``. Finds whether this variable is in a specified range.
+      For use in :py:meth:`JavaRawCommands.execute``. Finds whether this variable is in a specified range.
 
       .. versionadded:: 0.3
 
@@ -3080,9 +3080,9 @@ Variables
              if_=var2.in_range('7')
          )
     
-    .. py:method:: store(mode: str)
+   .. py:method:: store(mode: str)
 
-       For use in `:py:meth:`JavaRawCommands.execute``. Stores a result or success in this variable.
+       For use in :py:meth:`JavaRawCommands.execute``. Stores a result or success in this variable.
 
        .. versionadded:: 0.3
 
@@ -3093,7 +3093,7 @@ Variables
        .. code-block:: python
 
          f.r.execute(
-             store=val.store('result')
+             store=var.store('result')
          )
 
    .. py:method:: set(other: Union['JavaVariable', int])
@@ -3113,7 +3113,7 @@ Variables
 
       :param JavaVariable other: The other variable
 
-    .. py:method:: lower(self, other: 'JavaVariable')
+   .. py:method:: lower(self, other: 'JavaVariable')
 
       Sets this variable to the lower of the two variables.
 

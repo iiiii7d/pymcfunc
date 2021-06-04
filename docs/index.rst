@@ -1,4 +1,4 @@
-pymcfunc v0.2
+pymcfunc v0.3
 =============
 
 Minecraft functions, pythonised. Made by 7d
