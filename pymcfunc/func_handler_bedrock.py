@@ -930,7 +930,7 @@ class BedrockVariable:
         self.name = name
         self.target = target
         self.fh.r.scoreboard_objectives('add', objective=name)
-        self.fh.r.scoreboard_players('set', target=target, objective=name, count=0)
+        #self.fh.r.scoreboard_players('set', target=target, objective=name, count=0)
 
     def __iadd__(self, other: Union['BedrockVariable', int]):
         if isinstance(other, type(self)):
@@ -992,7 +992,7 @@ class BedrockVariable:
     def __del__(self):
         self.fh.r.scoreboard_players('reset', target=self.target, objective=self.name)
 
-    def in_range(self, minv: str, maxv: int=None):
+    def in_range(self, minv: int, maxv: int=None):
         self.fh.r.scoreboard_players('test', target=self.target, objective=self.name, minv=minv, maxv=maxv)
 
     def set(self, other: Union['BedrockVariable', int]):
@@ -1002,7 +1002,7 @@ class BedrockVariable:
         else:
             self.fh.r.scoreboard_players('set', target=self.target, objective=self.name, count=other)
 
-    def random(self, minv: str, maxv: int=None):
+    def random(self, minv: int, maxv: int=None):
         self.fh.r.scoreboard_players('random', target=self.target, objective=self.name, minv=minv, maxv=maxv)
 
     def higher(self, other: 'BedrockVariable'):

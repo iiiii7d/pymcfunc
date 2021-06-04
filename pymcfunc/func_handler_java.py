@@ -1228,7 +1228,7 @@ class JavaVariable:
         self.target = target
         criterion = 'dummy' if not trigger else 'trigger'
         self.fh.r.scoreboard_objectives('add', objective=name, criterion=criterion)
-        self.fh.r.scoreboard_players('set', target=target, objective=name, score=0)
+        #self.fh.r.scoreboard_players('set', target=target, objective=name, score=0)
 
     def __iadd__(self, other: Union['JavaVariable', int]):
         if isinstance(other, type(self)):

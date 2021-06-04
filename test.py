@@ -6,7 +6,11 @@ def test_pytest():
     p = pmf.Pack()
 
     @p.function
+    @p.t.tag("abc")
+    @p.t.on_load
+    @p.t.repeat_every_tick
     @p.t.repeat_every(3)
+    @p.t.repeat(3)
     def mcfuncjava(f: pmf.JavaFuncHandler):
         f.clear()
         f.comment("abcd")

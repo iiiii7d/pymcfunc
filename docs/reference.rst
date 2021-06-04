@@ -40,10 +40,19 @@ Pack
 
       .. versionadded:: 0.0
 
-   .. py:attribute:: name
-      :type: str
+   .. py:attribute:: tags
+      :type: dict
 
-      For future use
+      The list of tags.
+
+      .. versionadded:: 0.3
+
+   .. py:attribute:: t
+      :type: JavaTags
+
+      An instance of a JavaTags class. Java Edition only.
+
+      .. versionadded:: 0.3
 
    .. py:attribute:: sel
       :type: UniversalSelectors
@@ -83,6 +92,87 @@ Pack
              # youf commands here...
 
       .. versionadded:: 0.0
+
+   .. py:method:: build(name: str, pack_format: int, description: str, datapack_folder: str='.')
+
+      Builds the pack.
+
+      .. warning::
+         Java Edition only.
+
+      .. versionadded:: 0.3
+
+      **Format numbering**
+    
+      * **4** - 1.13–1.14.4
+      * **5** - 1.15–1.16.1
+      * **6** - 1.16.2–1.16.5
+      * **7** - 1.17
+
+      :param str name: The name of the pack
+      :param int format: The format number
+      :param str description: The pack description
+      :param str datapack_folder: The directory of the datapack folder. Do not include a slash at the end
+      :raises TypeError: if the pack is for Bedrock
+
+Tags & Events
+-------------
+
+.. py:class:: JavaTags
+
+   A container of decorators that handle tagging and events.
+
+   .. versionadded:: 0.3
+
+   .. warning::
+      Do not instantiate JavaTags directly; use a Pack and access the commands via the 't' attribute.
+
+   .. py:attribute:: p
+      :type: Pack
+
+      References back to the pack that it is in.
+
+      .. versionadded:: 0.3
+
+   .. py:decoratormethod:: tag(tag: str)
+
+      Applies a tag to the function. When the tag is run with ``/function``, all functions under this tag will run.
+
+      .. versionadded:: 0.3
+
+      :param str tag: The tag name.
+
+   .. py:decoratormethod:: on_load()
+
+      Applies a 'load' tag to the function. Alias of ``@pmf.JavaTags.tag('load')``.
+
+      Functions with the tag will be run when the datapack is loaded.
+
+      .. versionadded:: 0.3
+
+   .. py:decoratormethod:: repeat_every_tick()
+
+      Applies a 'tick' tag to the function. Alias of ``@pmf.JavaTags.tag('tick')``.
+
+      Functions with the tag will be run every tick.
+
+      .. versionadded:: 0.3
+
+   .. py:decoratormethod:: repeat_every(ticks: int)
+
+      The function will be run on a defined interval.
+
+      .. versionadded:: 0.3
+
+      :param int ticks: The interval to run the function
+
+   .. py:decoratormethod:: repeat(n: int)
+
+      The function will be run a defined number of times. 
+
+      .. versionadded:: 0.3
+
+      :param int n: The number of times to run the function
 
 Function Handlers
 -----------------
@@ -124,6 +214,82 @@ Function Handlers
 
       .. versionadded:: 0.1
 
+   .. py:method:: clear()
+      
+      Clears the command list.
+
+      .. versionadded:: 0.3
+
+   .. py:method:: comment(comment: str)
+
+      Adds a comment.
+
+      .. versionadded:: 0.3
+
+      :param str comment: The comment.
+
+.. py:class:: BedrockFuncHandler(UniversalFuncHandler)
+
+   The Beckrock Edition function handler.
+
+   .. py:attribute:: sel
+      :type: BedrockSelectors
+
+      A Selectors object.
+      
+      .. versionadded:: 0.0
+
+   .. py:attribute:: r
+      :type: BedrockRawCommands
+
+      A BedrockRawCommands instance.
+
+      .. versionadded:: 0.1
+
+   .. py:method:: v(self, name: str, target: str)
+
+      Creates a variable.
+
+      .. versionadded:: 0.3
+
+      :param str name: The name of the variable
+      :param str target: Whom to create the variable for.
+      :returns: The variable object
+      :rtype: BedrockVariable
+
+.. py:class:: JavaFuncHandler(UniversalFuncHandler)
+
+   The Java Edition function handler.
+
+   .. py:attribute:: sel
+      :type: JavaSelectors
+
+      A Selectors object.
+      
+      .. versionadded:: 0.0
+
+   .. py:attribute:: r
+      :type: JavaRawCommands
+
+       A JavaRawCommands instance.
+
+       .. versionadded:: 0.1
+
+   .. py:method:: v(self, name: str, target: str, trigger: bool=False)
+
+      Creates a variable.
+
+      .. versionadded:: 0.3
+
+      :param str name: The name of the variable
+      :param str target: Whom to create the variable for.
+      :param bool trigger: Whether to make the variable a trigger.
+      :returns: The variable object
+      :rtype: JavaVariable
+
+Raw commands
+------------
+    
 .. py:class:: UniversalRawCommands
 
    A container for raw Minecraft commands that are the same for both Java and Bedrock.
@@ -424,24 +590,6 @@ Function Handlers
 
       :returns: The command
       :rtype: str
-
-.. py:class:: BedrockFuncHandler(UniversalFuncHandler)
-
-   The Beckrock Edition function handler.
-
-   .. py:attribute:: sel
-      :type: BedrockSelectors
-
-      A Selectors object.
-      
-      .. versionadded:: 0.0
-
-   .. py:attribute:: r
-      :type: BedrockRawCommands
-
-      A BedrockRawCommands instance.
-
-      .. versionadded:: 0.1
 
 .. py:class:: BedrockRawCommands(UniversalRawCommands)
 
@@ -1592,25 +1740,6 @@ Function Handlers
 
       :returns: The command
       :rtype: str
-
-
-.. py:class:: JavaFuncHandler(UniversalFuncHandler)
-
-   The Java Edition function handler.
-
-   .. py:attribute:: sel
-      :type: JavaSelectors
-
-      A Selectors object.
-      
-      .. versionadded:: 0.0
-
-   .. py:attribute:: r
-      :type: JavaRawCommands
-
-       A JavaRawCommands instance.
-
-       .. versionadded:: 0.1
 
 .. py:class:: JavaRawCommands(UniversalRawCommands)
 
@@ -2777,10 +2906,243 @@ Coords
    :raises CaretError: if ``^`` and ``~`` are in the same set of coordinates
    :raises CaretError: if not all coordinates have ``^``
 
+Variables
+---------
+
+.. py:class:: BedrockVariable
+
+   Represents a variable in Bedrock Edition.
+
+   .. warning::
+      Do not instantiate BedrockVariable directly; use a FuncHandler and access the commands by calling 'v()'.
+   
+   .. versionadded: 0.3
+
+   .. description:: Operations   
+
+      * **a += b** - Adds a value or another variable to this variable
+      * **a -= b** - Subtracts a value or another variable from this variable
+      * **a *= b** - Multiplies this variable by a value or another variable
+      * **a /= b** - Divides this variable by a value by another variable (and rounds the result)
+      * **a //= b** - ditto
+      * **a %= b** - Sets this variable to the remainder of a / b
+      * **del a** - Removes the variable from the scoreboard for the target(s)
+
+   .. py:attribute:: fh
+      :type: UniversalFuncHandler
+
+      References back to the function handler that it is in.
+
+      .. versionadded:: 0.3
+
+   .. py:attribute:: name
+      :type: str
+
+      The name of the variable.
+
+      .. versionadded:: 0.3
+
+   .. py:attribute:: target
+      :type: str
+
+      The target(s) that the variable is attached to.
+
+      .. versionadded:: 0.3
+
+   .. py:method:: in_range(minv: int, maxv: int=None)   
+
+      Tests a value if it is within a certain range.
+
+      .. versionadded:: 0.3
+
+      :param int minv: The minimum value
+      :param int maxv: The maximum value
+
+   .. py:method:: set(other: Union['BedrockVariable', int])
+
+      Sets this variable to a value or that of another variable
+
+      .. versionadded:: 0.3
+
+      :param other: The other value or variable
+      :type other: BedrockVariable or int
+
+   .. py:method:: random(minv: int, maxv: int=None)
+
+      Sets this variable to a random number.
+
+      .. versionadded:: 0.3
+
+      :param int minv: The minimum value
+      :param int maxv: The maximum value
+
+   .. py:method:: higher(self, other: 'BedrockVariable')
+
+      Sets this variable to the higher of the two variables.
+
+      .. versionadded:: 0.3
+
+      :param BedrockVariable other: The other variable
+
+    .. py:method:: lower(self, other: 'BedrockVariable')
+
+      Sets this variable to the lower of the two variables.
+
+      .. versionadded:: 0.3
+
+      :param BedrockVariable other: The other variable
+
+   .. py:method:: swap(self, other: 'BedrockVariable')
+
+      Swaps the value of the two variables.
+
+      .. versionadded:: 0.3
+
+      :param BedrockVariable other: The other variable
+
+   .. py:method:: show(slot: str, sortOrder: str=None)
+
+      Shows the variable in a slot.
+
+      .. versionadded:: 0.3
+
+      :param str slot: The slot to show it in.
+      :param str sortOrder: The sort order, if ``slot`` is ``list`` or ``sidebar``
+
+.. py:class:: BedrockVariable
+
+   Represents a variable in Bedrock Edition.
+
+   .. warning::
+      Do not instantiate BedrockVariable directly; use a FuncHandler and access the commands by calling 'v()'.
+   
+   .. versionadded: 0.3
+
+   .. description:: Operations   
+
+      * **a += b** - Adds a value or another variable to this variable
+      * **a -= b** - Subtracts a value or another variable from this variable
+      * **a *= b** - Multiplies this variable by a value or another variable
+      * **a /= b** - Divides this variable by a value by another variable (and rounds the result)
+      * **a //= b** - ditto
+      * **a %= b** - Sets this variable to the remainder of a / b
+      * **a == b** - Returns a dict for use in `:py:meth:`JavaRawCommands.execute``
+      * **a > b** - ditto
+      * **a >= b** - ditto
+      * **a < b** - ditto
+      * **a <= b** - ditto
+      * **del a** - Removes the variable from the scoreboard for the target(s)
+
+      **Comparers example**
+      
+      .. code-block:: python
+
+         f.r.execute(
+             if_=var1 > var2
+         )
+
+   .. py:attribute:: fh
+      :type: UniversalFuncHandler
+
+      References back to the function handler that it is in.
+
+      .. versionadded:: 0.3
+
+   .. py:attribute:: name
+      :type: str
+
+      The name of the variable.
+
+      .. versionadded:: 0.3
+
+   .. py:attribute:: target
+      :type: str
+
+      The target(s) that the variable is attached to.
+
+      .. versionadded:: 0.3
+
+   .. py:method:: in_range(r: Union[str, int])
+
+      For use in `:py:meth:`JavaRawCommands.execute``. Finds whether this variable is in a specified range.
+
+      .. versionadded:: 0.3
+
+      :param r: The range. Can be a range or a single number.
+      :type r: str or int
+      :returns: The dict for use in ``if_`` or ``unless``.
+      :rtype: dict
+
+      .. code-block:: python
+
+         f.r.execute(
+             unless=var1.in_range('3..4'),
+             if_=var2.in_range('7')
+         )
+    
+    .. py:method:: store(mode: str)
+
+       For use in `:py:meth:`JavaRawCommands.execute``. Stores a result or success in this variable.
+
+       .. versionadded:: 0.3
+
+       :param str mode: Must be either ``result`` or ``success``.
+       :returns: The dict for use in ``store``.
+       :rtype: dict
+
+       .. code-block:: python
+
+         f.r.execute(
+             store=val.store('result')
+         )
+
+   .. py:method:: set(other: Union['JavaVariable', int])
+
+      Sets this variable to a value or that of another variable
+
+      .. versionadded:: 0.3
+
+      :param other: The other value or variable
+      :type other: JavaVariable or int
+
+   .. py:method:: higher(self, other: 'JavaVariable')
+
+      Sets this variable to the higher of the two variables.
+
+      .. versionadded:: 0.3
+
+      :param JavaVariable other: The other variable
+
+    .. py:method:: lower(self, other: 'JavaVariable')
+
+      Sets this variable to the lower of the two variables.
+
+      .. versionadded:: 0.3
+
+      :param JavaVariable other: The other variable
+
+   .. py:method:: swap(self, other: 'JavaVariable')
+
+      Swaps the value of the two variables.
+
+      .. versionadded:: 0.3
+
+      :param JavaVariable other: The other variable
+
+   .. py:method:: show(slot: str)
+
+      Shows the variable in a slot.
+
+      .. versionadded:: 0.3
+
+      :param str slot: The slot to show it in.
+
+
+
 Selectors
 ---------
 
-.. py:function:: 
+.. py:currentmodule:: pymcfunc.sel
 
 .. py:class:: UniversalSelectors
 
@@ -2874,14 +3236,100 @@ Selectors
 
    .. py:method:: range(minv=0, maxv=inf)
 
-   Returns a range of values, as it is represented in Minecraft commands.
+      Returns a range of values, as it is represented in Minecraft commands.
+   
+      :param int minv: The minimum value
+      :param int maxv: The maximum value
+      :return: The range
+      :rtype: str
+      :raises ValueError: if the minimum is bigger than the maximum
+      :raises ValueError: if minv is still 0 and maxv is still inf
 
-   :param int minv: The minimum value
-   :param int maxv: The maximum value
-   :return: The range
-   :rtype: str
-   :raises ValueError: if the minimum is bigger than the maximum
-   :raises ValueError: if minv is still 0 and maxv is still inf
+.. py:method:: cuboid(pos1: Sequence[int], pos2: Sequence[int], dims: str='xyz')
+
+   Finds the northwest-bottommost corner and the volume/area/length of a cuboid, area or line, given two corners.
+
+   This function is mainly for selector arguments, namely x, y, z, dx, dy and dz.
+
+   .. versionadded:: 0.3
+
+   :param Sequence[int] pos1: The first corner
+   :param Sequence[int] pos2: The second corner
+   :param str dims: The axes to find. Can be any combination of x, y and z, but no repeating.
+   
+   .. code-block:: python
+      
+      >>> import pymcfunc as pmf
+      >>> pmf.sel.cuboid((1,2,3),(4,5,6))
+      {'x': 1, 'dx': 3, 'y': 2, 'dy': 3, 'z': 3, 'dz': 3}
+      >>> s = pmf.JavaSelectors()
+      >>> s.all_entities(**pmf.sel.cuboid((1,2,3),(4,5,6)))
+      '@e[x=1,dx=3,y=2,dy=3,z=3,dz=3]'
+
+Raw JSON text
+-------------
+.. py:currentmodule:: pymcfunc.rt
+
+.. py:function:: java(text: str, format_symbol="§", content_symbol="¶")
+
+   Converts a string of text into Java raw JSON text.
+
+   .. versionadded:: 0.3
+
+   **Formatting symbols**
+
+   * **§#XXXXXX** - Hex code
+   * **§0-9, a-f** - Colours
+   * **§h[*text*]** - Extras to append after the segment of text
+   * **§i[*text*]** - String to be inserted into chat when clicked
+   * **§j[*text*]** - Sets the font
+   * **§k** - Obfuscate
+   * **§l** - Bold
+   * **§m** - Strikethrough
+   * **§n** - Underline
+   * **§o** - Italics
+   * **§p[url]** - Opens URL when text is clicked
+   * **§q[file]** - Opens file (might not work) when text is clicked
+   * **§r** - Reset all formatting
+   * **§s[command]** - Sends a command to chat input / runs the command when text is clicked
+   * **§t[value]** - Appends a value to chat input when text is clicked
+   * **§u[page]** - Changes the page in books when text is clicked
+   * **§v[value]** - Copies value to clipboard when text is clicked
+   * **§w[text]** - Shows text when text is hovered
+   * **§xX** - Removes formatting of X
+   * **§y[item id|optional count|optional tag]** - Shows item when hovered
+   * **§z[entity type|entity uuid|optional entity name]** - Shows entity when hovered
+
+   **Content symbols**
+
+   * **¶t[identifier|params...|...]** - Translated text
+   * **¶s[name|objective|optional value]** - Value from scoreboard
+   * **¶e[selector|optional separator text]** - Entity name
+   * **¶k[identifier]** - Keybind
+   * **¶n[path|type|val|optional interpret|optional separator text]** - NBT value (choose 'type' from block, entity, storage, 'interpet' from true, false)
+
+   :param str text: The text
+   :param str format_symbol: The format symbol, defaults to §
+   :param str content_symbol: The content symbol, defaults to ¶
+   :returns: The JSON text
+   :rtype: list[dict] or dict
+
+.. py:function:: bedrock(text: str, content_symbol="¶")
+
+   Converts a string of text into Bedrock raw JSON text.
+
+   .. versionadded:: 0.3
+
+   **Content symbols**
+
+   * **¶t[identifier|params...|...]** - Translated text
+   * **¶s[name|objective|optional value]** - Value from scoreboard
+   * **¶e[selector|optional separator text]** - Entity name
+
+   :param str text: The text
+   :param str content_symbol: The content symbol, defaults to ¶
+   :returns: The JSON text
+   :rtype: list[dict] or dict
 
 Errors
 ------

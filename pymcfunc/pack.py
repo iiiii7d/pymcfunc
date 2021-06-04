@@ -19,7 +19,6 @@ class Pack:
             raise errors.OptionError(['j', 'b'], edition)
         self.edition = edition
         self.funcs = {}
-        self.name = None
         self.tags = {'functions':{}}
         self.sel = selectors.BedrockSelectors() if edition == "b" else selectors.JavaSelectors()
         if edition == 'j':
@@ -86,11 +85,6 @@ class Pack:
                 }
                 with open(f'tags/{group}/{tag}.json', 'w') as f:
                     json.dump(tagJson, f)
-        
-
-
-        
-
 
 class JavaTags:
     def __init__(self, p):

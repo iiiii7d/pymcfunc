@@ -5,4 +5,4 @@ import pymcfunc.selectors as sel
 from pymcfunc.coords import *
 import pymcfunc.rawtext as rt
 
-__version__ = "0.2"
+__version__ = "0.3"

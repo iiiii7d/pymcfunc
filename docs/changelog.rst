@@ -1,13 +1,14 @@
 Changelog
 =========
 
-* **v0.3 ()**
+* **v0.3 (4/6/21)**
 
   * All booleans should be lowercase now
   * Added raw text translators (``pymcfunc.rt.java()`` and ``pymcfunc.rt.bedrock()``)
   * Added ``pymcfunc.sel.cuboid()``
   * Added ``pymcfunc.UniversalFuncHandler.clear()`` and ``pymcfunc.UniversalFuncHandler.comment()``
   * Added variables for both editions
+  * Added tag decorators for Java
   * Added pack building for Java
 
 * **v0.2 (2/6/21)**
