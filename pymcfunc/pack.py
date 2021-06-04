@@ -19,6 +19,7 @@ class Pack:
         self.edition = edition
         self.funcs = {}
         self.tags = {'functions':{}}
+        self.advancements = {}
         self.sel = selectors.BedrockSelectors() if edition == "b" else selectors.JavaSelectors()
         if edition == 'j':
             self.t = JavaTags(self)
