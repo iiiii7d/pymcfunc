@@ -1835,7 +1835,7 @@ Function Handlers
       :return: The command
       :rtype: str
 
-   .. py:method:: schedule(name: str, clear: bool=False, duration: str=None, mode: str="replace")
+   .. py:method:: schedule(name: str, clear: bool=False, duration: int=None, mode: str="replace")
 
       Adds a ``schedule`` command.
 

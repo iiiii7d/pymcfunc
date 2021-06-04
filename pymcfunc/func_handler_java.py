@@ -188,7 +188,7 @@ class JavaRawCommands(UniversalRawCommands):
         self.fh.commands.append(cmd)
         return cmd
 
-    def schedule(self, name: str, clear: bool=False, duration: str=None, mode: str="replace"):
+    def schedule(self, name: str, clear: bool=False, duration: int=None, mode: str="replace"):
         """**Syntax:** *schedule ...*
         * *function <name> <duration> [mode:append|replace]*
         * *clear <name>*\n

@@ -6,6 +6,7 @@ def test_pytest():
     p = pmf.Pack()
 
     @p.function
+    @p.t.repeat_every(3)
     def mcfuncjava(f: pmf.JavaFuncHandler):
         f.clear()
         f.comment("abcd")
@@ -241,7 +242,7 @@ def test_pytest():
         val.show('sidebar')
         del val
         del val2
-
+    
     print(p.funcs['mcfuncjava'])
     print("======================")
     print(b.funcs['mcfuncbedrock'])
@@ -268,6 +269,9 @@ def test_pytest():
         pmf.rt.bedrock('¶t[msg|a|b] ¶s[@p|abc] ¶e[@e] normal text')
     )
 
+    print(p.tags)
+
     print(time.time()-start)
+
 
 test_pytest()
