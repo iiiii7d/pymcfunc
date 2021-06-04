@@ -17,7 +17,7 @@
 
 Minecraft functions, pythonised. Made by 7d
 
-**Latest release version: v0.2**
+**Latest release version: v0.3**
 Changelogs: https://pymcfunc.readthedocs.io/en/latest/changelog.html
 
 **Documentation: https://pymcfunc.readthedocs.io/en/latest/**
@@ -30,9 +30,8 @@ programming but are cumbersome in Minecraft commands.
 Hence pymcfunc, which translates Python code into Minecraft commands. The code is aimed to be
 short, brief and concise so that it does not become another troublesome job.
 
-I'm writing code for the raw commands first - that being ordinary Minecraft commands.
-After the raw commands, shortcuts will be written to shorten and clarify several tasks.
-A datapack constructor will be made too :)
+Progress: Raw commands are complete, currently working on features to make programming functions easier,
+and tools to build datapacks :)
 
 ## Usage
 ```python
@@ -53,6 +52,20 @@ def make_sheep_jump(f: pmf.JavaFuncHandler):
         sf.r.say("boingg")
       ]
     )
+
+@p.function
+def addition(f: pmf.JavaFuncHandler):
+    val1 = f.v('val1', '@s')
+    val1.set(10)
+    val2 = f.v('val2', '@s')
+    val2.set(20)
+    val1 += val2
+    f.r.tellraw('@s', pmf.rt.java("§aThe value is now ¶s[val1|@s]"))
+
+@p.function
+@p.t.repeat_every(6000)
+def five_min_alert(f: pmf.JavaFuncHandler):
+    f.r.tellraw('@a', pmf.rt.java("§c§l§w[This is 6000 ticks]5 minutes§xw have passed!"))
 
 print(p.funcs)
 ```

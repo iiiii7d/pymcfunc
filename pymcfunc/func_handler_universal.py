@@ -55,7 +55,7 @@ class UniversalRawCommands:
     w = tell
     msg = tell
 
-    def tellraw(self, target: str, message: dict):
+    def tellraw(self, target: str, message: Union[dict, list]):
         """**Syntax:** *tellraw <target> <message>*\n
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.tellraw"""
         internal.check_spaces('target', target)
@@ -63,7 +63,7 @@ class UniversalRawCommands:
         self.fh.commands.append(cmd)
         return cmd
 
-    def title(self, target: str, mode: str, text: Union[str, dict]=None, fadeIn: int=None, stay: int=None, fadeOut: int=None):
+    def title(self, target: str, mode: str, text: Union[str, Union[dict, list]]=None, fadeIn: int=None, stay: int=None, fadeOut: int=None):
         """**Syntax:** *title <target> ...*\n
         * *... <mode\:clear|reset>*
         * *... <mode\:title|subtitle|actionbar> <text>*

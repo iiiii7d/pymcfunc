@@ -333,7 +333,7 @@ Raw commands
       :returns: The command
       :rtype: str
 
-   .. py:method:: tellraw(target: str, message: dict)
+   .. py:method:: tellraw(target: str, message: Union[dict, list])
 
       Adds a ``tellraw`` command.
 
@@ -342,11 +342,12 @@ Raw commands
       **Syntax:** *tellraw <target> <message>*
 
       :param str target: ``target``
-      :param dict message: ``message``
+      :param message: ``message``
+      :type message: dict or list[dict]
       :returns: The command
       :rtype: str
 
-   .. py:method:: title(target: str, mode: str, text: Union[str, dict]=None, fadeIn: int=None, stay: int=None, fadeOut: int=None)
+   .. py:method:: title(target: str, mode: str, text: Union[str, Union[dict, list]]=None, fadeIn: int=None, stay: int=None, fadeOut: int=None)
 
       Adds a ``title`` or ``titleraw`` (BE only) command.
 
@@ -361,7 +362,7 @@ Raw commands
       :param str target: ``target``
       :param str mode: ``mode:clear|reset|title|subtitle|actionbar|times``
       :param text: ``text`` (can be str in BE only)
-      :type text: dict or str
+      :type text: dict or list[dict] or str
       :param int fadeIn: ``fadeIn``
       :param int stay: ``stay``
       :param int fadeOut: ``fadeOut``

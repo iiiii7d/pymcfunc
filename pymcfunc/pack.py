@@ -42,7 +42,7 @@ class Pack:
         * **5** - 1.15–1.16.1
         * **6** - 1.16.2–1.16.5
         * **7** - 1.17\n
-        More info: https://pymcfunc.readthedocs.io/en/latest/reference.html#pymcfunc.Pack.build"""
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.Pack.build"""
         if self.edition == 'b':
             raise TypeError('Cannot build Bedrock packs')
         name = name.lower()
@@ -99,7 +99,7 @@ class JavaTags:
     
     def tag(self, tag: str):
         """Applies a tag to the function. When the tag is run with /function, all functions under this tag will run.
-        More info: https://pymcfunc.readthedocs.io/en/latest/reference.html#pymcfunc.JavaTags.tag"""
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaTags.tag"""
         def decorator(func):
             @wraps(func)
             def wrapper(m):
@@ -113,18 +113,18 @@ class JavaTags:
     def on_load(self, func):
         """Applies a ‘load’ tag to the function. Alias of @pmf.JavaTags.tag('load').
         Functions with the tag will be run when the datapack is loaded.
-        More info: https://pymcfunc.readthedocs.io/en/latest/reference.html#pymcfunc.JavaTags.on_load"""
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaTags.on_load"""
         return self.tag('load')(func)
 
     def repeat_every_tick(self, func):
         """Applies a ‘tick’ tag to the function. Alias of @pmf.JavaTags.tag('tick').
         Functions with the tag will be run every tick.
-        More info: https://pymcfunc.readthedocs.io/en/latest/reference.html#pymcfunc.JavaTags.repeat_every_tick"""
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaTags.repeat_every_tick"""
         return self.tag('tick')(func)
 
     def repeat_every(self, ticks: int):
         """The function will be run on a defined interval.
-        More info: https://pymcfunc.readthedocs.io/en/latest/reference.html#pymcfunc.JavaTags.repeat_every"""
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaTags.repeat_every"""
         def decorator(func):
             @wraps(func)
             def wrapper(m):
@@ -135,7 +135,7 @@ class JavaTags:
     
     def repeat(self, n: int):
         """The function will be run a defined number of times.
-        More info: https://pymcfunc.readthedocs.io/en/latest/reference.html#pymcfunc.JavaTags.repeat"""
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaTags.repeat"""
         def decorator(func):
             @wraps(func)
             def wrapper(m):
