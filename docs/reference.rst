@@ -3009,12 +3009,12 @@ Variables
       :param str slot: The slot to show it in.
       :param str sortOrder: The sort order, if ``slot`` is ``list`` or ``sidebar``
 
-.. py:class:: BedrockVariable
+.. py:class:: JavaVariable
 
-   Represents a variable in Bedrock Edition.
+   Represents a variable in Java Edition.
 
    .. warning::
-      Do not instantiate BedrockVariable directly; use a FuncHandler and access the commands by calling 'v()'.
+      Do not instantiate JavaVariable directly; use a FuncHandler and access the commands by calling 'v()'.
    
    .. versionadded: 0.3
 

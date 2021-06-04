@@ -19,6 +19,8 @@ class JavaFuncHandler(UniversalFuncHandler):
         self.r = JavaRawCommands(self)
 
     def v(self, name: str, target: str, trigger: bool=False):
+        """Creates a variable.
+        More info: https://pymcfunc.readthedocs.io/en/latest/reference.html#pymcfunc.JavaFuncHandler.v"""
         return JavaVariable(self, name, target, trigger=trigger)
 
 class JavaRawCommands(UniversalRawCommands):
@@ -1222,6 +1224,8 @@ class JavaRawCommands(UniversalRawCommands):
         return cmd
 
 class JavaVariable:
+    """Represents a variable in Java Edition.
+    More info: https://pymcfunc.readthedocs.io/en/latest/reference.html#pymcfunc.JavaVariable"""
     def __init__(self, fh, name: str, target: str, trigger: bool=False):
         self.fh = fh
         self.name = name
