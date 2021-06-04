@@ -272,6 +272,9 @@ def test_pytest():
     print(p.tags)
 
     print(time.time()-start)
+    finish = time.time()
+    p.build('testpack', 6, 'b')
 
+    print(time.time()-finish)
 
 test_pytest()

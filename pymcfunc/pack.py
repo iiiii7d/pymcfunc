@@ -1,9 +1,13 @@
+from functools import wraps
+import pathlib
+import os
+import json
+
 import pymcfunc.errors as errors
 import pymcfunc.internal as internal
 from pymcfunc.func_handler_java import JavaFuncHandler
 from pymcfunc.func_handler_bedrock import BedrockFuncHandler
 import pymcfunc.selectors as selectors
-from functools import wraps
 
 class Pack:
     """A container for all functions.
@@ -16,7 +20,7 @@ class Pack:
         self.edition = edition
         self.funcs = {}
         self.name = None
-        self.tags = {}
+        self.tags = {'functions':{}}
         self.sel = selectors.BedrockSelectors() if edition == "b" else selectors.JavaSelectors()
         if edition == 'j':
             self.t = JavaTags(self)
@@ -31,7 +35,62 @@ class Pack:
         func(m)
         fname = func.__name__
         self.funcs.update({fname: str(m)})
+
+    def build(self, name: str, pack_format: int, description: str, datapack_folder: str='.'):
+        if self.edition == 'b':
+            raise TypeError('Cannot build Bedrock packs')
+        name = name.lower()
+        #create pack dir
+        pathlib.Path(datapack_folder+'/'+name).mkdir(exist_ok=True)
+        os.chdir(datapack_folder+'/'+name)
+
+        #make pack.mcmeta
+        mcmeta = {
+            'pack': {
+                'pack_format': pack_format,
+                'description': description
+            }
+        }
+        with open('pack.mcmeta', 'w') as f:
+            json.dump(mcmeta, f)
+
+        #create data dir
+        pathlib.Path(os.getcwd()+'/data/'+name).mkdir(parents=True, exist_ok=True)
+        os.chdir('data/'+name)
+
+        #functions
+        pathlib.Path(os.getcwd()+'/functions').mkdir(exist_ok=True)
+        for k, v in self.funcs.items():
+            funcName, function = k.lower(), v[:]
+            function = function.replace('/pymcfunc:first/', name+':'+funcName)
+            with open(f'functions/{funcName}.mcfunction', 'w') as f:
+                f.write(function)
+            
+        #advancements
+        #loot tables
+        #predicates
+        #recipes
+        #structures
+        #tags
+        #dimension types
+        #dimensions
+        #item modifiers
+        #worldgen
         
+        #tags
+        for group, tags in self.tags.items():
+            pathlib.Path(os.getcwd()+f'/tags/{group}').mkdir(parents=True, exist_ok=True)
+            for tag, funcs in tags.items():
+                tagJson = {
+                    'values': [name+':'+i.lower() for i in funcs]
+                }
+                with open(f'tags/{group}/{tag}.json', 'w') as f:
+                    json.dump(tagJson, f)
+        
+
+
+        
+
 
 class JavaTags:
     def __init__(self, p):
@@ -42,8 +101,8 @@ class JavaTags:
             @wraps(func)
             def wrapper(m):
                 if tag not in self.pack.tags:
-                    self.pack.tags[tag] = []
-                self.pack.tags[tag].append(func.__name__)
+                    self.pack.tags['functions'][tag] = []
+                self.pack.tags['functions'][tag].append(func.__name__)
                 func(m)
             return wrapper
         return decorator

@@ -8,6 +8,7 @@ Changelog
   * Added ``pymcfunc.sel.cuboid()``
   * Added ``pymcfunc.UniversalFuncHandler.clear()`` and ``pymcfunc.UniversalFuncHandler.comment()``
   * Added variables for both editions
+  * Added pack building for Java
 
 * **v0.2 (2/6/21)**
 
