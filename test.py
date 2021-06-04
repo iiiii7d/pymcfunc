@@ -123,8 +123,8 @@ def test_pytest():
             unless=val.in_range('3..4'),
             store=val2.store('result')
         )
-        del val
-        del val2
+        #del val
+        #del val2
 
     b = pmf.Pack('b')
 
@@ -277,7 +277,7 @@ def test_pytest():
 
     print(time.time()-start)
     finish = time.time()
-    p.build('testpack', 6, 'b')
+    #p.build('testpack', 6, 'b')
 
     print(time.time()-finish)
 

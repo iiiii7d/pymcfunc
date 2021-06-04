@@ -5,8 +5,7 @@ import json
 
 import pymcfunc.errors as errors
 import pymcfunc.internal as internal
-from pymcfunc.func_handler_java import JavaFuncHandler
-from pymcfunc.func_handler_bedrock import BedrockFuncHandler
+from pymcfunc.func_handlers import JavaFuncHandler, BedrockFuncHandler
 import pymcfunc.selectors as selectors
 
 class Pack:

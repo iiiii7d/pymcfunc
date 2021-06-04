@@ -1,8 +1,8 @@
-from pymcfunc.func_handler_java import *
-from pymcfunc.func_handler_bedrock import *
+from pymcfunc.func_handlers import *
 from pymcfunc.pack import *
 import pymcfunc.selectors as sel
-from pymcfunc.coords import *
 import pymcfunc.rawtext as rt
+from pymcfunc.coords import *
 
-__version__ = "0.3"
+
+__version__ = "0.4"
