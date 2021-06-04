@@ -260,7 +260,6 @@ class UniversalRawCommands:
         self.fh.commands.append("stop")
         return "stop"
 
-    
 
 class BedrockRawCommands(UniversalRawCommands):
     """A container for raw Minecraft commands that are specially for Bedrock Edition.
@@ -1166,6 +1165,7 @@ class BedrockRawCommands(UniversalRawCommands):
         return 'worldbuilder'
     wb = worldbuilder
 
+
 class JavaRawCommands(UniversalRawCommands):
     def setblock(self, pos: str, block: str, mode="replace"):
         """**Syntax:** *setblock <pos> <block> [mode:destroy|keep|replace]*\n
@@ -1989,7 +1989,7 @@ class JavaRawCommands(UniversalRawCommands):
             optionals = internal.defaults((sourcePath, None))
             suffix = f"{source} {optionals}"
         else:
-            suffix = value
+            suffix = json.dumps(value)
         if mode == "index":
             mode = f"{mode} {index}"
         target = ('block ' if block is not None else 'entity ' if entity is not None else 'storage') + target

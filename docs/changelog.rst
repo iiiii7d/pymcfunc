@@ -1,6 +1,10 @@
 Changelog
 =========
 
+* **v0.4 ()**
+
+  * Added Entities, Mobs and ArmourStands
+
 * **v0.3 (4/6/21)**
 
   * All booleans should be lowercase now
