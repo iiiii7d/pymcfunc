@@ -4,6 +4,7 @@ Changelog
 * **v0.4 ()**
 
   * Added Entities, Mobs and ArmourStands
+  * Added Advancements
 
 * **v0.3 (4/6/21)**
 

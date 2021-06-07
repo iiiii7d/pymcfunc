@@ -5,12 +5,22 @@ def test_pytest():
     start = time.time()
     p = pmf.Pack()
 
+    adv = p.advancement('abc', None)
+    adv.set_icon('string')
+    adv.set_display('title', 'asdfasdf')
+    adv.set_parent(None)
+    adv.criterion('abc', 'minecraft:abcabc', {})
+    adv.criterion('def', 'minecraft:defdef', {})
+    adv.set_requirements(['abc', 'def'])
+    adv.reward('experience', 1)
+
     @p.function
     @p.t.tag("abc")
     @p.t.on_load
     @p.t.repeat_every_tick
     @p.t.repeat_every(3)
     @p.t.repeat(3)
+    @adv.on_reward
     def mcfuncjava(f: pmf.JavaFuncHandler):
         f.clear()
         f.comment("abcd")
@@ -125,6 +135,19 @@ def test_pytest():
         )
         #del val
         #del val2
+
+        armourstand = f.entity('ArmourStand', '@e[type=armor_stand]')
+        armourstand.display_name('armour')
+        armourstand.data_set_value('a', 'b')
+        armourstand.pitch(3)
+        armourstand.yaw(3)
+        armourstand.move(destxyz='1 2 3')
+        armourstand.force('x', 3)
+        armourstand.remove()
+        armourstand.set_armour_slot('head', 'abc')
+        armourstand.remove_armour_slot('head')
+        armourstand.move_limb('Head', 'x', 3)
+        armourstand.mess()
 
     b = pmf.Pack('b')
 
@@ -269,11 +292,10 @@ def test_pytest():
         pmf.rt.java('¶t[msg|a|b] ¶s[@p|abc] ¶e[@e] ¶k[keybind] ¶n[path|block|~ ~ ~]'),
         sep='\n'
     )
-    print(
-        pmf.rt.bedrock('¶t[msg|a|b] ¶s[@p|abc] ¶e[@e] normal text')
-    )
+    print(pmf.rt.bedrock('¶t[msg|a|b] ¶s[@p|abc] ¶e[@e] normal text'))
 
     print(p.tags)
+    print(p.advancements)
 
     print(time.time()-start)
     finish = time.time()

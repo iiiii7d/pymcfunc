@@ -1985,6 +1985,9 @@ class JavaRawCommands(UniversalRawCommands):
         internal.check_invalid_params('value', 'sourceMode', sourceMode,
             ('value', value, None))
         
+        if source is not None:
+            source = ('block ' if sourceBlock is not None else 'entity ' if sourceEntity is not None else 'storage') + source
+
         if sourceMode == "from":
             optionals = internal.defaults((sourcePath, None))
             suffix = f"{source} {optionals}"
@@ -1993,7 +1996,6 @@ class JavaRawCommands(UniversalRawCommands):
         if mode == "index":
             mode = f"{mode} {index}"
         target = ('block ' if block is not None else 'entity ' if entity is not None else 'storage') + target
-        source = ('block ' if sourceBlock is not None else 'entity ' if sourceEntity is not None else 'storage') + source
         cmd = f"data modify {target} {path} {mode} {sourceMode} {suffix}"
         self.fh.commands.append(cmd)
         return cmd

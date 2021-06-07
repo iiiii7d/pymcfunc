@@ -7,6 +7,7 @@ import pymcfunc.errors as errors
 import pymcfunc.internal as internal
 from pymcfunc.func_handlers import JavaFuncHandler, BedrockFuncHandler
 import pymcfunc.selectors as selectors
+from pymcfunc.advancements import Advancement
 
 class Pack:
     """A container for all functions.
@@ -34,6 +35,11 @@ class Pack:
         func(m)
         fname = func.__name__
         self.funcs.update({fname: str(m)})
+
+    def advancement(self, name: str, parent: str):
+        if self.edition == 'b':
+            raise TypeError('No advancements in Bedrock')
+        return Advancement(self, name, parent)
 
     def build(self, name: str, pack_format: int, description: str, datapack_folder: str='.'):
         """Builds the pack. Java Edition only.\n

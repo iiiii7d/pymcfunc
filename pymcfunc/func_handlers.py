@@ -1,5 +1,6 @@
 from pymcfunc.selectors import UniversalSelectors, JavaSelectors, BedrockSelectors
 from pymcfunc.variables import JavaVariable, BedrockVariable
+import pymcfunc.entities as entities
 #from pymcfunc.rawcommands import UniversalRawCommands, JavaRawCommands, BedrockRawCommands
 
 class UniversalFuncHandler:
@@ -26,6 +27,9 @@ class UniversalFuncHandler:
         """Adds a comment.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalFuncHandler.comment"""
         self.commands.append('# '+comment.strip())
+
+    def entity(self, entity_name: str, target: str):
+        return getattr(entities, entity_name)(self, target)
 
 class BedrockFuncHandler(UniversalFuncHandler):
     """The Beckrock Edition function handler.

@@ -5,5 +5,4 @@ import pymcfunc.rawtext as rt
 import pymcfunc.entities as ent
 from pymcfunc.coords import *
 
-
 __version__ = "0.4"
