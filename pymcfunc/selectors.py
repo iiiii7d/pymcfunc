@@ -11,6 +11,7 @@ class UniversalSelectors:
        Every function has a **kwargs, which is used for selector arguments. The list of selector arguemnts are in the respective specialised classes.
        If an argument is repeatable, you can express multiple values of the same argument in lists, sets, or tuples.
        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalSelectors"""
+    
     def select(self, var: str, **kwargs):
         """Returns a selector, given the selector variable and optional arguments.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalSelectors.select"""

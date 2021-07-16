@@ -1,5 +1,6 @@
 import pymcfunc.internal as internal
 from random import randint
+from typing import Any, Optional
 
 class Entity:
     def __init__(self, fh, target: str):
@@ -18,7 +19,7 @@ class Entity:
             self.fh.r.data_modify('set', 'value', 'CustomNameVisible',
                                   entity=self.target, value=1)
 
-    def data_set_value(self, attr: str, val):
+    def data_set_value(self, attr: str, val: Any):
         self.fh.r.data_modify('set', 'value', attr,
                               entity=self.target, value=val)
 
@@ -30,7 +31,7 @@ class Entity:
         self.fh.r.data_modify('insert', 'value', 'Rotation', index=0,
                               entity=self.target, value=val)
 
-    def move(self, destxyz: str=None, destentity: str=None, **kwargs):
+    def move(self, destxyz: Optional[str]=None, destentity: Optional[str]=None, **kwargs):
         self.fh.r.tp(destxyz=destxyz, destentity=destentity, target=self.target, **kwargs)
     
     def force(self, axis: str, velocity: float):
@@ -44,7 +45,7 @@ class Entity:
 
 
 class Mob(Entity):
-    def set_armour_slot(self, slot: str, itemId: str, count: int=1, tag: dict=None):
+    def set_armour_slot(self, slot: str, itemId: str, count: int=1, tag: Optional[dict]=None):
         index = ['feet', 'legs', 'chest', 'head']
         internal.options(slot, index)
         data = {

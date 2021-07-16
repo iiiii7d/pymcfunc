@@ -190,7 +190,7 @@ class JavaVariable:
             self.fh.r.scoreboard_players('reset', target=self.target, objective=self.name)
 
     @staticmethod
-    def _comparers(self, other, mode):
+    def _comparers(self, other: Union['JavaVariable', int], mode: str):
         if isinstance(other, type(self)):
             return {
                 'mode': 'score',

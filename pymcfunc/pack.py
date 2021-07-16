@@ -1,3 +1,4 @@
+from typing import Callable, Any
 from functools import wraps
 import pathlib
 import os
@@ -5,7 +6,7 @@ import json
 
 import pymcfunc.errors as errors
 import pymcfunc.internal as internal
-from pymcfunc.func_handlers import JavaFuncHandler, BedrockFuncHandler
+from pymcfunc.func_handlers import JavaFuncHandler, BedrockFuncHandler, UniversalFuncHandler
 import pymcfunc.selectors as selectors
 from pymcfunc.advancements import Advancement
 
@@ -25,7 +26,7 @@ class Pack:
         if edition == 'j':
             self.t = JavaTags(self)
 
-    def function(self, func):
+    def function(self, func: Callable[[UniversalFuncHandler], Any]):
         """Registers a Python function and translates it into a Minecraft function.    
         The decorator will run the function so you do not need to run the function again.
         The name of the Python function will be the name of the Minecraft function.
@@ -116,13 +117,13 @@ class JavaTags:
             return wrapper
         return decorator
 
-    def on_load(self, func):
+    def on_load(self, func: Callable[[UniversalFuncHandler], Any]):
         """Applies a ‘load’ tag to the function. Alias of @pmf.JavaTags.tag('load').
         Functions with the tag will be run when the datapack is loaded.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaTags.on_load"""
         return self.tag('load')(func)
 
-    def repeat_every_tick(self, func):
+    def repeat_every_tick(self, func: Callable[[UniversalFuncHandler], Any]):
         """Applies a ‘tick’ tag to the function. Alias of @pmf.JavaTags.tag('tick').
         Functions with the tag will be run every tick.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaTags.repeat_every_tick"""

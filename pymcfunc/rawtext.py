@@ -2,11 +2,11 @@ import re
 import pymcfunc.internal as internal
 #from traceback import format_exc
 
-def _compress(out):
+def _compress(out: str):
     out = [i for i in out if isinstance(i, str) or 'text' not in i.keys() or ('text' in i.keys() and i['text'] != "")]
     return out
 
-def _catchparam(c, text):
+def _catchparam(c: int, text: str):
         # c is where [ is
         if c >= len(text) or text[c] != '[':
             return None, None
@@ -43,7 +43,7 @@ def _catchparam(c, text):
             params[-1] += ch
         return params, c-orig_c+2
 
-def java(text: str, format_symbol="§", content_symbol="¶"):
+def java(text: str, format_symbol: str="§", content_symbol: str="¶"):
     """Converts a string of text into Java raw JSON text.\n
     **Formatting symbols**
     * **§#XXXXXX** - Hex code

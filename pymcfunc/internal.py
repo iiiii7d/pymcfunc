@@ -1,6 +1,7 @@
+from typing import Union, Tuple, Any, Sequence
 import pymcfunc.errors as errors
 
-def defaults(*vals: tuple):
+def defaults(*vals: Tuple[Tuple[Any, Any]]):
     """(v, dv)"""
     args = ""
     not_default_detected = False
@@ -12,11 +13,11 @@ def defaults(*vals: tuple):
             args = str(v)+" "+args
     return args.strip()
 
-def options(var, options):
+def options(var: Any, options: Sequence):
     if not var in options:
         raise errors.OptionError(options, var)
 
-def pick_one_arg(*vars: tuple, optional=True):
+def pick_one_arg(*vars: Tuple[Tuple[Any, Any, str]], optional: bool=True):
     """(v, dv, varname)"""
     sameCount = 0
     diffFound = False
@@ -42,12 +43,12 @@ def pick_one_arg(*vars: tuple, optional=True):
 
     return diff
 
-def reliant(indep_name, indep_value, indep_default, dep_name, dep_value, dep_default):
+def reliant(indep_name: str, indep_value: Any, indep_default: Any, dep_name: str, dep_value: Any, dep_default: Any):
     # only when both are optional params, and the default value of the indep param is None
     if dep_value != dep_default and indep_value == indep_default:
         raise errors.ReliantError(indep_name, dep_name)
 
-def check_invalid_params(allowed_val, other_param_name, other_val, *params, dep_mandatory=False):
+def check_invalid_params(allowed_val: Any, other_param_name: str, other_val: Any, *params: Tuple[Tuple[str, Any, Any]], dep_mandatory: bool=False):
     """(name, val, default)"""
     for name, val, default in params:
         if other_val != allowed_val and val != default:
@@ -56,7 +57,7 @@ def check_invalid_params(allowed_val, other_param_name, other_val, *params, dep_
         if dep_mandatory and other_val == allowed_val and val == default:
             raise errors.MissingError(name, other_param_name, other_val)
 
-def multi_check_invalid_params(allowed_vals, other_param_name, other_val, *params, dep_mandatory=False):
+def multi_check_invalid_params(allowed_vals: Sequence[Any], other_param_name: str, other_val: Any, *params: Tuple[Tuple[str, Any, Any]], dep_mandatory: bool=False):
     """(name, val, default)"""
     for name, val, default in params:
         for allowed_val in allowed_vals:
@@ -70,17 +71,17 @@ def multi_check_invalid_params(allowed_vals, other_param_name, other_val, *param
             raise errors.MissingError(name, other_param_name, other_val)
 
 
-def check_spaces(name, val):
+def check_spaces(name: str, val: str):
     if " " in val:
         raise errors.SpaceError(name, val)
 
-def unspace(val):
+def unspace(val: str):
     if val is not None and " " in val:
         return "\""+val+"\""
     else:
         return val
 
-def unstated(indep_name, indep_value, indep_reqvals, dep_name, dep_value, dep_default):
+def unstated(indep_name: str, indep_value: Any, indep_reqvals: Sequence[Any], dep_name: str, dep_value: Any, dep_default: Any):
     #only when the dep is mandatory due to the indep, and the dep's default is None
     for indep_reqval in indep_reqvals:
         if indep_value == indep_reqval and dep_value != dep_default:
