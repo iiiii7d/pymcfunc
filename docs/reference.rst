@@ -3271,7 +3271,7 @@ Raw JSON text
 -------------
 .. py:currentmodule:: pymcfunc.rt
 
-.. py:function:: java(text: str, format_symbol="§", content_symbol="¶")
+.. py:function:: java(text: str, format_symbol: str="§", content_symbol: str="¶")
 
    Converts a string of text into Java raw JSON text.
 
@@ -3315,7 +3315,7 @@ Raw JSON text
    :returns: The JSON text
    :rtype: list[dict] or dict
 
-.. py:function:: bedrock(text: str, content_symbol="¶")
+.. py:function:: bedrock(text: str, content_symbol: str="¶")
 
    Converts a string of text into Bedrock raw JSON text.
 

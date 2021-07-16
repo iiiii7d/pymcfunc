@@ -6,6 +6,22 @@ def _compress(out: str):
     out = [i for i in out if isinstance(i, str) or 'text' not in i.keys() or ('text' in i.keys() and i['text'] != "")]
     return out
 
+def _escaped(c: int, text: str):
+    bs = 0
+    c -= 1
+    while text[c] != '\\' and c >= 0:
+        bs += 1
+        c -= 1
+    return bs % 2 == 1
+
+def _escaping(c: int, text: str):
+    bs = 1
+    c += 1
+    while text[c] != '\\' and c < len(text):
+        bs += 1
+        c += 1
+    return bs % 2 == 1
+
 def _catchparam(c: int, text: str):
         # c is where [ is
         if c >= len(text) or text[c] != '[':
@@ -18,8 +34,8 @@ def _catchparam(c: int, text: str):
         indent = 0
         while not (text[c] == ']' and indent == 0) or (text[c] == ']' and (text[pc] == '\\' and text[ppc] != '\\')) and c < len(text):
             catcher += text[c]
-            if text[c] == '[' and (text[pc] != '\\' or (text[pc] == '\\' and text[ppc] == '\\')): indent += 1
-            if text[c] == ']' and (text[pc] != '\\' or (text[pc] == '\\' and text[ppc] == '\\')): indent -= 1
+            if text[c] == '[' and not _escaped(c, text): indent += 1
+            if text[c] == ']' and not _escaped(c, text): indent -= 1
             c += 1
             pc += 1
             ppc += 1
@@ -30,15 +46,15 @@ def _catchparam(c: int, text: str):
         params = ['']
         for i in range(len(catcher)):
             ch = catcher[i]
-            prev_ch = catcher[i-1] if i-1 > 0 else None
-            prevprev_ch = catcher[i-2] if i-2 > 0 else None
-            next_ch = catcher[i+1] if i+1 < len(catcher) else None
-            if ch == '[' and (prev_ch != '\\' or (prev_ch == '\\' and prevprev_ch == '\\')): indent += 1
-            if ch == ']' and (prev_ch != '\\' or (prev_ch == '\\' and prevprev_ch == '\\')): indent -= 1
-            if ch == '|' and indent == 0 and (prev_ch != '\\' or (prev_ch == '\\' and prevprev_ch == '\\')):
+            #prev_ch = catcher[i-1] if i-1 > 0 else None
+            #prevprev_ch = catcher[i-2] if i-2 > 0 else None
+            #next_ch = catcher[i+1] if i+1 < len(catcher) else None
+            if ch == '[' and not _escaped(i, ''.join(catcher)): indent += 1
+            if ch == ']' and not _escaped(i, ''.join(catcher)): indent -= 1
+            if ch == '|' and indent == 0 and not _escaped(i, ''.join(catcher)):
                 params.append('')
                 continue
-            if ch == '\\' and (next_ch == '|' or next_ch == '\\') and (prev_ch != '\\' or (prev_ch == '\\' and prevprev_ch == '\\')) and indent == 0:
+            if ch == '\\' and _escaping(i, ''.join(catcher)) and not _escaped(i, ''.join(catcher)) and indent == 0:
                 continue
             params[-1] += ch
         return params, c-orig_c+2
