@@ -5,6 +5,8 @@ Changelog
 
   * Added Entities, Mobs and ArmourStands
   * Added Advancements
+  * Retyped a few parameters
+  * Fixed escapes in raw text translators
 
 * **v0.3 (4/6/21)**
 

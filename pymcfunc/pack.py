@@ -9,6 +9,7 @@ import pymcfunc.internal as internal
 from pymcfunc.func_handlers import JavaFuncHandler, BedrockFuncHandler, UniversalFuncHandler
 import pymcfunc.selectors as selectors
 from pymcfunc.advancements import Advancement
+from pymcfunc.loot_tables import LootTable
 
 class Pack:
     """A container for all functions.
@@ -22,6 +23,7 @@ class Pack:
         self.funcs = {}
         self.tags = {'functions':{}}
         self.advancements = {}
+        self.loot_tables = {}
         self.sel = selectors.BedrockSelectors() if edition == "b" else selectors.JavaSelectors()
         if edition == 'j':
             self.t = JavaTags(self)
@@ -41,6 +43,11 @@ class Pack:
         if self.edition == 'b':
             raise TypeError('No advancements in Bedrock')
         return Advancement(self, name, parent)
+
+    def loot_table(self, name: str):
+        if self.edition == 'b':
+            raise TypeError('No loot tables in Bedrock')
+        return LootTable(self, name)
 
     def build(self, name: str, pack_format: int, description: str, datapack_folder: str='.'):
         """Builds the pack. Java Edition only.\n
@@ -75,11 +82,25 @@ class Pack:
         pathlib.Path(os.getcwd()+'/functions').mkdir(exist_ok=True)
         for k, v in self.funcs.items():
             funcName, function = k.lower(), v[:]
-            function = function.replace('/pymcfunc:first/', name+':'+funcName)
-            with open(f'functions/{funcName}.mcfunction', 'w') as f:
-                f.write(function)
+            subfuncs = f"\n{function}\n".count('\n***\n')+1
+            func_count = 1
+            for line in function:
+                if line == "***": func_count += 1
+                line = line.replace('/pymcfunc:first/', name+':'+funcName+("0" if subfuncs != 1 else "")) \
+                           .replace('/pymcfunc:prev/', name+':'+funcName+str(func_count-1)) \
+                           .replace('/pymcfunc:next/', name+':'+funcName+str(func_count+1)) \
+                           .replace('/pymcfunc:last/', name+':'+funcName+(str(subfuncs-1) if subfuncs != 1 else ""))
+            for n, subfunc in enumerate(function.split("***").strip()):
+                if subfuncs == 1: n = ""
+                with open(f'functions/{funcName}{n}.mcfunction', 'w') as f:
+                    f.write(subfunc)
             
         #advancements
+        pathlib.Path(os.getcwd()+'/advancements').mkdir(exist_ok=True)
+        for k, v in self.advancements.items():
+            with open(f'advancements/{k}.json', 'w') as f:
+                    json.dump(f, v)
+
         #loot tables
         #predicates
         #recipes
