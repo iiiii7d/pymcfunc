@@ -45,11 +45,11 @@ class Advancement:
 
     def reward(self, item: str, value: Any):
         internal.options(item, ['recipes', 'loot', 'experience', 'function'])
-        self.value['reward'][item] = value
+        self.value['rewards'][item] = value
 
     def on_reward(self, func: Callable[[func_handler.JavaFuncHandler], Any]):
         @wraps(func)
         def wrapper(m):
-            self.value['reward']['function'] = func.__name__
+            self.value['rewards']['function'] = func.__name__
             func(m)
         return wrapper
