@@ -1,5 +1,6 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 import pymcfunc.internal as internal
+NumberProvider = dict
 
 class LootTable:
     def __init__(self, p, name: str, type_: Optional[str]=None):
@@ -23,7 +24,7 @@ class LootTable:
         return Pool(self, rolls, bonus_rolls, len(self.lt.p.loot_tables[self.name]['pools']))
 
 class Pool:
-    def __init__(self, lt, rolls: int, bonus_rolls: float, index: str):
+    def __init__(self, lt, rolls: Union[int, NumberProvider], bonus_rolls: Union[float, NumberProvider], index: str):
         self.lt = lt
         self.lt.p.loot_tables[self.name]['pools'].append({
             'conditions': [],

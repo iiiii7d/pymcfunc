@@ -10,6 +10,7 @@ from pymcfunc.func_handlers import JavaFuncHandler, BedrockFuncHandler, Universa
 import pymcfunc.selectors as selectors
 from pymcfunc.advancements import Advancement
 from pymcfunc.loot_tables import LootTable
+from pymcfunc.predicates import Predicate
 
 class Pack:
     """A container for all functions.
@@ -49,6 +50,9 @@ class Pack:
         if self.edition == 'b':
             raise TypeError('No loot tables in Bedrock')
         return LootTable(self, name)
+
+    def predicate(self, name: str):
+        return Predicate(self, name)
 
     def build(self, name: str, pack_format: int, description: str, datapack_folder: str='.'):
         """Builds the pack. Java Edition only.\n
