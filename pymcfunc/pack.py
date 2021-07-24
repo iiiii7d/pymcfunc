@@ -1,4 +1,4 @@
-from typing import Callable, Any
+from typing import Callable, Any, Optional
 from functools import wraps
 import pathlib
 import os
@@ -11,7 +11,7 @@ import pymcfunc.selectors as selectors
 from pymcfunc.advancements import Advancement
 from pymcfunc.loot_tables import LootTable
 from pymcfunc.predicates import Predicate
-from pymcfunc.recipes import *
+from pymcfunc.recipes import CookingRecipe, ShapedCraftingRecipe, ShapelessCraftingRecipe, SmithingRecipe, StonecuttingRecipe
 
 class Pack:
     """A container for all functions.
@@ -58,10 +58,14 @@ class Pack:
             raise TypeError('No predicates in Bedrock')
         return Predicate(self, name)
 
-    def recipes(self, name: str, type_: str, group: Optional[str]=None):
+    def recipe(self, name: str, type_: str, group: Optional[str]=None):
         internal.options(type_, ['blasting', 'campfire_cooking', 'crafting_shaped', 'crafting_shapeless', 'smelting', 'smithing', 'smoking', 'stonecutting'])
-        if type_ in ['blasting', 'campfire_cooking', 'smelting', 'smoking']:
-            return CookingRecipe(self, name, type_, group=group)
+        if type_ in ['blasting', 'campfire_cooking', 'smelting', 'smoking']: recipe = CookingRecipe
+        elif type_ == "crafting_shaped": recipe = ShapedCraftingRecipe
+        elif type_ == "crafting_shapeless": recipe = ShapelessCraftingRecipe
+        elif type_ == "smithing": recipe = SmithingRecipe
+        elif type_ == "stonecutting": recipe = StonecuttingRecipe
+        return recipe(self, name, type_, group=group)
         
 
     def build(self, name: str, pack_format: int, description: str, datapack_folder: str='.'):
@@ -129,6 +133,11 @@ class Pack:
                     json.dump(f, v)
 
         #recipes
+        pathlib.Path(os.getcwd()+'/recipes').mkdir(exist_ok=True)
+        for k, v in self.recipes.items():
+            with open(f'recipes/{k}.json', 'w') as f:
+                    json.dump(f, v)
+
         #structures
         #tags
         #dimension types
