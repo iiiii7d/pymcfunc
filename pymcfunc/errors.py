@@ -30,6 +30,7 @@ class ReliantError(Exception):
 
 class CaretError(Exception):
     def __init__(self, coords, cause):
+        msg = ""
         if cause == "tilde":
             msg = f"Tildes and carets cannot be in the same set of coordinates (Got '{coords}')"
         elif cause == "notall":

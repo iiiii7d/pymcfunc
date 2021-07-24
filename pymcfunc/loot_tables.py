@@ -21,11 +21,12 @@ class LootTable:
         })
 
     def pool(self, rolls: int, bonus_rolls: float):
-        return Pool(self, rolls, bonus_rolls, len(self.lt.p.loot_tables[self.name]['pools']))
+        return Pool(self, rolls, bonus_rolls, len(self.p.loot_tables[self.name]['pools']))
 
 class Pool:
-    def __init__(self, lt, rolls: Union[int, NumberProvider], bonus_rolls: Union[float, NumberProvider], index: str):
+    def __init__(self, lt, rolls: Union[int, NumberProvider], bonus_rolls: Union[float, NumberProvider], index: int):
         self.lt = lt
+        self.name = self.lt.name
         self.lt.p.loot_tables[self.name]['pools'].append({
             'conditions': [],
             'functions': [],
@@ -53,6 +54,7 @@ class Pool:
 class Entry:
     def __init__(self, pl, type_: str, weight: int, quality: int, pool_index: Optional[int]=None, entry_index: Optional[int]=None, expand: Optional[bool]=None, name: Optional[str]=None, value: Optional[dict]=None):
         self.pl = pl
+        self.name = self.pl.lt.name
         template = {
             'conditions': [],
             'functions': [],
@@ -88,5 +90,3 @@ class Entry:
         self.value['children'].append([])
         index = int(len(self.value['children'])-1)
         return Entry(self, type_, weight, quality, expand=expand, name=name, value=self.value['children'][index])
-
-    

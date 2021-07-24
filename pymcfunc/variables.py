@@ -110,10 +110,10 @@ class BedrockVariable:
         self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
                                      operation='><', selector=other.target, selectorObjective=other.name)
 
-    def show(self, slot: str, sortOrder: str=None):
+    def show(self, slot: str, sort_order: str=None):
         """Shows the variable in a slot.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockVariable.show"""
-        self.fh.r.scoreboard_objectives('setdisplay', slot=slot, objective=self.name, sortOrder=sortOrder)
+        self.fh.r.scoreboard_objectives('setdisplay', slot=slot, objective=self.name, sortOrder=sort_order)
 
 class JavaVariable:
     """Represents a variable in Java Edition.

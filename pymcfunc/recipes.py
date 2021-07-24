@@ -70,8 +70,8 @@ class ShapedCraftingRecipe(Recipe):
                     self.values.append({'tag': tag})
             self.key = key
 
-    def pattern(self, pattern: Tuple[Tuple[Union[KeyGroup, Key], Union[KeyGroup, Key], Union[KeyGroup, Key]], \
-                                     Tuple[Union[KeyGroup, Key], Union[KeyGroup, Key], Union[KeyGroup, Key]], \
+    def pattern(self, pattern: Tuple[Tuple[Union[KeyGroup, Key], Union[KeyGroup, Key], Union[KeyGroup, Key]],
+                                     Tuple[Union[KeyGroup, Key], Union[KeyGroup, Key], Union[KeyGroup, Key]],
                                      Tuple[Union[KeyGroup, Key], Union[KeyGroup, Key], Union[KeyGroup, Key]]]):
         keys = []
         for rown in range(3):
@@ -155,10 +155,10 @@ class SmithingRecipe(Recipe):
     def result(self, result: str):
         self.value['result'] = result
 
-class StonecuttingRecipe:
+class StonecuttingRecipe(Recipe):
     def __init__(self, p, name: str, type_: str, group: Optional[str]=None):
         super().__init__(p, name, type_, group)
-        self.value['ingredient']
+        self.value['ingredient'] = []
 
     def ingredient(self, item: Optional[str]=None, tag: Optional[str]=None):
         internal.pick_one_arg(

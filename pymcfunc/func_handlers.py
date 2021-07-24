@@ -7,6 +7,7 @@ class UniversalFuncHandler:
     """The function handler which includes commands that are the same for both Java and Bedrock edition.
     More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalFuncHandler"""
     sel = UniversalSelectors()
+
     def __init__(self):
         from pymcfunc.rawcommands import UniversalRawCommands
         self.r = UniversalRawCommands(self)

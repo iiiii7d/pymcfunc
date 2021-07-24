@@ -19,12 +19,12 @@ class Pack:
     More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.Pack"""
 
     def __init__(self, edition: str="j"):
-        internal.options(edition, ['j','b'])
-        if not edition in ['j', 'b']:
+        internal.options(edition, ['j', 'b'])
+        if edition not in ['j', 'b']:
             raise errors.OptionError(['j', 'b'], edition)
         self.edition = edition
         self.funcs = {}
-        self.tags = {'functions':{}}
+        self.tags = {'functions': {}}
         self.minecraft_tags = {'load': [], 'tick': []}
         self.advancements = {}
         self.loot_tables = {}
@@ -65,13 +65,14 @@ class Pack:
         if self.edition == 'b':
             raise TypeError('No recipes in Bedrock')
         internal.options(type_, ['blasting', 'campfire_cooking', 'crafting_shaped', 'crafting_shapeless', 'smelting', 'smithing', 'smoking', 'stonecutting'])
-        if type_ in ['blasting', 'campfire_cooking', 'smelting', 'smoking']: recipe = CookingRecipe
-        elif type_ == "crafting_shaped": recipe = ShapedCraftingRecipe
-        elif type_ == "crafting_shapeless": recipe = ShapelessCraftingRecipe
-        elif type_ == "smithing": recipe = SmithingRecipe
-        elif type_ == "stonecutting": recipe = StonecuttingRecipe
-        return recipe(self, name, type_, group=group)
-        
+        r = None
+        if type_ in ['blasting', 'campfire_cooking', 'smelting', 'smoking']: r = CookingRecipe
+        elif type_ == "crafting_shaped": r = ShapedCraftingRecipe
+        elif type_ == "crafting_shapeless": r = ShapelessCraftingRecipe
+        elif type_ == "smithing": r = SmithingRecipe
+        elif type_ == "stonecutting": r = StonecuttingRecipe
+        return r(self, name, type_, group=group)
+
     def item_modifier(self, name: str):
         if self.edition == 'b':
             raise TypeError('No item modifiers in Bedrock')
@@ -104,7 +105,7 @@ class Pack:
 
         #create data dir
         pathlib.Path(os.getcwd()+'/data/'+name).mkdir(parents=True, exist_ok=True)
-        
+
         #minecraft tags
         pathlib.Path(os.getcwd()+f'/data/minecraft/tags/functions').mkdir(parents=True, exist_ok=True)
         for tag, funcs in self.minecraft_tags.items():
@@ -123,47 +124,48 @@ class Pack:
             funcName, function = k.lower(), v[:]
             subfuncs = f"\n{function}\n".count('\n***\n')+1
             func_count = 1
-            for line in function:
+            for n, line in enumerate(function):
                 if line == "***": func_count += 1
                 line = line.replace('/pymcfunc:first/', name+':'+funcName+("0" if subfuncs != 1 else "")) \
                            .replace('/pymcfunc:prev/', name+':'+funcName+str(func_count-1)) \
                            .replace('/pymcfunc:next/', name+':'+funcName+str(func_count+1)) \
                            .replace('/pymcfunc:last/', name+':'+funcName+(str(subfuncs-1) if subfuncs != 1 else ""))
+                function[n] = line
             for n, subfunc in enumerate(function.split("***").strip()):
                 if subfuncs == 1: n = ""
                 with open(f'functions/{funcName}{n}.mcfunction', 'w') as f:
                     f.write(subfunc)
-            
+
         #advancements
         pathlib.Path(os.getcwd()+'/advancements').mkdir(exist_ok=True)
         for k, v in self.advancements.items():
             with open(f'advancements/{k}.json', 'w') as f:
-                    json.dump(f, v)
+                json.dump(f, v)
 
         #loot tables
         pathlib.Path(os.getcwd()+'/loot_tables').mkdir(exist_ok=True)
         for k, v in self.loot_tables.items():
             with open(f'loot_tables/{k}.json', 'w') as f:
-                    json.dump(f, v)
+                json.dump(f, v)
 
         #predicates
         pathlib.Path(os.getcwd()+'/predicates').mkdir(exist_ok=True)
         for k, v in self.predicates.items():
             with open(f'predicates/{k}.json', 'w') as f:
-                    json.dump(f, v)
+                json.dump(f, v)
 
         #recipes
         pathlib.Path(os.getcwd()+'/recipes').mkdir(exist_ok=True)
         for k, v in self.recipes.items():
             with open(f'recipes/{k}.json', 'w') as f:
-                    json.dump(f, v)
+                json.dump(f, v)
 
         #structures
         #dimension types
         #dimensions
         #item modifiers
         #worldgen
-        
+
         #tags
         for group, tags in self.tags.items():
             pathlib.Path(os.getcwd()+f'/tags/{group}').mkdir(parents=True, exist_ok=True)
@@ -177,7 +179,7 @@ class Pack:
 class JavaTags:
     def __init__(self, p):
         self.pack = p
-    
+
     def tag(self, tag: str, minecraft_tag: bool=False):
         """Applies a tag to the function. When the tag is run with /function, all functions under this tag will run.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaTags.tag"""
@@ -216,8 +218,9 @@ class JavaTags:
                 m.r.schedule('/pymcfunc:first/', duration=ticks, mode='append')
             return wrapper
         return decorator
-    
-    def repeat(self, n: int):
+
+    @staticmethod
+    def repeat(n: int):
         """The function will be run a defined number of times.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaTags.repeat"""
         def decorator(func):

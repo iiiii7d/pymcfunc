@@ -1,4 +1,4 @@
-from typing import Optional, Sequence, Tuple
+from typing import Optional, Sequence, Tuple, Union, Dict, List
 import pymcfunc.internal as internal
 
 class ItemModifier:
@@ -8,15 +8,16 @@ class ItemModifier:
         self.p.item_modifiers[name] = {}
         self.value = self.p.item_modifiers[self.name]
 
-    def apply_bonus(self, enchantment: str, formula: str, extra: int, probability: float, bonusMultiplier: float):
+    def apply_bonus(self, enchantment: str, formula: str, extra: int, probability: float, bonus_multiplier: float):
         internal.options(formula, ['binomial_with_bonus_count', 'uniform_bonus_count', 'ore_drops'])
         self.value = {
             'function': 'apply_bonus',
+            'enchantment': enchantment,
             'formula': formula,
             'parameters': [
                 extra,
                 probability,
-                bonusMultiplier
+                bonus_multiplier
             ]
         }
 
@@ -44,7 +45,7 @@ class ItemModifier:
     def copy_nbt_operation(self, source: str, target: str, op: str):
         self.value['function'] = 'copy_nbt'
         internal.options(op, ['replace', 'append', 'merge'])
-        if not 'ops' in self.value.keys(): self.value['ops'] = []
+        if 'ops' not in self.value.keys(): self.value['ops'] = []
         self.value['ops'].append({
             'source': source,
             'target': target,
@@ -115,7 +116,7 @@ class ItemModifier:
         else:
             internal.options(slot, ['mainhand', 'offhand', 'feet', 'legs', 'chest', 'head'])
         self.value['function'] = "set_attributes"
-        if not 'modifiers' in self.value.keys():
+        if 'modifiers' not in self.value.keys():
             self.value['modifiers'] = []
         self.value['modifiers'].append({
             'name': name,

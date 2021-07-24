@@ -22,8 +22,8 @@ def binominal(n: Union[int, NumberProvider], p: Union[float, NumberProvider]):
         "p": p
     }
 
-def score(score: str, target: Optional[str]=None, type_: Optional[str]=None, name: Optional[str]=None, scale: Optional[float]=None) -> NumberProvider:
-    np = {"type": "score", "score": score}
+def score(score_: str, target: Optional[str]=None, type_: Optional[str]=None, name: Optional[str]=None, scale: Optional[float]=None) -> NumberProvider:
+    np = {"type": "score", "score": score_}
     internal.unstated("type", type_, ['fixed'], 'name', name, None)
     internal.pick_one_arg(
         (name, None, 'name'),
@@ -34,6 +34,7 @@ def score(score: str, target: Optional[str]=None, type_: Optional[str]=None, nam
     if type_ is None: np['target'] = target
     else:
         internal.options(type_, ['fixed', 'context'])
+        np['target'] = {}
         np['target']['type'] = type_
         if target is not None: np['target']['target'] = target
         else: np['target']['name'] = name

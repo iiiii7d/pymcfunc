@@ -1,7 +1,7 @@
-from typing import Union, Tuple, Any, Sequence
+from typing import Tuple, Any, Sequence
 import pymcfunc.errors as errors
 
-def defaults(*vals: Tuple[Tuple[Any, Any]]):
+def defaults(*vals: Tuple[Any, Any]):
     """(v, dv)"""
     args = ""
     not_default_detected = False
@@ -13,31 +13,31 @@ def defaults(*vals: Tuple[Tuple[Any, Any]]):
             args = str(v)+" "+args
     return args.strip()
 
-def options(var: Any, options: Sequence):
-    if not var in options:
-        raise errors.OptionError(options, var)
+def options(var: Any, opts: Sequence):
+    if var not in opts:
+        raise errors.OptionError(opts, var)
 
-def pick_one_arg(*vars: Tuple[Tuple[Any, Any, str]], optional: bool=True):
+def pick_one_arg(*vars_: Tuple[Any, Any, str], optional: bool=True):
     """(v, dv, varname)"""
     sameCount = 0
     diffFound = False
     diff = None
     diffname = None
     defaultNotNone = None
-    for v, dv, varname in vars:
+    for v, dv, varname in vars_:
         if v == dv:
             sameCount += 1
             if dv is not None:
                 defaultNotNone = dv
         elif v != dv and diffFound:
-            raise errors.OnlyOneAllowed([i[2] for i in vars], f"'{varname}' and '{diffname}'")
+            raise errors.OnlyOneAllowed([i[2] for i in vars_], f"'{varname}' and '{diffname}'")
         elif v != dv:
             diffFound = True
             diff = v
             diffname = varname
-    
+
     if diff is None and not optional:
-        raise errors.OptionError([i[2] for i in vars], None)
+        raise errors.OptionError([i[2] for i in vars_], None)
     elif diff is None:
         diff = defaultNotNone
 
@@ -48,7 +48,7 @@ def reliant(indep_name: str, indep_value: Any, indep_default: Any, dep_name: str
     if dep_value != dep_default and indep_value == indep_default:
         raise errors.ReliantError(indep_name, dep_name)
 
-def check_invalid_params(allowed_val: Any, other_param_name: str, other_val: Any, *params: Tuple[Tuple[str, Any, Any]], dep_mandatory: bool=False):
+def check_invalid_params(allowed_val: Any, other_param_name: str, other_val: Any, *params: Tuple[str, Any, Any], dep_mandatory: bool=False):
     """(name, val, default)"""
     for name, val, default in params:
         if other_val != allowed_val and val != default:
@@ -57,7 +57,7 @@ def check_invalid_params(allowed_val: Any, other_param_name: str, other_val: Any
         if dep_mandatory and other_val == allowed_val and val == default:
             raise errors.MissingError(name, other_param_name, other_val)
 
-def multi_check_invalid_params(allowed_vals: Sequence[Any], other_param_name: str, other_val: Any, *params: Tuple[Tuple[str, Any, Any]], dep_mandatory: bool=False):
+def multi_check_invalid_params(allowed_vals: Sequence[Any], other_param_name: str, other_val: Any, *params: Tuple[str, Any, Any], dep_mandatory: bool=False):
     """(name, val, default)"""
     for name, val, default in params:
         for allowed_val in allowed_vals:
@@ -65,10 +65,10 @@ def multi_check_invalid_params(allowed_vals: Sequence[Any], other_param_name: st
                 break
         else:
             raise errors.InvalidParameterError(", ".join(allowed_vals), other_param_name, other_val, name)
-    for allowed_val in allowed_vals:
-    # only when default is None
-        if dep_mandatory and other_val == allowed_val and val == default:
-            raise errors.MissingError(name, other_param_name, other_val)
+        for allowed_val in allowed_vals:
+            # only when default is None
+            if dep_mandatory and other_val == allowed_val and val == default:
+                raise errors.MissingError(name, other_param_name, other_val)
 
 
 def check_spaces(name: str, val: str):
@@ -82,7 +82,7 @@ def unspace(val: str):
         return val
 
 def unstated(indep_name: str, indep_value: Any, indep_reqvals: Sequence[Any], dep_name: str, dep_value: Any, dep_default: Any):
-    #only when the dep is mandatory due to the indep, and the dep's default is None
+    # only when the dep is mandatory due to the indep, and the dep's default is None
     for indep_reqval in indep_reqvals:
         if indep_value == indep_reqval and dep_value != dep_default:
             break

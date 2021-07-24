@@ -1,6 +1,7 @@
-from typing import Any, Optional, Dict, Union
+from typing import Optional, Dict, Union
 import pymcfunc.internal as internal
 NumberProvider = dict
+
 
 class Predicate:
     def __init__(self, p, name: str, value: Optional[dict]=None):
@@ -12,7 +13,7 @@ class Predicate:
 
     def alternative(self) -> 'Predicate':
         self.value['condition'] = "alternative"
-        if not 'terms' in self.value.keys():
+        if 'terms' not in self.value.keys():
             self.value['terms'] = []
         index = int(len(self.value['terms'])-1)
         return Predicate(self.p, "", value=self.value['terms'][index])
@@ -53,11 +54,11 @@ class Predicate:
         self.value['condition'] = "killed_by_player"
         self.value['inverse'] = inverse
 
-    def location_check(self, offsetX: Optional[int]=None, offsetY: Optional[int]=None, offsetZ: Optional[int]=None, **predicate: dict):
+    def location_check(self, offset_x: Optional[int]=None, offset_y: Optional[int]=None, offset_z: Optional[int]=None, **predicate: dict):
         self.value['condition'] = "location_check"
-        if offsetX is not None: self.value['offsetX'] = offsetX
-        if offsetY is not None: self.value['offsetY'] = offsetY
-        if offsetZ is not None: self.value['offsetZ'] = offsetZ
+        if offset_x is not None: self.value['offsetX'] = offset_x
+        if offset_y is not None: self.value['offsetY'] = offset_y
+        if offset_z is not None: self.value['offsetZ'] = offset_z
         self.value['predicate'] = predicate
 
     def match_tool(self, **predicate: dict):
@@ -78,7 +79,7 @@ class Predicate:
         if isinstance(predicate, type(self)):
             self.value['name'] = predicate.name
         else:
-            self.valuep['name'] = predicate
+            self.value['name'] = predicate
 
     def survives_explosion(self):
         self.value['condition'] = "survives_explosion"
@@ -109,4 +110,3 @@ class Predicate:
                     raise KeyError(f"Invalid key: {k}")
         self.value['range'] = range_
         self.value['value'] = value
-

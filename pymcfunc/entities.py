@@ -45,11 +45,11 @@ class Entity:
 
 
 class Mob(Entity):
-    def set_armour_slot(self, slot: str, itemId: str, count: int=1, tag: Optional[dict]=None):
+    def set_armour_slot(self, slot: str, item_id: str, count: int=1, tag: Optional[dict]=None):
         index = ['feet', 'legs', 'chest', 'head']
         internal.options(slot, index)
         data = {
-            'id': itemId,
+            'id': item_id,
             'Count': count,
         }
         if tag is not None:
@@ -76,4 +76,3 @@ class ArmourStand(Mob):
         for limb in ['Body', 'Head', 'LeftArm', 'LeftLeg', 'RightArm', 'RightLeg']:
             for axis in ['x', 'y', 'z']:
                 self.move_limb(limb, axis, randint(-180, 180))
-

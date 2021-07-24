@@ -11,18 +11,18 @@ class UniversalSelectors:
        Every function has a **kwargs, which is used for selector arguments. The list of selector arguemnts are in the respective specialised classes.
        If an argument is repeatable, you can express multiple values of the same argument in lists, sets, or tuples.
        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalSelectors"""
-    
+
     def select(self, var: str, **kwargs):
         """Returns a selector, given the selector variable and optional arguments.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalSelectors.select"""
-        internal.options(var, ['p','r','a','e','s'])
+        internal.options(var, ['p', 'r', 'a', 'e', 's'])
         return "@"+var+self._sel_args(**kwargs)
 
     def nearest_player(self, **kwargs):
         """Alias of select('p', **kwargs)."""
         return self.select('p', **kwargs)
     p = nearest_player
-    
+
     def random_player(self, **kwargs):
         """Alias of select('r', **kwargs)."""
         return self.select('p', **kwargs)
@@ -45,13 +45,13 @@ class UniversalSelectors:
 
     def _sel_args(self, **kwargs):
         args = []
-        BEDROCK = ["x","y","z","rmax","rmin","dx","dy","dz","scores","tag",
-                   "c","lmax","lmin","m","name","rxmax","rxmin","rymax","rymin","type","family",
+        BEDROCK = ["x", "y", "z", "rmax", "rmin", "dx", "dy", "dz", "scores", "tag",
+                   "c", "lmax", "lmin", "m", "name", "rxmax", "rxmin", "rymax", "rymin", "type", "family",
                    "l", "r", "rx", "ry"]
-        JAVA = ["x","y","z","distance","dx","dy","dz","scores","tag",
-                "team","limit","sort","level","gamemode","name","x_rotation","y_rotation",
-                "type","nbt","advancements","predicate"]
-        CAN_REPEAT = ["type","family","tag","nbt","advancements","predicate"]
+        JAVA = ["x", "y", "z", "distance", "dx", "dy", "dz", "scores", "tag",
+                "team", "limit", "sort", "level", "gamemode", "name", "x_rotation", "y_rotation",
+                "type", "nbt", "advancements", "predicate"]
+        CAN_REPEAT = ["type", "family", "tag", "nbt", "advancements", "predicate"]
         OPTIONS_JAVA = {
             "sort": ["nearest", "furthest", "random", "arbitrary"],
             "gamemode": ["spectator", "adventure", "creative", "survival"]
@@ -79,7 +79,7 @@ class UniversalSelectors:
         for k, v in kwargs.items():
             keylist = BEDROCK if type(self) == BedrockSelectors else JAVA
             optionslist = OPTIONS_BEDROCK if type(self) == BedrockSelectors else OPTIONS_JAVA
-            if not k in keylist:
+            if k not in keylist:
                 raise KeyError(f"Invalid target selector argument '{k}'")
             if k in optionslist.keys():
                 if not str(v) in optionslist[k]:
@@ -97,7 +97,7 @@ class UniversalSelectors:
             else:
                 v = json.dumps(v) if isinstance(v, dict) else v
                 args.append(f"{k}={v}")
-        result = "["+",".join(args)+"]"
+        result = "["+", ".join(args)+"]"
         if result == "[]": result = ""
         return result
 
@@ -115,7 +115,8 @@ class JavaSelectors(UniversalSelectors):
     def __init__(self):
         pass
 
-    def range(self, minv: int=0, maxv: int=inf):
+    @staticmethod
+    def range(minv: int=0, maxv: int=inf):
         """Returns a range of values, as it is represented in Minecraft commands.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaSelectors.range"""
         if minv > maxv:
@@ -128,7 +129,7 @@ class JavaSelectors(UniversalSelectors):
         if result == "..":
             raise ValueError(f"Invalid range")
         return result
-        
+
 def cuboid(pos1: Sequence[int], pos2: Sequence[int], dims: str='xyz'):
     """Finds the northwest-bottommost corner and the volume/area/length of a cuboid, area or line, given two corners.
     This function is mainly for selector arguments, namely x, y, z, dx, dy and dz.

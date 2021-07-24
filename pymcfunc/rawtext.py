@@ -1,5 +1,5 @@
 import re
-import pymcfunc.internal as internal
+#import pymcfunc.internal as internal
 #from traceback import format_exc
 
 def _compress(out: str):
@@ -23,41 +23,41 @@ def _escaping(c: int, text: str):
     return bs % 2 == 1
 
 def _catchparam(c: int, text: str):
-        # c is where [ is
-        if c >= len(text) or text[c] != '[':
-            return None, None
-        catcher = ''
-        orig_c = int(c)
+    # c is where [ is
+    if c >= len(text) or text[c] != '[':
+        return None, None
+    catcher = ''
+    orig_c = int(c)
+    c += 1
+    pc = c-1
+    ppc = c-2
+    indent = 0
+    while not (text[c] == ']' and indent == 0) or (text[c] == ']' and (text[pc] == '\\' and text[ppc] != '\\')) and c < len(text):
+        catcher += text[c]
+        if text[c] == '[' and not _escaped(c, text): indent += 1
+        if text[c] == ']' and not _escaped(c, text): indent -= 1
         c += 1
-        pc = c-1
-        ppc = c-2
-        indent = 0
-        while not (text[c] == ']' and indent == 0) or (text[c] == ']' and (text[pc] == '\\' and text[ppc] != '\\')) and c < len(text):
-            catcher += text[c]
-            if text[c] == '[' and not _escaped(c, text): indent += 1
-            if text[c] == ']' and not _escaped(c, text): indent -= 1
-            c += 1
-            pc += 1
-            ppc += 1
-        if c == len(text):
-            return None, None
+        pc += 1
+        ppc += 1
+    if c == len(text):
+        return None, None
 
-        indent = 0
-        params = ['']
-        for i in range(len(catcher)):
-            ch = catcher[i]
-            #prev_ch = catcher[i-1] if i-1 > 0 else None
-            #prevprev_ch = catcher[i-2] if i-2 > 0 else None
-            #next_ch = catcher[i+1] if i+1 < len(catcher) else None
-            if ch == '[' and not _escaped(i, ''.join(catcher)): indent += 1
-            if ch == ']' and not _escaped(i, ''.join(catcher)): indent -= 1
-            if ch == '|' and indent == 0 and not _escaped(i, ''.join(catcher)):
-                params.append('')
-                continue
-            if ch == '\\' and _escaping(i, ''.join(catcher)) and not _escaped(i, ''.join(catcher)) and indent == 0:
-                continue
-            params[-1] += ch
-        return params, c-orig_c+2
+    indent = 0
+    params = ['']
+    for i in range(len(catcher)):
+        ch = catcher[i]
+        #prev_ch = catcher[i-1] if i-1 > 0 else None
+        #prevprev_ch = catcher[i-2] if i-2 > 0 else None
+        #next_ch = catcher[i+1] if i+1 < len(catcher) else None
+        if ch == '[' and not _escaped(i, ''.join(catcher)): indent += 1
+        if ch == ']' and not _escaped(i, ''.join(catcher)): indent -= 1
+        if ch == '|' and indent == 0 and not _escaped(i, ''.join(catcher)):
+            params.append('')
+            continue
+        if ch == '\\' and _escaping(i, ''.join(catcher)) and not _escaped(i, ''.join(catcher)) and indent == 0:
+            continue
+        params[-1] += ch
+    return params, c-orig_c+2
 
 def java(text: str, format_symbol: str="§", content_symbol: str="¶"):
     """Converts a string of text into Java raw JSON text.\n

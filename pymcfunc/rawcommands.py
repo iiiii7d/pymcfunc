@@ -6,7 +6,7 @@ import json
 import pymcfunc.internal as internal
 import pymcfunc.errors as errors
 from pymcfunc.func_handlers import JavaFuncHandler, BedrockFuncHandler
-_b = lambda x: 'true' if x == True else 'false' if x == False else x
+_b = lambda x: 'true' if x is True else 'false' if x is False else x
 
 class UniversalRawCommands:
     """A container for raw Minecraft commands that are the same for both Java and Bedrock.
@@ -60,12 +60,13 @@ class UniversalRawCommands:
             raw = "raw"
         if isinstance(text, dict):
             text = json.dumps(text)
+        cmd = ""
         if mode in ['title', 'subtitle', 'actionbar']:
-            cmd = f"title{raw} {mode} {text}"
+            cmd = f"title{raw} {target} {mode} {text}"
         elif mode == "times":
-            cmd = f"title{raw} {mode} {fadeIn} {stay} {fadeOut}"
+            cmd = f"title{raw} {target} {mode} {fadeIn} {stay} {fadeOut}"
         elif mode in ['clear', 'reset']:
-            cmd = f"title{raw} {mode}"
+            cmd = f"title{raw}{target}  {mode}"
         self.fh.commands.append(cmd)
         return cmd
 
@@ -121,7 +122,7 @@ class UniversalRawCommands:
 
         rules = BEDROCK if isinstance(self.fh, BedrockFuncHandler) else JAVA
         rulelist = itertools.chain.from_iterable(rules.values())
-        internal.options(rule, rulelist)
+        internal.options(rule, list(rulelist))
 
         if value is not None:
             other = int if isinstance(value, bool) else bool
@@ -325,9 +326,9 @@ class BedrockRawCommands(UniversalRawCommands):
             nameTag = internal.unspace(nameTag)
             cmd = f"summon {entity} {nameTag} {optionals}".strip()
         else:
-            optionals = internal.defaults((pos, "~ ~ ~"), (event, None), (nameTag, None))
             if event is not None: event = internal.unspace(event)
             if nameTag is not None: nameTag = internal.unspace(nameTag)
+            optionals = internal.defaults((pos, "~ ~ ~"), (event, None), (nameTag, None))
             cmd = f"summon {entity} {optionals}".strip()
         
         self.fh.commands.append(cmd)
@@ -558,7 +559,8 @@ class BedrockRawCommands(UniversalRawCommands):
             internal.multi_check_invalid_params(['list', 'sidebar'], 'mode', mode, ('sortOrder', sortOrder, None))
             if sortOrder is not None:
                 internal.options(sortOrder, ['ascending', 'descending'])
-        
+
+        suffix = ""
         if mode == "add":
             suffix = f"{objective} dummy {displayName}"
         elif mode == "list":
@@ -604,6 +606,7 @@ class BedrockRawCommands(UniversalRawCommands):
         if operation is not None:
             internal.options(operation, ['+=', '-=', '*=', '/=', '%=', '<', '>', '><'])
 
+        suffix = ""
         if mode == "list":
             optionals = internal.defaults((target, None))
             suffix = optionals
@@ -611,7 +614,7 @@ class BedrockRawCommands(UniversalRawCommands):
             optionals = internal.defaults((objective, None))
             suffix = f"{target} {optionals}"
         elif mode in ['test', 'random']:
-            optionals = internal.default((maxv, None))
+            optionals = internal.defaults((maxv, None))
             suffix = f"{target} {objective} {minv} {optionals}"
         elif mode in ['add', 'set', 'remove']:
             suffix = f"{target} {objective} {count}"
@@ -1054,7 +1057,7 @@ class BedrockRawCommands(UniversalRawCommands):
         self.fh.commands.append(cmd)
         return cmd
 
-    def structure_load(self, name: str, pos: str, rotation: str='0_degrees', mirror: str='none', animationMode: str=None, \
+    def structure_load(self, name: str, pos: str, rotation: str='0_degrees', mirror: str='none', animationMode: str=None,
                        animationSeconds: float=1, includesEntities: bool=True, includesBlocks: bool=True, integrity: float=100, seed: str=None):
         """**Syntax:** *structure load <name> <pos> [rotation:0_degrees|90_degrees|180_degrees|270_degrees] [mirror:x|z|xz|none] ...*
         * *...*
@@ -1132,7 +1135,7 @@ class BedrockRawCommands(UniversalRawCommands):
             name_pos = internal.pick_one_arg(
                 (name, None, 'name'),
                 (pos, None, 'pos'),
-                optional = False
+                optional=False
             )
             cmd = f"tickingarea remove {name_pos}".strip()
         else:
@@ -1401,7 +1404,7 @@ class JavaRawCommands(UniversalRawCommands):
         * *under <maxHeight> <respectTeams>*\n
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.spreadplayers"""
         if maxHeight is not None:
-            maxHeight = "under "+maxHeight+" "
+            maxHeight = "under "+str(maxHeight)+" "
         else:
             maxHeight = ""
         cmd = f"spreadplayers {center} {dist} {maxRange} {maxHeight}{_b(respectTeams)} {target}"
@@ -1448,6 +1451,7 @@ class JavaRawCommands(UniversalRawCommands):
             internal.options(renderType, ['hearts', 'integer'])
         internal.check_invalid_params('setdisplay', 'mode', mode, ('slot', slot, None), dep_mandatory=True)
 
+        suffix = ""
         if mode == "list":
             suffix = ""
         elif mode == "add":
@@ -1461,7 +1465,7 @@ class JavaRawCommands(UniversalRawCommands):
             suffix = objective
         elif mode == "setdisplay":
             optionals = internal.defaults((objective, None))
-            suffix = f"{slot} {objective}"
+            suffix = f"{slot} {objective} {optionals}"
 
         cmd = f"scoreboard objectives {mode} {suffix}".strip()
         self.fh.commands.append(cmd)
@@ -1490,6 +1494,7 @@ class JavaRawCommands(UniversalRawCommands):
         if operation is not None:
             internal.options(operation, ['+=', '-=', '*=', '/=', '%=', '<', '>', '><'])
 
+        suffix = ""
         if mode == "add":
             suffix = f"{target} {objective} {score}"
         elif mode == "enable" or mode == "get":
@@ -1587,7 +1592,7 @@ class JavaRawCommands(UniversalRawCommands):
         if "run" in subcommands.keys() and list(subcommands.keys()).index('run') != len(subcommands.keys())-1:
             raise ValueError("'run' subcommand must be last subcommand")
         
-        class subcommandhandler:
+        class SubCommandHandler:
             @staticmethod
             def s_align(v):
                 if not re.search(r"^(?!.*(.).*\1)[xyz]+$", v):
@@ -1678,7 +1683,7 @@ class JavaRawCommands(UniversalRawCommands):
             scn = k if not k.endswith("_") else k[:-1]
             if scn.endswith("xyz") or scn.endswith("entity"):
                 scn = scn.replace("xyz", "").replace("entity", "")
-            cmd += scn + " " + getattr(subcommandhandler, 's_'+k)(v)
+            cmd += scn + " " + getattr(SubCommandHandler, 's_'+k)(v)
 
         if 'run' in subcommands.keys():
             sf = JavaFuncHandler()
@@ -1695,7 +1700,6 @@ class JavaRawCommands(UniversalRawCommands):
                 result = map(lambda j: (cmd+j).strip(), result)
                 self.fh.commands.extend(result)
                 return result
-            
 
         else:
             self.fh.commands.append(cmd.strip())
@@ -1729,7 +1733,6 @@ class JavaRawCommands(UniversalRawCommands):
         target_pos = internal.pick_one_arg((target, None, 'target'), (pos, None, 'pos'), optional=False)
         
         target_pos = ("block " if pos is not None else "entity ") + target_pos
-        
 
         if mode == "modify":
             suffix = modifier
@@ -1791,7 +1794,8 @@ class JavaRawCommands(UniversalRawCommands):
             dep_mandatory=True)
         if addMode is not None:
             internal.options(addMode, ['add', 'multiply', 'multiply_base'])
-        
+
+        suffix = ""
         if mode == "modifier_add":
             suffix = f"{uuid} {name} {value} {addMode}"
         elif mode in ['modifier_remove', 'modifier_value_get']:
@@ -2012,7 +2016,7 @@ class JavaRawCommands(UniversalRawCommands):
             dep_mandatory=True)
         internal.check_invalid_params('enable', 'mode', mode,
             ('priority', priority, None),
-            dep_mandatory=None)
+            dep_mandatory=False)
         if priority is not None:
             internal.options(priority, ['first', 'last', 'before', 'after'])
         internal.multi_check_invalid_params(['before', 'after'], 'priority', priority,
@@ -2085,7 +2089,7 @@ class JavaRawCommands(UniversalRawCommands):
         self.fh.commands.append(cmd)
         return cmd
     
-    def loot(self, targetMode: str, sourceMode: str, targetPos: str=None, targetEntity: str=None, targetSlot: str=None, \
+    def loot(self, targetMode: str, sourceMode: str, targetPos: str=None, targetEntity: str=None, targetSlot: str=None,
              targetCount: int=None, sourceLootTable: str=None, sourcePos: str=None, sourceEntity: str=None, sourceTool: str=None):
         """ **Syntax:** *loot ...*
 
@@ -2158,7 +2162,8 @@ class JavaRawCommands(UniversalRawCommands):
         """**Syntax:** *pardon <target> [reason]*\n
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.pardon"""
         internal.check_spaces('target', target)
-        cmd = f"pardon {target}".strip()
+        optionals = reason if reason is not None else ""
+        cmd = f"pardon {target} {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd
 
@@ -2166,7 +2171,8 @@ class JavaRawCommands(UniversalRawCommands):
         """**Syntax:** *pardon-ip <target> [reason]*\n
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaRawCommands.pardon_ip"""
         internal.check_spaces('target', target)
-        cmd = f"pardon-ip {target}".strip()
+        optionals = reason if reason is not None else ""
+        cmd = f"pardon-ip {target} {optionals}".strip()
         self.fh.commands.append(cmd)
         return cmd
 
@@ -2227,6 +2233,7 @@ class JavaRawCommands(UniversalRawCommands):
         internal.reliant('target', target, None, 'spectator', spectator, None)
         optionals = internal.defaults((target, None), (spectator, None))
         cmd = f"spectate {optionals}".strip()
+        self.fh.commands.append(cmd)
         return cmd
 
     def team(self, mode: str, team: str=None, members: str=None, displayName: str=None, option: str=None, value=None):
@@ -2364,6 +2371,5 @@ class JavaRawCommands(UniversalRawCommands):
 
         middle = "distance" if distance is not None else "time"
         cmd = f"worldborder warning {middle} {value}".strip()
-        cmd = "worldborder get"
         self.fh.commands.append(cmd)
         return cmd

@@ -15,16 +15,16 @@ class Advancement:
         if parent is not None:
             self.value['parent'] = parent
 
-    def set_icon(self, itemName: str, nbt: Optional[dict]=None):
-        if not 'display' in self.value.keys():
+    def set_icon(self, item_name: str, nbt: Optional[dict]=None):
+        if 'display' not in self.value.keys():
             self.value['display'] = {}
-        self.value['display']['item'] = itemName
+        self.value['display']['item'] = item_name
         if nbt is not None:
             self.value['display']['nbt'] = nbt
 
     def set_display(self, attr: str, value: Any):
         internal.options(attr, ['icon', 'title', 'frame', 'background', 'description', 'show_toast', 'announce_to_chat', 'hidden'])
-        if not 'display' in self.value.keys():
+        if 'display' not in self.value.keys():
             self.value['display'] = {}
         self.value['display'][attr] = value
 
@@ -35,7 +35,7 @@ class Advancement:
             self.value['parent'] = parent
 
     def criterion(self, name: str, trigger: str, conditions: dict):
-        if not 'criteria' in self.value.keys():
+        if 'criteria' not in self.value.keys():
             self.value['criteria'] = {}
         criterion_dict = {'trigger': trigger, 'conditions': conditions}
         self.value['criteria'][name] = criterion_dict
