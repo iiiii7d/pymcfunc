@@ -48,9 +48,9 @@ Pack
       .. versionadded:: 0.3
 
    .. py:attribute:: t
-      :type: JavaTags
+      :type: JavaFunctionTags
 
-      An instance of a JavaTags class. Java Edition only.
+      An instance of a JavaFunctionTags class. Java Edition only.
 
       .. versionadded:: 0.3
 
@@ -118,14 +118,14 @@ Pack
 Tags & Events
 -------------
 
-.. py:class:: JavaTags
+.. py:class:: JavaFunctionTags
 
    A container of decorators that handle tagging and events.
 
    .. versionadded:: 0.3
 
    .. warning::
-      Do not instantiate JavaTags directly; use a Pack and access the commands via the 't' attribute.
+      Do not instantiate JavaFunctionTags directly; use a Pack and access the commands via the 't' attribute.
 
    .. py:attribute:: p
       :type: Pack
@@ -144,7 +144,7 @@ Tags & Events
 
    .. py:decoratormethod:: on_load()
 
-      Applies a 'load' tag to the function. Alias of ``@pmf.JavaTags.tag('load')``.
+      Applies a 'load' tag to the function. Alias of ``@pmf.JavaFunctionTags.tag('load')``.
 
       Functions with the tag will be run when the datapack is loaded.
 
@@ -152,7 +152,7 @@ Tags & Events
 
    .. py:decoratormethod:: repeat_every_tick()
 
-      Applies a 'tick' tag to the function. Alias of ``@pmf.JavaTags.tag('tick')``.
+      Applies a 'tick' tag to the function. Alias of ``@pmf.JavaFunctionTags.tag('tick')``.
 
       Functions with the tag will be run every tick.
 

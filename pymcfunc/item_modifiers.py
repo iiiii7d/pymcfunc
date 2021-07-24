@@ -1,5 +1,6 @@
 from typing import Optional, Sequence, Tuple, Union, Dict, List
 import pymcfunc.internal as internal
+NumberProvider = dict
 
 class ItemModifier:
     def __init__(self, p, name: str):
@@ -63,7 +64,7 @@ class ItemModifier:
         self.value['function'] = 'enchant_randomly'
         if len(enchantments) != 0: self.value['enchantments'] = list(enchantments)
     
-    def enchant_with_levels(self, treasure: bool, levels: int):
+    def enchant_with_levels(self, treasure: bool, levels: Union[int, NumberProvider]):
         self.value = {
             'function': "enchant_with_levels",
             'treasure': treasure,
@@ -91,7 +92,7 @@ class ItemModifier:
         internal.options(entity, ['this', 'killer', 'killer_player'])
         self.value['entity'] = entity
 
-    def limit_count(self, limit: Union[int, Dict[str, int]]):
+    def limit_count(self, limit: Union[Union[int, NumberProvider], Dict[str, Union[int, NumberProvider]]]):
         if isinstance(limit, dict):
             for k, v in limit:
                 if k not in ['min', 'max']:
@@ -101,14 +102,14 @@ class ItemModifier:
             'limit': limit
         }
         
-    def looting_enchant(self, count: int, limit: int):
+    def looting_enchant(self, count: Union[int, NumberProvider], limit: int):
         self.value = {
             'function': 'looting_enchant',
             'count': count,
             'limit': limit
         }
         
-    def set_attributes_modifier(self, name: str, attribute: str, operation: str, amount: str, slot: Union[str, List[str]], id_: Optional[str]=None):
+    def set_attributes_modifier(self, name: str, attribute: str, operation: str, amount: Union[float, NumberProvider], slot: Union[str, List[str]], id_: Optional[str]=None):
         internal.options(operation, ['add', 'multiply_base', 'multiply_total'])
         if isinstance(slot, list):
             for s in slot:
@@ -143,4 +144,59 @@ class ItemModifier:
             'entries': list(entries)
         }
         
-    #def set_count
+    def set_count(self, count: Union[int, NumberProvider], add: Optional[bool]=None):
+        self.value = {
+            'function': 'set_count',
+            'count': count
+        }
+        if add is not None: self.value['add'] = add
+
+    def set_damage(self, damage: Union[float, NumberProvider], add: Optional[bool]=None):
+        self.value = {
+            'function': 'set_damage',
+            'damage': damage
+        }
+        if add is not None: self.value['add'] = add
+
+    def add_enchantments(self, enchantments: Dict[str, Union[int, NumberProvider]], add: Optional[bool]=None):
+        self.value = {
+            'function': 'add_enchantments',
+            'enchantments': enchantments
+        }
+        if add is not None: self.value['add'] = add
+
+    def set_loot_table(self, name: str, seed: int=0):
+        self.value = {
+            'function': 'add_enchantments',
+            'name': name
+        }
+        if seed != 0: self.value['seed'] = seed
+
+    def set_lore(self, lore: List[dict], entity: str, replace: bool):
+        internal.options(entity, ['this', 'killer', 'killer_player'])
+        self.value = {
+            'function': 'set_lore',
+            'lore': lore,
+            'entity': entity,
+            'replace': replace
+        }
+
+    def set_name(self, name: dict, entity: str):
+        internal.options(entity, ['this', 'killer', 'killer_player'])
+        self.value = {
+            'function': 'set_lore',
+            'name': name,
+            'entity': entity,
+        }
+
+    def set_nbt(self, tag: str):
+        self.value = {
+            'function': 'set_lore',
+            'tag': tag
+        }
+
+    def set_stew_effect(self, *effects: Tuple[str, Union[int, NumberProvider]]):
+        self.value = {
+            'function': 'set_stew_effect',
+            'effects': [{'type': t, 'duration': d} for t, d in effects]
+        }

@@ -33,7 +33,7 @@ class Pack:
         self.item_modifiers = {}
         self.sel = selectors.BedrockSelectors() if edition == "b" else selectors.JavaSelectors()
         if edition == 'j':
-            self.t = JavaTags(self)
+            self.t = JavaFunctionTags(self)
 
     def function(self, func: Callable[[UniversalFuncHandler], Any]):
         """Registers a Python function and translates it into a Minecraft function.    
@@ -160,10 +160,15 @@ class Pack:
             with open(f'recipes/{k}.json', 'w') as f:
                 json.dump(f, v)
 
+        #item modifiers
+        pathlib.Path(os.getcwd() + '/item_modifiers').mkdir(exist_ok=True)
+        for k, v in self.item_modifiers.items():
+            with open(f'item_modifiers/{k}.json', 'w') as f:
+                json.dump(f, v)
+
         #structures
         #dimension types
         #dimensions
-        #item modifiers
         #worldgen
 
         #tags
@@ -176,41 +181,41 @@ class Pack:
                 with open(f'tags/{group}/{tag}.json', 'w') as f:
                     json.dump(tagJson, f)
 
-class JavaTags:
+class JavaFunctionTags:
     def __init__(self, p):
-        self.pack = p
+        self.p = p
 
     def tag(self, tag: str, minecraft_tag: bool=False):
         """Applies a tag to the function. When the tag is run with /function, all functions under this tag will run.
-        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaTags.tag"""
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFunctionTags.tag"""
         def decorator(func):
             @wraps(func)
             def wrapper(m):
                 if minecraft_tag:
-                    self.pack.minecraft_tags[tag].append(func.__name__)
+                    self.p.minecraft_tags[tag].append(func.__name__)
                 else:
-                    if tag not in self.pack.tags:
-                        self.pack.tags['functions'][tag] = []
-                    self.pack.tags['functions'][tag].append(func.__name__)
+                    if tag not in self.p.tags:
+                        self.p.tags['functions'][tag] = []
+                    self.p.tags['functions'][tag].append(func.__name__)
                 func(m)
             return wrapper
         return decorator
 
     def on_load(self, func: Callable[[UniversalFuncHandler], Any]):
-        """Applies a ‘load’ tag to the function. Alias of @pmf.JavaTags.tag('load').
+        """Applies a ‘load’ tag to the function. Alias of @pmf.JavaFunctionTags.tag('load').
         Functions with the tag will be run when the datapack is loaded.
-        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaTags.on_load"""
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFunctionTags.on_load"""
         return self.tag('load')(func)
 
     def repeat_every_tick(self, func: Callable[[UniversalFuncHandler], Any]):
-        """Applies a ‘tick’ tag to the function. Alias of @pmf.JavaTags.tag('tick').
+        """Applies a ‘tick’ tag to the function. Alias of @pmf.JavaFunctionTags.tag('tick').
         Functions with the tag will be run every tick.
-        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaTags.repeat_every_tick"""
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFunctionTags.repeat_every_tick"""
         return self.tag('tick')(func)
 
     def repeat_every(self, ticks: int):
         """The function will be run on a defined interval.
-        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaTags.repeat_every"""
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFunctionTags.repeat_every"""
         def decorator(func):
             @wraps(func)
             def wrapper(m):
@@ -222,7 +227,7 @@ class JavaTags:
     @staticmethod
     def repeat(n: int):
         """The function will be run a defined number of times.
-        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaTags.repeat"""
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFunctionTags.repeat"""
         def decorator(func):
             @wraps(func)
             def wrapper(m):
