@@ -11,6 +11,7 @@ import pymcfunc.selectors as selectors
 from pymcfunc.advancements import Advancement
 from pymcfunc.loot_tables import LootTable
 from pymcfunc.predicates import Predicate
+from pymcfunc.recipes import *
 
 class Pack:
     """A container for all functions.
@@ -26,6 +27,7 @@ class Pack:
         self.advancements = {}
         self.loot_tables = {}
         self.predicates = {}
+        self.recipes = {}
         self.sel = selectors.BedrockSelectors() if edition == "b" else selectors.JavaSelectors()
         if edition == 'j':
             self.t = JavaTags(self)
@@ -52,7 +54,15 @@ class Pack:
         return LootTable(self, name)
 
     def predicate(self, name: str):
+        if self.edition == 'b':
+            raise TypeError('No predicates in Bedrock')
         return Predicate(self, name)
+
+    def recipes(self, name: str, type_: str, group: Optional[str]=None):
+        internal.options(type_, ['blasting', 'campfire_cooking', 'crafting_shaped', 'crafting_shapeless', 'smelting', 'smithing', 'smoking', 'stonecutting'])
+        if type_ in ['blasting', 'campfire_cooking', 'smelting', 'smoking']:
+            return CookingRecipe(self, name, type_, group=group)
+        
 
     def build(self, name: str, pack_format: int, description: str, datapack_folder: str='.'):
         """Builds the pack. Java Edition only.\n
@@ -107,7 +117,17 @@ class Pack:
                     json.dump(f, v)
 
         #loot tables
+        pathlib.Path(os.getcwd()+'/loot_tables').mkdir(exist_ok=True)
+        for k, v in self.loot_tables.items():
+            with open(f'loot_tables/{k}.json', 'w') as f:
+                    json.dump(f, v)
+
         #predicates
+        pathlib.Path(os.getcwd()+'/predicates').mkdir(exist_ok=True)
+        for k, v in self.predicates.items():
+            with open(f'predicates/{k}.json', 'w') as f:
+                    json.dump(f, v)
+
         #recipes
         #structures
         #tags

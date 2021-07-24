@@ -41,10 +41,10 @@ class Predicate:
         self.value['condition'] = "entity_scores"
         internal.options(entity, ['this', 'killer', 'killer_player'])
         self.value['entity'] = entity
-        for k, v in scores.items():
+        for _, v in scores.items():
             if not isinstance(v, dict):
                 continue
-            for sk, sv in v:
+            for sk, _ in v:
                 if sk not in ['min', 'max']:
                     raise KeyError(f"Invalid key: {sk}")
         self.value['scores'] = scores
