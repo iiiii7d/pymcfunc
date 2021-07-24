@@ -12,6 +12,7 @@ from pymcfunc.advancements import Advancement
 from pymcfunc.loot_tables import LootTable
 from pymcfunc.predicates import Predicate
 from pymcfunc.recipes import CookingRecipe, ShapedCraftingRecipe, ShapelessCraftingRecipe, SmithingRecipe, StonecuttingRecipe
+from pymcfunc.item_modifiers import ItemModifier
 
 class Pack:
     """A container for all functions.
@@ -29,6 +30,7 @@ class Pack:
         self.loot_tables = {}
         self.predicates = {}
         self.recipes = {}
+        self.item_modifiers = {}
         self.sel = selectors.BedrockSelectors() if edition == "b" else selectors.JavaSelectors()
         if edition == 'j':
             self.t = JavaTags(self)
@@ -60,6 +62,8 @@ class Pack:
         return Predicate(self, name)
 
     def recipe(self, name: str, type_: str, group: Optional[str]=None):
+        if self.edition == 'b':
+            raise TypeError('No recipes in Bedrock')
         internal.options(type_, ['blasting', 'campfire_cooking', 'crafting_shaped', 'crafting_shapeless', 'smelting', 'smithing', 'smoking', 'stonecutting'])
         if type_ in ['blasting', 'campfire_cooking', 'smelting', 'smoking']: recipe = CookingRecipe
         elif type_ == "crafting_shaped": recipe = ShapedCraftingRecipe
@@ -68,6 +72,10 @@ class Pack:
         elif type_ == "stonecutting": recipe = StonecuttingRecipe
         return recipe(self, name, type_, group=group)
         
+    def item_modifier(self, name: str):
+        if self.edition == 'b':
+            raise TypeError('No item modifiers in Bedrock')
+        return ItemModifier(self, name)
 
     def build(self, name: str, pack_format: int, description: str, datapack_folder: str='.'):
         """Builds the pack. Java Edition only.\n
@@ -96,6 +104,17 @@ class Pack:
 
         #create data dir
         pathlib.Path(os.getcwd()+'/data/'+name).mkdir(parents=True, exist_ok=True)
+        
+        #minecraft tags
+        pathlib.Path(os.getcwd()+f'/data/minecraft/tags/functions').mkdir(parents=True, exist_ok=True)
+        for tag, funcs in self.minecraft_tags.items():
+            tagJson = {
+                'values': [name+':'+i.lower() for i in funcs]
+            }
+            with open(f'/data/minecraft/tags/functions/{tag}.json', 'w') as f:
+                json.dump(tagJson, f)
+
+        #cd to custom namespace
         os.chdir('data/'+name)
 
         #functions
@@ -140,7 +159,6 @@ class Pack:
                     json.dump(f, v)
 
         #structures
-        #tags
         #dimension types
         #dimensions
         #item modifiers
