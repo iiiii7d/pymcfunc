@@ -90,4 +90,56 @@ class ItemModifier:
         internal.options(entity, ['this', 'killer', 'killer_player'])
         self.value['entity'] = entity
 
-    def limit_count(self, )
+    def limit_count(self, limit: Union[int, Dict[str, int]]):
+        if isinstance(limit, dict):
+            for k, v in limit:
+                if k not in ['min', 'max']:
+                    raise KeyError(f"Invalid key {k}")
+        self.value = {
+            'function': 'limit_count',
+            'limit': limit
+        }
+        
+    def looting_enchant(self, count: int, limit: int):
+        self.value = {
+            'function': 'looting_enchant',
+            'count': count,
+            'limit': limit
+        }
+        
+    def set_attributes_modifier(self, name: str, attribute: str, operation: str, amount: str, slot: Union[str, List[str]], id_: Optional[str]=None):
+        internal.options(operation, ['add', 'multiply_base', 'multiply_total'])
+        if isinstance(slot, list):
+            for s in slot:
+                internal.options(s, ['mainhand', 'offhand', 'feet', 'legs', 'chest', 'head'])
+        else:
+            internal.options(slot, ['mainhand', 'offhand', 'feet', 'legs', 'chest', 'head'])
+        self.value['function'] = "set_attributes"
+        if not 'modifiers' in self.value.keys():
+            self.value['modifiers'] = []
+        self.value['modifiers'].append({
+            'name': name,
+            'attribute': attribute,
+            'operation': operation,
+            'amount': amount,
+            'slot': slot
+        })
+        if id_ is not None: self.value['modifiers'][-1]['id'] = id_
+        
+    def set_banner_pattern(self, *patterns: Tuple[str, str], append: Optional[bool]=None):
+        for _, c in patterns:
+            internal.options(c, [])
+            
+        self.value = {
+            'function': 'set_banner_pattern',
+            'patterns': [{'pattern': p, 'color': c} for p, c in patterns]
+        }
+        if append is not None: self.value['append'] = append
+
+    def set_contents(self, *entries: Tuple[str]):
+        self.value = {
+            'function': 'set_contents',
+            'entries': list(entries)
+        }
+        
+    #def set_count
