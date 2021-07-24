@@ -24,6 +24,7 @@ class Pack:
         self.edition = edition
         self.funcs = {}
         self.tags = {'functions':{}}
+        self.minecraft_tags = {'load': [], 'tick': []}
         self.advancements = {}
         self.loot_tables = {}
         self.predicates = {}
@@ -159,15 +160,18 @@ class JavaTags:
     def __init__(self, p):
         self.pack = p
     
-    def tag(self, tag: str):
+    def tag(self, tag: str, minecraft_tag: bool=False):
         """Applies a tag to the function. When the tag is run with /function, all functions under this tag will run.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaTags.tag"""
         def decorator(func):
             @wraps(func)
             def wrapper(m):
-                if tag not in self.pack.tags:
-                    self.pack.tags['functions'][tag] = []
-                self.pack.tags['functions'][tag].append(func.__name__)
+                if minecraft_tag:
+                    self.pack.minecraft_tags[tag].append(func.__name__)
+                else:
+                    if tag not in self.pack.tags:
+                        self.pack.tags['functions'][tag] = []
+                    self.pack.tags['functions'][tag].append(func.__name__)
                 func(m)
             return wrapper
         return decorator
