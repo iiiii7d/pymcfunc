@@ -76,7 +76,7 @@ class Criterion:
 
     def bee_nest_destroyed(self, block: Optional[str]=None, item: Optional[dict]=None, num_bees_inside: Optional[int]=None, player: Optional[Union[List[str], dict]]=None):
         self._setup('bee_nest_destroyed')
-        if block.startswith("minecraft:"): internal.options(block, ["minecraft:bee_nest", "minecraft:beehive"])
+        if block is not None and block.startswith("minecraft:"): internal.options(block, ["minecraft:bee_nest", "minecraft:beehive"])
         if block is not None: self.value['conditions']['block'] = block
         if item is not None: self.value['conditions']['item'] = item
         if num_bees_inside is not None: self.value['conditions']['num_bees_inside'] = num_bees_inside
@@ -118,8 +118,8 @@ class Criterion:
         if item is not None: self.value['conditions']['item'] = item
         if player is not None: self.value['conditions']['player'] = player
 
-    def defcured_zombie_villager(self, villager: Optional[Union[List[str], dict]]=None, zombie: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None):
-        self._setup('defcured_zombie_villager')
+    def cured_zombie_villager(self, villager: Optional[Union[List[str], dict]]=None, zombie: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None):
+        self._setup('cured_zombie_villager')
         if villager is not None: self.value['conditions']['villager'] = villager
         if zombie is not None: self.value['conditions']['zombie'] = zombie
         if player is not None: self.value['conditions']['player'] = player
@@ -210,7 +210,7 @@ class Criterion:
         if item is not None: self.value['conditions']['item'] = item
         if player is not None: self.value['conditions']['player'] = player
 
-    def killed_by_crossbow(self, *victims: Union[List[str], dict], unique_entity_types: Optional[Union[int, RangeDict]], player: Optional[Union[List[str], dict]]=None):
+    def killed_by_crossbow(self, *victims: Union[List[str], dict], unique_entity_types: Optional[Union[int, RangeDict]]=None, player: Optional[Union[List[str], dict]]=None):
         self._setup('killed_by_crossbow')
         internal.check_range(unique_entity_types)
         if len(victims) != 0: self.value['victims'] = list(victims)
@@ -263,7 +263,7 @@ class Criterion:
         if state is not None: self.value['state'] = state
         if player is not None: self.value['player'] = player
 
-    def player_generates_container_loot(self, loot_table: Optional[str], player: Optional[Union[List[str], dict]]=None):
+    def player_generates_container_loot(self, loot_table: Optional[str]=None, player: Optional[Union[List[str], dict]]=None):
         self._setup('player_generates_container_loot')
         if loot_table is not None: self.value['loot_table'] = loot_table
         if player is not None: self.value['player'] = player

@@ -1,7 +1,7 @@
 from typing import Optional, Dict, Union
 import pymcfunc.internal as internal
 NumberProvider = dict
-
+RangeDict = Dict[str, Union[int, NumberProvider]]
 
 class Predicate:
     def __init__(self, p, name: str, value: Optional[dict]=None):
@@ -89,12 +89,9 @@ class Predicate:
         self.value['enchantment'] = enchantment
         self.value['chances'] = chances
 
-    def time_check(self, value: Union[int, Dict[str, Union[int, NumberProvider]]], period: Optional[int]=None):
+    def time_check(self, value: Union[int, RangeDict], period: Optional[int]=None):
         self.value['condition'] = "time_check"
-        if isinstance(value, dict):
-            for k, v in value:
-                if k not in ['min', 'max']:
-                    raise KeyError(f"Invalid key: {k}")
+        internal.check_range(value)
         self.value['value'] = value
         if period is not None: self.value['period'] = period
 
@@ -103,10 +100,7 @@ class Predicate:
         self.value['raining'] = raining
         self.value['thunder'] = thunder
 
-    def value_check(self, value: Union[int, NumberProvider], range_: Union[int, Dict[str, Union[int, NumberProvider]]]):
-        if isinstance(range_, dict):
-            for k, v in range_:
-                if k not in ['min', 'max']:
-                    raise KeyError(f"Invalid key: {k}")
+    def value_check(self, value: Union[int, NumberProvider], range_: Union[int, RangeDict]):
+        internal.check_range(range_)
         self.value['range'] = range_
         self.value['value'] = value
