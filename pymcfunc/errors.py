@@ -1,4 +1,5 @@
 from textwrap import dedent
+from difflib import get_close_matches
 
 class SpaceError(Exception):
     def __init__(self, varname, value):
@@ -9,7 +10,10 @@ class OptionError(Exception):
     def __init__(self, choices, choice):
         if choice is not None:
             choice = "'"+str(choice)+"'"
-        msg = f"Choices allowed: {', '.join(choices)} (Got '{choice}')"
+        close_matches = get_close_matches(choice, choices)
+        if len(close_matches) != 0: parentheses = f"(Got '{choice}', maybe you meant: {', '.join(close_matches)})"
+        else: parentheses = f"(Got '{choice}')"
+        msg = f"Choices allowed: {', '.join(choices)} {parentheses}"
         super().__init__(msg)
 
 class OnlyOneAllowed(Exception):
@@ -25,7 +29,7 @@ class InvalidParameterError(Exception):
 
 class ReliantError(Exception):
     def __init__(self, indep_name, dep_name):
-        msg = f"'{dep_name}'' relies on '{indep_name}'' not being its default value; try specifying parameter '{indep_name}'"
+        msg = f"'{dep_name}' relies on '{indep_name}' not being its default value; try specifying parameter '{indep_name}'"
         super().__init__(msg)
 
 class CaretError(Exception):

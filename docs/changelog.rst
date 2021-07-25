@@ -8,6 +8,7 @@ Changelog
   * Retyped a few parameters
   * Fixed escapes in raw text translators
   * ``name`` variable in ``pymcfunc.Pack.build`` is now shifted to ``pymcfunc.Pack.__init__()``
+  * New ``import_...()`` and ``tag()`` functions in ``pymcfunc.Pack``
 
 * **v0.3 (4/6/21)**
 
