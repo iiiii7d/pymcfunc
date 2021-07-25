@@ -3,6 +3,8 @@ from functools import wraps
 import pathlib
 import os
 import json
+import ntpath
+import re
 
 import pymcfunc.errors as errors
 import pymcfunc.internal as internal
@@ -25,7 +27,7 @@ class Pack:
         self.edition = edition
         self.name = name
         self.funcs = {}
-        self.tags = {'functions': {}}
+        self.tags = {'blocks': {}, 'entity_types': {}, 'fluids': {}, 'functions': {}, 'items': {}}
         self.minecraft_tags = {'load': [], 'tick': []}
         self.advancements = {}
         self.loot_tables = {}
@@ -35,6 +37,12 @@ class Pack:
         self.sel = selectors.BedrockSelectors() if edition == "b" else selectors.JavaSelectors()
         if edition == 'j':
             self.t = JavaFunctionTags(self)
+
+    def tag(self, group: str, tag_name: str, *items: str):
+        internal.options(group, ['blocks', 'entity_types', 'fluids', 'functions', 'items'])
+        if tag_name not in self.tags[group]:
+            self.tags[group][tag_name] = []
+        self.tags[group][tag_name].extend(list(items))
 
     def function(self, func: Callable[[UniversalFuncHandler], Any]):
         """Registers a Python function and translates it into a Minecraft function.    
@@ -78,6 +86,36 @@ class Pack:
         if self.edition == 'b':
             raise TypeError('No item modifiers in Bedrock')
         return ItemModifier(self, name)
+
+    def import_function(self, directory: str):
+        name = re.sub(r"\.mcfunction$", "", ntpath.basename(directory))
+        with open(directory) as f:
+            self.funcs[name] = f.read()
+
+    def import_advancement(self, directory: str):
+        name = re.sub(r"\.json$", "", ntpath.basename(directory))
+        with open(directory) as f:
+            self.advancements[name] = json.load(f)
+
+    def import_loot_table(self, directory: str):
+        name = re.sub(r"\.json$", "", ntpath.basename(directory))
+        with open(directory) as f:
+            self.loot_tables[name] = json.load(f)
+
+    def import_predicate(self, directory: str):
+        name = re.sub(r"\.json$", "", ntpath.basename(directory))
+        with open(directory) as f:
+            self.predicates[name] = json.load(f)
+
+    def import_recipe(self, directory: str):
+        name = re.sub(r"\.json$", "", ntpath.basename(directory))
+        with open(directory) as f:
+            self.recipes[name] = json.load(f)
+
+    def import_item_modifiers(self, directory: str):
+        name = re.sub(r"\.json$", "", ntpath.basename(directory))
+        with open(directory) as f:
+            self.item_modifiers[name] = json.load(f)
 
     def build(self, pack_format: int, description: str, datapack_folder: str='.'):
         """Builds the pack. Java Edition only.\n
