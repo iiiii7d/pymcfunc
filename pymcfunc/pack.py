@@ -117,7 +117,7 @@ class Pack:
         with open(directory) as f:
             self.item_modifiers[name] = json.load(f)
 
-    def build(self, pack_format: int, description: str, datapack_folder: str='.'):
+    def build(self, pack_format: int, description: str, datapack_folder: str='.', indent: int=2):
         """Builds the pack. Java Edition only.\n
         **Format numbering**
         * **4** - 1.13–1.14.4
@@ -129,7 +129,7 @@ class Pack:
             raise TypeError('Cannot build Bedrock packs')
         name = self.name.lower()
         #create pack dir
-        pathlib.Path(datapack_folder+'/'+self.name).mkdir(exist_ok=True)
+        pathlib.Path(datapack_folder+'/'+self.name).mkdir(parents=True, exist_ok=True)
         os.chdir(datapack_folder+'/'+self.name)
 
         #make pack.mcmeta
@@ -146,13 +146,15 @@ class Pack:
         pathlib.Path(os.getcwd()+'/data/'+self.name).mkdir(parents=True, exist_ok=True)
 
         #minecraft tags
-        pathlib.Path(os.getcwd()+f'/data/minecraft/tags/functions').mkdir(parents=True, exist_ok=True)
-        for tag, funcs in self.minecraft_tags.items():
-            tagJson = {
-                'values': [self.name+':'+i.lower() for i in funcs]
-            }
-            with open(f'/data/minecraft/tags/functions/{tag}.json', 'w') as f:
-                json.dump(tagJson, f)
+        if any([v != [] for v in self.minecraft_tags.values()]):
+            pathlib.Path(os.getcwd()+f'/data/minecraft/tags/functions').mkdir(parents=True, exist_ok=True)
+            for tag, funcs in self.minecraft_tags.items():
+                if funcs:
+                    tagJson = {
+                        'values': [self.name+':'+i.lower() for i in funcs]
+                    }
+                    with open(os.getcwd()+f'/data/minecraft/tags/functions/{tag}.json', 'w') as f:
+                        json.dump(tagJson, f, indent=indent)
 
         #cd to custom namespace
         os.chdir('data/'+self.name)
@@ -163,47 +165,56 @@ class Pack:
             funcName, function = k.lower(), v[:]
             subfuncs = f"\n{function}\n".count('\n***\n')+1
             func_count = 1
-            for n, line in enumerate(function):
+            func_list = function.split('\n')
+            for n, line in enumerate(func_list):
                 if line == "***": func_count += 1
                 line = line.replace('/pymcfunc:first/', self.name+':'+funcName+("0" if subfuncs != 1 else "")) \
                            .replace('/pymcfunc:prev/', self.name+':'+funcName+str(func_count-1)) \
+                           .replace('/pymcfunc:this/', self.name+':'+funcName+str(func_count if subfuncs != 1 else "")) \
                            .replace('/pymcfunc:next/', self.name+':'+funcName+str(func_count+1)) \
                            .replace('/pymcfunc:last/', self.name+':'+funcName+(str(subfuncs-1) if subfuncs != 1 else ""))
-                function[n] = line
-            for n, subfunc in enumerate(function.split("***").strip()):
+                func_list[n] = line
+            function = '\n'.join(func_list)
+            for n, subfunc in enumerate([x.strip() for x in function.split("***")]):
                 if subfuncs == 1: n = ""
                 with open(f'functions/{funcName}{n}.mcfunction', 'w') as f:
                     f.write(subfunc)
 
         #advancements
-        pathlib.Path(os.getcwd()+'/advancements').mkdir(exist_ok=True)
-        for k, v in self.advancements.items():
-            with open(f'advancements/{k}.json', 'w') as f:
-                json.dump(f, v)
+        if self.advancements != {}:
+            pathlib.Path(os.getcwd()+'/advancements').mkdir(exist_ok=True)
+            for k, v in self.advancements.items():
+                with open(f'advancements/{k}.json', 'w') as f:
+                    print(v)
+                    json.dump(v, f, indent=indent)
 
         #loot tables
-        pathlib.Path(os.getcwd()+'/loot_tables').mkdir(exist_ok=True)
-        for k, v in self.loot_tables.items():
-            with open(f'loot_tables/{k}.json', 'w') as f:
-                json.dump(f, v)
+        if self.loot_tables != {}:
+            pathlib.Path(os.getcwd()+'/loot_tables').mkdir(exist_ok=True)
+            for k, v in self.loot_tables.items():
+                with open(f'loot_tables/{k}.json', 'w') as f:
+                    json.dump(v, f, indent=indent)
 
         #predicates
-        pathlib.Path(os.getcwd()+'/predicates').mkdir(exist_ok=True)
-        for k, v in self.predicates.items():
-            with open(f'predicates/{k}.json', 'w') as f:
-                json.dump(f, v)
+        if self.predicates != {}:
+            pathlib.Path(os.getcwd()+'/predicates').mkdir(exist_ok=True)
+            for k, v in self.predicates.items():
+                with open(f'predicates/{k}.json', 'w') as f:
+                    json.dump(v, f, indent=indent)
 
         #recipes
-        pathlib.Path(os.getcwd()+'/recipes').mkdir(exist_ok=True)
-        for k, v in self.recipes.items():
-            with open(f'recipes/{k}.json', 'w') as f:
-                json.dump(f, v)
+        if self.recipes != {}:
+            pathlib.Path(os.getcwd()+'/recipes').mkdir(exist_ok=True)
+            for k, v in self.recipes.items():
+                with open(f'recipes/{k}.json', 'w') as f:
+                    json.dump(v, f, indent=indent)
 
         #item modifiers
-        pathlib.Path(os.getcwd() + '/item_modifiers').mkdir(exist_ok=True)
-        for k, v in self.item_modifiers.items():
-            with open(f'item_modifiers/{k}.json', 'w') as f:
-                json.dump(f, v)
+        if self.item_modifiers != {}:
+            pathlib.Path(os.getcwd() + '/item_modifiers').mkdir(exist_ok=True)
+            for k, v in self.item_modifiers.items():
+                with open(f'item_modifiers/{k}.json', 'w') as f:
+                    json.dump(v, f, indent=indent)
 
         #structures
         #dimension types
@@ -212,13 +223,14 @@ class Pack:
 
         #tags
         for group, tags in self.tags.items():
-            pathlib.Path(os.getcwd()+f'/tags/{group}').mkdir(parents=True, exist_ok=True)
-            for tag, funcs in tags.items():
-                tagJson = {
-                    'values': [self.name+':'+i.lower() for i in funcs]
-                }
-                with open(f'tags/{group}/{tag}.json', 'w') as f:
-                    json.dump(tagJson, f)
+            if tags != {}:
+                pathlib.Path(os.getcwd()+f'/tags/{group}').mkdir(parents=True, exist_ok=True)
+                for tag, funcs in tags.items():
+                    tagJson = {
+                        'values': [self.name+':'+i.lower() for i in funcs]
+                    }
+                    with open(f'tags/{group}/{tag}.json', 'w') as f:
+                        json.dump(tagJson, f, indent=indent)
 
 class JavaFunctionTags:
     def __init__(self, p):
@@ -241,16 +253,16 @@ class JavaFunctionTags:
         return decorator
 
     def on_load(self, func: Callable[[UniversalFuncHandler], Any]):
-        """Applies a ‘load’ tag to the function. Alias of @pmf.JavaFunctionTags.tag('load').
+        """Applies a ‘load’ tag to the function. Alias of @pmf.JavaFunctionTags.tag('load', minecraft_tag=True).
         Functions with the tag will be run when the datapack is loaded.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFunctionTags.on_load"""
-        return self.tag('load')(func)
+        return self.tag('load', minecraft_tag=True)(func)
 
     def repeat_every_tick(self, func: Callable[[UniversalFuncHandler], Any]):
-        """Applies a ‘tick’ tag to the function. Alias of @pmf.JavaFunctionTags.tag('tick').
+        """Applies a ‘tick’ tag to the function. Alias of @pmf.JavaFunctionTags.tag('tick', minecraft_tag=True).
         Functions with the tag will be run every tick.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFunctionTags.repeat_every_tick"""
-        return self.tag('tick')(func)
+        return self.tag('tick', minecraft_tag=True)(func)
 
     def repeat_every(self, ticks: int):
         """The function will be run on a defined interval.

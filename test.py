@@ -378,7 +378,7 @@ def test_pytest():
 
     print(time.time()-start)
     finish = time.time()
-    #p.build(6, 'b')
+    p.build(6, 'b')
 
     print(time.time()-finish)
 
