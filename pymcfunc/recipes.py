@@ -72,17 +72,20 @@ class ShapedCraftingRecipe(Recipe):
                     self.values.append({'tag': tag})
             self.key = key
 
-    def pattern(self, pattern: Tuple[Tuple[Union[KeyGroup, Key], Union[KeyGroup, Key], Union[KeyGroup, Key]],
-                                     Tuple[Union[KeyGroup, Key], Union[KeyGroup, Key], Union[KeyGroup, Key]],
-                                     Tuple[Union[KeyGroup, Key], Union[KeyGroup, Key], Union[KeyGroup, Key]]]):
+    def pattern(self, pattern: Tuple[Tuple[Optional[Union[KeyGroup, Key]], Optional[Union[KeyGroup, Key]], Optional[Union[KeyGroup, Key]]],
+                                     Tuple[Optional[Union[KeyGroup, Key]], Optional[Union[KeyGroup, Key]], Optional[Union[KeyGroup, Key]]],
+                                     Tuple[Optional[Union[KeyGroup, Key]], Optional[Union[KeyGroup, Key]], Optional[Union[KeyGroup, Key]]]]):
         keys = []
         for rown in range(3):
             col = []
             for elen in range(3):
-                col.append(pattern[rown][elen].key)
-                self.value['pattern'][rown] = str(col)
-                if pattern[rown][elen] not in keys:
-                    keys.append(pattern[rown][elen])
+                if pattern[rown][elen] is None:
+                    col.append(" ")
+                else:
+                    col.append(pattern[rown][elen].key)
+                    if pattern[rown][elen] not in keys:
+                        keys.append(pattern[rown][elen])
+            self.value['pattern'][rown] = ''.join(col)
         
         for key in keys:
             if isinstance(key, self.KeyGroup):
@@ -139,9 +142,9 @@ class SmithingRecipe(Recipe):
             optional=False
         )
         if item is not None:
-            self.value['base'].append({'item': item})
+            self.value['base']['item'] = item
         else:
-            self.value['base'].append({'tag': tag})
+            self.value['base']['tag'] = tag
 
     def addition(self, item: Optional[str]=None, tag: Optional[str]=None):
         internal.pick_one_arg(
@@ -150,9 +153,9 @@ class SmithingRecipe(Recipe):
             optional=False
         )
         if item is not None:
-            self.value['addition'].append({'item': item})
+            self.value['addition']['item'] = item
         else:
-            self.value['addition'].append({'tag': tag})
+            self.value['addition']['tag'] = tag
 
     def result(self, result: str):
         self.value['result'] = result
@@ -160,7 +163,7 @@ class SmithingRecipe(Recipe):
 class StonecuttingRecipe(Recipe):
     def __init__(self, p, name: str, type_: str, group: Optional[str]=None):
         super().__init__(p, name, type_, group)
-        self.value['ingredient'] = []
+        self.value['ingredients'] = []
 
     def ingredient(self, item: Optional[str]=None, tag: Optional[str]=None):
         internal.pick_one_arg(

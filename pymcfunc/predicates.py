@@ -16,6 +16,7 @@ class Predicate:
         self.value['condition'] = "alternative"
         if 'terms' not in self.value.keys():
             self.value['terms'] = []
+        self.value['terms'].append({})
         index = int(len(self.value['terms'])-1)
         return Predicate(self.p, "", value=self.value['terms'][index])
 

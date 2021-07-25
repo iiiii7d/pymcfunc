@@ -67,8 +67,9 @@ class Criterion:
     def __init__(self, ad, name: str):
         self.name = name
         self.ad = ad
-        if 'name' not in self.ad.value['criteria']: self.ad.value['criteria'][name] = {}
-        self.value = self.ad.value['criteria'][name]
+        if 'name' not in self.ad.value['criteria']: self.ad.value['criteria'][self.name] = {}
+        self.value = self.ad.value['criteria'][self.name]
+        print(self.value is self.ad.value['criteria'][self.name])
 
     def bee_nest_destroyed(self, block: Optional[str]=None, item: Optional[dict]=None, num_bees_inside: Optional[int]=None, player: Optional[Union[List[str], dict]]=None):
         self.value = {
@@ -223,10 +224,8 @@ class Criterion:
         if player is not None: self.value['conditions']['player'] = player
 
     def impossible(self):
-        self.value = {
-            'trigger': 'minecraft:impossible',
-            'conditions': {}
-        }
+        self.value['trigger'] = 'minecraft:impossible'
+        self.value['conditions'] = {}
 
     def inventory_changed(self, *items: dict, empty_slots: Optional[Union[int, RangeDict]]=None, full_slots: Optional[Union[int, RangeDict]]=None, occupied_slots: Optional[Union[int, RangeDict]]=None, player: Optional[Union[List[str], dict]]=None):
         self.value = {

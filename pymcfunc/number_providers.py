@@ -15,7 +15,7 @@ def uniform(min_: Union[Union[int, float], NumberProvider], max_: Union[Union[in
         "max": max_
     }
 
-def binominal(n: Union[int, NumberProvider], p: Union[float, NumberProvider]):
+def binomial(n: Union[int, NumberProvider], p: Union[float, NumberProvider]):
     return {
         "type": "binomial",
         "n": n,
@@ -24,7 +24,9 @@ def binominal(n: Union[int, NumberProvider], p: Union[float, NumberProvider]):
 
 def score(score_: str, target: Optional[str]=None, type_: Optional[str]=None, name: Optional[str]=None, scale: Optional[float]=None) -> NumberProvider:
     np = {"type": "score", "score": score_}
-    internal.unstated("type", type_, ['fixed'], 'name', name, None)
+    internal.check_invalid_params('fixed', 'type', type_,
+        ('name', name, None),
+        dep_mandatory=True)
     internal.pick_one_arg(
         (name, None, 'name'),
         (target, None, 'target'),

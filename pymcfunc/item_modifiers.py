@@ -39,6 +39,7 @@ class ItemModifier:
         )
         if type_ is None: self.value['source'] = source
         else:
+            if 'source' not in self.value.keys(): self.value['source'] = {}
             internal.options(type_, ['context', 'storage'])
             self.value['source']['type'] = type_
             if target is not None: self.value['source']['target'] = target
@@ -128,7 +129,8 @@ class ItemModifier:
         
     def set_banner_pattern(self, *patterns: Tuple[str, str], append: Optional[bool]=None):
         for _, c in patterns:
-            internal.options(c, [])
+            internal.options(c, ['white', 'orange', 'magenta', 'light_blue', 'yellow', 'lime', 'pink', 'gray',
+                                 'light_gray', 'cyan', 'purple', 'blue', 'brown', 'green', 'red', 'black'])
             
         self.value = {
             'function': 'set_banner_pattern',

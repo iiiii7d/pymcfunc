@@ -14,6 +14,81 @@ def test_pytest():
     adv.set_requirements(['abc', 'def'])
     adv.reward('experience', 1)
 
+    im = p.item_modifier('def')
+    im.apply_bonus("enchantment", "ore_drops", 1, 2, 3)
+    im.copy_name()
+    im.value = {}
+    im.copy_nbt_source(type_="context", target="@p")
+    im.copy_nbt_operation("a", "b", "merge")
+    im.copy_state("a", [])
+    im.enchant_randomly()
+    im.enchant_with_levels(False, pmf.np.binomial(1, 2))
+    im.exploration_map('1 2 3', 'icon')
+    im.explosion_decay()
+    im.furnace_smelt()
+    im.fill_player_head("this")
+    im.limit_count(3)
+    im.looting_enchant(pmf.np.constant(5), 3)
+    im.set_attributes_modifier("a", "attr", "add", pmf.np.uniform(2, 3), "legs")
+    im.set_banner_pattern(("a", "brown"), ("c", "red"))
+    im.set_contents("a")
+    im.set_count(pmf.np.score("score", name="name", type_="fixed"))
+    im.set_damage(3)
+    im.set_loot_table("loot_table")
+    im.set_lore([pmf.rt.java("adfsdfsda")], "this", True)
+    im.set_name("name", "this")
+    im.set_nbt("tag")
+    im.set_stew_effect(("", 0))
+
+    pdc = p.predicate("ghi")
+    alt = pdc.alternative()
+    inv = alt.inverted()
+    inv.block_state_property('block')
+    inv.damage_source_properties(tag=3)
+    inv.entity_properties('this', tag=3)
+    inv.entity_scores('this', score=3)
+    inv.killed_by_player()
+    inv.location_check(offset_x=3)
+    inv.match_tool(tag=3)
+
+    lt = p.loot_table("jkl", type_="generic")
+    lt.item_modifier(im, pdc)
+    pl = lt.pool(2, 3)
+    pl.item_modifier(im, pdc)
+    pl.predicate(pdc)
+    ent = pl.entry("group", 1, 2)
+    ent.item_modifier(im, pdc)
+    ent.predicate(pdc)
+    ent.child("empty", 1, 2)
+
+    cook_rp = p.recipe("mno", "blasting")
+    cook_rp.ingredient(item='abc')
+    cook_rp.result("def")
+    cook_rp.experience(3)
+    cook_rp.cooking_time(5)
+
+    sc_rp = p.recipe("mno", "crafting_shaped")
+    B = sc_rp.Key('B', item='abc')
+    G = sc_rp.KeyGroup('G', items=['def', 'ghi'])
+    sc_rp.pattern(((None, G   , None),
+                   (None, None, B   ),
+                   (None, G   , None)))
+    sc_rp.result("abc")
+
+    slc_rp = p.recipe("pqr", "crafting_shapeless")
+    slc_rp.ingredient(item='abc')
+    slc_rp.ingredient_group(items=['def', 'ghi'])
+    slc_rp.result("a")
+
+    sm_rp = p.recipe("stu", "smithing")
+    sm_rp.base(item='a')
+    sm_rp.addition(item='a')
+    sm_rp.result("a")
+
+    sc_rp = p.recipe("vwx", "stonecutting")
+    sc_rp.ingredient(item="abc")
+    sc_rp.result("def")
+
     @p.function
     @p.t.tag("abc")
     @p.t.on_load
@@ -296,6 +371,10 @@ def test_pytest():
 
     print(p.tags)
     print(p.advancements)
+    print(p.loot_tables)
+    print(p.predicates)
+    print(p.recipes)
+    print(p.item_modifiers)
 
     print(time.time()-start)
     finish = time.time()

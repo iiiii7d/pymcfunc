@@ -52,10 +52,10 @@ class Pack:
             raise TypeError('No advancements in Bedrock')
         return Advancement(self, name, parent)
 
-    def loot_table(self, name: str):
+    def loot_table(self, name: str, type_: Optional[str]=None):
         if self.edition == 'b':
             raise TypeError('No loot tables in Bedrock')
-        return LootTable(self, name)
+        return LootTable(self, name, type_=type_)
 
     def predicate(self, name: str):
         if self.edition == 'b':

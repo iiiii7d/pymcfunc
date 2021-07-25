@@ -58,7 +58,7 @@ class Entry:
     def __init__(self, pl, type_: str, weight: int, quality: int, pool_index: Optional[int]=None, entry_index: Optional[int]=None, expand: Optional[bool]=None, name: Optional[str]=None, value: Optional[dict]=None):
         self.pl = pl
         self.name = self.pl.lt.name
-        internal.options(type_, ['item', 'tag', 'loot_table', 'alternatives', 'sequence', 'dynamic', 'empty'])
+        internal.options(type_, ['item', 'tag', 'loot_table', 'group', 'alternatives', 'sequence', 'dynamic', 'empty'])
         template = {
             'conditions': [],
             'functions': [],
@@ -93,4 +93,4 @@ class Entry:
     def child(self, type_: str, weight: int, quality: int, expand: Optional[bool]=None, name: Optional[str]=None):
         self.value['children'].append([])
         index = int(len(self.value['children'])-1)
-        return Entry(self, type_, weight, quality, expand=expand, name=name, value=self.value['children'][index])
+        return Entry(self.pl, type_, weight, quality, expand=expand, name=name, value=self.value['children'][index])
