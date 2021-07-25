@@ -17,7 +17,7 @@ def test_pytest():
     im = p.item_modifier('def')
     im.apply_bonus("enchantment", "ore_drops", 1, 2, 3)
     im.copy_name()
-    im.value = {}
+    im.value.clear()
     im.copy_nbt_source(type_="context", target="@p")
     im.copy_nbt_operation("a", "b", "merge")
     im.copy_state("a", [])

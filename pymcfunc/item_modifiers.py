@@ -12,7 +12,7 @@ class ItemModifier:
 
     def apply_bonus(self, enchantment: str, formula: str, extra: int, probability: float, bonus_multiplier: float):
         internal.options(formula, ['binomial_with_bonus_count', 'uniform_bonus_count', 'ore_drops'])
-        self.value = {
+        self.value.update({
             'function': 'apply_bonus',
             'enchantment': enchantment,
             'formula': formula,
@@ -21,13 +21,13 @@ class ItemModifier:
                 probability,
                 bonus_multiplier
             ]
-        }
+        })
 
     def copy_name(self):
-        self.value = {
+        self.value.update({
             'function': 'copy_name',
             'source': 'block_entity'
-        }
+        })
 
     def copy_nbt_source(self, source: Optional[str]=None, type_: Optional[str]=None, target: Optional[str]=None):
         self.value['function'] = 'copy_nbt'
@@ -56,32 +56,32 @@ class ItemModifier:
         })
 
     def copy_state(self, block: str, properties: Sequence[str]):
-        self.value = {
+        self.value.update({
             "function": 'copy_state',
             "block": block,
             "properties": list(properties)
-        }
+        })
 
     def enchant_randomly(self, *enchantments: str):
         self.value['function'] = 'enchant_randomly'
         if len(enchantments) != 0: self.value['enchantments'] = list(enchantments)
     
     def enchant_with_levels(self, treasure: bool, levels: Union[int, NumberProvider]):
-        self.value = {
+        self.value.update({
             'function': "enchant_with_levels",
             'treasure': treasure,
             'levels': levels
-        }
+        })
 
     def exploration_map(self, dest: str, icon: str, zoom: int=2, search_radius: int=50, skip_existing_chunks: bool=True):
-        self.value = {
+        self.value.update({
             'function': 'exploration_map',
             'destination': dest,
             'decoration': icon,
             'zoom': zoom,
             'search_radius': search_radius,
             'skip_existing_chunks': skip_existing_chunks
-        }
+        })
 
     def explosion_decay(self):
         self.value['function'] = 'explosion_decay'
@@ -96,17 +96,17 @@ class ItemModifier:
 
     def limit_count(self, limit: Union[Union[int, NumberProvider], Dict[str, Union[int, NumberProvider]]]):
         internal.check_range(limit)
-        self.value = {
+        self.value.update({
             'function': 'limit_count',
             'limit': limit
-        }
+        })
         
     def looting_enchant(self, count: Union[int, NumberProvider], limit: int):
-        self.value = {
+        self.value.update({
             'function': 'looting_enchant',
             'count': count,
             'limit': limit
-        }
+        })
         
     def set_attributes_modifier(self, name: str, attribute: str, operation: str, amount: Union[float, NumberProvider], slot: Union[str, List[str]], id_: Optional[str]=None):
         internal.options(operation, ['add', 'multiply_base', 'multiply_total'])
@@ -132,71 +132,71 @@ class ItemModifier:
             internal.options(c, ['white', 'orange', 'magenta', 'light_blue', 'yellow', 'lime', 'pink', 'gray',
                                  'light_gray', 'cyan', 'purple', 'blue', 'brown', 'green', 'red', 'black'])
             
-        self.value = {
+        self.value.update({
             'function': 'set_banner_pattern',
             'patterns': [{'pattern': p, 'color': c} for p, c in patterns]
-        }
+        })
         if append is not None: self.value['append'] = append
 
     def set_contents(self, *entries: str):
-        self.value = {
+        self.value.update({
             'function': 'set_contents',
             'entries': list(entries)
-        }
+        })
         
     def set_count(self, count: Union[int, NumberProvider], add: Optional[bool]=None):
-        self.value = {
+        self.value.update({
             'function': 'set_count',
             'count': count
-        }
+        })
         if add is not None: self.value['add'] = add
 
     def set_damage(self, damage: Union[float, NumberProvider], add: Optional[bool]=None):
-        self.value = {
+        self.value.update({
             'function': 'set_damage',
             'damage': damage
-        }
+        })
         if add is not None: self.value['add'] = add
 
     def add_enchantments(self, enchantments: Dict[str, Union[int, NumberProvider]], add: Optional[bool]=None):
-        self.value = {
+        self.value.update({
             'function': 'add_enchantments',
             'enchantments': enchantments
-        }
+        })
         if add is not None: self.value['add'] = add
 
     def set_loot_table(self, name: str, seed: int=0):
-        self.value = {
+        self.value.update({
             'function': 'add_enchantments',
             'name': name
-        }
+        })
         if seed != 0: self.value['seed'] = seed
 
     def set_lore(self, lore: List[dict], entity: str, replace: bool):
         internal.options(entity, ['this', 'killer', 'killer_player'])
-        self.value = {
+        self.value.update({
             'function': 'set_lore',
             'lore': lore,
             'entity': entity,
             'replace': replace
-        }
+        })
 
     def set_name(self, name: dict, entity: str):
         internal.options(entity, ['this', 'killer', 'killer_player'])
-        self.value = {
+        self.value.update({
             'function': 'set_lore',
             'name': name,
             'entity': entity,
-        }
+        })
 
     def set_nbt(self, tag: str):
-        self.value = {
+        self.value.update({
             'function': 'set_lore',
             'tag': tag
-        }
+        })
 
     def set_stew_effect(self, *effects: Tuple[str, Union[int, NumberProvider]]):
-        self.value = {
+        self.value.update({
             'function': 'set_stew_effect',
             'effects': [{'type': t, 'duration': d} for t, d in effects]
-        }
+        })
