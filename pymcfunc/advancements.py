@@ -69,7 +69,6 @@ class Criterion:
         self.ad = ad
         if 'name' not in self.ad.value['criteria']: self.ad.value['criteria'][self.name] = {}
         self.value = self.ad.value['criteria'][self.name]
-        print(self.value is self.ad.value['criteria'][self.name])
 
     def bee_nest_destroyed(self, block: Optional[str]=None, item: Optional[dict]=None, num_bees_inside: Optional[int]=None, player: Optional[Union[List[str], dict]]=None):
         self.value = {
