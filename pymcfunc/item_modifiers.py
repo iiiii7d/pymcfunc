@@ -6,6 +6,7 @@ class ItemModifier:
     def __init__(self, p, name: str):
         self.p = p
         self.name = name
+        self.namespaced = self.p.name + ":" + self.name
         self.p.item_modifiers[name] = {}
         self.value = self.p.item_modifiers[self.name]
 

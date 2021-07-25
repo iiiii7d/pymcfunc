@@ -6,6 +6,7 @@ class LootTable:
     def __init__(self, p, name: str, type_: Optional[str]=None):
         self.p = p
         self.name = name
+        self.namespaced = self.p.name + ":" + self.name
         self.p.loot_tables[name] = {
             'functions': [],
             'pools': []

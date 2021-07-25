@@ -4,6 +4,8 @@ import pymcfunc.internal as internal
 class Recipe:
     def __init__(self, p, name: str, type_: str, group: Optional[str]=None):
         self.p = p
+        self.name = name
+        self.namespaced = self.p.name + ":" + self.name
         self.p.recipes[name] = {
             "type_": type_
         }

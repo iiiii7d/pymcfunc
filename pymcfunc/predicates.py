@@ -7,6 +7,7 @@ class Predicate:
     def __init__(self, p, name: str, value: Optional[dict]=None):
         self.p = p
         self.name = name
+        self.namespaced = self.p.name + ":" + self.name
         self.p.predicates[name] = {}
         if value is None: self.value = self.p.predicates[self.name]
         else: self.value = value

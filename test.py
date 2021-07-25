@@ -3,7 +3,7 @@ import time
 
 def test_pytest():
     start = time.time()
-    p = pmf.Pack()
+    p = pmf.Pack("testpack")
 
     adv = p.advancement('abc', None)
     adv.set_icon('string')
@@ -299,7 +299,7 @@ def test_pytest():
 
     print(time.time()-start)
     finish = time.time()
-    #p.build('testpack', 6, 'b')
+    #p.build(6, 'b')
 
     print(time.time()-finish)
 

@@ -36,7 +36,7 @@ and tools to build datapacks :)
 ## Usage
 ```python
 import pymcfunc as pmf
-p = pmf.Pack()
+p = pmf.Pack("pack name")
 
 @p.function
 def diamond(f: pmf.JavaFuncHandler):

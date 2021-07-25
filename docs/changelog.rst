@@ -4,9 +4,10 @@ Changelog
 * **v0.4 ()**
 
   * Added Entities, Mobs and ArmourStands
-  * Added Advancements
+  * Added Advancements, Recipes, LootTables, ItemModifiers and Predicates
   * Retyped a few parameters
   * Fixed escapes in raw text translators
+  * ``name`` variable in ``pymcfunc.Pack.build`` is now shifted to ``pymcfunc.Pack.__init__()``
 
 * **v0.3 (4/6/21)**
 

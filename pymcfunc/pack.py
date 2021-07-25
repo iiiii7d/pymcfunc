@@ -18,11 +18,12 @@ class Pack:
     """A container for all functions.
     More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.Pack"""
 
-    def __init__(self, edition: str="j"):
+    def __init__(self, name: str, edition: str="j"):
         internal.options(edition, ['j', 'b'])
         if edition not in ['j', 'b']:
             raise errors.OptionError(['j', 'b'], edition)
         self.edition = edition
+        self.name = name
         self.funcs = {}
         self.tags = {'functions': {}}
         self.minecraft_tags = {'load': [], 'tick': []}
@@ -78,7 +79,7 @@ class Pack:
             raise TypeError('No item modifiers in Bedrock')
         return ItemModifier(self, name)
 
-    def build(self, name: str, pack_format: int, description: str, datapack_folder: str='.'):
+    def build(self, pack_format: int, description: str, datapack_folder: str='.'):
         """Builds the pack. Java Edition only.\n
         **Format numbering**
         * **4** - 1.13–1.14.4
@@ -88,10 +89,10 @@ class Pack:
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.Pack.build"""
         if self.edition == 'b':
             raise TypeError('Cannot build Bedrock packs')
-        name = name.lower()
+        name = self.name.lower()
         #create pack dir
-        pathlib.Path(datapack_folder+'/'+name).mkdir(exist_ok=True)
-        os.chdir(datapack_folder+'/'+name)
+        pathlib.Path(datapack_folder+'/'+self.name).mkdir(exist_ok=True)
+        os.chdir(datapack_folder+'/'+self.name)
 
         #make pack.mcmeta
         mcmeta = {
@@ -104,19 +105,19 @@ class Pack:
             json.dump(mcmeta, f)
 
         #create data dir
-        pathlib.Path(os.getcwd()+'/data/'+name).mkdir(parents=True, exist_ok=True)
+        pathlib.Path(os.getcwd()+'/data/'+self.name).mkdir(parents=True, exist_ok=True)
 
         #minecraft tags
         pathlib.Path(os.getcwd()+f'/data/minecraft/tags/functions').mkdir(parents=True, exist_ok=True)
         for tag, funcs in self.minecraft_tags.items():
             tagJson = {
-                'values': [name+':'+i.lower() for i in funcs]
+                'values': [self.name+':'+i.lower() for i in funcs]
             }
             with open(f'/data/minecraft/tags/functions/{tag}.json', 'w') as f:
                 json.dump(tagJson, f)
 
         #cd to custom namespace
-        os.chdir('data/'+name)
+        os.chdir('data/'+self.name)
 
         #functions
         pathlib.Path(os.getcwd()+'/functions').mkdir(exist_ok=True)
@@ -126,10 +127,10 @@ class Pack:
             func_count = 1
             for n, line in enumerate(function):
                 if line == "***": func_count += 1
-                line = line.replace('/pymcfunc:first/', name+':'+funcName+("0" if subfuncs != 1 else "")) \
-                           .replace('/pymcfunc:prev/', name+':'+funcName+str(func_count-1)) \
-                           .replace('/pymcfunc:next/', name+':'+funcName+str(func_count+1)) \
-                           .replace('/pymcfunc:last/', name+':'+funcName+(str(subfuncs-1) if subfuncs != 1 else ""))
+                line = line.replace('/pymcfunc:first/', self.name+':'+funcName+("0" if subfuncs != 1 else "")) \
+                           .replace('/pymcfunc:prev/', self.name+':'+funcName+str(func_count-1)) \
+                           .replace('/pymcfunc:next/', self.name+':'+funcName+str(func_count+1)) \
+                           .replace('/pymcfunc:last/', self.name+':'+funcName+(str(subfuncs-1) if subfuncs != 1 else ""))
                 function[n] = line
             for n, subfunc in enumerate(function.split("***").strip()):
                 if subfuncs == 1: n = ""
@@ -176,7 +177,7 @@ class Pack:
             pathlib.Path(os.getcwd()+f'/tags/{group}').mkdir(parents=True, exist_ok=True)
             for tag, funcs in tags.items():
                 tagJson = {
-                    'values': [name+':'+i.lower() for i in funcs]
+                    'values': [self.name+':'+i.lower() for i in funcs]
                 }
                 with open(f'tags/{group}/{tag}.json', 'w') as f:
                     json.dump(tagJson, f)
