@@ -61,7 +61,7 @@ class ItemModifier:
             "properties": list(properties)
         }
 
-    def enchant_randomly(self, *enchantments: Tuple[str]):
+    def enchant_randomly(self, *enchantments: str):
         self.value['function'] = 'enchant_randomly'
         if len(enchantments) != 0: self.value['enchantments'] = list(enchantments)
     
@@ -94,10 +94,7 @@ class ItemModifier:
         self.value['entity'] = entity
 
     def limit_count(self, limit: Union[Union[int, NumberProvider], Dict[str, Union[int, NumberProvider]]]):
-        if isinstance(limit, dict):
-            for k, v in limit:
-                if k not in ['min', 'max']:
-                    raise KeyError(f"Invalid key {k}")
+        internal.check_range(limit)
         self.value = {
             'function': 'limit_count',
             'limit': limit
@@ -139,7 +136,7 @@ class ItemModifier:
         }
         if append is not None: self.value['append'] = append
 
-    def set_contents(self, *entries: Tuple[str]):
+    def set_contents(self, *entries: str):
         self.value = {
             'function': 'set_contents',
             'entries': list(entries)

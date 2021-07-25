@@ -9,8 +9,8 @@ def test_pytest():
     adv.set_icon('string')
     adv.set_display('title', 'asdfasdf')
     adv.set_parent(None)
-    adv.criterion('abc', 'minecraft:abcabc', {})
-    adv.criterion('def', 'minecraft:defdef', {})
+    adv.criterion('abc').impossible()
+    adv.criterion('def').brewed_potion()
     adv.set_requirements(['abc', 'def'])
     adv.reward('experience', 1)
 
@@ -149,7 +149,7 @@ def test_pytest():
         armourstand.move_limb('Head', 'x', 3)
         armourstand.mess()
 
-    b = pmf.Pack('b')
+    b = pmf.Pack('test2', 'b')
 
     @b.function
     def mcfuncbedrock(f: pmf.BedrockFuncHandler):

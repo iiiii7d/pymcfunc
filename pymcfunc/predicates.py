@@ -39,16 +39,14 @@ class Predicate:
         self.value['entity'] = entity
         self.value['predicate'] = tags
 
-    def entity_scores(self, entity: str, **scores: Dict[str, Union[int, Dict[str, Union[int, NumberProvider]]]]):
+    def entity_scores(self, entity: str, **scores: Union[int, Dict[str, Union[int, NumberProvider]]]):
         self.value['condition'] = "entity_scores"
         internal.options(entity, ['this', 'killer', 'killer_player'])
         self.value['entity'] = entity
         for _, v in scores.items():
             if not isinstance(v, dict):
                 continue
-            for sk, _ in v:
-                if sk not in ['min', 'max']:
-                    raise KeyError(f"Invalid key: {sk}")
+            internal.check_range(v)
         self.value['scores'] = scores
 
     def killed_by_player(self, inverse: bool=False):
@@ -78,7 +76,7 @@ class Predicate:
     def reference(self, predicate: Union[str, 'Predicate']):
         self.value['condition'] = "reference"
         if isinstance(predicate, type(self)):
-            self.value['name'] = predicate.name
+            self.value['name'] = predicate.namespaced
         else:
             self.value['name'] = predicate
 

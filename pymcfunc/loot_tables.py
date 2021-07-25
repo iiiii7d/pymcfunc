@@ -1,5 +1,7 @@
-from typing import Optional, Tuple, Union
+from typing import Optional, Union
 import pymcfunc.internal as internal
+from pymcfunc.predicates import Predicate
+from pymcfunc.item_modifiers import ItemModifier
 NumberProvider = dict
 
 class LootTable:
@@ -15,10 +17,10 @@ class LootTable:
             internal.options(type_, ['empty', 'entity', 'block', 'chest', 'fishing', 'gift', 'advancement_reward', 'barter', 'command', 'selector', 'advancement_entity', 'generic'])
             self.p.loot_tables[name]['type'] = type_
 
-    def item_modifier(self, name: str, *predicates: Tuple[str]):
+    def item_modifier(self, name: Union[str, ItemModifier], *predicates: Union[str, Predicate]):
         self.p.loot_tables[self.name]['functions'].append({
-            'function': name,
-            'conditions': [{'condition': i} for i in predicates]
+            'function': name.namespaced if isinstance(name, ItemModifier) else name,
+            'conditions': [{'condition': i.namespaced if isinstance(i, Predicate) else i} for i in predicates]
         })
 
     def pool(self, rolls: int, bonus_rolls: float):
@@ -38,15 +40,15 @@ class Pool:
         self.index = index
         self.value = self.lt.p.loot_tables[self.name]['pools'][self.index]
 
-    def item_modifier(self, name: str, *predicates: Tuple[str]):
+    def item_modifier(self, name: Union[str, ItemModifier], *predicates: Union[str, Predicate]):
         self.value['functions'].append({
-            'function': name,
-            'conditions': [{'condition': i} for i in predicates]
+            'function': name.namespaced if isinstance(name, ItemModifier) else name,
+            'conditions': [{'condition': i.namespaced if isinstance(i, Predicate) else i} for i in predicates]
         })
 
-    def predicate(self, predicate: str):
+    def predicate(self, predicate: Union[str, Predicate]):
         self.value['conditions'].append({
-            'condition': predicate
+            'condition': predicate.namespaced if isinstance(predicate, Predicate) else predicate
         })
 
     def entry(self, type_: str, weight: int, quality: int, expand: Optional[bool]=None, name: Optional[str]=None):
@@ -56,6 +58,7 @@ class Entry:
     def __init__(self, pl, type_: str, weight: int, quality: int, pool_index: Optional[int]=None, entry_index: Optional[int]=None, expand: Optional[bool]=None, name: Optional[str]=None, value: Optional[dict]=None):
         self.pl = pl
         self.name = self.pl.lt.name
+        internal.options(type_, ['item', 'tag', 'loot_table', 'alternatives', 'sequence', 'dynamic', 'empty'])
         template = {
             'conditions': [],
             'functions': [],
@@ -76,15 +79,15 @@ class Entry:
         if name is not None:
             self.value['name'] = name
 
-    def item_modifier(self, name: str, *predicates: Tuple[str]):
+    def item_modifier(self, name: Union[str, ItemModifier], *predicates: Union[str, Predicate]):
         self.value['functions'].append({
-            'function': name,
-            'conditions': [{'condition': i} for i in predicates]
+            'function': name.namespaced if isinstance(name, ItemModifier) else name,
+            'conditions': [{'condition': i.namespaced if isinstance(i, Predicate) else i} for i in predicates]
         })
 
-    def predicate(self, predicate: str):
+    def predicate(self, predicate: Union[str, Predicate]):
         self.value['conditions'].append({
-            'condition': predicate
+            'condition': predicate.namespaced if isinstance(predicate, Predicate) else predicate
         })
 
     def child(self, type_: str, weight: int, quality: int, expand: Optional[bool]=None, name: Optional[str]=None):

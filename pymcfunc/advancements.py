@@ -44,7 +44,11 @@ class Advancement:
     def criterion(self, name: str):
         return Criterion(self, name)
 
-    def set_requirements(self, *criterion_lists: List[str]):
+    def set_requirements(self, *criterion_lists: List[Union[str, 'Criterion']]):
+        for li, criterion_list in enumerate(criterion_lists):
+            for ei, criterion in enumerate(criterion_list):
+                if isinstance(criterion, Criterion):
+                    criterion_lists[li][ei] = criterion.name
         self.value['requirements'] = list(criterion_lists)
 
     def reward(self, item: str, value: Any):
@@ -58,6 +62,7 @@ class Advancement:
             func(m)
         return wrapper
 
+RangeDict = Dict[str, int]
 class Criterion:
     def __init__(self, ad, name: str):
         self.name = name
@@ -113,15 +118,12 @@ class Criterion:
         if len(victims) != 0: self.value['conditions']['victims'] = list(victims)
         if player is not None: self.value['conditions']['player'] = player
 
-    def construct_beacon(self, level: Optional[Union[int, Dict[str, int]]]=None, player: Optional[Union[List[str], dict]]=None):
+    def construct_beacon(self, level: Optional[Union[int, RangeDict]]=None, player: Optional[Union[List[str], dict]]=None):
         self.value = {
             'trigger': 'minecraft:construct_beacon',
             'conditions': {}
         }
-        if isinstance(level, dict):
-            for k, v in level:
-                if k not in ['min', 'max']:
-                    raise KeyError(f"Invalid key: {k}")
+        internal.check_range(level)
         if level is not None: self.value['conditions']['level'] = level
         if player is not None: self.value['conditions']['player'] = player
 
@@ -148,31 +150,22 @@ class Criterion:
         if source is not None: self.value['conditions']['source'] = source
         if player is not None: self.value['conditions']['player'] = player
 
-    def effects_changed_effect(self, effect_name: Optional[str]=None, amplifier: Optional[Union[int, Dict[str, int]]]=None, duration: Optional[Union[int, Dict[str, int]]]=None):
+    def effects_changed_effect(self, effect_name: Optional[str]=None, amplifier: Optional[Union[int, RangeDict]]=None, duration: Optional[Union[int, RangeDict]]=None):
         self.value['trigger'] = 'minecraft:effects_changed'
         if 'conditions' not in self.value.keys(): self.value['conditions'] = {}
         if 'effects' not in self.value['conditions'].keys(): self.value['conditions']['effects'] = {}
         self.value['conditions']['effects'][effect_name] = {}
-        if isinstance(amplifier, dict):
-            for k, v in amplifier:
-                if k not in ['min', 'max']:
-                    raise KeyError(f"Invalid key: {k}")
-        if isinstance(duration, dict):
-            for k, v in duration:
-                if k not in ['min', 'max']:
-                    raise KeyError(f"Invalid key: {k}")
+        internal.check_range(amplifier)
+        internal.check_range(duration)
         if amplifier is not None: self.value['conditions']['amplifier'] = amplifier
         if duration is not None: self.value['conditions']['duration'] = duration
 
-    def enchanted_item(self, item: Optional[dict]=None, levels: Optional[Union[int, Dict[str, int]]]=None, player: Optional[Union[List[str], dict]]=None):
+    def enchanted_item(self, item: Optional[dict]=None, levels: Optional[Union[int, RangeDict]]=None, player: Optional[Union[List[str], dict]]=None):
         self.value = {
             'trigger': 'minecraft:enchanted_item',
             'conditions': {}
         }
-        if isinstance(levels, dict):
-            for k, v in levels:
-                if k not in ['min', 'max']:
-                    raise KeyError(f"Invalid key: {k}")
+        internal.check_range(levels)
         if item is not None: self.value['conditions']['item'] = item
         if levels is not None: self.value['conditions']['levels'] = levels
         if player is not None: self.value['conditions']['player'] = player
@@ -235,43 +228,25 @@ class Criterion:
             'conditions': {}
         }
 
-    def inventory_changed(self, *items: dict, empty_slots: Optional[Union[int, Dict[str, int]]]=None, full_slots: Optional[Union[int, Dict[str, int]]]=None, occupied_slots: Optional[Union[int, Dict[str, int]]]=None, player: Optional[Union[List[str], dict]]=None):
+    def inventory_changed(self, *items: dict, empty_slots: Optional[Union[int, RangeDict]]=None, full_slots: Optional[Union[int, RangeDict]]=None, occupied_slots: Optional[Union[int, RangeDict]]=None, player: Optional[Union[List[str], dict]]=None):
         self.value = {
             'trigger': 'minecraft:inventory_changed',
             'conditions': {}
         }
-        if isinstance(empty_slots, dict):
-            for k, v in empty_slots:
-                if k not in ['min', 'max']:
-                    raise KeyError(f"Invalid key: {k}")
-        if isinstance(full_slots, dict):
-            for k, v in full_slots:
-                if k not in ['min', 'max']:
-                    raise KeyError(f"Invalid key: {k}")
-        if isinstance(occupied_slots, dict):
-            for k, v in occupied_slots:
-                if k not in ['min', 'max']:
-                    raise KeyError(f"Invalid key: {k}")
-        if items is not None: self.value['conditions']['items'] = items
-        if empty_slots is not None or full_slots is not None or occupied_slots is not None: self.value['conditions']['slots'] = {}
+        for l in (empty_slots, full_slots, occupied_slots): internal.check_range(l)
+        if any([x is not None for x in (empty_slots, full_slots, occupied_slots)]): self.value['conditions']['slots'] = {}
         if empty_slots is not None: self.value['conditions']['slots']['empty'] = empty_slots
         if full_slots is not None: self.value['conditions']['slots']['full'] = full_slots
         if occupied_slots is not None: self.value['conditions']['slots']['occupied'] = occupied_slots
         if player is not None: self.value['conditions']['player'] = player
 
-    def item_durability_changed(self, delta: Optional[Union[int, Dict[str, int]]]=None, durability: Optional[Union[int, Dict[str, int]]]=None, item: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None):
+    def item_durability_changed(self, delta: Optional[Union[int, RangeDict]]=None, durability: Optional[Union[int, RangeDict]]=None, item: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None):
         self.value = {
             'trigger': 'minecraft:item_durability_changed',
             'conditions': {}
         }
-        if isinstance(delta, dict):
-            for k, v in delta:
-                if k not in ['min', 'max']:
-                    raise KeyError(f"Invalid key: {k}")
-        if isinstance(durability, dict):
-            for k, v in durability:
-                if k not in ['min', 'max']:
-                    raise KeyError(f"Invalid key: {k}")
+        internal.check_range(delta)
+        internal.check_range(durability)
         if delta is not None: self.value['conditions']['delta'] = delta
         if durability is not None: self.value['conditions']['durability'] = durability
         if item is not None: self.value['conditions']['item'] = item
@@ -286,5 +261,231 @@ class Criterion:
         if item is not None: self.value['conditions']['item'] = item
         if player is not None: self.value['conditions']['player'] = player
 
-    def killed_by_crossbow(self, *victims: Union[List[str], dict], unique_entity_types: Optional[Union[int, Dict[str, int]]], player: Optional[Union[List[str], dict]]=None):
-        pass
+    def killed_by_crossbow(self, *victims: Union[List[str], dict], unique_entity_types: Optional[Union[int, RangeDict]], player: Optional[Union[List[str], dict]]=None):
+        self.value = {
+            'trigger': 'minecraft:killed_by_crossbow',
+            'conditions': {}
+        }
+        internal.check_range(unique_entity_types)
+        if len(victims) != 0: self.value['victims'] = list(victims)
+        if unique_entity_types is not None: self.value['unique_entity_types'] = unique_entity_types
+        if player is not None: self.value['conditions']['player'] = player
+
+    def levitation(self, absolute_distance: Optional[RangeDict]=None, horizontal_distance: Optional[RangeDict]=None, x_distance: Optional[RangeDict]=None, y_distance: Optional[RangeDict]=None,
+                   z_distance: Optional[RangeDict]=None, duration: Optional[Union[int, RangeDict]]=None, player: Optional[Union[List[str], dict]]=None):
+        self.value = {
+            'trigger': 'minecraft:levitation',
+            'conditions': {}
+        }
+        for l in (absolute_distance, horizontal_distance, x_distance, y_distance, z_distance, duration): internal.check_range(l)
+        if any([x is not None for x in (absolute_distance, horizontal_distance, x_distance, y_distance, z_distance)]): self.value['distance']
+        if absolute_distance is not None: self.value['distance']['absolute'] = absolute_distance
+        if horizontal_distance is not None: self.value['distance']['horizontal'] = horizontal_distance
+        if x_distance is not None: self.value['distance']['x'] = x_distance
+        if y_distance is not None: self.value['distance']['y'] = y_distance
+        if z_distance is not None: self.value['distance']['z'] = z_distance
+        if duration is not None: self.value['duration'] = duration
+        if player is not None: self.value['player'] = player
+
+    def lightning_strike(self, lightning: Optional[Union[List[str], dict]]=None, bystander: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None):
+        self.value = {
+            'trigger': 'minecraft:lightning_strike',
+            'conditions': {}
+        }
+        if lightning is not None: self.value['lightning'] = lightning
+        if bystander is not None: self.value['bystander'] = bystander
+        if player is not None: self.value['player'] = player
+
+    def location(self, location: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None):
+        self.value = {
+            'trigger': 'minecraft:location',
+            'conditions': {}
+        }
+        if location is not None: self.value['location'] = location
+        if player is not None: self.value['player'] = player
+    
+    def nether_travel(self, entered: Optional[dict]=None, exited: Optional[dict]=None, absolute_distance: Optional[RangeDict]=None, horizontal_distance: Optional[RangeDict]=None,
+                      x_distance: Optional[RangeDict]=None, y_distance: Optional[RangeDict]=None, z_distance: Optional[RangeDict]=None, player: Optional[Union[List[str], dict]]=None):
+        self.value = {
+            'trigger': 'minecraft:nether_travel',
+            'conditions': {}
+        }
+        for l in (absolute_distance, horizontal_distance, x_distance, y_distance, z_distance): internal.check_range(l)
+        if any([x is not None for x in (absolute_distance, horizontal_distance, x_distance, y_distance, z_distance)]): self.value['distance']
+        if absolute_distance is not None: self.value['distance']['absolute'] = absolute_distance
+        if horizontal_distance is not None: self.value['distance']['horizontal'] = horizontal_distance
+        if x_distance is not None: self.value['distance']['x'] = x_distance
+        if y_distance is not None: self.value['distance']['y'] = y_distance
+        if z_distance is not None: self.value['distance']['z'] = z_distance
+        if entered is not None: self.value['entered'] = entered
+        if exit is not None: self.value['exit'] = exit
+        if player is not None: self.value['player'] = player
+
+    def placed_block(self, block: Optional[str]=None, item: Optional[dict]=None, location: Optional[dict]=None, state: Optional[Dict[str, str]]=None, player: Optional[Union[List[str], dict]]=None):
+        self.value = {
+            'trigger': 'minecraft:placed_block',
+            'conditions': {}
+        }
+        if block is not None: self.value['block'] = block
+        if item is not None: self.value['item'] = item
+        if location is not None: self.value['location'] = location
+        if state is not None: self.value['state'] = state
+        if player is not None: self.value['player'] = player
+
+    def player_generates_container_loot(self, loot_table: Optional[str], player: Optional[Union[List[str], dict]]=None):
+        self.value = {
+            'trigger': 'minecraft:player_generates_container_loot',
+            'conditions': {}
+        }
+        if loot_table is not None: self.value['loot_table'] = loot_table
+        if player is not None: self.value['player'] = player
+
+    def player_hurt_entity(self, damage: Optional[dict]=None, entity: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None):
+        self.value = {
+            'trigger': 'minecraft:player_hurt_entity',
+            'conditions': {}
+        }
+        if damage is not None: self.value['conditions']['damage'] = damage
+        if entity is not None: self.value['conditions']['entity'] = entity
+        if player is not None: self.value['conditions']['player'] = player
+
+    def player_interacted_with_entity(self, item: Optional[dict]=None, entity: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None):
+        self.value = {
+            'trigger': 'minecraft:player_interacted_with_entity',
+            'conditions': {}
+        }
+        if item is not None: self.value['conditions']['item'] = item
+        if entity is not None: self.value['conditions']['entity'] = entity
+        if player is not None: self.value['conditions']['player'] = player
+
+    def player_killed_entity(self, entity: Optional[Union[List[str], dict]]=None, killing_blow: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None):
+        self.value = {
+            'trigger': 'minecraft:player_killed_entity',
+            'conditions': {}
+        }
+        if entity is not None: self.value['conditions']['entity'] = entity
+        if killing_blow is not None: self.value['conditions']['killing_blow'] = killing_blow
+        if player is not None: self.value['conditions']['player'] = player
+
+    def recipe_unlocked(self, recipe: Optional[str]=None, player: Optional[Union[List[str], dict]]=None):
+        self.value = {
+            'trigger': 'minecraft:recipe_unlocked',
+            'conditions': {}
+        }
+        if recipe is not None: self.value['conditions']['recipe'] = recipe
+        if player is not None: self.value['conditions']['player'] = player
+
+    def shot_crossbow(self, item: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None):
+        self.value = {
+            'trigger': 'minecraft:shot_crossbow',
+            'conditions': {}
+        }
+        if item is not None: self.value['conditions']['item'] = item
+        if player is not None: self.value['conditions']['player'] = player
+
+    def slept_in_bed(self, location: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None):
+        self.value = {
+            'trigger': 'minecraft:slept_in_bed',
+            'conditions': {}
+        }
+        if location is not None: self.value['conditions']['location'] = location
+        if player is not None: self.value['conditions']['player'] = player
+
+    def slide_down_block(self, block: Optional[str]=None, player: Optional[Union[List[str], dict]]=None):
+        self.value = {
+            'trigger': 'minecraft:slide_down_block',
+            'conditions': {}
+        }
+        if block is not None: self.value['conditions']['block'] = block
+        if player is not None: self.value['conditions']['player'] = player
+
+    def start_riding(self, player: Optional[Union[List[str], dict]]=None):
+        self.value = {
+            'trigger': 'minecraft:start_riding',
+            'conditions': {}
+        }
+        if player is not None: self.value['conditions']['player'] = player
+
+    def summoned_entity(self, entity: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None):
+        self.value = {
+            'trigger': 'minecraft:summoned_entity',
+            'conditions': {}
+        }
+        if entity is not None: self.value['conditions']['entity'] = entity
+        if player is not None: self.value['conditions']['player'] = player
+
+    def tame_animal(self, entity: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None):
+        self.value = {
+            'trigger': 'minecraft:tame_animal',
+            'conditions': {}
+        }
+        if entity is not None: self.value['conditions']['entity'] = entity
+        if player is not None: self.value['conditions']['player'] = player 
+
+    def target_hit(self, signal_strength: Optional[int]=None, projectile: Optional[str]=None, shooter: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None):
+        self.value = {
+            'trigger': 'minecraft:target_hit',
+            'conditions': {}
+        }
+        if signal_strength is not None: self.value['conditions']['signal_strength'] = signal_strength
+        if projectile is not None: self.value['conditions']['projectile'] = projectile
+        if shooter is not None: self.value['conditions']['shooter'] = shooter
+        if player is not None: self.value['conditions']['player'] = player
+
+    def thrown_item_picked_up_by_entity(self, item: Optional[dict]=None, entity: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None):
+        self.value = {
+            'trigger': 'minecraft:thrown_item_picked_up_by_entity',
+            'conditions': {}
+        }
+        if item is not None: self.value['conditions']['item'] = item
+        if entity is not None: self.value['conditions']['entity'] = entity
+        if player is not None: self.value['conditions']['player'] = player
+
+    def tick(self, player: Optional[Union[List[str], dict]]=None):
+        self.value = {
+            'trigger': 'minecraft:tick',
+            'conditions': {}
+        }
+        if player is not None: self.value['conditions']['player'] = player
+
+    def used_ender_eye(self, distance: Optional[Union[int, RangeDict]]=None, player: Optional[Union[List[str], dict]]=None):
+        self.value = {
+            'trigger': 'minecraft:used_ender_eye',
+            'conditions': {}
+        }
+        internal.check_range(distance)
+        if distance is not None: self.value['conditions']['distance'] = distance
+        if player is not None: self.value['conditions']['player'] = player
+
+    def used_totem(self, item: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None):
+        self.value = {
+            'trigger': 'minecraft:used_totem',
+            'conditions': {}
+        }
+        if item is not None: self.value['conditions']['item'] = item
+        if player is not None: self.value['conditions']['player'] = player
+
+    def using_item(self, item: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None):
+        self.value = {
+            'trigger': 'minecraft:using_item',
+            'conditions': {}
+        }
+        if item is not None: self.value['conditions']['item'] = item
+        if player is not None: self.value['conditions']['player'] = player
+
+    def villager_trade(self, item: Optional[dict]=None, vilager: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None):
+        self.value = {
+            'trigger': 'minecraft:villager_trade',
+            'conditions': {}
+        }
+        if item is not None: self.value['conditions']['item'] = item
+        if vilager is not None: self.value['conditions']['vilager'] = vilager
+        if player is not None: self.value['conditions']['player'] = player
+
+    def voluntary_exile(self, location: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None):
+        self.value = {
+            'trigger': 'minecraft:voluntary_exile',
+            'conditions': {}
+        }
+        if location is not None: self.value['conditions']['location'] = location
+        if player is not None: self.value['conditions']['player'] = player

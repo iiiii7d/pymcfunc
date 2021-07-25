@@ -88,3 +88,9 @@ def unstated(indep_name: str, indep_value: Any, indep_reqvals: Sequence[Any], de
             break
     else:
         raise errors.MissingError(dep_name, indep_name, indep_value)
+
+def check_range(r: dict):
+    if isinstance(r, dict):
+        for k, v in r:
+            if k not in ['min', 'max']:
+                raise KeyError(f"Invalid key: {k}; only 'min' and 'max' allowed")
