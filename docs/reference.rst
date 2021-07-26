@@ -3,9 +3,9 @@ Reference
 .. py:currentmodule:: pymcfunc
 
 .. py:attribute:: __version__
-      :type: str
-      
-      The version.
+   :type: str
+   
+   The version.
 
 Syntax Guide
 ------------
@@ -177,6 +177,8 @@ Tags & Events
 Function Handlers
 -----------------
 
+.. py:currentmodule:: pymcfunc.fh
+
 .. py:class:: UniversalFuncHandler
 
    The function handler that is inherited by both :py:class:`JavaFuncHandler` and :py:class:`BedrockFuncHandler`.
@@ -191,7 +193,7 @@ Function Handlers
    .. describe:: Operations
 
    * **str(a)** - Returns a linebreaked string of Minecraft commands.
-   * **set(a) list(a) tuple(a)** - Returns a list of Minecraft commands.
+   * **list(a) tuple(a)** - Returns a list of Minecraft commands.
 
    .. py:attribute:: commands
       :type: list
@@ -289,7 +291,9 @@ Function Handlers
 
 Raw commands
 ------------
-    
+
+.. py:currentmodule:: pymcfunc.rawcommands
+
 .. py:class:: UniversalRawCommands
 
    A container for raw Minecraft commands that are the same for both Java and Bedrock.
@@ -2910,6 +2914,8 @@ Coords
 Variables
 ---------
 
+.. py:currentmodule:: pymcfunc.variables
+
 .. py:class:: BedrockVariable
 
    Represents a variable in Bedrock Edition.
@@ -3138,8 +3144,6 @@ Variables
 
       :param str slot: The slot to show it in.
 
-
-
 Selectors
 ---------
 
@@ -3331,6 +3335,142 @@ Raw JSON text
    :param str content_symbol: The content symbol, defaults to ¶
    :returns: The JSON text
    :rtype: list[dict] or dict
+
+Advancements
+------------
+
+.. py:currentmodule:: pymcfunc.advancements
+
+.. py:class:: Advancement
+   
+   An advancement in Java Edition.
+
+   .. versionadded:: 0.4
+   
+   .. py:attribute:: p
+      :type: Pack
+
+      References back to the pack that it is in.
+
+      .. versionadded:: 0.4
+
+   .. py:attribute:: name
+      :type: str
+
+      The name of the advancement.
+
+      .. versionadded:: 0.4
+
+   .. py:attribute:: namespaced
+      :type: str
+
+      The namespaced name of the advancement.
+
+      .. versionadded:: 0.4
+
+   .. py:attribute:: value
+      :type: dict
+
+      The value of the advancement as a reference to ``advancements[name]`` in the pack.
+
+      .. versionadded:: 0.4
+
+   .. py:method:: __init__(p, name: str, parent: Union[str, 'Advancement'])
+
+      Initialises the advancement.
+
+      .. versionadded:: 0.4
+
+      :param Pack p: The pack that the advancement is attached to
+      :param str name: The name of the pack
+      :param parent: The parent of the advancement
+      :type parent: str or Advancement
+
+   .. py:method:: set_icon(item_name: str, nbt: Optional[dict]=None)
+
+      Sets the icon of the advancement.
+
+      .. versionadded:: 0.4
+
+      :param str item_name: The name of the item
+      :param dict nbt: The NBT data of the item.
+
+   .. py:method:: set_display(attr: str, value: Any)
+      
+      Sets display parameters for the advancement.
+
+      * **attr: type(val)**
+      * icon:
+      * title: 
+      * frame: 
+      * background:
+      * description:
+      * show_toast: bool
+      * announce_to_chat: bool
+      * hidden: bool
+
+      .. versionadded:: 0.4
+
+      :param str attr: The attribute name
+      :param Any value: The value for the attribute
+
+   .. py:method:: set_parent(parent: Union[str, 'Advancement'])
+
+      Sets the parent for the advancement.
+
+      .. versionadded:: 0.4
+
+      :param parent: The parent of the advancement
+      :type parent: str or Advancement
+
+   .. py:method:: criterion(name: str)
+
+      Creates and returns a new criterion for the advancement.
+
+      .. versionadded:: 0.4
+
+      :param str name: The name of the criterion.
+      :return: The criterion.
+      :rtype: Criterion
+
+   .. py:method:: set_requirements(*criterion_lists: List[Union[str, 'Criterion']])
+
+      Sets the requirements for the advancement.
+    
+      .. versionadded:: 0.4
+      
+      :param *criterion_lists: Made of params that are lists of criterion names (AND list of OR lists)
+      :type *criterion_lists: List[str or Criterion]
+
+   .. py:method:: reward(item: str, value: Any)
+
+      Sets the reward for the advancement.
+
+      * **item: type(value)**
+      * recipes: str
+      * loot: str
+      * experience: int
+      * function: str
+
+      .. versionadded:: 0.4
+      
+      :param str item: The reward type that is set
+      :param Any value: The value for the reward type
+
+   .. py:decoratormethod:: on_reward()
+
+      The function with the tag will be called when the achievement is gotten.
+
+      .. versionadded:: 0.4
+
+.. py:class:: Criterion
+
+   A criterion for an advancement.
+
+   .. warning::
+      Do not instantiate this class directly, access it in :py:class:`Achivement` via `criterion()`.
+
+   .. versionadded:: 0.4
 
 Errors
 ------
