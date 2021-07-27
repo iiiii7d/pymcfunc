@@ -7,6 +7,12 @@ Reference
    
    The version.
 
+   Versions go in this format: **x.y.z**
+
+   * **x**: Projects built for different x versions are incompatitable. If 'x' is 0, is is a development release.
+   * **y**: Features have been added from the previous y version.
+   * **z**: Minor bug fixes.
+
 Syntax Guide
 ------------
 
@@ -3468,9 +3474,96 @@ Advancements
    A criterion for an advancement.
 
    .. warning::
-      Do not instantiate this class directly, access it in :py:class:`Achivement` via `criterion()`.
+      Do not instantiate this class directly, access it in :py:class:`Achievement` via `criterion()`.
 
    .. versionadded:: 0.4
+
+   .. py:attribute:: name
+      :type: str
+
+      The name of the criterion.
+
+      .. versionadded:: 0.4
+
+   .. py:attribute:: ach
+      :type: str
+
+      The achievement that this criterion is under.
+
+      .. versionadded:: 0.4
+ 
+   .. py:attribute:: value
+      :type: dict
+
+      The value of the criterion as a reference to ``advancements[ach_name]['criteria'][criterion_name]`` in the pack.
+
+      .. versionadded:: 0.4
+
+   .. py:method:: __init__(ach, name: str)
+      
+      Initialises the criterion.
+
+      .. versionadded:: 0.4
+
+      :param Achievement ach: The achievement that the criterion is under
+      :param str name: The name of the criterion.
+
+   .. py:method:: bee_nest_destroyed(block: Optional[str]=None, item: Optional[dict]=None, num_bees_inside: Optional[int]=None, player: Optional[Union[List[str], dict]]=None)
+      
+      Sets the criterion's trigger to ``bee_nest_destroyed``.
+
+      .. versionadded:: 0.4
+
+      :param str block: The block that is destroyed
+      :param str item: The item used to destroy the block
+      :param int num_bees_inside: The number of bees inside the block
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: bred_animals(child: Optional[Union[List[str], dict]]=None, parent: Optional[Union[List[str], dict]]=None, partner: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``bred_animals``
+
+      .. versionadded:: 0.4
+
+      :param child: Tags for the child, or list of predicates
+      :type child: List[str] or dict
+      :param parent: Tags for the parent, or list of predicates
+      :type parent: List[str] or dict
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: brewed_potion(potion: Optional[str]=None, player: Optional[Union[List[str], dict]]=None)
+      
+      Sets the criterion's trigger to ``brewed_potion``
+
+      .. versionadded:: 0.4
+
+      :param str potion: The potion brewed
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: changed_dimension(from_: Optional[str]=None, to: Optional[str]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``changed_dimension``
+
+      .. versionadded:: 0.4
+
+      :param str from_: The dimension that the player came from, can be one of ``overworld``, ``the_nether``, ``the_end``
+      :param str to: The dimension that the player went to, can be one of ``overworld``, ``the_nether``, ``the_end``
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: channeled_lightning(*victims: Union[List[str], dict], player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``chanelled_lightning``
+
+      .. versionadded:: 0.4
+
+      :param *victims: Tags for the victims, or list of predicates
+      :type *victims: List[str] or dict
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
 
 Errors
 ------

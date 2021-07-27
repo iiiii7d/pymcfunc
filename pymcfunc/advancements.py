@@ -4,7 +4,7 @@ import pymcfunc.internal as internal
 import pymcfunc.func_handlers as func_handler
 
 class Advancement:
-    def __init__(self, p, name: str, parent: str):
+    def __init__(self, p, name: str, parent: Union[str, 'Advancement']):
         self.p = p
         self.name = name
         self.namespaced = self.p.name+":"+self.name
@@ -14,7 +14,10 @@ class Advancement:
         }
         self.value = self.p.advancements[self.name]
         if parent is not None:
-            self.value['parent'] = parent
+            if isinstance(parent, type(self)):
+                self.value['parent'] = parent.name
+            else:
+                self.value['parent'] = parent
 
     def set_icon(self, item_name: str, nbt: Optional[dict]=None):
         if 'display' not in self.value.keys():
@@ -64,11 +67,11 @@ class Advancement:
 
 RangeDict = Dict[str, int]
 class Criterion:
-    def __init__(self, ad, name: str):
+    def __init__(self, ach, name: str):
         self.name = name
-        self.ad = ad
-        if 'name' not in self.ad.value['criteria']: self.ad.value['criteria'][self.name] = {}
-        self.value = self.ad.value['criteria'][self.name]
+        self.ach = ach
+        if 'name' not in self.ach.value['criteria']: self.ach.value['criteria'][self.name] = {}
+        self.value = self.ach.value['criteria'][self.name]
 
     def _setup(self, trigger):
         self.value['trigger'] = "minecraft:"+trigger
