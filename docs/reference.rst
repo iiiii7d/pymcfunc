@@ -3478,6 +3478,8 @@ Advancements
 
    .. versionadded:: 0.4
 
+   Note: RangeDicts come in the form of ``{"min": num, "max": num}``
+
    .. py:attribute:: name
       :type: str
 
@@ -3564,6 +3566,15 @@ Advancements
       :type *victims: List[str] or dict
       :param player: Tags for the player, or list of predicates
       :type player: List[str] or dict
+
+   .. py:method:: construct_beacon(level: Optional[Union[int, RangeDict]]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``construct_beacon``.
+
+      .. versionadded:: 0.4
+
+      :param level: The level of the beacon. Can be exact value or range.
+
 
 Errors
 ------
