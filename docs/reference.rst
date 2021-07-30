@@ -254,7 +254,7 @@ Function Handlers
 
       .. versionadded:: 0.1
 
-   .. py:method:: v(self, name: str, target: str)
+   .. py:method:: v(name: str, target: str)
 
       Creates a variable.
 
@@ -283,7 +283,7 @@ Function Handlers
 
        .. versionadded:: 0.1
 
-   .. py:method:: v(self, name: str, target: str, trigger: bool=False)
+   .. py:method:: v(name: str, target: str, trigger: bool=False)
 
       Creates a variable.
 
@@ -934,7 +934,7 @@ Raw commands
       :returns: The command
       :rtype: str
 
-   .. py:method:: replaceitem(self, mode: str, slotId: int, itemName: str, pos: str=None, target: str=None, slotType: str=None, itemHandling: str=None, amount: int=1, data: int=0, components: dict=None)
+   .. py:method:: replaceitem(mode: str, slotId: int, itemName: str, pos: str=None, target: str=None, slotType: str=None, itemHandling: str=None, amount: int=1, data: int=0, components: dict=None)
 
       Adds a ``replaceitem`` command.
 
@@ -1249,7 +1249,7 @@ Raw commands
       :returns: The command
       :rtype: str
 
-   .. py:method:: gametest_clearall(self, radius: int=None)
+   .. py:method:: gametest_clearall(radius: int=None)
 
       Adds a ``gametest clearall`` command.
 
@@ -1517,7 +1517,7 @@ Raw commands
       :returns: The command
       :rtype: str
 
-   .. py:method:: ride_summon_rider(self, ride: str, entity: str, event: str=None, nameTag: str=None)
+   .. py:method:: ride_summon_rider(ride: str, entity: str, event: str=None, nameTag: str=None)
 
       Adds a ``ride summon_riders`` command.
 
@@ -1532,7 +1532,7 @@ Raw commands
       :returns: The command
       :rtype: str
       
-   .. py:method:: ride_summon_ride(self, rider: str, entity: str, rideMode: str='reassign_rides', event: str=None, nameTag: str=None)
+   .. py:method:: ride_summon_ride(rider: str, entity: str, rideMode: str='reassign_rides', event: str=None, nameTag: str=None)
 
       Adds a ``ride summon_ride`` command.
 
@@ -1589,7 +1589,7 @@ Raw commands
       :returns: The command
       :rtype: str
 
-   .. py:method:: structure_load(self, name: str, pos: str, rotation: str='0_degrees', mirror: str='none', animationMode: str=None, \
+   .. py:method:: structure_load(name: str, pos: str, rotation: str='0_degrees', mirror: str='none', animationMode: str=None, \
                                  animationSeconds: float=1, includesEntities: bool=True, includesBlocks: bool=True, integrity: float=100, seed: str=None)
 
       Adds a ``strcture load`` command.
@@ -1956,7 +1956,7 @@ Raw commands
       :return: The command
       :rtype: str
 
-   .. py:method:: particle(self, name: str, speed: float, count: int, params: str=None, pos: str="~ ~ ~", delta: str="~ ~ ~", mode: str="normal", viewers: str=None)
+   .. py:method:: particle(name: str, speed: float, count: int, params: str=None, pos: str="~ ~ ~", delta: str="~ ~ ~", mode: str="normal", viewers: str=None)
 
       Adds a ``particle`` command.
 
@@ -2308,7 +2308,7 @@ Raw commands
       :returns: The command
       :rtype: str
 
-   .. py:method:: attribute(self, target: str, attribute: str, mode: str, scale: int=None, uuid: str=None, name: str=None, value: str=None, addMode: str=None)
+   .. py:method:: attribute(target: str, attribute: str, mode: str, scale: int=None, uuid: str=None, name: str=None, value: str=None, addMode: str=None)
 
       Adds an ``attribute`` command.
 
@@ -2494,7 +2494,7 @@ Raw commands
       :returns: The command
       :rtype: str
 
-   .. py:method:: data_modify(self, mode: str, sourceMode: str, path: str, block: str=None, entity: str=None, storage: str=None, index: str=None, sourceBlock: str=None, sourceEntity: str=None, sourceStorage: str=None, sourcePath: str=None, value: str=None)
+   .. py:method:: data_modify(mode: str, sourceMode: str, path: str, block: str=None, entity: str=None, storage: str=None, index: str=None, sourceBlock: str=None, sourceEntity: str=None, sourceStorage: str=None, sourcePath: str=None, value: str=None)
 
       Adds a ``data modify`` command.
 
@@ -2582,7 +2582,7 @@ Raw commands
       :returns: The command
       :rtype: str
 
-   .. py:method:: locatebiome(self, biomeId: str)
+   .. py:method:: locatebiome(biomeId: str)
 
       Adds a ``locatebiome`` command.
 
@@ -2989,7 +2989,7 @@ Variables
       :param int minv: The minimum value
       :param int maxv: The maximum value
 
-   .. py:method:: higher(self, other: 'BedrockVariable')
+   .. py:method:: higher(other: 'BedrockVariable')
 
       Sets this variable to the higher of the two variables.
 
@@ -2997,7 +2997,7 @@ Variables
 
       :param BedrockVariable other: The other variable
 
-   .. py:method:: lower(self, other: 'BedrockVariable')
+   .. py:method:: lower(other: 'BedrockVariable')
 
       Sets this variable to the lower of the two variables.
 
@@ -3005,7 +3005,7 @@ Variables
 
       :param BedrockVariable other: The other variable
 
-   .. py:method:: swap(self, other: 'BedrockVariable')
+   .. py:method:: swap(other: 'BedrockVariable')
 
       Swaps the value of the two variables.
 
@@ -3118,7 +3118,7 @@ Variables
       :param other: The other value or variable
       :type other: JavaVariable or int
 
-   .. py:method:: higher(self, other: 'JavaVariable')
+   .. py:method:: higher(other: 'JavaVariable')
 
       Sets this variable to the higher of the two variables.
 
@@ -3126,7 +3126,7 @@ Variables
 
       :param JavaVariable other: The other variable
 
-   .. py:method:: lower(self, other: 'JavaVariable')
+   .. py:method:: lower(other: 'JavaVariable')
 
       Sets this variable to the lower of the two variables.
 
@@ -3134,7 +3134,7 @@ Variables
 
       :param JavaVariable other: The other variable
 
-   .. py:method:: swap(self, other: 'JavaVariable')
+   .. py:method:: swap(other: 'JavaVariable')
 
       Swaps the value of the two variables.
 
@@ -3994,7 +3994,7 @@ Advancements
       :param player: Tags for the player, or list of predicates
       :type player: List[str] or dict
 
-   .. py:method:: used_totem(self, item: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None)
+   .. py:method:: used_totem(item: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None)
      
       Sets the criterion's trigger to ``used_totem``.
 
@@ -4014,7 +4014,7 @@ Advancements
       :param player: Tags for the player, or list of predicates
       :type player: List[str] or dict
 
-   .. py:method:: villager_trade(self, item: Optional[dict]=None, villager: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None)
+   .. py:method:: villager_trade(item: Optional[dict]=None, villager: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None)
 
       Sets the criterion's trigger to ``villager_trade``.
 
@@ -4026,7 +4026,7 @@ Advancements
       :param player: Tags for the player, or list of predicates
       :type player: List[str] or dict
 
-   .. py:method:: voluntary_exile(self, location: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None)
+   .. py:method:: voluntary_exile(location: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None)
 
       Sets the criterion's trigger to ``voluntary_exile``.
 
