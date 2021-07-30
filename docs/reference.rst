@@ -3762,7 +3762,7 @@ Advancements
       :param player: Tags for the player, or list of predicates
       :type player: List[str] or dict
 
-   .. py:method:: levitation(absolute_distance: Optional[RangeDict]=None, horizontal_distance: Optional[RangeDict]=None, x_distance: Optional[RangeDict]=None, y_distance: Optional[RangeDict]=None,
+   .. py:method:: levitation(absolute_distance: Optional[RangeDict]=None, horizontal_distance: Optional[RangeDict]=None, x_distance: Optional[RangeDict]=None, y_distance: Optional[RangeDict]=None, \
                              z_distance: Optional[RangeDict]=None, duration: Optional[Union[int, RangeDict]]=None, player: Optional[Union[List[str], dict]]=None)
 
       Sets the criterion's trigger to ``levitation``.
@@ -3779,6 +3779,262 @@ Advancements
       :param player: Tags for the player, or list of predicates
       :type player: List[str] or dict
 
+   .. py:method:: lightning_strike(lightning: Optional[Union[List[str], dict]]=None, bystander: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``lightning_strike``.
+
+      .. versionadded:: 0.4
+
+      :param lightning: Tags for the lightning, or list of predicates
+      :type lightning: List[str] or dict
+      :param bystander: Tags for the bystander, or list of predicates
+      :type bystander: List[str] or dict
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: location(location: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None)
+      
+      Sets the criterion's trigger to ``location``.
+
+      .. versionadded:: 0.4
+
+      :param dict location: Tags for the location
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+    
+   .. py:method:: nether_travel(entered: Optional[dict]=None, exited: Optional[dict]=None, absolute_distance: Optional[RangeDict]=None, horizontal_distance: Optional[RangeDict]=None, \
+                                x_distance: Optional[RangeDict]=None, y_distance: Optional[RangeDict]=None, z_distance: Optional[RangeDict]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``nether_travel``.
+
+      .. versionadded:: 0.4
+
+      :param dict entered: Tags for the entered
+      :param dict exited: Tags for the exited
+      :param RangeDict absolute_distance: The absolute distance travelled
+      :param RangeDict horizontal_distance: The horizontal distance travelled
+      :param RangeDict x_distance: The distance in the x axis travelled
+      :param RangeDict y_distance: The distance in the y axis travelled
+      :param RangeDict z_distance: The distance in the z axis travelled
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: placed_block(block: Optional[str]=None, item: Optional[dict]=None, location: Optional[dict]=None, state: Optional[Dict[str, str]]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``placed_block``.
+
+      .. versionadded:: 0.4
+
+      :param str block: The block placed
+      :param dict item: Tags for the item used
+      :param dict location: Tags for the location of the block
+      :param dict state: The states of the block, given in key: value pairs
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dic
+
+   .. py:method:: player_generates_container_loot(loot_table: Optional[str]=None, player: Optional[Union[List[str], dict]]=None)
+      
+      Sets the criterion's trigger to ``player_generates_container_loot``.
+
+      .. versionadded:: 0.4
+
+      :param str loot_table: The resource location of the loot table used.
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: player_hurt_entity(damage: Optional[dict]=None, entity: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``player_hurt_entity``.
+
+      .. versionadded:: 0.4
+
+      :param dict damage: Tags for damage
+      :param entity: Tags for the entity, or list of predicates
+      :type entity: List[str] or dict
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: player_interacted_with_entity(item: Optional[dict]=None, entity: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``player_interacted_with_entity``.
+
+      .. versionadded:: 0.4
+
+      :param dict item: Tags for the item used
+      :param entity: Tags for the entity, or list of predicates
+      :type entity: List[str] or dict
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: player_killed_entity(entity: Optional[Union[List[str], dict]]=None, killing_blow: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``player_killed_entity``.
+
+      .. versionadded:: 0.4
+
+      :param entity: Tags for the entity, or list of predicates
+      :type entity: List[str] or dict
+      :param dict killing_blow: Tags for killing blow
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: recipe_unlocked(recipe: Optional[str]=None, player: Optional[Union[List[str], dict]]=None)
+      
+      Sets the criterion's trigger to ``recipe_unlocked``.
+
+      .. versionadded:: 0.4
+
+      :param str recipe: The recipe unlocked
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: shot_crossbow(item: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``shot_crossbow``.
+
+      .. versionadded:: 0.4
+
+      :param dict item: Tags for the item used
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: slept_in_bed(location: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``slept_in_bed``.
+
+      .. versionadded:: 0.4
+
+      :param dict location: Tags for the location
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: slide_down_block(block: Optional[str]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``slept_in_bed``.
+
+      .. versionadded:: 0.4
+
+      :param str block: The block slid down on
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: start_riding(player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``slept_in_bed``.
+
+      .. versionadded:: 0.4
+
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: summoned_entity(entity: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None)
+      
+      Sets the criterion's trigger to ``slept_in_bed``.
+
+      .. versionadded:: 0.4
+
+      :param entity: Tags for the entity, or list of predicates
+      :type entity: List[str] or dict
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+    
+   .. py:method:: tame_animal(entity: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``tame_animal``.
+
+      .. versionadded:: 0.4
+
+      :param entity: Tags for the entity, or list of predicates
+      :type entity: List[str] or dict
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: target_hit(signal_strength: Optional[int]=None, projectile: Optional[str]=None, shooter: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``target_hit``.
+
+      .. versionadded:: 0.4
+
+      :param int signal_strength: The signal strength output by the target block
+      :param str projectile: The projectile
+      :param shooter: Tags for the shooter, or list of loot tables
+      :type shooter: List[str] or dict
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: thrown_item_picked_up_by_entity(item: Optional[dict]=None, entity: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``thrown_item_picked_up_by_entity``.
+
+      .. versionadded:: 0.4
+
+      :param dict item: Tags for the item picked up
+      :param entity: Tags for the entity, or list of loot tables
+      :type entity: List[str] or dict
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: tick(player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``thrown_item_picked_up_by_entity``.
+
+      .. versionadded:: 0.4
+
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: used_ender_eye(distance: Optional[Union[int, RangeDict]]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``used_ender_eye``.
+
+      .. versionadded:: 0.4
+
+      :param distance: The distance travelled by the ender eye. Can be an exact value or range
+      :type distance: int or RangeDict
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: used_totem(self, item: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None)
+     
+      Sets the criterion's trigger to ``used_totem``.
+
+      .. versionadded:: 0.4
+
+      :param dict item: Tags for the item used
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: using_item(item: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``using_item``.
+
+      .. versionadded:: 0.4
+
+      :param dict item: Tags for the item used
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: villager_trade(self, item: Optional[dict]=None, villager: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``villager_trade``.
+
+      .. versionadded:: 0.4
+
+      :param dict item: Tags for the item traded
+      :param villager: Tags for the villager, or list of predicates
+      :type villager: List[str] or dict
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: voluntary_exile(self, location: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``voluntary_exile``.
+
+      .. versionadded:: 0.4
+
+      :param dict location: Tags for the locaton
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
 
 Errors
 ------

@@ -356,10 +356,10 @@ class Criterion:
         if item is not None: self.value['conditions']['item'] = item
         if player is not None: self.value['conditions']['player'] = player
 
-    def villager_trade(self, item: Optional[dict]=None, vilager: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None):
+    def villager_trade(self, item: Optional[dict]=None, villager: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None):
         self._setup('villager_trade')
         if item is not None: self.value['conditions']['item'] = item
-        if vilager is not None: self.value['conditions']['vilager'] = vilager
+        if villager is not None: self.value['conditions']['villager'] = villager
         if player is not None: self.value['conditions']['player'] = player
 
     def voluntary_exile(self, location: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None):
