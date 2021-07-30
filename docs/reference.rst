@@ -3573,7 +3573,211 @@ Advancements
 
       .. versionadded:: 0.4
 
-      :param level: The level of the beacon. Can be exact value or range.
+      :param level: The level of the beacon. Can be exact value or range
+      :type level: int or RangeDict
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: consume_item(item: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``consume_item``.
+
+      .. versionadded:: 0.4
+
+      :param dict item: Tags for the item consumed
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: cured_zombie_villager(villager: Optional[Union[List[str], dict]]=None, zombie: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``cured_zombie_villager``.
+
+      .. versionadded:: 0.4
+
+      :param villager: Tags for the villager, or list of predicates
+      :type villager: List[str] or dict
+      :param zombie: Tags for the zombie, or list of predicates
+      :type zombie: List[str] or dict
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: effects_changed(source: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``effects_changed``. Used together with :py:meth:`effects_changed_effect`
+
+      .. versionadded:: 0.4
+
+      :param source: Tags for the source, or list of predicates
+      :type source: List[str] or dict
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: effects_changed_effect(effect_name: Optional[str]=None, amplifier: Optional[Union[int, RangeDict]]=None, duration: Optional[Union[int, RangeDict]]=None)
+
+      An effect, for when the criterion is ``effects_changed``. Used together with :py:meth:`effects_changed`
+
+      .. versionadded:: 0.4
+
+      :param str effect_name: The name of the effect
+      :param amplifier: The amplifier of the effect
+      :type amplfier: int or RangeDict
+      :param duration: The duration of the effect
+      :type duration: int or RangeDict
+
+   .. py:method:: enchanted_item(item: Optional[dict]=None, levels: Optional[Union[int, RangeDict]]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``enchanted_item``.
+
+      .. versionadded:: 0.4
+
+      :param dict item: Tags for the item enchanted
+      :param levels: The number of levels enchanted. Can be exact value or range
+      :type levels: int or RangeDict
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: enter_block(block: Optional[str]=None, state: Optional[Dict[str, str]]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``enter_block``.
+
+      .. versionadded:: 0.4
+
+      :param str block: The block entered
+      :param dict state: The states of the block, given in key: value pairs
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: entity_hurt_player(damage: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``entity_hurt_player``.
+
+      .. versionadded:: 0.4
+
+      :param dict damage: Tags for damage
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: entity_killed_player(entity: Optional[Union[List[str], dict]]=None, killing_blow: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``entity_killed_player``.
+
+      .. versionadded:: 0.4
+
+      :param entity: Tags for the entity, or list of predicates
+      :type entity: List[str] or dict
+      :param dict killing_blow: Tags for killing blow
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: filled_bucket(item: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None)
+
+       Sets the criterion's trigger to ``entity_killed_player``.
+
+      .. versionadded:: 0.4
+
+      :param dict item: Tags for the item filled
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: fishing_rod_hooked(entity: Optional[Union[List[str], dict]]=None, item: Optional[dict]=None, rod: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``fishing_rod_hooked``.
+
+      .. versionadded:: 0.4
+
+      :param entity: Tags for the entity, or list of predicates
+      :type entity: List[str] or dict
+      :param dict item: Tags for the item caught
+      :param dict rod: Tags for the rod
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: hero_of_the_village(location: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``hero_of_the_village``.
+
+      .. versionadded:: 0.4
+
+      :param dict location: Tags for the location
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: impossible()
+
+      Sets the criterion's trigger to ``impossible``.
+
+      .. versionadded:: 0.4
+
+   .. py:method:: inventory_changed(*items: dict, empty_slots: Optional[Union[int, RangeDict]]=None, full_slots: Optional[Union[int, RangeDict]]=None, occupied_slots: Optional[Union[int, RangeDict]]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``impossible``.
+
+      .. versionadded:: 0.4
+
+      :param dict *items: A list of tags for items
+      :param empty_slots: The number of empty slots. Can be an exact value or range
+      :type empty_slots: int or RangeDict
+      :param full_slots: The number of full slots. Can be an exact value or range
+      :type full_slots: int or RangeDict
+      :param occupied_slots: The number of occupied slots. Can be an exact value or range
+      :type occupied_slots: int or RangeDict
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: item_durability_changed(delta: Optional[Union[int, RangeDict]]=None, durability: Optional[Union[int, RangeDict]]=None, item: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``item_durability_changed``.
+
+      .. versionadded:: 0.4
+
+      :param delta: The amount of durability gained/lost. Can be an exact value or range
+      :type delta: int or RangeDict
+      :param durability: The durability of the item. Can be an exact value or range
+      :type durability: int or RangeDict
+      :param dict item: Tags for the item
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: item_used_on_block(location: Optional[dict]=None, item: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``item_used_on_block``.
+
+      .. versionadded:: 0.4
+
+      :param dict location: Tags for the location of the block
+      :param dict item: Tags for the item
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: killed_by_crossbow(*victims: Union[List[str], dict], unique_entity_types: Optional[Union[int, RangeDict]]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``item_used_on_block``.
+
+      .. versionadded:: 0.4
+
+      :param victims: A list of tags for the victims, or lists of predicates
+      :type victims: List[str] or dict
+      :param unique_entity_types: The number of unique types of entities that are victims. Can be an exact value or range.
+      :type unique_entity_types: int or RangeDict
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
+
+   .. py:method:: levitation(absolute_distance: Optional[RangeDict]=None, horizontal_distance: Optional[RangeDict]=None, x_distance: Optional[RangeDict]=None, y_distance: Optional[RangeDict]=None,
+                             z_distance: Optional[RangeDict]=None, duration: Optional[Union[int, RangeDict]]=None, player: Optional[Union[List[str], dict]]=None)
+
+      Sets the criterion's trigger to ``levitation``.
+
+      .. versionadded:: 0.4
+
+      :param RangeDict absolute_distance: The absolute distance levitated
+      :param RangeDict horizontal_distance: The horizontal distance levitated
+      :param RangeDict x_distance: The distance in the x axis levitated
+      :param RangeDict y_distance: The distance in the y axis levitated
+      :param RangeDict z_distance: The distance in the z axis levitated
+      :param duration: The duration levitated. Can be an exact value or range.
+      :type duration: int or RangeDict
+      :param player: Tags for the player, or list of predicates
+      :type player: List[str] or dict
 
 
 Errors
