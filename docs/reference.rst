@@ -3150,6 +3150,127 @@ Variables
 
       :param str slot: The slot to show it in.
 
+Entities
+--------
+
+.. py:currentmodule:: pymcfunc.ent
+
+.. py:class:: Entity
+
+   An entity object. This will reference and control entities that match a selector.
+
+   .. warning::
+      Do not instantiate Entity directly; use a FuncHandler and access the commands by calling `entity()`
+
+   .. versionadded:: 0.4
+
+   .. py:attribute:: fh
+      :type: FunctionHandler
+
+      The function handler that this object is a part of.
+
+      .. versionadded:: 0.4
+
+   .. py:attribute:: target
+      :type: str
+
+      The target used to select the entities.
+
+      .. versionadded:: 0.4
+
+   .. py:method:: __init__(fh, target: str)
+
+      Initialises the entity.
+
+      .. versionadded:: 0.4
+
+      :param UniversalFunctionHandler fh: The function handler that the object is a part of
+      :param str target: The target used to select the entities
+
+   .. py:method:: display_name(name: str)
+
+      Sets the display name of the entities.
+
+      .. versionadded:: 0.4
+
+      :param str name: The name to display.
+
+   .. py:method:: data_set_value(attr: str, val: Any)
+
+      Sets an NBT data value.
+
+      .. versionadded:: 0.4
+
+      :param str attr: The attribute key.
+      :param Any val: The value.
+
+   .. py:method:: pitch(val: float)
+      
+      Rotates the entity, such that it is rotating vertically.
+
+      .. versionadded:: 0.4
+
+      :param float val: The value to pitch it by.
+
+   .. py:method:: yaw(val: float)
+      
+      Rotates the entity, such that it is rotating horizontally.
+
+      .. versionadded:: 0.4
+
+      :param float val: The value to yaw it by.
+
+   .. py:method:: move(destxyz: Optional[str]=None, destentity: Optional[str]=None, **kwargs)
+
+      Moves the entity.
+
+      .. versionadded:: 0.4
+
+      :param str destxyz: The coordinates to move to
+      :param str destentity: The selector for the entity to move to
+      :param **kwargs: Additional parameters for the tp command
+
+   .. py:method:: force(axis: str, velocity: float)
+
+      Apply force to the entity.
+
+      .. versionadded:: 0.4
+
+      :param str axis: The axis in which the force is applied on
+      :param float velocity: The velocity of the force
+      
+   .. py:method:: remove()
+
+      Remove the entity.
+
+      .. versionadded:: 0.4
+
+.. py:class:: Mob(Entity)
+
+   A special type of entity, for mobs.
+
+   .. versionadded:: 0.4
+
+   .. py:method:: set_armour_slot(slot: str, item_id: str, count: int=1, tag: Optional[dict]=None)
+
+      Sets the armour slot of the mob.
+
+      .. versionadded:: 0.4
+
+      :param str slot: The slot to set. Can be one of `feet`, `legs`, `chest`, `head`
+      :param str item_id: The ID of the armour
+      :param int count: The count of the armour
+      :param dict tag: Tags for the armour
+
+   .. py:method:: remove_armour_slot(slot: str)
+
+      Removes armour from an armour slot.
+
+      .. versionadded:: 0.4
+
+      :param str slot: The slot to set. Can be one of `feet`, `legs`, `chest`, `head`
+      
+
 Selectors
 ---------
 
