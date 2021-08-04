@@ -3210,7 +3210,7 @@ Entities
 
       .. versionadded:: 0.4
 
-      :param float val: The value to pitch it by.
+      :param float val: The new pitch value. Does not add up.
 
    .. py:method:: yaw(val: float)
       
@@ -3218,7 +3218,7 @@ Entities
 
       .. versionadded:: 0.4
 
-      :param float val: The value to yaw it by.
+      :param float val: The new pitch value. Does not add up.
 
    .. py:method:: move(destxyz: Optional[str]=None, destentity: Optional[str]=None, **kwargs)
 
@@ -3241,7 +3241,7 @@ Entities
       
    .. py:method:: remove()
 
-      Remove the entity.
+      Removes the entity.
 
       .. versionadded:: 0.4
 
@@ -3270,6 +3270,27 @@ Entities
 
       :param str slot: The slot to set. Can be one of `feet`, `legs`, `chest`, `head`
       
+.. py:class:: ArmourStand(Mob)
+
+   A special type of entity, for armour stands.
+
+   .. versionadded:: 0.4
+
+   .. py:method:: move_limb(limb: str, axis: str, val: float)
+      
+      Moves a limb or part of the armour stand.
+
+      .. versionadded:: 0.4
+
+      :param str limb: The limb to move. Can be one of `Body`, `Head`, `LeftArm`, `LeftLeg`, `RightArm`, `RightLeg`
+      :param str axis: The axis to move the limb in. Can be one of `x`, `y`, `z`
+      :param float val: The new value of the rotation. Does not add up.
+
+   .. py:method:: mess()
+
+      Sets each value of rotation of each limb to a random value, because why not :))
+
+      .. versionadded:: 0.4
 
 Selectors
 ---------
