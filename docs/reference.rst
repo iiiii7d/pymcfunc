@@ -4203,9 +4203,15 @@ Errors
 
 .. py:exception:: InvalidParameterError
 
-   The parameter is invalid because another parameter is at its default value of None.
+   The parameter is invalid because another parameter is not set to a specific value.
 
    .. versionadded:: 0.0
+
+.. py:exception:: ReliantError
+
+   The parameter is invalid because another parameter is not specified, or is None.
+
+   .. versionadded:: 0.0?
 
 .. py:exception:: CaretError
 
