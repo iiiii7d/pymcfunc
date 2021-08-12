@@ -4211,7 +4211,7 @@ Errors
 
    The parameter is invalid because another parameter is not specified, or is None.
 
-   .. versionadded:: 0.0?
+   .. versionadded:: 0.0
 
 .. py:exception:: CaretError
 
