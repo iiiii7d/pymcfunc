@@ -295,6 +295,17 @@ Function Handlers
       :returns: The variable object
       :rtype: JavaVariable
 
+   .. py:method:: entity(entity_name: str, target: str)
+
+      Creates an entity object.
+
+      .. versionaded:: 0.4
+
+      :param str entity_name: Can be one of `Entity`, `Mob`, `ArmourStand`
+      :param str target: The target for the object
+      :returns: The entity object
+      :rtype: Entity
+
 Raw commands
 ------------
 
@@ -4177,6 +4188,70 @@ Advancements
       :param dict location: Tags for the locaton
       :param player: Tags for the player, or list of predicates
       :type player: List[str] or dict
+
+Itemm Modifiers
+---------------
+
+.. py:currentmodule:: pymcfunc.item_modifiers
+
+.. py:class:: ItemModifier
+   
+   An item modifier in Java Edition.
+
+   .. versionadded:: 0.4
+   
+   .. py:attribute:: p
+      :type: Pack
+
+      References back to the pack that it is in.
+
+      .. versionadded:: 0.4
+
+   .. py:attribute:: name
+      :type: str
+
+      The name of the advancement.
+
+      .. versionadded:: 0.4
+
+   .. py:attribute:: namespaced
+      :type: str
+
+      The namespaced name of the advancement.
+
+      .. versionadded:: 0.4
+
+   .. py:attribute:: value
+      :type: dict
+
+      The value of the advancement as a reference to ``advancements[name]`` in the pack.
+
+      .. versionadded:: 0.4
+
+   .. py:method:: __init__(p, name: str)
+
+      Initialises the advancement.
+
+      .. versionadded:: 0.4
+
+      :param Pack p: The pack that the advancement is attached to
+      :param str name: The name of the pack
+
+   .. py:method:: apply_bonus(enchantment: str, formula: str, extra: int, probability: float, bonus_multiplier: float)
+
+      Sets the item modifier's function to `apply_bonus`.
+
+      .. versionadded:: 0.4
+
+      :param str enchantment: The enchantment to add to
+      :param str formula: The formula to use, can be one of `binomial_with_bonus_count`, `uniform_bonus_count`, `ore_drops`
+      :param int extra: The amount extra to add
+      :param float probability: The probability
+      :param float bonus_multiplier: The bonus multiplier
+
+   .. py:method:: copy_name():
+
+      Sets the item modifier's  
 
 Errors
 ------

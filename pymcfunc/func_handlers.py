@@ -29,9 +29,6 @@ class UniversalFuncHandler:
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalFuncHandler.comment"""
         self.commands.append('# '+comment.strip())
 
-    def entity(self, entity_name: str, target: str):
-        return getattr(entities, entity_name)(self, target)
-
 class BedrockFuncHandler(UniversalFuncHandler):
     """The Beckrock Edition function handler.
     More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockFuncHandler"""
@@ -62,3 +59,7 @@ class JavaFuncHandler(UniversalFuncHandler):
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFuncHandler.v"""
         return JavaVariable(self, name, target, trigger=trigger)
 
+    def entity(self, entity_name: str, target: str):
+        """Creates an entity object.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFuncHandler.entity"""
+        return getattr(entities, entity_name)(self, target)
