@@ -4251,7 +4251,82 @@ Itemm Modifiers
 
    .. py:method:: copy_name():
 
-      Sets the item modifier's  
+      Sets the item modifier's function to `copy_name`.
+
+      .. versionadded:: 0.4
+
+   .. py:method:: copy_nbt_source(source: Optional[str]=None, type_: Optional[str]=None, target: Optional[str]=None)
+
+      Sets the source of the item modifier for when its function to `copy_nbt`. Used together with `copy_nbt_operation()`.
+
+      .. versionadded:: 0.4
+
+      :param str source: The source that contains the NBT
+      :param str type_: The type of NBT, choose from `context`, `storage`
+      :param str target: The target source's NBT attribute
+
+   .. py:method:: copy_nbt_operation(source: str, target: str, op: str)
+
+      Sets the target of the item modifier for when its function to `copy_nbt`. Used together with `copy_nbt_source()`.
+
+      .. versionadded:: 0.4
+
+      :param str source: The source of the NBT
+      :param str target: The target NBT attribute
+      :param str op: The operation to carry out, can be one of `replace`, `append`, `merge`
+
+   .. py:method:: copy_state(block: str, properties: Sequence[str])
+    
+      Sets the item modifier's function to `copy_state`.
+
+      .. versionadded:: 0.4
+
+      :param str block: The block
+      :param Sequence[str] properties: A list of properties to add
+
+   .. py:method:: enchant_randomly(*enchantments: str)
+
+      Sets the item modifier's function to `enchant_randomly`.
+
+      .. versionadded:: 0.4
+
+      :param str enchantments: A list of enchantments to pick from
+
+   .. py:method:: enchant_with_levels(treasure: bool, levels: Union[int, NumberProvider])
+
+      Sets the item modifier's function to `enchant_with_levels`.
+
+      .. versionadded:: 0.4
+
+      :param bool treasure: Whether the enchantment is a treasure
+      :param levels: How many levels to add
+      :type levels: int or NumberProvider
+
+   .. py:method:: exploration_map(dest: str, icon: str, zoom: int=2, search_radius: int=50, skip_existing_chunks: bool=True)
+
+      Sets the item modifier's function to `exploration_map`.
+
+      .. versionadded:: 0.4
+
+      :param str dest: The destination coordinates
+      :param str icon: The icon to use as the marker
+      :param int zoom: The zoom level of the exploration map
+      :param int search_radius: The search radius of the map
+      :param bool skip_existing_chunks: Whether to skip existing chunks
+
+   .. py:method:: explosion_decay()
+
+      Sets the item modifier's function to `explosion_decay`.
+
+      .. versionadded:: 0.4
+
+   .. py:method:: furnace_smelt()
+
+      Sets the item modifier's function to `furnace_smelt`.
+
+      .. versionadded:: 0.4
+
+   
 
 Errors
 ------
