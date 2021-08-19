@@ -4326,6 +4326,43 @@ Itemm Modifiers
 
       .. versionadded:: 0.4
 
+   .. py:method:: fill_player_head(entity: str)
+
+      Sets the item modifier's function to `fill_player_head`.
+
+      .. versionadded:: 0.4
+
+      :param str entity: The name of the entity
+
+   .. py:method:: limit_count(limit: Union[Union[int, NumberProvider], Dict[str, Union[int, NumberProvider]]])
+
+      Sets the item modifier's function to `limit_count`.
+
+      .. versionadded:: 0.4
+
+      :param limit: The limit. Can be an integer, a number provider, or a dictionary of integers or NumberProviders
+      :type limit: int or NumberProvider or Dict[str, int or NumberProvider]]
+
+   .. py:method:: looting_enchant(count: Union[int, NumberProvider], limit: int)
+
+      Sets the item modifier's function to `looting_enchant`.
+
+      .. versionadded:: 0.4
+
+      :param count: The count to enchant
+      :type count: int or NumberProvider
+      :param str limit: The limit
+
+   .. py:method:: set_attributes_modifier(name: str, attribute: str, operation: str, amount: Union[float, NumberProvider], slot: Union[str, List[str]], id_: Optional[str]=None)
+
+      Sets the item modifier's function to `set_attributes_modifier`.
+
+      .. versionadded:: 0.4
+
+      :param str name: The name of the item holding the attribute
+      :param str attribute: The directory of the attribute
+      :param str operation: The operation, choose from `add`, `multiply_base`, `multiply_total`
+      TODO
    
 
 Errors
