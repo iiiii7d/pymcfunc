@@ -55,7 +55,7 @@ class Advancement:
         criterion_dict = {'trigger': trigger, 'conditions': conditions}
         self.value['criteria'][name] = criterion_dict'''
 
-    def criterion(self, name: str):
+    def criterion(self, name: str) -> 'Criterion':
         """Creates and returns a new criterion for the advancement.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.advancements.Advancement.criterion"""
         return Criterion(self, name)

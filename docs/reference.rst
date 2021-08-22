@@ -3495,6 +3495,62 @@ Raw JSON text
    :returns: The JSON text
    :rtype: list[dict] or dict
 
+Number Providers
+----------------
+
+.. py:currentmodule:: pymcfunc.np
+
+.. py:function:: constant(value: Union[int, float]) -> NumberProvider
+
+   A number provider that returns a constant.
+
+   .. versionadded:: 0.4
+
+   :param value: The constant
+   :type value: int or float
+   :returns: A number provider in the form of a dict
+   :rtype: NumberProvider
+
+.. py:function:: uniform(min_: Union[Union[int, float], NumberProvider], max_: Union[Union[int, float], NumberProvider]) -> NumberProvider:
+
+   A number provider that returns a random number between two numbers.
+
+   .. versionadded:: 0.4
+
+   :param min_: The minimum number
+   :type min_: int or float or NumberProvider
+   :param max_: The minimum number
+   :type max_: int or float or NumberProvider
+   :returns: A number provider in the form of a dict
+   :rtype: NumberProvider
+
+.. py:function:: binomial(n: Union[int, NumberProvider], p: Union[float, NumberProvider])
+
+   A number provider that returns a random number on a binomial distribution.
+
+   .. versionadded:: 0.4
+
+   :param n: The amount of trials of the distribution
+   :type n: int or NumberProvider
+   :param n: The probability of success on each trial of the distribution
+   :type n: float or NumberProvider
+   :returns: A number provider in the form of a dict
+   :rtype: NumberProvider
+
+.. py:function:: score(score_: str, target: Optional[str]=None, type_: Optional[str]=None, name: Optional[str]=None, scale: Optional[float]=None) -> NumberProvider
+
+   A number provider that returns a value from the scoreboard.
+
+   .. versionadded:: 0.4
+
+   :param str score_: The scoreboard objective
+   :param str target: The name provider, choose from ``this``, ``killer``, ``direct_killer``, ``player_killer``, when ``type_`` is not ``fixed``
+   :param str type_: The type of resource location, choose from ``fixed``, ``context``
+   :param str name: The name or UUID of the player, when ``type_`` is ``fixed``
+   :param float scale: The constant to multiply the score by
+   :returns: A number provider in the form of a dict
+   :rtype: NumberProvider
+
 Advancements
 ------------
 
@@ -3582,14 +3638,14 @@ Advancements
       :param parent: The parent of the advancement
       :type parent: str or Advancement
 
-   .. py:method:: criterion(name: str)
+   .. py:method:: criterion(name: str) -> Criterion
 
       Creates and returns a new criterion for the advancement.
 
       .. versionadded:: 0.4
 
-      :param str name: The name of the criterion.
-      :return: The criterion.
+      :param str name: The name of the criterion
+      :return: The criterion
       :rtype: Criterion
 
    .. py:method:: set_requirements(*criterion_lists: List[Union[str, 'Criterion']])
@@ -3618,7 +3674,7 @@ Advancements
 
    .. py:decoratormethod:: on_reward()
 
-      The function with the tag will be called when the achievement is gotten.
+      The function with the tag will be called when the advancement is gotten.
 
       .. versionadded:: 0.4
 
@@ -3627,7 +3683,7 @@ Advancements
    A criterion for an advancement.
 
    .. warning::
-      Do not instantiate this class directly, access it in :py:class:`Achievement` via `criterion()`.
+      Do not instantiate this class directly, access it in :py:class:`Advancement` via `criterion()`.
 
    .. versionadded:: 0.4
 
@@ -3643,10 +3699,10 @@ Advancements
    .. py:attribute:: ach
       :type: str
 
-      The achievement that this criterion is under.
+      The advancement that this criterion is under.
 
       .. versionadded:: 0.4
- 
+
    .. py:attribute:: value
       :type: dict
 
@@ -3655,16 +3711,16 @@ Advancements
       .. versionadded:: 0.4
 
    .. py:method:: __init__(ach, name: str)
-      
+
       Initialises the criterion.
 
       .. versionadded:: 0.4
 
-      :param Achievement ach: The achievement that the criterion is under
+      :param Advancement ach: The advancement that the criterion is under
       :param str name: The name of the criterion.
 
    .. py:method:: bee_nest_destroyed(block: Optional[str]=None, item: Optional[dict]=None, num_bees_inside: Optional[int]=None, player: Optional[Union[List[str], dict]]=None)
-      
+
       Sets the criterion's trigger to ``bee_nest_destroyed``.
 
       .. versionadded:: 0.4
@@ -3689,7 +3745,7 @@ Advancements
       :type player: List[str] or dict
 
    .. py:method:: brewed_potion(potion: Optional[str]=None, player: Optional[Union[List[str], dict]]=None)
-      
+
       Sets the criterion's trigger to ``brewed_potion``
 
       .. versionadded:: 0.4
@@ -3946,7 +4002,7 @@ Advancements
       :type player: List[str] or dict
 
    .. py:method:: location(location: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None)
-      
+
       Sets the criterion's trigger to ``location``.
 
       .. versionadded:: 0.4
@@ -3954,7 +4010,7 @@ Advancements
       :param dict location: Tags for the location
       :param player: Tags for the player, or list of predicates
       :type player: List[str] or dict
-    
+
    .. py:method:: nether_travel(entered: Optional[dict]=None, exited: Optional[dict]=None, absolute_distance: Optional[RangeDict]=None, horizontal_distance: Optional[RangeDict]=None, \
                                 x_distance: Optional[RangeDict]=None, y_distance: Optional[RangeDict]=None, z_distance: Optional[RangeDict]=None, player: Optional[Union[List[str], dict]]=None)
 
@@ -3986,7 +4042,7 @@ Advancements
       :type player: List[str] or dic
 
    .. py:method:: player_generates_container_loot(loot_table: Optional[str]=None, player: Optional[Union[List[str], dict]]=None)
-      
+
       Sets the criterion's trigger to ``player_generates_container_loot``.
 
       .. versionadded:: 0.4
@@ -4032,7 +4088,7 @@ Advancements
       :type player: List[str] or dict
 
    .. py:method:: recipe_unlocked(recipe: Optional[str]=None, player: Optional[Union[List[str], dict]]=None)
-      
+
       Sets the criterion's trigger to ``recipe_unlocked``.
 
       .. versionadded:: 0.4
@@ -4081,7 +4137,7 @@ Advancements
       :type player: List[str] or dict
 
    .. py:method:: summoned_entity(entity: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None)
-      
+
       Sets the criterion's trigger to ``slept_in_bed``.
 
       .. versionadded:: 0.4
@@ -4090,7 +4146,7 @@ Advancements
       :type entity: List[str] or dict
       :param player: Tags for the player, or list of predicates
       :type player: List[str] or dict
-    
+
    .. py:method:: tame_animal(entity: Optional[Union[List[str], dict]]=None, player: Optional[Union[List[str], dict]]=None)
 
       Sets the criterion's trigger to ``tame_animal``.
@@ -4148,7 +4204,7 @@ Advancements
       :type player: List[str] or dict
 
    .. py:method:: used_totem(item: Optional[dict]=None, player: Optional[Union[List[str], dict]]=None)
-     
+
       Sets the criterion's trigger to ``used_totem``.
 
       .. versionadded:: 0.4
@@ -4189,17 +4245,17 @@ Advancements
       :param player: Tags for the player, or list of predicates
       :type player: List[str] or dict
 
-Itemm Modifiers
+Item Modifiers
 ---------------
 
 .. py:currentmodule:: pymcfunc.item_modifiers
 
 .. py:class:: ItemModifier
-   
+
    An item modifier in Java Edition.
 
    .. versionadded:: 0.4
-   
+
    .. py:attribute:: p
       :type: Pack
 
@@ -4239,7 +4295,7 @@ Itemm Modifiers
 
    .. py:method:: apply_bonus(enchantment: str, formula: str, extra: int, probability: float, bonus_multiplier: float)
 
-      Sets the item modifier's function to `apply_bonus`.
+      Sets the item modifier's function to ``apply_bonus``.
 
       .. versionadded:: 0.4
 
@@ -4251,13 +4307,13 @@ Itemm Modifiers
 
    .. py:method:: copy_name():
 
-      Sets the item modifier's function to `copy_name`.
+      Sets the item modifier's function to ``copy_name`.
 
       .. versionadded:: 0.4
 
    .. py:method:: copy_nbt_source(source: Optional[str]=None, type_: Optional[str]=None, target: Optional[str]=None)
 
-      Sets the source of the item modifier for when its function to `copy_nbt`. Used together with `copy_nbt_operation()`.
+      Sets the source of the item modifier for when its function to ``copy_nbt``. Used together with ``copy_nbt_operation()``.
 
       .. versionadded:: 0.4
 
@@ -4267,7 +4323,7 @@ Itemm Modifiers
 
    .. py:method:: copy_nbt_operation(source: str, target: str, op: str)
 
-      Sets the target of the item modifier for when its function to `copy_nbt`. Used together with `copy_nbt_source()`.
+      Sets the target of the item modifier for when its function to ``copy_nbt``. Used together with ``copy_nbt_source()``.
 
       .. versionadded:: 0.4
 
@@ -4276,8 +4332,8 @@ Itemm Modifiers
       :param str op: The operation to carry out, can be one of `replace`, `append`, `merge`
 
    .. py:method:: copy_state(block: str, properties: Sequence[str])
-    
-      Sets the item modifier's function to `copy_state`.
+
+      Sets the item modifier's function to ``copy_state``.
 
       .. versionadded:: 0.4
 
@@ -4286,7 +4342,7 @@ Itemm Modifiers
 
    .. py:method:: enchant_randomly(*enchantments: str)
 
-      Sets the item modifier's function to `enchant_randomly`.
+      Sets the item modifier's function to ``enchant_randomly``.
 
       .. versionadded:: 0.4
 
@@ -4294,7 +4350,7 @@ Itemm Modifiers
 
    .. py:method:: enchant_with_levels(treasure: bool, levels: Union[int, NumberProvider])
 
-      Sets the item modifier's function to `enchant_with_levels`.
+      Sets the item modifier's function to ``enchant_with_levels``.
 
       .. versionadded:: 0.4
 
@@ -4304,7 +4360,7 @@ Itemm Modifiers
 
    .. py:method:: exploration_map(dest: str, icon: str, zoom: int=2, search_radius: int=50, skip_existing_chunks: bool=True)
 
-      Sets the item modifier's function to `exploration_map`.
+      Sets the item modifier's function to ``exploration_map``.
 
       .. versionadded:: 0.4
 
@@ -4316,19 +4372,19 @@ Itemm Modifiers
 
    .. py:method:: explosion_decay()
 
-      Sets the item modifier's function to `explosion_decay`.
+      Sets the item modifier's function to ``explosion_decay``.
 
       .. versionadded:: 0.4
 
    .. py:method:: furnace_smelt()
 
-      Sets the item modifier's function to `furnace_smelt`.
+      Sets the item modifier's function to ``furnace_smelt``.
 
       .. versionadded:: 0.4
 
    .. py:method:: fill_player_head(entity: str)
 
-      Sets the item modifier's function to `fill_player_head`.
+      Sets the item modifier's function to ``fill_player_head``.
 
       .. versionadded:: 0.4
 
@@ -4336,7 +4392,7 @@ Itemm Modifiers
 
    .. py:method:: limit_count(limit: Union[Union[int, NumberProvider], Dict[str, Union[int, NumberProvider]]])
 
-      Sets the item modifier's function to `limit_count`.
+      Sets the item modifier's function to ``limit_count``.
 
       .. versionadded:: 0.4
 
@@ -4345,7 +4401,7 @@ Itemm Modifiers
 
    .. py:method:: looting_enchant(count: Union[int, NumberProvider], limit: int)
 
-      Sets the item modifier's function to `looting_enchant`.
+      Sets the item modifier's function to ``looting_enchant``.
 
       .. versionadded:: 0.4
 
@@ -4355,15 +4411,362 @@ Itemm Modifiers
 
    .. py:method:: set_attributes_modifier(name: str, attribute: str, operation: str, amount: Union[float, NumberProvider], slot: Union[str, List[str]], id_: Optional[str]=None)
 
-      Sets the item modifier's function to `set_attributes_modifier`.
+      Sets the item modifier's function to ``set_attributes_modifier``.
 
       .. versionadded:: 0.4
 
       :param str name: The name of the item holding the attribute
       :param str attribute: The directory of the attribute
       :param str operation: The operation, choose from `add`, `multiply_base`, `multiply_total`
-      TODO
-   
+      :param amount: The amount to set
+      :type amount: float or NumberProvider
+      :param slot: The slot to apply the attribute to, choose from `mainhand`, `offhand`, `feet`, `legs`, `chest`, `head`
+      :type slot: str or List[str]
+      :param str id_: The UUID of the modifier
+
+   .. py:method:: set_banner_pattern(*patterns: Tuple[str, str], append: Optional[bool]=None)
+
+      Sets the item modifier's function to ``set_banner_pattern``.
+
+      .. versionadded:: 0.4
+
+      :param patterns: The patterns to apply, given in tuples of (pattern, colour)
+      :type pattern: Tuple[str, str]
+      :param bool append: Whether to append the pattern to the existing banner
+
+   .. py:method:: set_contents(*entries: dict)
+
+      Sets the item modifier's function to ``set_contents``.
+
+      .. versionadded:: 0.4
+
+      :param dict entries: The entries as contents
+
+   .. py:method:: set_count(count: Union[int, NumberProvider], add: Optional[bool]=None)
+
+      Sets the item modifier's function to ``set_count``.
+
+      .. versionadded:: 0.4
+
+      :param count: The size of the stack
+      :type count: int or NumberProvider
+      :param bool add: Whether to add to (true) or to set (false) the count
+
+   .. py:method:: set_damage(damage: Union[float, NumberProvider], add: Optional[bool]=None)
+
+      Sets the item modifier's function to ``set_damage``.
+
+      .. versionadded:: 0.4
+
+      :param damage: The damage
+      :type damage: float, NumberProvider
+      :param bool add: Whether to add to (true) or to set (false) the damage
+
+   .. py:method:: set_enchantments(enchantments: Dict[str, Union[int, NumberProvider]], add: Optional[bool]=None)
+
+      Sets the item modifier's function to ``set_enchantments``.
+
+      .. versionadded:: 0.4
+
+      :param enchantments: The enchantments to set, given in dicts of ``{enchantment ID: enchantment level}``
+      :type enchantments: Dict[str, int or NumberProvider]
+      :param bool add: Whether to add to (true) or to set (false) the level to the existing levels
+
+   .. py:method:: set_loot_table(name: str, seed: int=0)
+
+      Sets the item modifier's function to ``set_loot_table``.
+
+      .. versionadded:: 0.4
+
+      :param str name: The resource location of the loot table
+      :param int seed: The seed to use
+
+   .. py:method:: set_lore(lore: List[dict], entity: str, replace: bool)
+
+      Sets the item modifier's function to ``set_lore``.
+
+      .. versionadded:: 0.4
+
+      :param List[dict] lore: A list of JSON text components, each representing one line of lore
+      :param str entity: Entity to be ``@s`` for component resolution in JSON text components
+      :param bool replace: Whether to replace (true) or to append (false) to the existing lore
+
+   .. py:method:: set_name(name: dict, entity: str)
+
+      Sets the item modifier's function to ``set_name``.
+
+      .. versionadded:: 0.4
+
+      :param dict name: A JSON text component to be the name
+      :param str entity: Entity to be ``@s`` for component resolution in JSON text components
+
+   .. py:method:: set_nbt(tag: str)
+
+      Sets the item modifier's function to ``set_nbt``.
+
+      .. versionadded:: 0.4
+
+      :param str tag: The tag to set
+
+   .. py:method:: set_stew_effect(*effects: Tuple[str, Union[int, NumberProvider]])
+
+      Sets the item modifier's function to ``set_stew_effect``.
+
+      .. versionadded:: 0.4
+
+      :param effects: The effects to set, given in tuples of (effect ID, duration)
+      :type effects: Tuple[str, int or NumberProvider]
+
+Loot Tables
+-----------
+
+.. py:currentmodule:: pymcfunc.loot_tables
+
+.. py:class:: LootTable
+
+   A loot table.
+
+   .. versionadded:: 0.4
+
+   .. py:attribute:: p
+      :type: Pack
+
+      References back to the pack that it is in.
+
+      .. versionadded:: 0.4
+
+   .. py:attribute:: name
+      :type: str
+
+      The name of the loot table.
+
+      .. versionadded:: 0.4
+
+   .. py:attribute:: namespaced
+      :type: str
+
+      The namespaced name of the loot table.
+
+      .. versionadded:: 0.4
+
+   .. py:attribute:: value
+      :type: dict
+
+      The value of the loot table as a reference to ``loot_tables[name]`` in the pack.
+
+      .. versionadded:: 0.4
+
+   .. py:method:: __init__(p, name: str, type_: Optional[str]=None)
+
+      Initialises the loot table.
+
+      .. versionadded:: 0.4
+
+      :param Pack p: The pack that the loot table is attached to
+      :param str name: The name of the loot table
+      :param str type_: The type of the pack, choose from `empty`, `entity`, `block`, `chest`, `fishing`, `gift`, `advancement_reward`, `barter`, 'command`, `selector`, `advancement_entity`, `generic`
+
+   .. py:method:: item_modifier(name: Union[str, ItemModifier], *predicates: Union[str, Predicate])
+
+      Sets an item modifier of the loot table as the function.
+
+      .. versionadded:: 0.4
+
+      :param name: The name of the item modifier
+      :type name: str or ItemModifier
+      :param predicates: A list of predicates to act as conditions for the function to be used
+      :type predicates: str or Predicate
+
+   .. py:method:: pool(rolls: Union[int, NumberProvider], bonus_rolls: Union[float, NumberProvider]) -> Pool
+
+      Sets a pool of the loot table.
+
+      .. versionadded:: 0.4
+
+      :param rolls: The number of rolls on the pool
+      :type rolls: int or NumberProvider
+      :param bonus_rolls: The number of bonus rolls on the pool
+      :type bonus_rolls: float or NumberProvider
+      :returns: A pool
+      :rtype: Pool
+
+.. py:class:: Pool
+
+   A pool for a loot table.
+
+   .. warning::
+      Do not instantiate this class directly, access it in :py:class:`LootTable` via `pool()`.
+
+   .. versionadded:: 0.4
+
+   .. py:attribute:: lt
+      :type: LootTable
+
+      References back to the loot table that it is in.
+
+      .. versionadded:: 0.4
+
+   .. py:attribute:: name
+      :type: str
+
+      The name of the loot table that it is in.
+
+      .. versionadded:: 0.4
+
+   .. py:attribute:: index
+      :type: str
+
+       The index of the pool in the list of pools in the loot table.
+
+      .. versionadded:: 0.4
+
+   .. py:attribute:: value
+      :type: dict
+
+      The value of the pool as a reference to ``loot_tables[name]['pools'][index]`` in the pack.
+
+      .. versionadded:: 0.4
+
+   .. py:method:: __init__(lt, rolls: Union[int, NumberProvider], bonus_rolls: Union[float, NumberProvider], index: int)
+
+      Initialises the pool.
+
+      .. versionadded:: 0.4
+
+      :param LootTable lt: The loot table for the pool to be attached to
+      :param rolls: The number of rolls on the pool
+      :type rolls: int or NumberProvider
+      :param bonus_rolls: The number of bonus rolls on the pool
+      :type bonus_rolls: float or NumberProvider
+      :param int index: The index of the pool in the list of pools in the loot table
+
+   .. py:method:: item_modifier(name: Union[str, ItemModifier], *predicates: Union[str, Predicate])
+
+      Sets an item modifier of the pool as the function.
+
+      .. versionadded:: 0.4
+
+      :param name: The name of the item modifier
+      :type name: str or ItemModifier
+      :param predicates: A list of predicates to act as conditions for the function to be used
+      :type predicates: str or Predicate
+
+   .. py:method:: predicate(predicate: Union[str, Predicate])
+
+      Sets a predicate of the pool as the condition for the pool to be used.
+
+      .. versionadded:: 0.4
+
+      :param predicates: The predicate
+      :type predicates: str or Predicate
+
+   .. py:method:: entry(type_: str, weight: int, quality: int, expand: Optional[bool]=None, name: Optional[str]=None) -> 'Entry'
+
+      An entry of things in the pool.
+
+      .. versionadded:: 0.4
+
+      :param str type_: The type of the entry, choose from `item`, `tag`, `loot_table`, `group`, `alternatives`, `sequence`, `dynamic`, `empty`
+      :param int weight: The weight of the entry in randomly choosing from the list of entries
+      :param int quality: Modifier for ``weight``, based on luck
+      :param bool expand: When type is ``tag``. Whether to choose an item of the tag (true) or to generate one of each of the items in the tag (false)
+      :param str name: ID of item produced (when type is ``item``), tag to be used (when type is ``tag``), loot table to be used (when type is ``loot_table``), or ``contents`` for block entity contents or ``self`` for banners/skulls (when type is ``dynamic``)
+      :returns: An entry
+      :rtype: Entry
+
+.. py:class:: Entry
+
+   An entry for a pool.
+
+   .. warning::
+      Do not instantiate this class directly, access it in :py:class:`Pool` via `entry()`.
+
+   .. versionadded:: 0.4
+
+   .. py:attribute:: pl
+      :type: Pool
+
+      References back to the pool that it is in.
+
+      .. versionadded:: 0.4
+
+   .. py:attribute:: name
+      :type: str
+
+      The name of the loot table that it is in.
+
+      .. versionadded:: 0.4
+
+   .. py:attribute:: pool_index
+      :type: str
+
+      The index of the pool that the entry is in in the list of pools in the loot table. Not present if a value is specified in __init__.
+
+      .. versionadded:: 0.4
+
+   .. py:attribute:: index
+      :type: str
+
+      The index of the entry in the list of entries in the pool. Not present if a value is specified in __init__.
+
+      .. versionadded:: 0.4
+
+   .. py:attribute:: value
+      :type: dict
+
+      The value of the entry as a reference to ``loot_tables[name]['pools'][pool_index]['entries'][index]`` in the pack, unless a value is specified in __init__.
+
+      .. versionadded:: 0.4
+
+   .. py:method:: __init__(pl, type_: str, weight: int, quality: int, pool_index: Optional[int]=None, entry_index: Optional[int]=None, expand: Optional[bool]=None, name: Optional[str]=None, value: Optional[dict]=None)
+
+      Initialises the entry.
+
+      .. versionadded:: 0.4
+
+      :param Pool pl: The pool that the entry is attached to
+      :param str type_: The type of the entry, choose from `item`, `tag`, `loot_table`, `group`, `alternatives`, `sequence`, `dynamic`, `empty`
+      :param int weight: The weight of the entry in randomly choosing from the list of entries
+      :param int quality: Modifier for ``weight``, based on luck
+      :param int pool_index: The index of the pool that the entry is in in the list of pools in the loot table. Will be ignored if ``value`` is specified.
+      :param int entry_index: The index of the entry in the list of entries in the pool. Will be ignored if ``value`` is specified.
+      :param bool expand: When type is ``tag``. Whether to choose an item of the tag (true) or to generate one of each of the items in the tag (false)
+      :param str name: ID of item produced (when type is ``item``), tag to be used (when type is ``tag``), loot table to be used (when type is ``loot_table``), or ``contents`` for block entity contents or ``self`` for banners/skulls (when type is ``dynamic``)
+      :param dict name: The value of the entry that it is hooked to
+
+   .. py:method:: item_modifier(name: Union[str, ItemModifier], *predicates: Union[str, Predicate])
+
+      Sets an item modifier of the entry as the function.
+
+      .. versionadded:: 0.4
+
+      :param name: The name of the item modifier
+      :type name: str or ItemModifier
+      :param predicates: A list of predicates to act as conditions for the function to be used
+      :type predicates: str or Predicate
+
+   .. py:method:: predicate(predicate: Union[str, Predicate])
+
+      Sets a predicate of the entry as the condition for the entry to be used.
+
+      .. versionadded:: 0.4
+
+      :param predicates: The predicate
+      :type predicates: str or Predicate
+
+   .. py:method:: child(type_: str, weight: int, quality: int, expand: Optional[bool]=None, name: Optional[str]=None) -> 'Entry'
+
+      Sets a child entry in the entry.
+
+      .. versionadded:: 0.4
+
+      :param str type_: The type of the entry, choose from `item`, `tag`, `loot_table`, `group`, `alternatives`, `sequence`, `dynamic`, `empty`
+      :param int weight: The weight of the entry in randomly choosing from the list of entries
+      :param int quality: Modifier for ``weight``, based on luck
+      :param bool expand: When type is ``tag``. Whether to choose an item of the tag (true) or to generate one of each of the items in the tag (false)
+      :param str name: ID of item produced (when type is ``item``), tag to be used (when type is ``tag``), loot table to be used (when type is ``loot_table``), or ``contents`` for block entity contents or ``self`` for banners/skulls (when type is ``dynamic``)
+      :returns: An entry
+      :rtype: Entry
 
 Errors
 ------
@@ -4410,4 +4813,4 @@ Errors
 
    A parameter that had been made mandatory due to another parameter is not stated, and that parameter has a default value of None.
 
-   .. versionadded: 0.1
+   .. versionadded:: 0.1
