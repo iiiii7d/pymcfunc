@@ -3,7 +3,6 @@ import pymcfunc.internal as internal
 
 NumberProvider = dict
 
-
 class ItemModifier:
     """An item modifier in Java Edition.
     More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.item_modifiers.ItemModifier"""

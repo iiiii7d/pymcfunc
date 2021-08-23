@@ -1,6 +1,7 @@
 from pymcfunc.selectors import UniversalSelectors, JavaSelectors, BedrockSelectors
 from pymcfunc.variables import JavaVariable, BedrockVariable
 import pymcfunc.entities as entities
+from pymcfunc.entities import Entity
 #from pymcfunc.rawcommands import UniversalRawCommands, JavaRawCommands, BedrockRawCommands
 
 class UniversalFuncHandler:
@@ -39,7 +40,7 @@ class BedrockFuncHandler(UniversalFuncHandler):
         from pymcfunc.rawcommands import BedrockRawCommands
         self.r = BedrockRawCommands(self)
 
-    def v(self, name: str, target: str):
+    def v(self, name: str, target: str) -> BedrockVariable:
         """Creates a variable.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockFuncHandler.v"""
         return BedrockVariable(self, name, target)
@@ -54,12 +55,12 @@ class JavaFuncHandler(UniversalFuncHandler):
         from pymcfunc.rawcommands import JavaRawCommands
         self.r = JavaRawCommands(self)
 
-    def v(self, name: str, target: str, trigger: bool=False):
+    def v(self, name: str, target: str, trigger: bool=False) -> JavaVariable:
         """Creates a variable.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFuncHandler.v"""
         return JavaVariable(self, name, target, trigger=trigger)
 
-    def entity(self, entity_name: str, target: str):
+    def entity(self, entity_name: str, target: str) -> Entity:
         """Creates an entity object.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFuncHandler.entity"""
         return getattr(entities, entity_name)(self, target)

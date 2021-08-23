@@ -1,7 +1,7 @@
 from typing import Union
 import pymcfunc.errors as errors
 
-def coords(x: Union[Union[int, float], str], y: Union[Union[int, float], str], z: Union[Union[int, float], str]):
+def coords(x: Union[Union[int, float], str], y: Union[Union[int, float], str], z: Union[Union[int, float], str]) -> str:
     """Translates values into coordinates, with extra validaton.
     More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.coords"""
     result = f"{x} {y} {z}"

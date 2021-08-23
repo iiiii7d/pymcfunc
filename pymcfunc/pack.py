@@ -1,4 +1,4 @@
-from typing import Callable, Any, Optional
+from typing import Callable, Any, Optional, Union
 from functools import wraps
 import pathlib
 import os
@@ -13,7 +13,7 @@ import pymcfunc.selectors as selectors
 from pymcfunc.advancements import Advancement
 from pymcfunc.loot_tables import LootTable
 from pymcfunc.predicates import Predicate
-from pymcfunc.recipes import CookingRecipe, ShapedCraftingRecipe, ShapelessCraftingRecipe, SmithingRecipe, StonecuttingRecipe
+from pymcfunc.recipes import CookingRecipe, ShapedCraftingRecipe, ShapelessCraftingRecipe, SmithingRecipe, StonecuttingRecipe, Recipe
 from pymcfunc.item_modifiers import ItemModifier
 
 class Pack:
@@ -39,6 +39,8 @@ class Pack:
             self.t = JavaFunctionTags(self)
 
     def tag(self, group: str, tag_name: str, *items: str):
+        """Adds items to a tag.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.Pack.tag"""
         internal.options(group, ['blocks', 'entity_types', 'fluids', 'functions', 'items'])
         if tag_name not in self.tags[group]:
             self.tags[group][tag_name] = []
@@ -55,22 +57,30 @@ class Pack:
         fname = func.__name__
         self.funcs.update({fname: str(m)})
 
-    def advancement(self, name: str, parent: str):
+    def advancement(self, name: str, parent: Union[str, Advancement]) -> Advancement:
+        """Registers and returns an advancement.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.Pack.advancement"""
         if self.edition == 'b':
             raise TypeError('No advancements in Bedrock')
         return Advancement(self, name, parent)
 
-    def loot_table(self, name: str, type_: Optional[str]=None):
+    def loot_table(self, name: str, type_: Optional[str]=None) -> LootTable:
+        """Registers and returns a loot table.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.Pack.loot_table"""
         if self.edition == 'b':
             raise TypeError('No loot tables in Bedrock')
         return LootTable(self, name, type_=type_)
 
-    def predicate(self, name: str):
+    def predicate(self, name: str) -> Predicate:
+        """Registers and returns a predicate.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.Pack.predicate"""
         if self.edition == 'b':
             raise TypeError('No predicates in Bedrock')
         return Predicate(self, name)
 
-    def recipe(self, name: str, type_: str, group: Optional[str]=None):
+    def recipe(self, name: str, type_: str, group: Optional[str]=None) -> Recipe:
+        """Registers and returns a recipe.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.Pack.recipe"""
         if self.edition == 'b':
             raise TypeError('No recipes in Bedrock')
         internal.options(type_, ['blasting', 'campfire_cooking', 'crafting_shaped', 'crafting_shapeless', 'smelting', 'smithing', 'smoking', 'stonecutting'])
@@ -82,37 +92,51 @@ class Pack:
         elif type_ == "stonecutting": r = StonecuttingRecipe
         return r(self, name, type_, group=group)
 
-    def item_modifier(self, name: str):
+    def item_modifier(self, name: str) -> ItemModifier:
+        """Registers and returns an item_modifier.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.Pack.item_modifier"""
         if self.edition == 'b':
             raise TypeError('No item modifiers in Bedrock')
         return ItemModifier(self, name)
 
     def import_function(self, directory: str):
+        """Imports and registers a function.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.Pack.import_function"""
         name = re.sub(r"\.mcfunction$", "", ntpath.basename(directory))
         with open(directory) as f:
             self.funcs[name] = f.read()
 
     def import_advancement(self, directory: str):
+        """Imports and registers an advancement.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.Pack.import_advancement"""
         name = re.sub(r"\.json$", "", ntpath.basename(directory))
         with open(directory) as f:
             self.advancements[name] = json.load(f)
 
     def import_loot_table(self, directory: str):
+        """Imports and registers a loot table.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.Pack.import_loot_table"""
         name = re.sub(r"\.json$", "", ntpath.basename(directory))
         with open(directory) as f:
             self.loot_tables[name] = json.load(f)
 
     def import_predicate(self, directory: str):
+        """Imports and registers a predicate.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.Pack.import_predicate"""
         name = re.sub(r"\.json$", "", ntpath.basename(directory))
         with open(directory) as f:
             self.predicates[name] = json.load(f)
 
     def import_recipe(self, directory: str):
+        """Imports and registers a recipe.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.Pack.import_recipe"""
         name = re.sub(r"\.json$", "", ntpath.basename(directory))
         with open(directory) as f:
             self.recipes[name] = json.load(f)
 
-    def import_item_modifiers(self, directory: str):
+    def import_item_modifier(self, directory: str):
+        """Imports and registers an item modifier.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.Pack.import_item_modifier"""
         name = re.sub(r"\.json$", "", ntpath.basename(directory))
         with open(directory) as f:
             self.item_modifiers[name] = json.load(f)

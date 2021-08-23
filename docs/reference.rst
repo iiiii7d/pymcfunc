@@ -99,6 +99,134 @@ Pack
 
       .. versionadded:: 0.0
 
+   .. py:method:: tag(group: str, tag_name: str, *items: str)
+
+      Adds items to a tag.
+
+      .. versionadded:: 0.4
+
+      :param str group: The group to register the items under, choose from ``blocks``, ``entity_types``, ``fluids``, ``functions``, ``items``
+      :param str tag_name: The name of the tag
+      :param str items: The list of items to add
+
+   .. py:method:: advancement(name: str, parent: Union[str, Advancement]) -> Advancement
+
+      Registers and returns an advancement.
+
+      .. warning::
+         Java Edition only.
+
+      .. versionadded:: 0.4
+
+      :param str name: The name of the advancement
+      :param parent: The parent of the advancement
+      :type parent: str or Advancement
+      :returns: An advancement
+      :rtype: Advancement
+
+   .. py:method:: loot_table(name: str, type_: Optional[str]=None) -> LootTable
+
+      Registers and returns a loot table.
+
+      .. warning::
+         Java Edition only.
+
+      .. versionadded:: 0.4
+
+      :param str name: The name of the loot table
+      :param str type_: The type of the loot table, refer to :py:class:`LootTable`
+      :returns: A loot table
+      :rtype: LootTable
+
+   .. py:method:: predicate(name: str) -> Predicate
+
+      Registers and returns a predicate.
+
+      .. warning::
+         Java Edition only.
+
+      .. versionadded:: 0.4
+
+      :param str name: The name of the predicate
+      :returns: A predicate
+      :rtype: Predicate
+
+   .. py:method:: recipe(name: str, type_: str, group: Optional[str]=None) -> Recipe
+
+      Registers and returns a recipe.
+
+      .. warning::
+         Java Edition only.
+
+      .. versionadded:: 0.4
+
+      :param str name: The name of the recipe
+      :param str type_: The type of the recipe, choose from ``blasting``, ``campfire_cooking``, ``crafting_shaped``, ``crafting_shapeless``, ``smelting``, ``smithing``, ``smoking``, ``stonecutting``
+      :param str group: The group of the recipe, refer to :py:class:`Recipe`
+      :returns: A recipe
+      :rtype: Recipe
+
+   .. py:method:: item_modifier(name: str) -> ItemModifier
+
+      Registers and returns an item modifier.
+
+      .. warning::
+         Java Edition only.
+
+      .. versionadded:: 0.4
+
+      :param str name: The name of the item modifier
+      :returns: An item modifier
+      :rtype: ItemModifier
+
+   .. py:method:: import_function(directory: str)
+
+      Imports and registers a function.
+
+      .. versionadded:: 0.4
+
+      :param str directory: The directory of the ``.mcfunction`` file.
+
+   .. py:method:: import_advancement(directory: str)
+
+      Imports and registers an advancement.
+
+      .. versionadded:: 0.4
+
+      :param str directory: The directory of the ``.json`` file.
+
+   .. py:method:: import_loot_table(directory: str)
+
+      Imports and registers a loot table.
+
+      .. versionadded:: 0.4
+
+      :param str directory: The directory of the ``.json`` file.
+
+   .. py:method:: import_predicate(directory: str)
+
+      Imports and registers a predicate.
+
+      .. versionadded:: 0.4
+
+      :param str directory: The directory of the ``.json`` file.
+
+   .. py:method:: import_recipe(directory: str)
+
+      Imports and registers a recipe.
+
+      .. versionadded:: 0.4
+
+      :param str directory: The directory of the ``.json`` file.
+
+   .. py:method:: import_item_modifier(directory: str)
+
+      Imports and registers an item modifier.
+
+      .. versionadded:: 0.4
+
+      :param str directory: The directory of the ``.json`` file.
+
    .. py:method:: build(name: str, pack_format: int, describe: str, datapack_folder: str='.')
 
       Builds the pack.
@@ -254,7 +382,7 @@ Function Handlers
 
       .. versionadded:: 0.1
 
-   .. py:method:: v(name: str, target: str)
+   .. py:method:: v(name: str, target: str) -> BedrockVariable
 
       Creates a variable.
 
@@ -283,7 +411,7 @@ Function Handlers
 
        .. versionadded:: 0.1
 
-   .. py:method:: v(name: str, target: str, trigger: bool=False)
+   .. py:method:: v(name: str, target: str, trigger: bool=False) -> JavaVariable
 
       Creates a variable.
 
@@ -295,7 +423,7 @@ Function Handlers
       :returns: The variable object
       :rtype: JavaVariable
 
-   .. py:method:: entity(entity_name: str, target: str)
+   .. py:method:: entity(entity_name: str, target: str) -> Entity
 
       Creates an entity object.
 
@@ -2907,7 +3035,7 @@ Raw commands
 Coords
 ------
 
-.. py:function:: coords(x: Union[Union[int, float], str], y: Union[Union[int, float], str], z: Union[Union[int, float], str])
+.. py:function:: coords(x: Union[Union[int, float], str], y: Union[Union[int, float], str], z: Union[Union[int, float], str]) -> str
 
    Translates values into coordinates, with extra validaton.
 
@@ -3532,8 +3660,8 @@ Number Providers
 
    :param n: The amount of trials of the distribution
    :type n: int or NumberProvider
-   :param n: The probability of success on each trial of the distribution
-   :type n: float or NumberProvider
+   :param p: The probability of success on each trial of the distribution
+   :type p: float or NumberProvider
    :returns: A number provider in the form of a dict
    :rtype: NumberProvider
 
