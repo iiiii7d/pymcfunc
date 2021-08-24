@@ -4645,6 +4645,209 @@ Item Modifiers
       :param effects: The effects to set, given in tuples of (effect ID, duration)
       :type effects: Tuple[str, int or NumberProvider]
 
+Predicates
+----------
+
+.. py:currentmodule:: pymcfunc.predicates
+
+.. py:class:: Predicate
+
+   A predicate.
+
+   .. versionadded:: 0.4
+
+   .. py:attribute:: p
+      :type: Pack
+
+      References back to the pack that it is in.
+
+      .. versionadded:: 0.4
+
+   .. py:attribute:: name
+      :type: str
+
+      The name of the predicate.
+
+      .. versionadded:: 0.4
+
+   .. py:attribute:: namespaced
+      :type: str
+
+      The namespaced name of the predicate.
+
+      .. versionadded:: 0.4
+
+   .. py:attribute:: value
+      :type: dict
+
+      The value of the predicate as a reference to ``predicates[name]`` in the pack, if ``value`` is not defined when initialising.
+
+      .. versionadded:: 0.4
+
+   .. py:method:: __init__(p, name: str, value: Optional[dict]=None)
+
+      Initialises the loot table.
+
+      .. versionadded:: 0.4
+
+      :param Pack p: The pack that the predicate is attached to
+      :param str name: The name of the predicate
+      :param dict value: The reference to the data of the predicate
+
+   .. py:method:: alternative() -> Predicate
+
+      Returns a subpredicate. The predicate would be true if either the main predicate or the subpredicate is true.
+
+      .. versionadded:: 0.4
+
+      :returns: The subpredicate
+      :rtype: Predicate
+   
+   .. py:method:: inverted() -> Predicate
+
+      Returns a subpredicate. The predicate would be true if the opposite of the subpredicate is false.
+
+      .. versionadded:: 0.4
+
+      :returns: The subpredicate
+      :rtype: Predicate
+
+   .. py:method:: block_state_property(block: str, properties: Optional[Dict[str, str]]=None)
+
+      Sets the predicate's condition to ``block_state_property``.
+
+      .. versionadded:: 0.4
+
+      :param str block: The block's coordinates
+      :param properties: The properties of the block
+      :type properties: Dict[str, str]
+
+   .. py:method:: damage_source_properties(**tags: dict)
+
+      Sets the predicate's condition to ``damage_source_properties``.
+
+      .. versionadded:: 0.4
+
+      :param dict tags: The damage tags
+
+   .. py:method:: entity_properties(entity: str, **tags: dict)
+
+      Sets the predicate's condition to ``entity_properties``.
+
+      .. versionadded:: 0.4
+
+      :param str entity: The entity
+      :param dict tags: The tags for the entity
+
+   .. py:method:: entity_scores(entity: str, **scores: Union[int, Dict[str, Union[int, NumberProvider]]])
+
+      Sets the predicate's condition to ``entity_scores``.
+
+      .. versionadded:: 0.4
+
+      :param str entity: The entity
+      :param scores: The scores for the entity
+      :type scores: int or Dict[str, int or NumberProvider]
+
+   .. py:method:: killed_by_player(inverse: bool=False)
+
+      Sets the predicate's condition to ``entity_scores``.
+
+      .. versionadded:: 0.4
+
+      :param bool inverse: Whether to invert the condition
+
+   .. py:method:: location_check(offset_x: Optional[int]=None, offset_y: Optional[int]=None, offset_z: Optional[int]=None, **predicate: dict)
+
+      Sets the predicate's condition to ``location_check``.
+
+      .. versionadded:: 0.4
+
+      :param int x: The x coordinate
+      :param int y: The y coordinate
+      :param int z: The z coordinate
+      :param dict predicate: The additional predicates
+
+   .. py:method:: match_tool(**predicate: dict)
+
+      Sets the predicate's condition to ``match_tool``.
+
+      .. versionadded:: 0.4
+
+      :param dict predicate: The additional predicates
+
+   .. py:method:: random_chance(chance: float)
+
+      Sets the predicate's condition to ``random_chance``.
+
+      .. versionadded:: 0.4
+
+      :param float chance: The chance of the predicate being true
+
+   .. py:method:: random_chance_with_looting(chance: float, looting_multiplier: float)
+
+      Sets the predicate's condition to ``random_chance_with_looting``.
+
+      .. versionadded:: 0.4
+
+      :param float chance: The chance of the predicate being true
+      :param float looting_multiplier: The multiplier to apply to the chance
+
+   .. py:method:: reference(predicate: Union[str, Predicate])
+
+      References another predicate.
+
+      .. versionadded:: 0.4
+
+      :param predicate: The predicate to refer to
+      :type predicate: str or Predicate
+
+   .. py:method:: survives_explosion()
+
+      Sets the predicate's condition to ``survives_explosion``.
+
+      .. versionadded:: 0.4
+
+   .. py:method:: table_bonus(enchantment: int, chances: list)
+
+      Sets the predicate's condition to ``table_bonus``.
+
+      .. versionadded:: 0.4
+
+      :param int enchantment: The enchantment
+      :param list chances: The chances of the conditon (TODO)
+
+   .. py:method:: time_check(value: Union[int, RangeDict], period: Optional[int]=None)
+
+      Sets the predicate's condition to ``time_check``.
+
+      .. versionadded:: 0.4
+
+      :param value: The time value
+      :type value: int or RangeDict
+      :param int period: The amount of time after ``value`` for which the predicate will stil be true
+
+   .. py:method:: weather_check(raining: bool=False, thunder: bool=False)
+
+      Sets the predicate's condition to ``weather_check``.
+
+      .. versionadded:: 0.4
+
+      :param bool raining: Predicate is true if it is raining
+      :param bool thunder: Predicate is true of thunder is present
+
+   .. py:method:: value_check(value: Union[int, NumberProvider], range_: Union[int, RangeDict])
+
+      Sets the predicate's condition to ``value_check``.
+
+      .. versionadded:: 0.4
+
+      :param value: A value
+      :type value: int or NumberProvider
+      :param range_: The range for the predicate to be true
+      :type range_: int or RangeDict
+
+
 Loot Tables
 -----------
 
@@ -4895,6 +5098,158 @@ Loot Tables
       :param str name: ID of item produced (when type is ``item``), tag to be used (when type is ``tag``), loot table to be used (when type is ``loot_table``), or ``contents`` for block entity contents or ``self`` for banners/skulls (when type is ``dynamic``)
       :returns: An entry
       :rtype: Entry
+
+Recipes
+-------
+
+.. py:currentmodule:: pymcfunc.recipes
+
+.. py:class:: Recipe
+
+   The base class for all Recipes.
+
+   .. warning::
+      Do not instantiate this class; use the recipe classes below this one for extended functionality.
+
+   .. versionadded:: 0.4
+
+   .. py:attribute:: p
+      :type: Pack
+
+      References back to the pack that it is in.
+
+      .. versionadded:: 0.4
+
+   .. py:attribute:: name
+      :type: str
+
+      The name of the recipe.
+
+      .. versionadded:: 0.4
+
+   .. py:attribute:: namespaced
+      :type: str
+
+      The namespaced name of the recipe.
+
+      .. versionadded:: 0.4
+
+   .. py:attribute:: value
+      :type: dict
+
+      The value of the recipe as a reference to ``recipes[name]`` in the pack, if ``value`` is not defined when initialising.
+
+      .. versionadded:: 0.4
+
+   .. py:method:: __init__(p, name: str, type_: str, group: Optional[str]=None)
+
+      Initialises the recipe
+
+      .. versionadded:: 0.4
+
+      :param Pack p: The pack that the recipe is attached to
+      :param str name: The name of the recipe
+      :param str type_: The type of the recipe, choose from ``blasting``, ``campfire_cooking``, ``crafting_shaped``, ``crafting_shapeless``, ``smelting``, ``smithing``, ``smoking``, ``stonecutting``
+      :param str group: The group that the recipe is under
+
+.. py:class:: CookingRecipe(Recipe)
+
+   A recipe for furnaces, blast furnaces, smokers and campfires.
+
+   .. versionadded:: 0.4
+
+   .. py:method:: ingredient(item: Optional[str]=None, tag: Optional[str]=None)
+
+      Sets the ingredient of the recipe.
+
+      .. versionadded:: 0.4
+
+      :param str item: The item
+      :param str tag: A tag of items
+
+   .. py:method:: result(item: str)
+
+      Sets the result of the recipe.
+
+      .. versionadded:: 0.4
+
+      :param str item: The item
+
+   .. py:method:: experience(exp: int)
+
+      Sets the amount of experience obtained from the recipe.
+
+      .. versionadded:: 0.4
+
+      :param int exp: The amount of experience
+
+   .. py:method:: cooking_time(time: int)
+
+      Sets the amount of cooking time the recipe would take.
+
+      .. versionadded:: 0.4
+
+      :param int time: The amount of time
+
+.. py:class:: ShapedCraftingRecipe
+
+   A shaped recipe for crafting tables and inventory crafting.
+
+   .. versionadded:: 0.4
+
+   .. py:class:: Key
+      
+      A key, or a representation of an item.
+
+      .. versionadded:: 0.4
+
+      .. py:method:: __init__(key: str, item: Optional[str]=None, tag: Optional[str]=None)
+
+         :param str key: A single character to represent the key
+         :param str item: An item to be represented
+         :param str tag: A tag of items to be represented
+         :raises ValueError: if the key is of multiple characters
+
+   .. py:class:: KeyGroup
+
+      A group of keys, or a representation of a group of items.
+
+      .. versionadded:: 0.4
+
+      .. py:method:: __init__(key: str, items: Optional[Sequence[str]]=None, tags: Optional[Sequence[str]]=None)
+
+         :param str key: A single character to represent the key
+         :param Sequence[str] items: A list of items to be represented
+         :param Sequence[str] tags: A list of tags of items to be represented
+         :raises ValueError: if the key is of multiple characters
+
+   .. py:method:: pattern(pattern: Tuple[Tuple[Optional[Union[KeyGroup, Key]], Optional[Union[KeyGroup, Key]], Optional[Union[KeyGroup, Key]]], \
+                                         Tuple[Optional[Union[KeyGroup, Key]], Optional[Union[KeyGroup, Key]], Optional[Union[KeyGroup, Key]]], \
+                                         Tuple[Optional[Union[KeyGroup, Key]], Optional[Union[KeyGroup, Key]], Optional[Union[KeyGroup, Key]]]])
+
+      Sets the pattern of the crafting recipe.
+
+      .. versionadded:: 0.4
+
+      :param pattern: The pattern. Each slot must be either a ``KeyGroup``, a ``Key``, or ``None``
+      
+      .. code-block:: python
+
+         recipe = p.recipe("recipe", "crafting_shaped")
+         B = recipe.Key('D', item='diamond')
+         G = recipe.KeyGroup('S', items=['string', 'cobweb'])
+         recipe.pattern(((None, D   , None),
+                         (None, None, S   ),
+                         (None, D   , None)))
+
+   .. py:method:: result(item: str, count: int=1)
+
+      Sets the result of the recipe.
+
+      .. versionadded:: 0.4
+
+      :param str item: The item
+      :param int count: The count of items
 
 Errors
 ------
