@@ -5337,28 +5337,28 @@ Recipes
       
       :param str item: An item
       
-   .. py:method:: StonecuttingRecipe(Recipe)
-   
-      A recipe for stonecutters.
-      
+.. py:method:: StonecuttingRecipe(Recipe)
+
+   A recipe for stonecutters.
+
+   .. versionadded:: 0.4
+
+   .. py:method:: ingredient(item: Optional[str]=None, tag: Optional[str]=None)
+
+      Sets the ingredient of the recipe.
+
       .. versionadded:: 0.4
-      
-      .. py:method:: ingredient(item: Optional[str]=None, tag: Optional[str]=None)
-            
-         Sets the ingredient of the recipe.
-         
-         .. versionadded:: 0.4
-         
-         :param str item: The item
-         :param str tag: A tag of items
-            
-      .. py:method:: result(item: str)
-      
-         Sets the result of the recipe.
-         
-         .. versionadded:: 0.4
-            
-         :param str item: An item
+
+      :param str item: The item
+      :param str tag: A tag of items
+
+   .. py:method:: result(item: str)
+
+      Sets the result of the recipe.
+
+      .. versionadded:: 0.4
+
+      :param str item: An item
 
 Errors
 ------
