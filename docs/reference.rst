@@ -5284,7 +5284,60 @@ Recipes
       :param str item: The item
       :param int count: The count of items
 
+.. py:class:: SmithingRecipe(Recipe)
 
+   A recipe for smithing tables.
+   
+   .. versionadded:: 0.4
+   
+   .. py:method:: base(item: Optional[str]=None, tag: Optional[str]=None)
+   
+      Sets the base item of the recipe.
+      
+      .. versionadded:: 0.4
+      
+      :param str item: The item
+      :param str tag: A tag of items
+      
+   .. py:method:: additon(item: Optional[str]=None, tag: Optional[str]=None)
+      
+      Sets the additional item of the recipe.
+      
+      .. versionadded:: 0.4
+      
+      :param str item: The item
+      :param str tag: A tag of items
+      
+   .. py:method:: result(item: str)
+   
+      Sets the result of the recipe.
+      
+      .. versionadded:: 0.4
+      
+      :param str item: An item
+      
+   .. py:method:: StonecuttingRecipe(Recipe)
+   
+      A recipe for stonecutters.
+      
+      .. versionadded:: 0.4
+      
+      .. py:method:: additon(item: Optional[str]=None, tag: Optional[str]=None)
+            
+         Sets the additional item of the recipe.
+         
+         .. versionadded:: 0.4
+         
+         :param str item: The item
+         :param str tag: A tag of items
+            
+      .. py:method:: result(item: str)
+      
+         Sets the result of the recipe.
+         
+         .. versionadded:: 0.4
+            
+         :param str item: An item
 
 Errors
 ------
