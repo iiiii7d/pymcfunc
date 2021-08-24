@@ -5251,6 +5251,41 @@ Recipes
       :param str item: The item
       :param int count: The count of items
 
+.. py:class:: ShapelessCraftingRecipe(Recipe)
+
+   A shapeless recipe for crafting tables and inventory crafting.
+
+   .. versionadded:: 0.4
+
+   .. py:method:: ingredient(item: Optional[str]=None, tag: Optional[str]=None)
+
+      Adds an ingredient to the recipe.
+
+      .. versionadded:: 0.4
+
+      :param str item: The item
+      :param str tag: A tag of items
+
+   .. py:method:: ingredient_group(items: Optional[Sequence[str]]=None, tags: Optional[Sequence[str]]=None)
+
+      Adds a group of ingredients to the recipe.
+
+      .. versionadded:: 0.4
+
+      :param Sequence[str] items: A list of items to be represented
+      :param Sequence[str] tags: A list of tags of items to be represented
+
+   .. py:method:: result(item: str, count: int=1)
+
+      Sets the result of the recipe.
+
+      .. versionadded:: 0.4
+
+      :param str item: The item
+      :param int count: The count of items
+
+
+
 Errors
 ------
 
