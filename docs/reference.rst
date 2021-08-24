@@ -429,7 +429,7 @@ Function Handlers
 
       .. versionaded:: 0.4
 
-      :param str entity_name: Can be one of `Entity`, `Mob`, `ArmourStand`
+      :param str entity_name: Can be one of ``Entity``, ``Mob``, ``ArmourStand``
       :param str target: The target for the object
       :returns: The entity object
       :rtype: Entity
@@ -1153,7 +1153,7 @@ Raw commands
 
    .. py:method:: execute(target: str, pos: str, run: Callable[[BedrockFuncHandler], Union[Union[list, tuple], None]], detectPos: str=None, block: str=None, data: int=None)
 
-      Adds an ``execute` command.
+      Adds an ``execute`` command.
 
       .. versionadded:: 0.1
 
@@ -1343,7 +1343,7 @@ Raw commands
 
       **Syntax:** *fog <target> <mode:push|pop|remove> <mode=push:fogId> <userProvidedId>*
 
-      :param str target: ```target``
+      :param str target: ``target``
       :param str mode: ``mode:push|pop|remove``
       :param str userProvidedId: ``userProvidedId``
       :param str fogId: ``mode=push:fogId``
@@ -1447,7 +1447,7 @@ Raw commands
 
       :param str dimension: ``dimension``
       :param str chunkPos: ``chunkPos``
-      :param int height: ``height```
+      :param int height: ``height``
       :returns: The command
       :rtype: str
 
@@ -2290,7 +2290,7 @@ Raw commands
 
    .. py:method:: execute(**subcommands)
       
-      Adds an ``execute` command.
+      Adds an ``execute`` command.
 
       .. versionadded:: 0.1
 
@@ -3068,7 +3068,7 @@ Variables
    .. warning::
       Do not instantiate BedrockVariable directly; use a FuncHandler and access the commands by calling 'v()'.
    
-   .. versionadded: 0.3
+   .. versionadded:: 0.3
 
    .. describe:: Operations   
 
@@ -3078,7 +3078,6 @@ Variables
       * **a /= b** - Divides this variable by a value by another variable (and rounds the result)
       * **a //= b** - ditto
       * **a %= b** - Sets this variable to the remainder of a / b
-      * **del a** - Removes the variable from the scoreboard for the target(s)
 
    .. py:attribute:: fh
       :type: UniversalFuncHandler
@@ -3100,6 +3099,17 @@ Variables
       The target(s) that the variable is attached to.
 
       .. versionadded:: 0.3
+
+   .. py:method:: remove(full: bool=False)
+
+      Removes the variable from the scoreboard for the target(s).
+
+      .. versionadded:: 0.3
+
+      .. versionchanged:: 0.4
+         Renamed from ``__del__()`` to ``remove()``
+
+      :param bool full: Whether to remove the variable for all players
 
    .. py:method:: in_range(minv: int, maxv: int=None)   
 
@@ -3183,7 +3193,6 @@ Variables
       * **a >= b** - ditto
       * **a < b** - ditto
       * **a <= b** - ditto
-      * **del a** - Removes the variable from the scoreboard for the target(s)
 
       **Comparers example**
       
@@ -3214,7 +3223,18 @@ Variables
 
       .. versionadded:: 0.3
 
-   .. py:method:: in_range(r: Union[str, int])
+   .. py:method:: remove(full: bool=False)
+
+      Removes the variable from the scoreboard for the target(s).
+
+      .. versionadded:: 0.3
+
+      .. versionchanged:: 0.4
+         Renamed from ``__del__()`` to ``remove()``
+
+      :param bool full: Whether to remove the variable for all player
+
+   .. py:method:: in_range(r: Union[str, int]) -> dict
 
       For use in :py:meth:`JavaRawCommands.execute`. Finds whether this variable is in a specified range.
 
@@ -3232,7 +3252,7 @@ Variables
              if_=var2.in_range('7')
          )
     
-   .. py:method:: store(mode: str)
+   .. py:method:: store(mode: str) -> dict
 
        For use in :py:meth:`JavaRawCommands.execute`. Stores a result or success in this variable.
 
@@ -3299,7 +3319,7 @@ Entities
    An entity object. This will reference and control entities that match a selector.
 
    .. warning::
-      Do not instantiate Entity directly; use a FuncHandler and access the commands by calling `entity()`
+      Do not instantiate Entity directly; use a FuncHandler and access the commands by calling ``entity()``
 
    .. versionadded:: 0.4
 
@@ -3396,7 +3416,7 @@ Entities
 
       .. versionadded:: 0.4
 
-      :param str slot: The slot to set. Can be one of `feet`, `legs`, `chest`, `head`
+      :param str slot: The slot to set. Can be one of ``feet``, ``legs``, ``chest``, ``head``
       :param str item_id: The ID of the armour
       :param int count: The count of the armour
       :param dict tag: Tags for the armour
@@ -3407,7 +3427,7 @@ Entities
 
       .. versionadded:: 0.4
 
-      :param str slot: The slot to set. Can be one of `feet`, `legs`, `chest`, `head`
+      :param str slot: The slot to set. Can be one of ``feet``, ``legs``, ``chest``, ``head``
       
 .. py:class:: ArmourStand(Mob)
 
@@ -3421,8 +3441,8 @@ Entities
 
       .. versionadded:: 0.4
 
-      :param str limb: The limb to move. Can be one of `Body`, `Head`, `LeftArm`, `LeftLeg`, `RightArm`, `RightLeg`
-      :param str axis: The axis to move the limb in. Can be one of `x`, `y`, `z`
+      :param str limb: The limb to move. Can be one of ``Body``, ``Head``, ``LeftArm``, ``LeftLeg``, ``RightArm``, ``RightLeg``
+      :param str axis: The axis to move the limb in. Can be one of ``x``, ``y``, ``z``
       :param float val: The new value of the rotation. Does not add up.
 
    .. py:method:: mess()
@@ -3811,7 +3831,7 @@ Advancements
    A criterion for an advancement.
 
    .. warning::
-      Do not instantiate this class directly, access it in :py:class:`Advancement` via `criterion()`.
+      Do not instantiate this class directly, access it in :py:class:`Advancement` via ``criterion()``.
 
    .. versionadded:: 0.4
 
@@ -4428,14 +4448,13 @@ Item Modifiers
       .. versionadded:: 0.4
 
       :param str enchantment: The enchantment to add to
-      :param str formula: The formula to use, can be one of `binomial_with_bonus_count`, `uniform_bonus_count`, `ore_drops`
+      :param str formula: The formula to use, can be one of ``binomial_with_bonus_count``, ``uniform_bonus_count``, ``ore_drops``
       :param int extra: The amount extra to add
       :param float probability: The probability
       :param float bonus_multiplier: The bonus multiplier
 
-   .. py:method:: copy_name():
-
-      Sets the item modifier's function to ``copy_name`.
+   .. py:method:: copy_name()
+      Sets the item modifier's function to ``copy_name``.
 
       .. versionadded:: 0.4
 
@@ -4446,7 +4465,7 @@ Item Modifiers
       .. versionadded:: 0.4
 
       :param str source: The source that contains the NBT
-      :param str type_: The type of NBT, choose from `context`, `storage`
+      :param str type_: The type of NBT, choose from ``context``, ``storage``
       :param str target: The target source's NBT attribute
 
    .. py:method:: copy_nbt_operation(source: str, target: str, op: str)
@@ -4457,7 +4476,7 @@ Item Modifiers
 
       :param str source: The source of the NBT
       :param str target: The target NBT attribute
-      :param str op: The operation to carry out, can be one of `replace`, `append`, `merge`
+      :param str op: The operation to carry out, can be one of ``replace``, ``append``, ``merge``
 
    .. py:method:: copy_state(block: str, properties: Sequence[str])
 
@@ -4545,10 +4564,10 @@ Item Modifiers
 
       :param str name: The name of the item holding the attribute
       :param str attribute: The directory of the attribute
-      :param str operation: The operation, choose from `add`, `multiply_base`, `multiply_total`
+      :param str operation: The operation, choose from ``add``, ``multiply_base``, ``multiply_total``
       :param amount: The amount to set
       :type amount: float or NumberProvider
-      :param slot: The slot to apply the attribute to, choose from `mainhand`, `offhand`, `feet`, `legs`, `chest`, `head`
+      :param slot: The slot to apply the attribute to, choose from ``mainhand``, ``offhand``, ``feet``, ``legs``, ``chest``, ``head``
       :type slot: str or List[str]
       :param str id_: The UUID of the modifier
 
@@ -4895,7 +4914,7 @@ Loot Tables
 
       :param Pack p: The pack that the loot table is attached to
       :param str name: The name of the loot table
-      :param str type_: The type of the pack, choose from `empty`, `entity`, `block`, `chest`, `fishing`, `gift`, `advancement_reward`, `barter`, 'command`, `selector`, `advancement_entity`, `generic`
+      :param str type_: The type of the pack, choose from ``empty``, ``entity``, ``block``, ``chest``, ``fishing``, ``gift``, ``advancement_reward``, ``barter``, ``command``, ``selector``, ``advancement_entity``, ``generic``
 
    .. py:method:: item_modifier(name: Union[str, ItemModifier], *predicates: Union[str, Predicate])
 
@@ -4926,7 +4945,7 @@ Loot Tables
    A pool for a loot table.
 
    .. warning::
-      Do not instantiate this class directly, access it in :py:class:`LootTable` via `pool()`.
+      Do not instantiate this class directly, access it in :py:class:`LootTable` via ``pool()``.
 
    .. versionadded:: 0.4
 
@@ -4997,7 +5016,7 @@ Loot Tables
 
       .. versionadded:: 0.4
 
-      :param str type_: The type of the entry, choose from `item`, `tag`, `loot_table`, `group`, `alternatives`, `sequence`, `dynamic`, `empty`
+      :param str type_: The type of the entry, choose from ``item``, ``tag``, ``loot_table``, ``group``, ``alternatives``, ``sequence``, ``dynamic``, ``empty``
       :param int weight: The weight of the entry in randomly choosing from the list of entries
       :param int quality: Modifier for ``weight``, based on luck
       :param bool expand: When type is ``tag``. Whether to choose an item of the tag (true) or to generate one of each of the items in the tag (false)
@@ -5010,7 +5029,7 @@ Loot Tables
    An entry for a pool.
 
    .. warning::
-      Do not instantiate this class directly, access it in :py:class:`Pool` via `entry()`.
+      Do not instantiate this class directly, access it in :py:class:`Pool` via ``entry()``.
 
    .. versionadded:: 0.4
 
@@ -5056,7 +5075,7 @@ Loot Tables
       .. versionadded:: 0.4
 
       :param Pool pl: The pool that the entry is attached to
-      :param str type_: The type of the entry, choose from `item`, `tag`, `loot_table`, `group`, `alternatives`, `sequence`, `dynamic`, `empty`
+      :param str type_: The type of the entry, choose from ``item``, ``tag``, ``loot_table``, ``group``, ``alternatives``, ``sequence``, ``dynamic``, ``empty``
       :param int weight: The weight of the entry in randomly choosing from the list of entries
       :param int quality: Modifier for ``weight``, based on luck
       :param int pool_index: The index of the pool that the entry is in in the list of pools in the loot table. Will be ignored if ``value`` is specified.
@@ -5091,7 +5110,7 @@ Loot Tables
 
       .. versionadded:: 0.4
 
-      :param str type_: The type of the entry, choose from `item`, `tag`, `loot_table`, `group`, `alternatives`, `sequence`, `dynamic`, `empty`
+      :param str type_: The type of the entry, choose from ``item``, ``tag``, ``loot_table``, ``group``, ``alternatives``, ``sequence``, ``dynamic``, ``empty``
       :param int weight: The weight of the entry in randomly choosing from the list of entries
       :param int quality: Modifier for ``weight``, based on luck
       :param bool expand: When type is ``tag``. Whether to choose an item of the tag (true) or to generate one of each of the items in the tag (false)
@@ -5143,7 +5162,7 @@ Recipes
 
    .. py:method:: __init__(p, name: str, type_: str, group: Optional[str]=None)
 
-      Initialises the recipe
+      Initialises the recipe.
 
       .. versionadded:: 0.4
 
@@ -5322,9 +5341,9 @@ Recipes
       
       .. versionadded:: 0.4
       
-      .. py:method:: additon(item: Optional[str]=None, tag: Optional[str]=None)
+      .. py:method:: ingredient(item: Optional[str]=None, tag: Optional[str]=None)
             
-         Sets the additional item of the recipe.
+         Sets the ingredient of the recipe.
          
          .. versionadded:: 0.4
          

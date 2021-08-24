@@ -39,7 +39,7 @@ class BedrockVariable:
             temp.set(other)
             self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
                                          operation='*=', selector=temp.target, selectorObjective=temp.name)
-            del temp
+            temp.remove()
         return self
 
     def __itruediv__(self, other: Union['BedrockVariable', int]):
@@ -51,7 +51,7 @@ class BedrockVariable:
             temp.set(other)
             self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
                                          operation='/=', selector=temp.target, selectorObjective=temp.name)
-            del temp
+            temp.remove()
         return self
     __ifloordiv__ = __itruediv__
 
@@ -64,10 +64,12 @@ class BedrockVariable:
             temp.set(other)
             self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
                                          operation='%=', selector=temp.target, sselectorbjective=temp.name)
-            del temp
+            temp.remove()
         return self
 
     def remove(self, full: bool=False):
+        """Removes the variable from the scoreboard for the target(s).
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockVariable.remove"""
         if full:
             self.fh.r.scoreboard_objectives('remove', objective=self.name)
         else:
@@ -155,7 +157,7 @@ class JavaVariable:
             temp.set(other)
             self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
                                          operation='*=', source=temp.target, sourceObjective=temp.name)
-            del temp
+            temp.remove()
         return self
 
     def __itruediv__(self, other: Union['JavaVariable', int]):
@@ -167,7 +169,7 @@ class JavaVariable:
             temp.set(other)
             self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
                                          operation='/=', source=temp.target, sourceObjective=temp.name)
-            del temp
+            temp.remove()
         return self
     __ifloordiv__ = __itruediv__
 
@@ -180,17 +182,19 @@ class JavaVariable:
             temp.set(other)
             self.fh.r.scoreboard_players('operation', target=self.target, objective=self.name,
                                          operation='%=', source=temp.target, sourceObjective=temp.name)
-            del temp
+            temp.remove()
         return self
 
     def remove(self, full: bool=False):
+        """Removes the variable from the scoreboard for the target(s).
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaVariable.remove"""
         if full:
             self.fh.r.scoreboard_objectives('remove', objective=self.name)
         else:
             self.fh.r.scoreboard_players('reset', target=self.target, objective=self.name)
 
     @staticmethod
-    def _comparers(self, other: Union['JavaVariable', int], mode: str):
+    def _comparers(self, other: Union['JavaVariable', int], mode: str) -> dict:
         if isinstance(other, type(self)):
             return {
                 'mode': 'score',
@@ -233,12 +237,12 @@ class JavaVariable:
     def __ge__(self, other: Union['JavaVariable', int]):
         return self._comparers(self, other, '>=')
 
-    def in_range(self, r: Union[str, int]):
+    def in_range(self, r: Union[str, int]) -> dict:
         """For use in JavaRawCommands.execute(). Finds whether this variable is in a specified range.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaVariable.in_range"""
         return self.__eq__(r)
 
-    def store(self, mode: str):
+    def store(self, mode: str) -> dict:
         """For use in JavaRawCommands.execute(). Stores a result or success in this variable.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaVariable.store"""
         return {
