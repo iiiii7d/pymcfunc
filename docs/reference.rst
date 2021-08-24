@@ -3120,7 +3120,7 @@ Variables
       :param int minv: The minimum value
       :param int maxv: The maximum value
 
-   .. py:method:: set(other: Union['BedrockVariable', int])
+   .. py:method:: set(other: Union[BedrockVariable, int])
 
       Sets this variable to a value or that of another variable
 
@@ -3138,7 +3138,7 @@ Variables
       :param int minv: The minimum value
       :param int maxv: The maximum value
 
-   .. py:method:: higher(other: 'BedrockVariable')
+   .. py:method:: higher(other: BedrockVariable)
 
       Sets this variable to the higher of the two variables.
 
@@ -3146,7 +3146,7 @@ Variables
 
       :param BedrockVariable other: The other variable
 
-   .. py:method:: lower(other: 'BedrockVariable')
+   .. py:method:: lower(other: BedrockVariable)
 
       Sets this variable to the lower of the two variables.
 
@@ -3154,7 +3154,7 @@ Variables
 
       :param BedrockVariable other: The other variable
 
-   .. py:method:: swap(other: 'BedrockVariable')
+   .. py:method:: swap(other: BedrockVariable)
 
       Swaps the value of the two variables.
 
@@ -3268,7 +3268,7 @@ Variables
              store=var.store('result')
          )
 
-   .. py:method:: set(other: Union['JavaVariable', int])
+   .. py:method:: set(other: Union[JavaVariable, int])
 
       Sets this variable to a value or that of another variable
 
@@ -3277,7 +3277,7 @@ Variables
       :param other: The other value or variable
       :type other: JavaVariable or int
 
-   .. py:method:: higher(other: 'JavaVariable')
+   .. py:method:: higher(other: JavaVariable)
 
       Sets this variable to the higher of the two variables.
 
@@ -3285,7 +3285,7 @@ Variables
 
       :param JavaVariable other: The other variable
 
-   .. py:method:: lower(other: 'JavaVariable')
+   .. py:method:: lower(other: 'JavaVariable)
 
       Sets this variable to the lower of the two variables.
 
@@ -3293,7 +3293,7 @@ Variables
 
       :param JavaVariable other: The other variable
 
-   .. py:method:: swap(other: 'JavaVariable')
+   .. py:method:: swap(other: JavaVariable)
 
       Swaps the value of the two variables.
 
@@ -3557,7 +3557,7 @@ Selectors
       :raises ValueError: if the minimum is bigger than the maximum
       :raises ValueError: if minv is still 0 and maxv is still inf
 
-.. py:method:: cuboid(pos1: Sequence[int], pos2: Sequence[int], dims: str='xyz')
+.. py:method:: cuboid(pos1: Sequence[int], pos2: Sequence[int], dims: str='xyz') -> Dict[str, int]
 
    Finds the northwest-bottommost corner and the volume/area/length of a cuboid, area or line, given two corners.
 
@@ -3568,6 +3568,8 @@ Selectors
    :param Sequence[int] pos1: The first corner
    :param Sequence[int] pos2: The second corner
    :param str dims: The axes to find. Can be any combination of x, y and z, but no repeating.
+   :returns: A dictionary of the values to put into the selector.
+   :rtype: Dict[str, int]
    
    .. code-block:: python
       
@@ -3582,7 +3584,7 @@ Raw JSON text
 -------------
 .. py:currentmodule:: pymcfunc.rt
 
-.. py:function:: java(text: str, format_symbol: str="§", content_symbol: str="¶")
+.. py:function:: java(text: str, format_symbol: str="§", content_symbol: str="¶") -> Union[dict, List[dict]]
 
    Converts a string of text into Java raw JSON text.
 
@@ -3626,7 +3628,7 @@ Raw JSON text
    :returns: The JSON text
    :rtype: list[dict] or dict
 
-.. py:function:: bedrock(text: str, content_symbol: str="¶")
+.. py:function:: bedrock(text: str, content_symbol: str="¶") -> Union[dict, List[dict]]
 
    Converts a string of text into Bedrock raw JSON text.
 
@@ -3738,7 +3740,7 @@ Advancements
 
       .. versionadded:: 0.4
 
-   .. py:method:: __init__(p, name: str, parent: Union[str, 'Advancement'])
+   .. py:method:: __init__(p, name: str, parent: Union[str, Advancement])
 
       Initialises the advancement.
 
@@ -3777,7 +3779,7 @@ Advancements
       :param str attr: The attribute name
       :param Any value: The value for the attribute
 
-   .. py:method:: set_parent(parent: Union[str, 'Advancement'])
+   .. py:method:: set_parent(parent: Union[str, Advancement])
 
       Sets the parent for the advancement.
 
@@ -3796,7 +3798,7 @@ Advancements
       :return: The criterion
       :rtype: Criterion
 
-   .. py:method:: set_requirements(*criterion_lists: List[Union[str, 'Criterion']])
+   .. py:method:: set_requirements(*criterion_lists: List[Union[str, Criterion]])
 
       Sets the requirements for the advancement.
     
@@ -4460,7 +4462,7 @@ Item Modifiers
 
    .. py:method:: copy_nbt_source(source: Optional[str]=None, type_: Optional[str]=None, target: Optional[str]=None)
 
-      Sets the source of the item modifier for when its function to ``copy_nbt``. Used together with ``copy_nbt_operation()``.
+      Sets the source of the item modifier for when its function to ``copy_nbt``. Used together with :py:meth:`copy_nbt_operation()`.
 
       .. versionadded:: 0.4
 
@@ -4470,7 +4472,7 @@ Item Modifiers
 
    .. py:method:: copy_nbt_operation(source: str, target: str, op: str)
 
-      Sets the target of the item modifier for when its function to ``copy_nbt``. Used together with ``copy_nbt_source()``.
+      Sets the target of the item modifier for when its function to ``copy_nbt``. Used together with :py:meth:`copy_nbt_source()`.
 
       .. versionadded:: 0.4
 

@@ -1,6 +1,6 @@
 from math import inf
 import json
-from typing import Sequence
+from typing import Sequence, Dict
 import re
 
 import pymcfunc.internal as internal
@@ -130,7 +130,7 @@ class JavaSelectors(UniversalSelectors):
             raise ValueError(f"Invalid range")
         return result
 
-def cuboid(pos1: Sequence[int], pos2: Sequence[int], dims: str='xyz'):
+def cuboid(pos1: Sequence[int], pos2: Sequence[int], dims: str='xyz') -> Dict[str, int]:
     """Finds the northwest-bottommost corner and the volume/area/length of a cuboid, area or line, given two corners.
     This function is mainly for selector arguments, namely x, y, z, dx, dy and dz.
     More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.sel.cuboid"""

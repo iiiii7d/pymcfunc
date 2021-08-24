@@ -1,4 +1,5 @@
 import re
+from typing import Union, List
 #import pymcfunc.internal as internal
 #from traceback import format_exc
 
@@ -59,9 +60,10 @@ def _catchparam(c: int, text: str):
         params[-1] += ch
     return params, c-orig_c+2
 
-def java(text: str, format_symbol: str="§", content_symbol: str="¶"):
+def java(text: str, format_symbol: str="§", content_symbol: str="¶") -> Union[dict, List[dict]]:
     """Converts a string of text into Java raw JSON text.\n
     **Formatting symbols**
+
     * **§#XXXXXX** - Hex code
     * **§0-9, a-f** - Colours
     * **§h[text]** - Extras to append after the segment of text
@@ -85,6 +87,7 @@ def java(text: str, format_symbol: str="§", content_symbol: str="¶"):
     * **§z[entity type|entity uuid|optional entity name]** - Shows entity when hovered
  
     **Content symbols**
+
     * **¶t[identifier|params...|...]** - Translated text
     * **¶s[name|objective|optional value]** - Value from scoreboard
     * **¶e[selector|optional separator text]** - Entity name
@@ -280,7 +283,7 @@ def java(text: str, format_symbol: str="§", content_symbol: str="¶"):
     if len(out) == 2: out = out[1]
     return out
 
-def bedrock(text: str, content_symbol="¶"):
+def bedrock(text: str, content_symbol="¶") -> Union[dict, List[dict]]:
     """Converts a string of text into Bedrock raw JSON text.\n
     **Content symbols**
     * **¶t[identifier|params...|...]** - Translated text
