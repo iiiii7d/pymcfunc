@@ -1,3 +1,4 @@
+from functools import wraps
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from pymcfunc import selectors
@@ -28,18 +29,18 @@ class JavaPack:
         self.sel = selectors.JavaSelectors()
         self.version = MinecraftVersion(version) if isinstance(version, str) else version
 
-    def function(self, func: Callable[[JavaFuncHandler], Any], name: Optional[str]=None):
+    def function(self, name: Optional[str]=None):
         """
         Registers a Python function and translates it into a Minecraft function.
 
         The decorator calls the function being decorated with one argument being a PackageHandler.
 
-        :param func: The function to turn into a Minecraft function
-        :type func: Callable[[UniversalFuncHandler], Any]
         :param name: The name of the Minecraft function, if it isn't the name of the Python function.
         :type name: [type] | None
         """
-        m = JavaFuncHandler()
-        func(m)
-        fname = func.__name__
-        self.funcs.update({fname: str(m)})
+        def decorator(func: Callable[[JavaFuncHandler], Any]):
+            m = JavaFuncHandler(self)
+            func(m)
+            fname = func.__name__ if name is None else name
+            self.funcs.update({fname: str(m)})
+        return decorator

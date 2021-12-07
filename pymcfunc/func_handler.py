@@ -1,8 +1,9 @@
+from pymcfunc.pack import JavaPack
 from pymcfunc.selectors import UniversalSelectors, JavaSelectors, BedrockSelectors
 from pymcfunc_old.variables import JavaVariable, BedrockVariable
 import pymcfunc_old.entities as entities
 from pymcfunc_old.entities import Entity
-#from pymcfunc_old.rawcommands import UniversalRawCommands, JavaRawCommands, BedrockRawCommands
+from pymcfunc_old.rawcommands import UniversalRawCommands, JavaRawCommands, BedrockRawCommands
 
 class UniversalFuncHandler:
     """
@@ -15,9 +16,10 @@ class UniversalFuncHandler:
     """
     sel = UniversalSelectors()
 
-    def __init__(self):
-        from pymcfunc_old.rawcommands import UniversalRawCommands
+    def __init__(self, p):
+        self.commands = []
         self.r = UniversalRawCommands(self)
+        self.p = p
 
     def __str__(self):
         return "\n".join(self.commands)
@@ -42,9 +44,8 @@ class BedrockFuncHandler(UniversalFuncHandler):
     """The Beckrock Edition function handler."""
     sel = BedrockSelectors()
 
-    def __init__(self):
-        self.commands = []
-        from pymcfunc_old.rawcommands import BedrockRawCommands
+    def __init__(self, p):
+        super().__init__(p)
         self.r = BedrockRawCommands(self)
 
     def v(self, name: str, target: str) -> BedrockVariable:
@@ -62,10 +63,11 @@ class JavaFuncHandler(UniversalFuncHandler):
     """The Java Edition function handler."""
     sel = JavaSelectors()
 
-    def __init__(self):
+    def __init__(self, p: JavaPack):
+        super().__init__(p)
         self.commands = []
-        from pymcfunc_old.rawcommands import JavaRawCommands
         self.r = JavaRawCommands(self)
+        self.p = p
 
     def v(self, name: str, target: str, trigger: bool=False) -> JavaVariable:
         """

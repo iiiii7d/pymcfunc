@@ -1,6 +1,9 @@
 from textwrap import dedent
 from difflib import get_close_matches
 
+from pymcfunc.minecraft_version import MinecraftVersion
+
+
 class SpaceError(Exception):
     """No spaces are allowed in a specific parameter."""
     def __init__(self, varname, value):
@@ -18,7 +21,16 @@ class OptionError(Exception):
         msg = f"Choices allowed: {', '.join(choices)} {parentheses}"
         super().__init__(msg)
 
-class OnlyOneAllowed(Exception):
+def MissingArgumentError(Exception):
+    """An argument is missing."""
+    def __init__(self, varname):
+        super().__init__(f"Missing argument `{varname}`")
+
+def MultipleBranchesSatisfiedError(Exeception):
+    """"Multiple branches are satisfied. It is unclear which branch is intended."""
+    pass
+
+'''class OnlyOneAllowed(Exception):
     """Only one parameter is allowed, but two were given."""
     def __init__(self, params, param):
         msg = f"Parameters: {', '.join(params)} (Got '{param}'')"
@@ -51,4 +63,10 @@ class MissingError(Exception):
     """A parameter that had been made mandatory due to another parameter is not stated, and that parameter has a default value of None."""
     def __init__(self, dep_name, indep_name, indep_val):
         msg = f"Variable '{dep_name}' must be stated as '{indep_name}''s value is '{indep_val}'"
-        super().__init__(msg)
+        super().__init__(msg)'''
+
+class FutureCommandWarning(Warning):
+    pass
+
+class DeprecatedCommandWarning(Warning):
+    pass
