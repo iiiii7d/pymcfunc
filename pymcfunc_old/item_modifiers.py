@@ -1,5 +1,5 @@
 from typing import Optional, Sequence, Tuple, Union, Dict, List
-import pymcfunc.internal as internal
+import pymcfunc_old.internal as internal
 
 NumberProvider = dict
 

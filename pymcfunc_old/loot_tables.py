@@ -1,7 +1,7 @@
 from typing import Optional, Union
-import pymcfunc.internal as internal
-from pymcfunc.predicates import Predicate
-from pymcfunc.item_modifiers import ItemModifier
+import pymcfunc_old.internal as internal
+from pymcfunc_old.predicates import Predicate
+from pymcfunc_old.item_modifiers import ItemModifier
 NumberProvider = dict
 
 class LootTable:

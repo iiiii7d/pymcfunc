@@ -3,9 +3,9 @@ import itertools
 import re
 import json
 
-import pymcfunc.internal as internal
-import pymcfunc.errors as errors
-from pymcfunc.func_handlers import JavaFuncHandler, BedrockFuncHandler
+import pymcfunc_old.internal as internal
+import pymcfunc_old.errors as errors
+from pymcfunc_old.func_handlers import JavaFuncHandler, BedrockFuncHandler
 _b = lambda x: 'true' if x is True else 'false' if x is False else x
 
 class UniversalRawCommands:

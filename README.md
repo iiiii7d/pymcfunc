@@ -34,8 +34,9 @@ Progress: Raw commands are complete, currently working on features to make progr
 and tools to build datapacks :)
 
 ## Usage
+
 ```python
-import pymcfunc as pmf
+import pymcfunc_old as pmf
 p = pmf.Pack("pack name")
 
 @p.function

@@ -1,13 +1,13 @@
 from setuptools import setup
-import pymcfunc
+import pymcfunc_old
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-  name = 'pymcfunc',
-  packages = ['pymcfunc'],
-  version = pymcfunc.__version__+"",
+  name = 'pymcfunc_old',
+  packages = ['pymcfunc_old'],
+  version =pymcfunc_old.__version__ + "",
   license ='gpl-3.0',
   description = 'Minecraft functions, pythonised',
   long_description=long_description,
@@ -15,11 +15,11 @@ setup(
   author = '7d',
   author_email = 'i.third.7d@protonmail.com',
   url = 'https://github.com/iiiii7d/pymcfunc',
-  download_url = f'https://github.com/iiiii7d/pymcfunc/archive/refs/tags/v{pymcfunc.__version__}.tar.gz',
-  keywords = ['pymcfunc', 'minecraft', 'commands', 'function'],
+  download_url = f'https://github.com/iiiii7d/pymcfunc/archive/refs/tags/v{pymcfunc_old.__version__}.tar.gz',
+  keywords = ['pymcfunc_old', 'minecraft', 'commands', 'function'],
   python_requires='>=3.6',
   #package_data={
-  #  'pymcfunc': [''],
+  #  'pymcfunc_old': [''],
   #},
   install_requires=[],
   classifiers=[

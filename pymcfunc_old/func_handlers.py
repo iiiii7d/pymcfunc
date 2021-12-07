@@ -1,8 +1,8 @@
 from pymcfunc.selectors import UniversalSelectors, JavaSelectors, BedrockSelectors
-from pymcfunc.variables import JavaVariable, BedrockVariable
-import pymcfunc.entities as entities
-from pymcfunc.entities import Entity
-#from pymcfunc.rawcommands import UniversalRawCommands, JavaRawCommands, BedrockRawCommands
+from pymcfunc_old.variables import JavaVariable, BedrockVariable
+import pymcfunc_old.entities as entities
+from pymcfunc_old.entities import Entity
+#from pymcfunc_old.rawcommands import UniversalRawCommands, JavaRawCommands, BedrockRawCommands
 
 class UniversalFuncHandler:
     """The function handler which includes commands that are the same for both Java and Bedrock edition.
@@ -10,7 +10,7 @@ class UniversalFuncHandler:
     sel = UniversalSelectors()
 
     def __init__(self):
-        from pymcfunc.rawcommands import UniversalRawCommands
+        from pymcfunc_old.rawcommands import UniversalRawCommands
         self.r = UniversalRawCommands(self)
 
     def __str__(self):
@@ -37,7 +37,7 @@ class BedrockFuncHandler(UniversalFuncHandler):
 
     def __init__(self):
         self.commands = []
-        from pymcfunc.rawcommands import BedrockRawCommands
+        from pymcfunc_old.rawcommands import BedrockRawCommands
         self.r = BedrockRawCommands(self)
 
     def v(self, name: str, target: str) -> BedrockVariable:
@@ -52,7 +52,7 @@ class JavaFuncHandler(UniversalFuncHandler):
 
     def __init__(self):
         self.commands = []
-        from pymcfunc.rawcommands import JavaRawCommands
+        from pymcfunc_old.rawcommands import JavaRawCommands
         self.r = JavaRawCommands(self)
 
     def v(self, name: str, target: str, trigger: bool=False) -> JavaVariable:

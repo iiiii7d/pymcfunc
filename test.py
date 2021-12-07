@@ -1,4 +1,4 @@
-import pymcfunc as pmf
+import pymcfunc_old as pmf
 import time
 
 def test_pytest():

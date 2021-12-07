@@ -1,5 +1,5 @@
 from typing import Union, Optional
-import pymcfunc.internal as internal
+import pymcfunc_old.internal as internal
 NumberProvider = dict
 
 def constant(value: Union[int, float]) -> NumberProvider:

@@ -3,8 +3,8 @@ import json
 from typing import Sequence, Dict
 import re
 
-import pymcfunc.internal as internal
-import pymcfunc.errors as errors
+import pymcfunc_old.internal as internal
+import pymcfunc_old.errors as errors
 
 class UniversalSelectors:
     """The universal selector class.

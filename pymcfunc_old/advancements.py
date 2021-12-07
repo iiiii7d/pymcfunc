@@ -1,7 +1,7 @@
 from typing import Union, Optional, Any, Callable, List, Dict
 from functools import wraps
-import pymcfunc.internal as internal
-import pymcfunc.func_handlers as func_handler
+import pymcfunc_old.internal as internal
+import pymcfunc_old.func_handlers as func_handler
 
 class Advancement:
     """An advancement in Java Edition.

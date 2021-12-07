@@ -1,5 +1,5 @@
 from typing import Optional, Dict, Union
-import pymcfunc.internal as internal
+import pymcfunc_old.internal as internal
 NumberProvider = dict
 RangeDict = Dict[str, Union[int, NumberProvider]]
 

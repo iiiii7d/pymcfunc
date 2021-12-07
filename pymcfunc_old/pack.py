@@ -1,32 +1,20 @@
-from typing import Union
+from typing import Callable, Any, Optional, Union
+from functools import wraps
+import pathlib
+import os
+import json
+import ntpath
+import re
 
-from pymcfunc import selectors
-from pymcfunc.minecraftversion import MinecraftVersion
-
-
-class JavaPack:
-    """Represents a Java Edition Datapack."""
-
-    def __init__(self, name: str, version: Union[str, MinecraftVersion]):
-        """
-        Initialises the pack.
-
-        :param str name: The name of the pack
-        :param version: The version of the pack
-        :type version: str | MinecraftVersion
-        """
-        self.name = name
-        self.funcs = {}
-        self.tags = {'blocks': {}, 'entity_types': {}, 'fluids': {}, 'functions': {}, 'items': {}}
-        self.minecraft_tags = {'load': [], 'tick': []}
-        self.advancements = {}
-        self.loot_tables = {}
-        self.predicates = {}
-        self.recipes = {}
-        self.item_modifiers = {}
-        self.sel = selectors.JavaSelectors()
-        self.version = MinecraftVersion(version) if isinstance(version, str) else version
-
+import pymcfunc_old.errors as errors
+import pymcfunc_old.internal as internal
+from pymcfunc_old.func_handlers import JavaFuncHandler, BedrockFuncHandler, UniversalFuncHandler
+import pymcfunc.selectors as selectors
+from pymcfunc_old.advancements import Advancement
+from pymcfunc_old.loot_tables import LootTable
+from pymcfunc_old.predicates import Predicate
+from pymcfunc_old.recipes import CookingRecipe, ShapedCraftingRecipe, ShapelessCraftingRecipe, SmithingRecipe, StonecuttingRecipe, Recipe
+from pymcfunc_old.item_modifiers import ItemModifier
 
 class Pack:
     """A container for all functions.
@@ -59,7 +47,7 @@ class Pack:
         self.tags[group][tag_name].extend(list(items))
 
     def function(self, func: Callable[[UniversalFuncHandler], Any]):
-        """Registers a Python function and translates it into a Minecraft function.
+        """Registers a Python function and translates it into a Minecraft function.    
         The decorator will run the function so you do not need to run the function again.
         The name of the Python function will be the name of the Minecraft function.
         The decorator calls the function being decorated with one argument being a PackageHandler.
@@ -267,3 +255,58 @@ class Pack:
                     }
                     with open(f'tags/{group}/{tag}.json', 'w') as f:
                         json.dump(tagJson, f, indent=indent)
+
+class JavaFunctionTags:
+    def __init__(self, p):
+        self.p = p
+
+    def tag(self, tag: str, minecraft_tag: bool=False):
+        """Applies a tag to the function. When the tag is run with /function, all functions under this tag will run.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFunctionTags.tag"""
+        def decorator(func):
+            @wraps(func)
+            def wrapper(m):
+                if minecraft_tag:
+                    self.p.minecraft_tags[tag].append(func.__name__)
+                else:
+                    if tag not in self.p.tags:
+                        self.p.tags['functions'][tag] = []
+                    self.p.tags['functions'][tag].append(func.__name__)
+                func(m)
+            return wrapper
+        return decorator
+
+    def on_load(self, func: Callable[[UniversalFuncHandler], Any]):
+        """Applies a ‘load’ tag to the function. Alias of @pmf.JavaFunctionTags.tag('load', minecraft_tag=True).
+        Functions with the tag will be run when the datapack is loaded.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFunctionTags.on_load"""
+        return self.tag('load', minecraft_tag=True)(func)
+
+    def repeat_every_tick(self, func: Callable[[UniversalFuncHandler], Any]):
+        """Applies a ‘tick’ tag to the function. Alias of @pmf.JavaFunctionTags.tag('tick', minecraft_tag=True).
+        Functions with the tag will be run every tick.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFunctionTags.repeat_every_tick"""
+        return self.tag('tick', minecraft_tag=True)(func)
+
+    def repeat_every(self, ticks: int):
+        """The function will be run on a defined interval.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFunctionTags.repeat_every"""
+        def decorator(func):
+            @wraps(func)
+            def wrapper(m):
+                self.on_load(func)(m)
+                m.r.schedule('/pymcfunc_old:first/', duration=ticks, mode='append')
+            return wrapper
+        return decorator
+
+    @staticmethod
+    def repeat(n: int):
+        """The function will be run a defined number of times.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaFunctionTags.repeat"""
+        def decorator(func):
+            @wraps(func)
+            def wrapper(m):
+                for i in range(n):
+                    func(m)
+            return wrapper
+        return decorator

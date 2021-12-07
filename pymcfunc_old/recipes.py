@@ -1,5 +1,5 @@
 from typing import Optional, Tuple, Sequence, Union
-import pymcfunc.internal as internal
+import pymcfunc_old.internal as internal
 
 class Recipe:
     """The base class for all Recipes.

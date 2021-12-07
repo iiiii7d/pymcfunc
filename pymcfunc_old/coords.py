@@ -1,5 +1,5 @@
 from typing import Union
-import pymcfunc.errors as errors
+import pymcfunc_old.errors as errors
 
 def coords(x: Union[Union[int, float], str], y: Union[Union[int, float], str], z: Union[Union[int, float], str]) -> str:
     """Translates values into coordinates, with extra validaton.

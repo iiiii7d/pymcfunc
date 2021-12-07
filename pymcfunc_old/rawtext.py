@@ -1,6 +1,6 @@
 import re
 from typing import Union, List
-#import pymcfunc.internal as internal
+#import pymcfunc_old.internal as internal
 #from traceback import format_exc
 
 def _compress(out: str):

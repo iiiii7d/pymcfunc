@@ -13,17 +13,17 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
-import pymcfunc
+import pymcfunc_old
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'pymcfunc'
+project = 'pymcfunc_old'
 copyright = '2021, 7d'
 author = '7d'
 
 # The full version, including alpha/beta/rc tags
-release = 'v'+pymcfunc.__version__
+release = 'v' + pymcfunc_old.__version__
 
 
 # -- General configuration ---------------------------------------------------

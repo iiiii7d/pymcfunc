@@ -1,4 +1,4 @@
-import pymcfunc.internal as internal
+import pymcfunc_old.internal as internal
 from random import randint
 from typing import Any, Optional
 
