@@ -1,7 +1,7 @@
 from textwrap import dedent
 from difflib import get_close_matches
 
-from pymcfunc.minecraft_version import MinecraftVersion
+from pymcfunc.version import JavaVersion
 
 
 class SpaceError(Exception):
@@ -29,6 +29,12 @@ def MissingArgumentError(Exception):
 def MultipleBranchesSatisfiedError(Exeception):
     """"Multiple branches are satisfied. It is unclear which branch is intended."""
     pass
+
+class MissingError(Exception):
+    """A parameter that had been made mandatory due to another parameter is not stated, and that parameter has a default value of None."""
+    def __init__(self, dep_name, indep_name):
+        msg = f"Variable `{dep_name}` must be stated as variable `{indep_name}` is stated"
+        super().__init__(msg)
 
 '''class OnlyOneAllowed(Exception):
     """Only one parameter is allowed, but two were given."""
@@ -69,4 +75,7 @@ class FutureCommandWarning(Warning):
     pass
 
 class DeprecatedCommandWarning(Warning):
+    pass
+
+class EducationEditionWarning(Warning):
     pass

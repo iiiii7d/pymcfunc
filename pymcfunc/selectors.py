@@ -6,7 +6,7 @@ import re
 import pymcfunc_old.internal as internal
 import pymcfunc_old.errors as errors
 
-class UniversalSelectors:
+class UniversalSelector:
     """The universal selector class.
        Every function has a **kwargs, which is used for selector arguments. The list of selector arguemnts are in the respective specialised classes.
        If an argument is repeatable, you can express multiple values of the same argument in lists, sets, or tuples.
@@ -102,14 +102,14 @@ class UniversalSelectors:
         return result
 
 
-class BedrockSelectors(UniversalSelectors):
+class BedrockSelector(UniversalSelector):
     """The Bedrock Edition selector class.
     More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockSelectors"""
     def __init__(self):
         pass
 
 
-class JavaSelectors(UniversalSelectors):
+class JavaSelector(UniversalSelector):
     """The Java Edition selector class.
     More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaSelectors"""
     def __init__(self):

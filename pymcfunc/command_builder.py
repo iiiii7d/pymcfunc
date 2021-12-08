@@ -1,17 +1,20 @@
 from __future__ import annotations
 from typing import Any, List, Literal, Optional, Union
 
-from pymcfunc.errors import OptionError, SpaceError, MissingArgumentError, MultipleBranchesSatisfiedError
+from pymcfunc.errors import OptionError, SpaceError, MissingArgumentError, MultipleBranchesSatisfiedError, MissingError
+from pymcfunc.selectors import UniversalSelector
 
 
 class _Parameter:
-    def __init__(self, name: str, type_: type, default: Optional[Any]=None, options: List[Any]=None, spaces: Union[bool, Literal["q"]]=False):
+    def __init__(self, name: str, type_: type, optional: bool=False, default: Optional[Any]=None, options: Optional[List[Any]]=None, spaces: Union[bool, Literal["q"]]=False, **kwargs):
         if options is None: options = []
         self.name = name
+        self.optional = optional
         self.type_ = type_
         self.default = default
         self.options = options
         self.spaces = spaces
+        self.attrs = kwargs
 
 class _Branch:
     def __init__(self, num_branches: int):
@@ -20,7 +23,7 @@ class _Branch:
             self.branches.append(CommandBuilder())
 
 class _Literal:
-    def __init__(self, literal: str, optional: bool=True):
+    def __init__(self, literal: str, optional: bool=False):
         self.literal = literal
         self.optional = optional
 
@@ -72,12 +75,13 @@ class CommandBuilder:
         """
         self.series.append(_Literal(literal))
 
-    def add_param(self, name: str, type_: type, default: Optional[Any]=None, options: List[Any]=None, spaces: Union[bool, Literal["q"]]=False):
+    def add_param(self, name: str, type_: type, optional: bool=False, default: Optional[Any]=None, options: Optional[List[Any]]=None, spaces: Union[bool, Literal["q"]]=False, **kwargs):
         """
         Adds a parameter to the command builder's series.
 
         :param str name: The name of the parameter
         :param type type_: The type of the parameter
+        :param bool optional: Whether the parameter is optional
         :param default: The default option, if the value is not specified. Required if None.
         :type default: the value in ``type_`` | None
         :param options: A list of possible values for the parameter. All values are allowed if empty.
@@ -86,20 +90,21 @@ class CommandBuilder:
         :type spaces: bool | Literal["q"]
         """
         if options is None: options = []
-        self.series.append(_Parameter(name, type_, default, options, spaces))
+        self.series.append(_Parameter(name, type_, optional, default, options, spaces, **kwargs))
 
-    def add_switch(self, name: str, options: List[str], default: Optional[str]=None):
+    def add_switch(self, name: str, options: List[str], optional: bool=False, default: Optional[str]=None):
         """
         Adds a switch to the command builder's series.
 
         Like a parameter, but it's a string and there are always options.
 
         :param str name: The name of the switch.
+        :param bool optional: Whether the parameter is optional
         :param List[str] options: A list of possible values for the parameter.
         :param default: The default option, if the value is not specified. Required if None.
         :type default: str, optional
         """
-        self.series.append(_Parameter(name, str, default, options))
+        self.series.append(_Parameter(name, str, optional, default, options))
 
     def add_branch(self, num_branches: int=2) -> List[CommandBuilder]:
         """
@@ -122,16 +127,19 @@ class CommandBuilder:
         command = []
         defaults_queue = []
         prev_element_name = ""
+        prev_default_element_name = ""
         for element in self.series:
             if isinstance(element, _Literal):
-                if element.optional: defaults_queue.append(element.literal)
+                if element.optional:
+                    defaults_queue.append(element.literal)
+                    prev_default_element_name = "`"+element.literal+"`"
                 else:
                     command.extend(defaults_queue)
                     command.append(element.literal)
-                prev_element_name = "`"+element.literal+"`"
+                    prev_element_name = "`"+element.literal+"`"
             elif isinstance(element, _Parameter):
                 value = params[element.name] if element.name in params else element.default
-                if value is None:
+                if not element.optional and value is None:
                     raise MissingArgumentError(element.name)
                 elif not isinstance(value, element.type_):
                     raise TypeError(f"Parameter {element.name} must be type {element.type_} (Got {type(value)}")
@@ -142,11 +150,20 @@ class CommandBuilder:
                 elif element.spaces == "q" and isinstance(value, str) and " " in value:
                     value = "\""+value+"\""
                 if isinstance(value, bool): value = "true" if value else "false"
-                if element.default == value: defaults_queue.append(str(value))
+                if issubclass(value, UniversalSelector) and 'qty' in element.attrs and value.qty is not None and element.attrs['qty'] != value.qty:
+                    raise ValueError(f"Parameter {element.name} allows target selector for {element.attrs['qty']} entities/players (Got `{value.qty}`)")
+                if issubclass(value, UniversalSelector) and element.attrs['playeronly'] and not value.playeronly:
+                    raise ValueError(
+                        f"Parameter {element.name} allows players target selectors for (Got one for entities as well)")
+                if element.default == value:
+                    if defaults_queue[-1] is None:
+                        raise MissingError(prev_default_element_name, element.name)
+                    defaults_queue.append(str(value) if value is not None else None)
+                    prev_default_element_name = "parameter "+element.name
                 else:
                     command.extend(defaults_queue)
                     command.append(str(value))
-                prev_element_name = "parameter "+element.name
+                    prev_element_name = "parameter "+element.name
             elif isinstance(element, _Branch):
                 exceptions = []
                 possible_branches = []
@@ -163,15 +180,15 @@ class CommandBuilder:
                     raise ValueError(f"No branches valid after {prev_element_name}\n\nSyntax:\n{self.syntax()}\n\n" +
                                      f"Individual errors from each branch:\n{exceptions_string}")
                 possible_branches = list(filter(lambda b, o: o != [], possible_branches))
+                satisfied_params = []
+                for branch, _ in possible_branches:
+                    satisfied_branch_params = []
+                    for ele in branch.series:
+                        if isinstance(ele, _Parameter) and ele.name in params.keys():
+                            satisfied_branch_params.append(ele.name)
+                    satisfied_params.append(satisfied_branch_params)
+                satisfied_params_string = []
                 if len(possible_branches) >= 2:
-                    satisfied_params = []
-                    for branch, _ in possible_branches:
-                        satisfied_branch_params = []
-                        for ele in branch.series:
-                            if isinstance(ele, _Parameter) and ele.name in params.keys():
-                                satisfied_branch_params.append(ele.name)
-                        satisfied_params.append(satisfied_branch_params)
-                    satisfied_params_string = []
                     for index, (branch, _) in enumerate(possible_branches):
                         satisfied_params_string.append(f"{branch.syntax()}: params {', '.join(satisfied_params[index])} satisfied")
                     satisfied_params_string = "\n".join(satisfied_params_string)
@@ -179,5 +196,6 @@ class CommandBuilder:
                 if len(possible_branches) == 1:
                     command.extend(defaults_queue)
                     command.append(possible_branches[1])
+                    prev_element_name = satisfied_params[0][-1]
 
         return " ".join(command)

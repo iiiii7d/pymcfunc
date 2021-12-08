@@ -3,19 +3,19 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 from pymcfunc import selectors
 from pymcfunc.func_handler import JavaFuncHandler
-from pymcfunc.minecraft_version import MinecraftVersion
+from pymcfunc.version import JavaVersion
 
 
 class JavaPack:
     """Represents a Java Edition Datapack."""
 
-    def __init__(self, name: str, version: Union[str, MinecraftVersion]):
+    def __init__(self, name: str, version: Union[str, JavaVersion]):
         """
         Initialises the pack.
         
         :param str name: The name of the pack
         :param version: The version of the pack
-        :type version: str | MinecraftVersion
+        :type version: str | JavaVersion
         """
         self.name = name
         self.funcs: Dict[str, str] = {}
@@ -26,8 +26,8 @@ class JavaPack:
         self.predicates: dict = {}
         self.recipes: dict = {}
         self.item_modifiers: dict = {}
-        self.sel = selectors.JavaSelectors()
-        self.version = MinecraftVersion(version) if isinstance(version, str) else version
+        self.sel = selectors.JavaSelector()
+        self.version = JavaVersion(version) if isinstance(version, str) else version
 
     def function(self, name: Optional[str]=None):
         """
