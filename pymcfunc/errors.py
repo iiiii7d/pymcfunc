@@ -21,7 +21,7 @@ class OptionError(Exception):
         msg = f"Choices allowed: {', '.join(choices)} {parentheses}"
         super().__init__(msg)
 
-def MissingArgumentError(Exception):
+class MissingArgumentError(Exception):
     """An argument is missing."""
     def __init__(self, varname):
         super().__init__(f"Missing argument `{varname}`")
