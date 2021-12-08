@@ -10,11 +10,11 @@ from pymcfunc.selectors import JavaSelector, BedrockSelector
 from pymcfunc.version import JavaVersion, BedrockVersion
 
 
-def _get_default(func: Callable[[Any, ...], Any], param: str) -> Any:
+def _get_default(func: Callable[..., Any], param: str) -> Any:
     return inspect.signature(func).parameters[param].default
 _gd = _get_default
 
-def _get_options(func: Callable[[Any, ...], Any], param: str) -> Any:
+def _get_options(func: Callable[..., Any], param: str) -> Any:
     # noinspection PyUnresolvedReferences
     options = get_args(get_args(func.__annotations__[param])[0])
     if len(options) == 0:
@@ -54,24 +54,26 @@ class BedrockRawCommands(UniversalRawCommands):
     .. warning::
        Do not instantiate BedrockRawCommands directly; use a :py:class:`BedrockFuncHandler` and access the commands via the ‘r’ attribute.
     """
-    def education_edition(self, func: Callable[[Any, ...], Any]):
+    @staticmethod
+    def education_edition(func: Callable[..., Any]):
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(self, *args, **kwargs):
             if not self.fh.p.education:
                 warnings.warn(f"The command `{func.__name__}` is an Education Edition feature. Your pack is not for Education Edition.", category=EducationEditionWarning)
-            return func(*args, **kwargs)
+            return func(self, *args, **kwargs)
         return wrapper
 
-    def version(self, version_introduced: Optional[str]=None, version_deprecated: Optional[str]=None):
-        def decorator(func: Callable[[Any, ...], Any]):
+    @staticmethod
+    def version(version_introduced: Optional[str]=None, version_deprecated: Optional[str]=None):
+        def decorator(func: Callable[..., Any]):
             @wraps(func)
-            def wrapper(*args, **kwargs):
+            def wrapper(self, *args, **kwargs):
                 pack_version = self.fh.p.version
                 if version_introduced is not None and pack_version < BedrockVersion(version_introduced):
                     warnings.warn(f"The command `{func.__name__}` was introduced in {version_introduced}, but your pack is for {pack_version}", category=FutureCommandWarning)
                 elif version_deprecated is not None and pack_version >= BedrockVersion(version_deprecated):
                     warnings.warn(f"The command `{func.__name__}` was deprecated in {version_deprecated}, but your pack is for {pack_version}", category=DeprecatedCommandWarning)
-                return func(*args, **kwargs)
+                return func(self, *args, **kwargs)
             return wrapper
         return decorator
 
@@ -108,6 +110,19 @@ class BedrockRawCommands(UniversalRawCommands):
         cb.add_param("value", bool, optional=True)
         return cb
 
+    @version(version_introduced="1.2.0")
+    def daylock(self, lock: Optional[bool]=None):
+        cb = self.daylock_cb()
+        cmd = ExecutedCommand(self.fh, "daylock", cb.build(lock=lock))
+        self.fh.commands.append(cmd)
+        return cmd
+    alwaysday = daylock
+    def daylock_cb(self):
+        cb = CommandBuilder("daylock")
+        cb.add_param("lock", bool, optional=True)
+        return cb
+    alwaysday_cb = daylock_cb
+
 class JavaRawCommands(UniversalRawCommands):
     """
     A container for raw Minecraft commands that are specially for Java Edition.
@@ -115,16 +130,17 @@ class JavaRawCommands(UniversalRawCommands):
     .. warning::
        Do not instantiate JavaRawCommands directly; use a :py:class:`JavaFuncHandler` and access the commands via the ‘r’ attribute.
     """
-    def version(self, version_introduced: Optional[str]=None, version_deprecated: Optional[str]=None):
-        def decorator(func: Callable[[Any, ...], Any]):
+    @staticmethod
+    def version(version_introduced: Optional[str]=None, version_deprecated: Optional[str]=None):
+        def decorator(func: Callable[..., Any]):
             @wraps(func)
-            def wrapper(*args, **kwargs):
+            def wrapper(self, *args, **kwargs):
                 pack_version = self.fh.p.version
                 if version_introduced is not None and pack_version < JavaVersion(version_introduced):
                     warnings.warn(f"The command `{func.__name__}` was introduced in {version_introduced}, but your pack is for {pack_version}", category=FutureCommandWarning)
                 elif version_deprecated is not None and pack_version >= JavaVersion(version_deprecated):
                     warnings.warn(f"The command `{func.__name__}` was deprecated in {version_deprecated}, but your pack is for {pack_version}", category=DeprecatedCommandWarning)
-                return func(*args, **kwargs)
+                return func(self, *args, **kwargs)
             return wrapper
         return decorator
 
@@ -141,9 +157,16 @@ class JavaRawCommands(UniversalRawCommands):
         return cb
 
     @version(version_introduced="17w13a")
-    def advancement(self, targets: JavaSelector):
+    def advancement(self, targets: JavaSelector, *,
+                    mode: Literal["grant", "revoke"],
+                    action: Literal["everything", "only", "from", "through", "until"],
+                    advancement: Optional[str]=None,
+                    criterion: Optional[str]=None) -> ExecutedCommand:
         cb = self.advancement_cb()
-        cmd = ExecutedCommand(self.fh, "advancement", cb.build())
+        cmd = ExecutedCommand(self.fh, "advancement", cb.build(targets=targets, mode=mode, action=action, advancement=advancement, criterion=criterion))
+        self.fh.commands.append(cmd)
+        return cmd
+        
     def advancement_cb(self):
         cb = CommandBuilder("advancement")
         cb.add_switch("mode", _go(self.advancement, "mode"))

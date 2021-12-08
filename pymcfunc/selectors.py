@@ -77,16 +77,16 @@ class UniversalSelector:
         }
 
         for k, v in kwargs.items():
-            keylist = BEDROCK if type(self) == BedrockSelectors else JAVA
-            optionslist = OPTIONS_BEDROCK if type(self) == BedrockSelectors else OPTIONS_JAVA
+            keylist = BEDROCK if type(self) == BedrockSelector else JAVA
+            optionslist = OPTIONS_BEDROCK if type(self) == BedrockSelector else OPTIONS_JAVA
             if k not in keylist:
                 raise KeyError(f"Invalid target selector argument '{k}'")
             if k in optionslist.keys():
                 if not str(v) in optionslist[k]:
                     raise errors.OptionError(optionslist[k], v)
-            if k in ALIASES and type(self) == BedrockSelectors:
+            if k in ALIASES and type(self) == BedrockSelector:
                 args.append(f"{ALIASES[k]}={v}")
-            elif k in EXPAND and type(self) == BedrockSelectors:
+            elif k in EXPAND and type(self) == BedrockSelector:
                 for i in EXPAND[k]:
                     v = json.dumps(v) if isinstance(v, dict) else v
                     args.append(f"{i}={v}")
