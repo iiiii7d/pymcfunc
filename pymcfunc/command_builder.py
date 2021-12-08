@@ -1,7 +1,11 @@
 from __future__ import annotations
+
+import inspect
+import re
 from typing import Any, List, Literal, Optional, Union
 
-from pymcfunc.errors import OptionError, SpaceError, MissingArgumentError, MultipleBranchesSatisfiedError, MissingError
+from pymcfunc.errors import OptionError, SpaceError, MissingArgumentError, MultipleBranchesSatisfiedError, MissingError, \
+    RangeError
 from pymcfunc.selectors import UniversalSelector
 
 
@@ -16,11 +20,15 @@ class _Parameter:
         self.spaces = spaces
         self.attrs = kwargs
 
-class _Branch:
-    def __init__(self, num_branches: int):
+class _BranchNode:
+    def __init__(self):
         self.branches: List[CommandBuilder] = []
-        for _ in range(num_branches):
-            self.branches.append(CommandBuilder())
+
+    def add_branch(self, branch_switch_name: Optional[str]=None, branch_switch_options: List[str]=None) -> CommandBuilder:
+        branch = CommandBuilder()
+        self.branches.append(branch)
+        if branch_switch_name is not None: branch.add_switch(branch_switch_name, branch_switch_options)
+        return branch
 
 class _Literal:
     def __init__(self, literal: str, optional: bool=False):
@@ -38,7 +46,7 @@ class CommandBuilder:
 
         :param str name: The name of the command.
         """
-        self.series: List[Union[_Literal, Union[_Parameter, _Branch]]] = []
+        self.series: List[Union[_Literal, Union[_Parameter, _BranchNode]]] = []
         if name: self.series.append(_Literal(name))
 
     def syntax(self) -> str:
@@ -63,7 +71,7 @@ class CommandBuilder:
                 if element.default is None: param_syntax = "<"+param_syntax+">"
                 else: param_syntax = "["+param_syntax+"]"
                 syntax.append(param_syntax)
-            elif isinstance(element, _Branch):
+            elif isinstance(element, _BranchNode):
                 syntax.append("{"+"/".join(b.syntax() for b in element.branches)+"}")
         return " ".join(syntax)
     
@@ -106,15 +114,13 @@ class CommandBuilder:
         """
         self.series.append(_Parameter(name, str, optional, default, options))
 
-    def add_branch(self, num_branches: int=2) -> List[CommandBuilder]:
+    def add_branch_node(self) -> _BranchNode:
         """
-        Adds a branch to the command builder's series.
-
-        :param int num_branches: The number of branches to return, if ``options`` is []
+        Adds a branch node to the command builder's series.
         """
-        branch = _Branch(num_branches)
+        branch = _BranchNode()
         self.series.append(branch)
-        return branch.branches
+        return branch
 
     def build(self, **params: Any) -> str:
         """
@@ -139,22 +145,31 @@ class CommandBuilder:
                     prev_element_name = "`"+element.literal+"`"
             elif isinstance(element, _Parameter):
                 value = params[element.name] if element.name in params else element.default
+
                 if not element.optional and value is None:
                     raise MissingArgumentError(element.name)
-                elif not isinstance(value, element.type_):
+                if not isinstance(value, element.type_):
                     raise TypeError(f"Parameter {element.name} must be type {element.type_} (Got {type(value)}")
                 if element.options != [] and value not in element.options:
                     raise OptionError(element.options, value)
                 if not element.spaces and isinstance(value, str) and " " in value:
-                    raise SpaceError(element.name, value) 
-                elif element.spaces == "q" and isinstance(value, str) and " " in value:
-                    value = "\""+value+"\""
+                    raise SpaceError(element.name, value)
+                if issubclass(type(value), UniversalSelector) and 'singleonly' in element.attrs and element.attrs['singleonly'] and not value.singleonly:
+                    raise ValueError(f"Parameter {element.name} allows target selector for single entities/players (Got `{value}`)")
+                if issubclass(type(value), UniversalSelector) and 'playeronly' in element.attrs and element.attrs['playeronly'] and not value.playeronly:
+                    raise ValueError(f"Parameter {element.name} allows players target selectors for (Got `{value}`)")
+                if isinstance(value, (int, float)) and 'range' in element.attrs and not element.attrs['range'](value):
+                    try: range_string = re.search(r"lambda [^:]*:(.*)\n", inspect.getsource(element.attrs['range'])).group(1).strip()
+                    except AttributeError: range_string = "(unknown)"
+                    raise RangeError(f"Parameter {element.name} does not satisfy range {range_string} (Got {value})")
+                if isinstance(value, str) and 'regex' in element.attrs and re.search(element.attrs['regex'], value) is None:
+                    raise ValueError(f"Parameter {element.name} does not satisfy regex {element.attrs['regex']} (Got {value})")
+                if isinstance(value, str) and value == "":
+                    raise ValueError(f"Parameter {element.name} is an empty string")
+
                 if isinstance(value, bool): value = "true" if value else "false"
-                if issubclass(value, UniversalSelector) and 'qty' in element.attrs and value.qty is not None and element.attrs['qty'] != value.qty:
-                    raise ValueError(f"Parameter {element.name} allows target selector for {element.attrs['qty']} entities/players (Got `{value.qty}`)")
-                if issubclass(value, UniversalSelector) and element.attrs['playeronly'] and not value.playeronly:
-                    raise ValueError(
-                        f"Parameter {element.name} allows players target selectors for (Got one for entities as well)")
+                if element.spaces == "q" and isinstance(value, str) and " " in value:
+                    value = "\"" + value + "\""
                 if element.default == value:
                     if defaults_queue[-1] is None:
                         raise MissingError(prev_default_element_name, element.name)
@@ -164,7 +179,7 @@ class CommandBuilder:
                     command.extend(defaults_queue)
                     command.append(str(value))
                     prev_element_name = "parameter "+element.name
-            elif isinstance(element, _Branch):
+            elif isinstance(element, _BranchNode):
                 exceptions = []
                 possible_branches = []
                 for branch in element.branches:

@@ -26,8 +26,12 @@ class MissingArgumentError(Exception):
     def __init__(self, varname):
         super().__init__(f"Missing argument `{varname}`")
 
-def MultipleBranchesSatisfiedError(Exeception):
+class MultipleBranchesSatisfiedError(Exception):
     """"Multiple branches are satisfied. It is unclear which branch is intended."""
+    pass
+
+class RangeError(Exception):
+    """The value is out of the range specified."""
     pass
 
 class MissingError(Exception):

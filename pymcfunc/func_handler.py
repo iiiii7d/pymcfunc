@@ -1,9 +1,12 @@
-from pymcfunc.pack import JavaPack
-from pymcfunc.selectors import UniversalSelectors, JavaSelectors, BedrockSelectors
-from pymcfunc_old.variables import JavaVariable, BedrockVariable
-import pymcfunc_old.entities as entities
-from pymcfunc_old.entities import Entity
-from pymcfunc_old.rawcommands import UniversalRawCommands, JavaRawCommands, BedrockRawCommands
+from __future__ import annotations
+from typing import TYPE_CHECKING
+from pymcfunc.selectors import UniversalSelector, JavaSelector, BedrockSelector
+from pymcfunc.variables import JavaVariable, BedrockVariable
+import pymcfunc.entities as entities
+from pymcfunc.entities import Entity
+from pymcfunc.raw_commands import UniversalRawCommands, JavaRawCommands, BedrockRawCommands
+if TYPE_CHECKING:
+    from pymcfunc.pack import JavaPack
 
 class UniversalFuncHandler:
     """
@@ -14,7 +17,7 @@ class UniversalFuncHandler:
     .. warning::
        Use either :py:class:`BedrockFuncHandler` or :py:class:`JavaFuncHandler` for extended support of commands for your edition.
     """
-    sel = UniversalSelectors()
+    sel = UniversalSelector()
 
     def __init__(self, p):
         self.commands = []
@@ -42,7 +45,7 @@ class UniversalFuncHandler:
 
 class BedrockFuncHandler(UniversalFuncHandler):
     """The Beckrock Edition function handler."""
-    sel = BedrockSelectors()
+    sel = BedrockSelector()
 
     def __init__(self, p):
         super().__init__(p)
@@ -61,7 +64,7 @@ class BedrockFuncHandler(UniversalFuncHandler):
 
 class JavaFuncHandler(UniversalFuncHandler):
     """The Java Edition function handler."""
-    sel = JavaSelectors()
+    sel = JavaSelector()
 
     def __init__(self, p: JavaPack):
         super().__init__(p)
@@ -73,6 +76,7 @@ class JavaFuncHandler(UniversalFuncHandler):
         """
         Creates and registers a variable.
 
+        :param trigger:
         :param str name: The name of the variable
         :param str target: The target of the variable, or whom it applies to
         :return: The variable

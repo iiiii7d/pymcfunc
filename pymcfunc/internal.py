@@ -1,5 +1,5 @@
 from typing import Tuple, Any, Sequence
-import pymcfunc_old.errors as errors
+import pymcfunc.errors as errors
 
 def defaults(*vals: Tuple[Any, Any]):
     """(v, dv)"""
