@@ -21,13 +21,15 @@ class _Parameter:
         self.attrs = kwargs
 
 class _BranchNode:
-    def __init__(self):
+    def __init__(self, optional: bool=False):
         self.branches: List[CommandBuilder] = []
+        self.optional = optional
 
-    def add_branch(self, branch_switch_name: Optional[str]=None, branch_switch_options: List[str]=None) -> CommandBuilder:
+    def add_branch(self, switch_name: Optional[str]=None, switch_options: Optional[List[str]]=None, literal: Optional[str]=None) -> CommandBuilder:
         branch = CommandBuilder()
         self.branches.append(branch)
-        if branch_switch_name is not None: branch.add_switch(branch_switch_name, branch_switch_options)
+        if switch_name is not None: branch.add_switch(switch_name, switch_options)
+        if literal is not None: branch.add_literal(literal)
         return branch
 
 class _Literal:
@@ -73,6 +75,7 @@ class CommandBuilder:
                 syntax.append(param_syntax)
             elif isinstance(element, _BranchNode):
                 syntax.append("{"+"/".join(b.syntax() for b in element.branches)+"}")
+                if element.optional: syntax[-1] = "["+syntax[-1]+"]"
         return " ".join(syntax)
     
     def add_literal(self, literal: str):
@@ -114,11 +117,11 @@ class CommandBuilder:
         """
         self.series.append(_Parameter(name, str, optional, default, options))
 
-    def add_branch_node(self) -> _BranchNode:
+    def add_branch_node(self, optional: bool=False) -> _BranchNode:
         """
         Adds a branch node to the command builder's series.
         """
-        branch = _BranchNode()
+        branch = _BranchNode(optional=optional)
         self.series.append(branch)
         return branch
 
@@ -191,9 +194,10 @@ class CommandBuilder:
                     except Exception as e:
                         exceptions.append(e)
                 else:
-                    exceptions_string = '\n'.join(b.syntax()+": "+str(e) for b, e in zip(element.branches, exceptions))
-                    raise ValueError(f"No branches valid after {prev_element_name}\n\nSyntax:\n{self.syntax()}\n\n" +
-                                     f"Individual errors from each branch:\n{exceptions_string}")
+                    if not element.optional:
+                        exceptions_string = '\n'.join(b.syntax()+": "+str(e) for b, e in zip(element.branches, exceptions))
+                        raise ValueError(f"No branches valid after {prev_element_name}\n\nSyntax:\n{self.syntax()}\n\n" +
+                                         f"Individual errors from each branch:\n{exceptions_string}")
                 possible_branches = list(filter(lambda b, o: o != [], possible_branches))
                 satisfied_params = []
                 for branch, _ in possible_branches:
