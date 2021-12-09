@@ -4,7 +4,7 @@ import inspect
 import json
 import warnings
 from functools import wraps
-from typing import Optional, Any, Callable, Literal, get_args, TYPE_CHECKING, Union, TypeAlias, List
+from typing import Dict, Optional, Any, Callable, Literal, Tuple, get_args, TYPE_CHECKING, Union, TypeAlias, List
 from uuid import UUID
 
 from pymcfunc.command_builder import CommandBuilder
@@ -24,7 +24,7 @@ _gd = _get_default
 def _get_type(func: Callable[..., Any], param: str) -> type:
     # noinspection PyUnresolvedReferences
     type_ = func.__annotations__[param]
-    if get_args(type_) != () and isinstance(get_args(type_)[1], type(None)): type_ = get_args(type_)[0]
+    if get_args(type_) != () and len(get_args(type_)) >= 2 and isinstance(get_args(type_)[1], type(None)): type_ = get_args(type_)[0]
     return type_
 _gt = _get_type
 
@@ -240,7 +240,7 @@ class BedrockRawCommands(UniversalRawCommands):
               clone_mode: Literal["force", "move", "normal"]="normal",
               tile_name: Optional[Union[str, int]]=None,
               tile_data: int=-1,
-              block_states: Optional[List[str, Any]]=None) -> ExecutedCommand: # TODO add block predicate thingy when it is written
+              block_states: Optional[Dict[str, Any]]=None) -> ExecutedCommand: # TODO add block predicate thingy when it is written
         cb = self.clone_cb()
         self.param_version_introduced("block_states", block_states, "1.16.210.53")
         cmd = ExecutedCommand(self.fh, "clone", cb.build(begin=begin, end=end, destination=destination, mask_mode=mask_mode,
@@ -295,6 +295,141 @@ class BedrockRawCommands(UniversalRawCommands):
         cb.add_param(*nt("target"), playeronly=True, singleonly=True)
         return cb
 
+    @version(introduced="1.17.10.22")
+    def dialogue(self, *,
+                 mode: Literal["open", "change"],
+                 npc: BedrockSelector,
+                 player: Optional[BedrockSelector]=None,
+                 scene_name: Optional[str]=None) -> ExecutedCommand:
+        cb = self.dialogue_cb()
+        cmd = ExecutedCommand(self.fh, "dialogue", cb.build(mode=mode, npc=npc, player=player, scene_name=scene_name))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def dialogue_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("dialogue")
+        nt = lambda param: (param, _gt(cls.dialogue, param))
+        node = cb.add_branch_node()
+        cb_open = node.add_branch(literal="open")
+        cb_open.add_param(*nt("npc"))
+        cb_open.add_param(*nt("player"), playeronly=True)
+        cb_open.add_param(*nt("scene_name"), optional=True, spaces="q")
+        cb_change = node.add_branch(literal="change")
+        cb_change.add_param(*nt("npc"))
+        cb_change.add_param(*nt("scene_name"), spaces="q")
+        cb_change.add_param(*nt("player"), playeronly=True, optional=True)
+        return cb
+
+    @version(introduced="1.0.5.0")
+    def difficulty(self, difficulty: Union[int, Literal["peaceful", "easy", "normal", "hard", "p", "e", "n", "h"]]) -> ExecutedCommand:
+        cb = self.difficulty_cb()
+        cmd = ExecutedCommand(self.fh, "difficulty", cb.build(difficulty=difficulty))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def difficulty_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("difficulty")
+        nt = lambda param: (param, _gt(cls.difficulty, param))
+        cb.add_param(*nt("difficulty"), range=lambda x: 0 <= x <= 3)
+        return cb
+
+    @version(introduced="1.0.5.0")
+    def effect_give(self,
+                    targets: BedrockSelector,
+                    effect: str,
+                    seconds: int=30,
+                    amplifier: int=1,
+                    hide_particles: bool=False) -> ExecutedCommand:
+        cb = self.effect_give_cb()
+        self.param_version_introduced("hide_particles", hide_particles, "14w06a", default=False)
+        cmd = ExecutedCommand(self.fh, "effect", cb.build(targets=targets, effect=effect, seconds=seconds, amplifier=amplifier))
+        self.fh.commands.append(cmd)
+        return cb
+    @classmethod
+    def effect_give_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("effect")
+        nt = lambda param: (param, _gt(cls.effect_give, param))
+        cb.add_param(*nt("targets"))
+        cb.add_param(*nt("effect"))
+        cb.add_param(*nt("seconds"), default=_gd(cls.effect_give, "seconds"), range=lambda x: 0 <= x <= 2147483647)
+        cb.add_param(*nt("amplifier"), default=_gd(cls.effect_give, "amplifier"), range=lambda x: 0 <= x <= 255)
+        cb.add_param(*nt("hide_particles"), default=False)
+        return cb
+    
+    @version(introduced="1.0.5.0")
+    def effect_clear(self, targets: BedrockSelector) -> ExecutedCommand:
+        cb = self.effect_clear_cb()
+        cmd = ExecutedCommand(self.fh, "effect", cb.build(targets=targets))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def effect_clear_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("effect")
+        nt = lambda param: (param, _gt(cls.effect_clear, param))
+        cb.add_param(*nt("targets"))
+        cb.add_literal("clear")
+        return cb
+
+    @version(introduced="0.16.0b5")
+    def enchant(self, target: BedrockSelector, enchantment: Union[str, int], level: int=1) -> ExecutedCommand:
+        cb = self.enchant_cb()
+        cmd = ExecutedCommand(self.fh, "enchant", cb.build(target=target, enchantment=enchantment, level=level))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def enchant_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("enchant")
+        nt = lambda param: (param, _gt(cls.enchant, param))
+        cb.add_param(*nt("target"))
+        cb.add_param(*nt("enchantment"))
+        cb.add_param(*nt("level"), range=lambda x: 1 <= x <= 2147483647, default=_gd(cls.enchant, "level"))
+        return cb
+
+    @version(introduced="1.16.100.57")
+    def event(self, target: BedrockSelector, event_name: str) -> ExecutedCommand:
+        cb = self.event_cb()
+        cmd = ExecutedCommand(self.fh, "event", cb.build(target=target, event_name=event_name))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def event_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("event entity")
+        nt = lambda param: (param, _gt(cls.event, param))
+        cb.add_param(*nt("target"))
+        cb.add_param(*nt("event_name"), spaces="q")
+        return cb
+
+    @version(introduced="0.16.0b1")
+    def execute(self, origin: BedrockSelector, *,
+                position: str, # TODO add coordinate class when its written
+                detect_pos: Optional[str]=None,
+                detect_block: Optional[str]=None,
+                detect_data: int=-1,
+                commands: Union[ExecutedCommand, List[ExecutedCommand]]) -> Union[ExecutedCommand, List[ExecutedCommand]]:
+        cb = self.execute_cb()
+        cmds = []
+        commands = [commands] if not isinstance(commands, list) else commands # TODO flatten list
+        for command in commands:
+            cmd = ExecutedCommand(self.fh, "execute", cb.build(origin=origin, position=position, detect_pos=detect_pos,
+                                                               detect_block=detect_block, detect_data=detect_data,
+                                                               command=command.command_string))
+            self.fh.commands[self.fh.commands.index(command)] = cmd
+            cmds.append(cmd)
+        return cmds[0] if len(cmds) == 1 else cmds
+    @classmethod
+    def execute_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("execute")
+        nt = lambda param: (param, _gt(cls.execute, param))
+        cb.add_param(*nt("origin"))
+        cb.add_param(*nt("position"))
+        cb_detect = cb.add_branch_node(optional=True).add_branch(literal="detect")
+        cb_detect.add_param(*nt("detect_pos"))
+        cb_detect.add_param(*nt("detect_block"))
+        cb_detect.add_param(*nt("detect_data"), default=_gd(cls.execute, "detect_data"))
+        cb.add_param("command", str, spaces=True)
+        return cb
+
+
 class JavaRawCommands(UniversalRawCommands):
     """
     A container for raw Minecraft commands that are specially for Java Edition.
@@ -303,7 +438,7 @@ class JavaRawCommands(UniversalRawCommands):
        Do not instantiate JavaRawCommands directly; use a :py:class:`JavaFuncHandler` and access the commands via the ‘r’ attribute.
     """
     @staticmethod
-    def version(introduced: Optional[str]=None, deprecated: Optional[str]=None):
+    def version(introduced: Optional[str]=None, deprecated: Optional[str]=None, temp_removed: Optional[Tuple[str, str]]=None):
         def decorator(func: Callable[..., Any]):
             @wraps(func)
             def wrapper(self, *args, **kwargs):
@@ -312,6 +447,8 @@ class JavaRawCommands(UniversalRawCommands):
                     warnings.warn(f"The command `{func.__name__}` was introduced in {introduced}, but your pack is for {pack_version}", category=FutureCommandWarning)
                 elif deprecated is not None and pack_version >= JavaVersion(deprecated):
                     warnings.warn(f"The command `{func.__name__}` was deprecated in {deprecated}, but your pack is for {pack_version}", category=DeprecatedCommandWarning)
+                elif temp_removed is not None and  JavaVersion(temp_removed[0]) <= pack_version < JavaVersion(temp_removed[1]):
+                    warnings.warn(f"The command `{func.__name__}` was deprecated in {temp_removed[0]} and reintroduced in {temp_removed[1]}, but your pack is for {pack_version}", category=DeprecatedCommandWarning)
                 return func(self, *args, **kwargs)
             return wrapper
         return decorator
@@ -831,3 +968,72 @@ class JavaRawCommands(UniversalRawCommands):
         nt = lambda param: (param, _gt(cls.deop, param))
         cb.add_param(*nt("targets"), playeronly=True)
         return cb
+
+    @version(introduced="12w32a")
+    def difficulty(self, difficulty: Optional[Literal["peaceful", "easy", "normal", "hard"]]) -> ExecutedCommand:
+        cb = self.difficulty_cb()
+        cmd = ExecutedCommand(self.fh, "difficulty", cb.build(difficulty=difficulty))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def difficulty_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("difficulty")
+        nt = lambda param: (param, _gt(cls.difficulty, param))
+        cb.add_param(*nt("difficulty"), optional=True)
+        return cb
+
+    @version(introduced="13w09b")
+    def effect_give(self,
+                    targets: Union[JavaSelector, UUID],
+                    effect: str,
+                    seconds: int=30,
+                    amplifier: int=1,
+                    hide_particles: bool=False) -> ExecutedCommand:
+        cb = self.effect_give_cb()
+        self.param_version_introduced("hide_particles", hide_particles, "14w06a", default=False)
+        cmd = ExecutedCommand(self.fh, "effect", cb.build(targets=targets, effect=effect, seconds=seconds, amplifier=amplifier))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def effect_give_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("effect give")
+        nt = lambda param: (param, _gt(cls.effect_give, param))
+        cb.add_param(*nt("targets"))
+        cb.add_param(*nt("effect"))
+        cb.add_param(*nt("seconds"), default=_gd(cls.effect_give, "seconds"), range=lambda x: 0 <= x <= 1e6)
+        cb.add_param(*nt("amplifier"), default=_gd(cls.effect_give, "amplifier"), range=lambda x: 0 <= x <= 255)
+        cb.add_param(*nt("hide_particles"), default=False)
+        return cb
+    
+    @version(introduced="1.6.1p")
+    def effect_clear(self,
+                     targets: Union[JavaSelector, UUID]=JavaSelector.s,
+                     effect: Optional[str]=None) -> ExecutedCommand:
+        cb = self.effect_clear_cb()
+        cmd = ExecutedCommand(self.fh, "effect", cb.build(targets=targets, effect=effect))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def effect_clear_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("effect clear")
+        nt = lambda param: (param, _gt(cls.effect_clear, param))
+        cb.add_param(*nt("targets"), optional=True, default=_gd(cls.effect_clear, "targets"))
+        cb.add_param(*nt("effect"), optional=True)
+        return cb
+
+    @version(introduced="1.4.4p", temp_removed=("17w45a", "18w06a"))
+    def enchant(self, target: Union[JavaVersion, UUID], enchantment: str, level: int=1) -> ExecutedCommand:
+        cb = self.enchant_cb()
+        cmd = ExecutedCommand(self.fh, "enchant", cb.build(target=target, enchantment=enchantment, level=level))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def enchant_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("enchant")
+        nt = lambda param: (param, _gt(cls.enchant, param))
+        cb.add_param(*nt("target"))
+        cb.add_param(*nt("enchantment"))
+        cb.add_param(*nt("level"), range=lambda x: 0 <= x <= 2147483647, default=_gd(cls.enchant, "level"))
+        return cb
+    
+    
