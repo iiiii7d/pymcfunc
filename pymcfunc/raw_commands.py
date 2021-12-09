@@ -4,7 +4,8 @@ import inspect
 import json
 import warnings
 from functools import wraps
-from typing import Dict, Optional, Any, Callable, Literal, Tuple, get_args, TYPE_CHECKING, Union, TypeAlias, List
+from typing import Dict, Optional, Any, Callable, Literal, Tuple, get_args, TYPE_CHECKING, Union, TypeAlias, List, \
+    TypedDict
 from uuid import UUID
 
 from pymcfunc.command_builder import CommandBuilder
@@ -344,7 +345,7 @@ class BedrockRawCommands(UniversalRawCommands):
         self.param_version_introduced("hide_particles", hide_particles, "14w06a", default=False)
         cmd = ExecutedCommand(self.fh, "effect", cb.build(targets=targets, effect=effect, seconds=seconds, amplifier=amplifier))
         self.fh.commands.append(cmd)
-        return cb
+        return cmd
     @classmethod
     def effect_give_cb(cls) -> CommandBuilder:
         cb = CommandBuilder("effect")
@@ -447,7 +448,7 @@ class JavaRawCommands(UniversalRawCommands):
                     warnings.warn(f"The command `{func.__name__}` was introduced in {introduced}, but your pack is for {pack_version}", category=FutureCommandWarning)
                 elif deprecated is not None and pack_version >= JavaVersion(deprecated):
                     warnings.warn(f"The command `{func.__name__}` was deprecated in {deprecated}, but your pack is for {pack_version}", category=DeprecatedCommandWarning)
-                elif temp_removed is not None and  JavaVersion(temp_removed[0]) <= pack_version < JavaVersion(temp_removed[1]):
+                elif temp_removed is not None and JavaVersion(temp_removed[0]) <= pack_version < JavaVersion(temp_removed[1]):
                     warnings.warn(f"The command `{func.__name__}` was deprecated in {temp_removed[0]} and reintroduced in {temp_removed[1]}, but your pack is for {pack_version}", category=DeprecatedCommandWarning)
                 return func(self, *args, **kwargs)
             return wrapper
@@ -768,7 +769,7 @@ class JavaRawCommands(UniversalRawCommands):
     @version(introduced="17w45b")
     def data_get(self,
                  block: Optional[str]=None,
-                 entity: Optional[JavaSelector]=None,  # TODO add Coordinates class when it is written
+                 entity: Optional[Union[JavaSelector, UUID]]=None,  # TODO add Coordinates class when it is written
                  storage: Optional[str]=None, # TODO add ResourceLocation class when it is written
                  path: Optional[str]=None, # TODO add NBTPath class when it is written
                  scale: Optional[float]=None) -> ExecutedCommand:
@@ -792,7 +793,7 @@ class JavaRawCommands(UniversalRawCommands):
     @version(introduced="17w45b")
     def data_merge(self, *,
                    block: Optional[str]=None,
-                   entity: Optional[JavaSelector]=None,  # TODO add Coordinates class when it is written
+                   entity: Optional[Union[JavaSelector, UUID]]=None,  # TODO add Coordinates class when it is written
                    storage: Optional[str]=None,
                    nbt: dict) -> ExecutedCommand: # TODO add NBT class when it is written
         cb = self.data_merge_cb()
@@ -815,13 +816,13 @@ class JavaRawCommands(UniversalRawCommands):
     @version(introduced="18w43a")
     def data_modify(self, *,
                     block: Optional[str]=None,
-                    entity: Optional[JavaSelector]=None,  # TODO add Coordinates class when it is written
+                    entity: Optional[Union[JavaSelector, UUID]]=None,  # TODO add Coordinates class when it is written
                     storage: Optional[str]=None,
                     target_path: str, # TODO add NBTPath when it is written
                     mode: Literal["add", "index", "merge", "prepend", "set"],
                     index: Optional[int]=None,
                     from_block: Optional[str]=None,
-                    from_entity: Optional[JavaSelector]=None,  # TODO add Coordinates class when it is written
+                    from_entity: Optional[Union[JavaSelector, UUID]]=None,  # TODO add Coordinates class when it is written
                     from_storage: Optional[str]=None,
                     source_path: Optional[str]=None, # TODO add NBTPath when it is written
                     value: Optional[Any]=None) -> ExecutedCommand:
@@ -857,7 +858,7 @@ class JavaRawCommands(UniversalRawCommands):
     @version(introduced="17w45b")
     def data_remove(self, *,
                     block: Optional[str]=None,
-                    entity: Optional[JavaSelector]=None,  # TODO add Coordinates class when it is written
+                    entity: Optional[Union[JavaSelector, UUID]]=None,  # TODO add Coordinates class when it is written
                     storage: Optional[str]=None,
                     path: str) -> ExecutedCommand: # TODO add NBTPath class when it is written
         cb = self.data_remove_cb()
@@ -1035,5 +1036,94 @@ class JavaRawCommands(UniversalRawCommands):
         cb.add_param(*nt("enchantment"))
         cb.add_param(*nt("level"), range=lambda x: 0 <= x <= 2147483647, default=_gd(cls.enchant, "level"))
         return cb
-    
-    
+
+    _ExecuteBlockOptions = TypedDict("_ExecuteBlockOptions", {
+        "position": str, # TODO Coord class when it is written
+        "block": str
+    })
+    _ExecuteBlocksOptions = TypedDict("_ExecuteBlocksOptions", {
+        "start": str, # TODO Coord class when it is written
+        "end": str,
+        "destination": str,
+        "scan_mode": Literal["all", "masked"]
+    })
+    _ExecuteDataOptions = TypedDict("_ExecuteDataOptions", {
+        "block": str, # TODO add Coordinates class when it is written
+        "entity": Union[JavaSelector, UUID],
+        "storage": str, # TODO add ResourceLocation class when it is written
+        "path": str # TODO add NBTPath class when it is written
+    }, total=False)
+    _ExecuteEntityOptions = Union[JavaSelector, UUID]
+    _ExecutePredicateOptions = str # TODO add Predicate class when it is written
+    _ExecuteScoreOptions = TypedDict("_ExecuteScoreOptions", {
+        "target": Union[Union[JavaSelector, UUID], Literal["*"]],
+        "target_objective": str,
+        "comparator": Literal["<", "<=", "=", ">=", ">", "matches"],
+        "source": Union[Union[JavaSelector, UUID], Literal["*"]],
+        "source_objective": str,
+        "range": Union[str, int]
+    }, total=False)
+    _ExecuteStoreBlockOptions = TypedDict("_ExecuteStoreBlockOptions", {
+        "position": str, # TODO add Coordinates class when it is written
+        "path": str,  # TODO add NBTPath class when it is written
+        "type": Literal["byte", "short", "int", "long", "float", "double"],
+        "scale": float
+    })
+    _ExecuteStoreBossbarOptions = TypedDict("_ExecuteStoreBossbarOptions", {
+        "id": str, # TODO add ResourceLocation class when it is written
+        "value": Literal["value", "max"]
+    })
+    _ExecuteStoreEntityOptions = TypedDict("_ExecuteStoreEntityOptions", {
+        "target": JavaSelector,
+        "path": str,  # TODO add NBTPath class when it is written
+        "type": Literal["byte", "short", "int", "long", "float", "double"],
+        "scale": float
+    })
+    _ExecuteStoreScoreOptions = TypedDict("_ExecuteStoreScoreOptions", {
+        "target": JavaSelector,
+        "objective": str,
+    })
+    _ExecuteStoreStorageOptions = TypedDict("_ExecuteStoreStorageOptions", {
+        "target": str, # TODO add ResourceLocation class when it is written
+        "path": str,  # TODO add NBTPath class when it is written
+        "type": Literal["byte", "short", "int", "long", "float", "double"],
+        "scale": float
+    })
+    @version(introduced="14w07a")
+    def execute(self, *,
+                align: Optional[str]=None,
+                anchored: Optional[Literal["eyes", "feet"]]=None,
+                as_: Optional[Union[JavaSelector, UUID]]=None,
+                at: Optional[Union[JavaSelector, UUID]]=None,
+                facing_block: str, # TODO Coord class when it is written
+                facing_entity: Optional[Union[JavaSelector, UUID]]=None,
+                facing_entity_anchor: Optional[Literal["eyes", "feet"]]=None,
+                in_: Optional[str]=None, # TODO add resource location when it is written
+                positioned_block: Optional[Union[JavaSelector, UUID]]=None,
+                positioned_entity: Optional[Union[JavaSelector, UUID]]=None,
+                rotated: Optional[str]=None, # TODO rotation
+                rotated_entity: Optional[Union[JavaSelector, UUID]]=None,
+                if_block: _ExecuteBlockOptions,
+                if_blocks: _ExecuteEntityOptions,
+                if_data: _ExecuteDataOptions,
+                if_entity: _ExecuteEntityOptions,
+                if_predicate: _ExecutePredicateOptions,
+                if_score: _ExecuteScoreOptions, # TODO list thingy, Optional thingy
+                unless_block: _ExecuteBlockOptions,
+                unless_blocks: _ExecuteEntityOptions,
+                unless_data: _ExecuteDataOptions,
+                unless_entity: _ExecuteEntityOptions,
+                unless_predicate: _ExecutePredicateOptions,
+                unless_score: _ExecuteScoreOptions,
+                store_result_block: _ExecuteStoreBlockOptions,
+                store_result_bossbar: _ExecuteStoreBossbarOptions,
+                store_result_entity: _ExecuteStoreEntityOptions,
+                store_result_score: _ExecuteStoreScoreOptions,
+                store_result_storage: _ExecuteStoreStorageOptions,
+                store_success_block: _ExecuteStoreBlockOptions,
+                store_success_bossbar: _ExecuteStoreBossbarOptions,
+                store_success_entity: _ExecuteStoreEntityOptions,
+                store_success_score: _ExecuteStoreScoreOptions,
+                store_success_storage: _ExecuteStoreStorageOptions,
+                run: Union[List[ExecutedCommand], ExecutedCommand]):
+
