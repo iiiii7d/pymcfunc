@@ -4,9 +4,10 @@ import inspect
 import json
 import warnings
 from functools import wraps
-from typing import Dict, Optional, Any, Callable, Literal, Tuple, get_args, TYPE_CHECKING, Union, TypeAlias, List, \
-    TypedDict
+from typing import Dict, Optional, Any, Callable, Literal, Tuple, get_args, TYPE_CHECKING, Union, TypeAlias, List
 from uuid import UUID
+
+from typing_extensions import Self
 
 from pymcfunc.command_builder import CommandBuilder
 from pymcfunc.errors import FutureCommandWarning, DeprecatedCommandWarning, EducationEditionWarning
@@ -410,6 +411,7 @@ class BedrockRawCommands(UniversalRawCommands):
         cb = self.execute_cb()
         cmds = []
         commands = [commands] if not isinstance(commands, list) else commands # TODO flatten list
+        commands = [item for sublist in commands for item in sublist]
         for command in commands:
             cmd = ExecutedCommand(self.fh, "execute", cb.build(origin=origin, position=position, detect_pos=detect_pos,
                                                                detect_block=detect_block, detect_data=detect_data,
@@ -429,6 +431,36 @@ class BedrockRawCommands(UniversalRawCommands):
         cb_detect.add_param(*nt("detect_data"), default=_gd(cls.execute, "detect_data"))
         cb.add_param("command", str, spaces=True)
         return cb
+
+    @version(introduced="0.16.0b1")
+    def xp(self, *,
+           amount: int,
+           levels: bool=False,
+           player: BedrockSelector=BedrockSelector.s) -> ExecutedCommand:
+        cb = self.xp_cb()
+        cmd = ExecutedCommand(self.fh, "xp", cb.build(amount=str(amount)+"L" if levels else amount, player=player))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def xp_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("xp")
+        nt = lambda param: (param, _gt(cls.xp, "player"))
+        cb.add_param("amount", Union[str, int], range=lambda x: 0 <= x <= 2147483647)
+        cb.add_param(*nt("player"), optional=True, default=_gd(cls.xp, "player"))
+        return cb
+
+    @version(introduced="0.16.0b1")
+    def fill(self, *,
+             from_: str, # TODO Coords and BlockStates classes when they are written
+             to: str,
+             block: str,
+             tile_data: int=0,
+             block_states: Optional[str]=None,
+             fill_mode: Literal["destroy", "hollow", "keep", "outline", "replace"]="replace",
+             replace_block: Optional[str]=None,
+             replace_data_value: Optional[int]=None):
+        pass
+
 
 
 class JavaRawCommands(UniversalRawCommands):
@@ -1037,93 +1069,415 @@ class JavaRawCommands(UniversalRawCommands):
         cb.add_param(*nt("level"), range=lambda x: 0 <= x <= 2147483647, default=_gd(cls.enchant, "level"))
         return cb
 
-    _ExecuteBlockOptions = TypedDict("_ExecuteBlockOptions", {
-        "position": str, # TODO Coord class when it is written
-        "block": str
-    })
-    _ExecuteBlocksOptions = TypedDict("_ExecuteBlocksOptions", {
-        "start": str, # TODO Coord class when it is written
-        "end": str,
-        "destination": str,
-        "scan_mode": Literal["all", "masked"]
-    })
-    _ExecuteDataOptions = TypedDict("_ExecuteDataOptions", {
-        "block": str, # TODO add Coordinates class when it is written
-        "entity": Union[JavaSelector, UUID],
-        "storage": str, # TODO add ResourceLocation class when it is written
-        "path": str # TODO add NBTPath class when it is written
-    }, total=False)
-    _ExecuteEntityOptions = Union[JavaSelector, UUID]
-    _ExecutePredicateOptions = str # TODO add Predicate class when it is written
-    _ExecuteScoreOptions = TypedDict("_ExecuteScoreOptions", {
-        "target": Union[Union[JavaSelector, UUID], Literal["*"]],
-        "target_objective": str,
-        "comparator": Literal["<", "<=", "=", ">=", ">", "matches"],
-        "source": Union[Union[JavaSelector, UUID], Literal["*"]],
-        "source_objective": str,
-        "range": Union[str, int]
-    }, total=False)
-    _ExecuteStoreBlockOptions = TypedDict("_ExecuteStoreBlockOptions", {
-        "position": str, # TODO add Coordinates class when it is written
-        "path": str,  # TODO add NBTPath class when it is written
-        "type": Literal["byte", "short", "int", "long", "float", "double"],
-        "scale": float
-    })
-    _ExecuteStoreBossbarOptions = TypedDict("_ExecuteStoreBossbarOptions", {
-        "id": str, # TODO add ResourceLocation class when it is written
-        "value": Literal["value", "max"]
-    })
-    _ExecuteStoreEntityOptions = TypedDict("_ExecuteStoreEntityOptions", {
-        "target": JavaSelector,
-        "path": str,  # TODO add NBTPath class when it is written
-        "type": Literal["byte", "short", "int", "long", "float", "double"],
-        "scale": float
-    })
-    _ExecuteStoreScoreOptions = TypedDict("_ExecuteStoreScoreOptions", {
-        "target": JavaSelector,
-        "objective": str,
-    })
-    _ExecuteStoreStorageOptions = TypedDict("_ExecuteStoreStorageOptions", {
-        "target": str, # TODO add ResourceLocation class when it is written
-        "path": str,  # TODO add NBTPath class when it is written
-        "type": Literal["byte", "short", "int", "long", "float", "double"],
-        "scale": float
-    })
-    @version(introduced="14w07a")
-    def execute(self, *,
-                align: Optional[str]=None,
-                anchored: Optional[Literal["eyes", "feet"]]=None,
-                as_: Optional[Union[JavaSelector, UUID]]=None,
-                at: Optional[Union[JavaSelector, UUID]]=None,
-                facing_block: str, # TODO Coord class when it is written
-                facing_entity: Optional[Union[JavaSelector, UUID]]=None,
-                facing_entity_anchor: Optional[Literal["eyes", "feet"]]=None,
-                in_: Optional[str]=None, # TODO add resource location when it is written
-                positioned_block: Optional[Union[JavaSelector, UUID]]=None,
-                positioned_entity: Optional[Union[JavaSelector, UUID]]=None,
-                rotated: Optional[str]=None, # TODO rotation
-                rotated_entity: Optional[Union[JavaSelector, UUID]]=None,
-                if_block: _ExecuteBlockOptions,
-                if_blocks: _ExecuteEntityOptions,
-                if_data: _ExecuteDataOptions,
-                if_entity: _ExecuteEntityOptions,
-                if_predicate: _ExecutePredicateOptions,
-                if_score: _ExecuteScoreOptions, # TODO list thingy, Optional thingy
-                unless_block: _ExecuteBlockOptions,
-                unless_blocks: _ExecuteEntityOptions,
-                unless_data: _ExecuteDataOptions,
-                unless_entity: _ExecuteEntityOptions,
-                unless_predicate: _ExecutePredicateOptions,
-                unless_score: _ExecuteScoreOptions,
-                store_result_block: _ExecuteStoreBlockOptions,
-                store_result_bossbar: _ExecuteStoreBossbarOptions,
-                store_result_entity: _ExecuteStoreEntityOptions,
-                store_result_score: _ExecuteStoreScoreOptions,
-                store_result_storage: _ExecuteStoreStorageOptions,
-                store_success_block: _ExecuteStoreBlockOptions,
-                store_success_bossbar: _ExecuteStoreBossbarOptions,
-                store_success_entity: _ExecuteStoreEntityOptions,
-                store_success_score: _ExecuteStoreScoreOptions,
-                store_success_storage: _ExecuteStoreStorageOptions,
-                run: Union[List[ExecutedCommand], ExecutedCommand]):
+    class ExecuteCommand:
+        """Handler for the (over)complicated /execute command for Java Edition."""
+        def __init__(self):
+            self.command_strings: List[str] = []
+            self.commands: List[ExecutedCommand] = []
 
+        @staticmethod
+        def _check_run(func: Callable[..., Self]):
+            @wraps(func)
+            def wrapper(self, *args, **kwargs):
+                if len(self.command_strings) > 0 and self.command_strings[-1].startswith("run"):
+                    raise ValueError("The `run` subcommand has already been registered. No additional subcommands can be entered.")
+                return func(self, *args, **kwargs)
+            return wrapper
+
+        @_check_run
+        def align(self, axes: str) -> Self:
+            cb = self.align_cb()
+            self.command_strings.append(cb.build(axes=axes))
+            return self
+        @classmethod
+        def align_cb(cls) -> CommandBuilder:
+            cb = CommandBuilder("align")
+            nt = lambda param: (param, _gt(cls.align, param))
+            cb.add_param(*nt("align"), regex=r"^(?!.*(.).*\1)[xyz]+$")
+            return cb
+
+        @_check_run
+        def anchored(self, anchor: Literal["eyes", "feet"]) -> Self:
+            cb = self.anchored_cb()
+            self.command_strings.append(cb.build(anchor=anchor))
+            return self
+        @classmethod
+        def anchored_cb(cls) -> CommandBuilder:
+            cb = CommandBuilder("anchored")
+            cb.add_switch("anchor", _go(cls.anchored, "anchor"))
+            return cb
+
+        @_check_run
+        def as_(self, targets: Union[JavaSelector, UUID]) -> Self:
+            cb = self.as_cb()
+            self.command_strings.append(cb.build(targets=targets))
+            return self
+        @classmethod
+        def as_cb(cls) -> CommandBuilder:
+            cb = CommandBuilder("as")
+            nt = lambda param: (param, _gt(cls.as_, param))
+            cb.add_param(*nt("targets"))
+            return cb
+
+        @_check_run
+        def at(self, targets: Union[JavaSelector, UUID]) -> Self:
+            cb = self.at_cb()
+            self.command_strings.append(cb.build(targets=targets))
+            return self
+        @classmethod
+        def at_cb(cls) -> CommandBuilder:
+            cb = CommandBuilder("as")
+            nt = lambda param: (param, _gt(cls.at, param))
+            cb.add_param(*nt("targets"))
+            return cb
+
+        @_check_run
+        def facing_position(self, position: str) -> Self: # TODO Coord class when it is written
+            cb = self.facing_position_cb()
+            self.command_strings.append(cb.build(position=position))
+            return self
+        @classmethod
+        def facing_position_cb(cls) -> CommandBuilder:
+            cb = CommandBuilder("facing")
+            nt = lambda param: (param, _gt(cls.facing_position, param))
+            cb.add_param(*nt("position"))
+            return cb
+
+        @_check_run
+        def facing_entity(self, targets: Union[JavaSelector, UUID], anchor: Literal["eyes", "feet"]) -> Self:
+            cb = self.facing_entity_cb()
+            self.command_strings.append(cb.build(targets=targets, anchor=anchor))
+            return self
+        @classmethod
+        def facing_entity_cb(cls) -> CommandBuilder:
+            cb = CommandBuilder("facing entity")
+            nt = lambda param: (param, _gt(cls.facing_entity, param))
+            cb.add_param(*nt("targets"))
+            cb.add_switch("anchor", _go(cls.anchored, "anchor"))
+            return cb
+
+        @_check_run
+        def in_(self, dimension: str) -> Self: # TODO add resource location when it is written
+            cb = self.in_cb()
+            self.command_strings.append(cb.build(dimension=dimension))
+            return self
+        @classmethod
+        def in_cb(cls) -> CommandBuilder:
+            cb = CommandBuilder("in")
+            nt = lambda param: (param, _gt(cls.in_, param))
+            cb.add_param(*nt("targets"))
+            return cb
+
+        @_check_run
+        def positioned_position(self, position: str) -> Self:  # TODO Coord class when it is written
+            cb = self.positioned_position_cb()
+            self.command_strings.append(cb.build(position=position))
+            return self
+        @classmethod
+        def positioned_position_cb(cls) -> CommandBuilder:
+            cb = CommandBuilder("positioned")
+            nt = lambda param: (param, _gt(cls.positioned_position, param))
+            cb.add_param(*nt("position"))
+            return cb
+
+        @_check_run
+        def positioned_entity(self, targets: Union[JavaSelector, UUID]) -> Self:
+            cb = self.positioned_entity_cb()
+            self.command_strings.append(cb.build(targets=targets))
+            return self
+        @classmethod
+        def positioned_entity_cb(cls) -> CommandBuilder:
+            cb = CommandBuilder("positioned as")
+            nt = lambda param: (param, _gt(cls.positioned_entity, param))
+            cb.add_param(*nt("targets"))
+            return cb
+
+        @_check_run
+        def rotated(self, yaw: float, pitch: float) -> Self:
+            cb = self.rotated_cb()
+            self.command_strings.append(cb.build(yaw=yaw, pitch=pitch))
+            return self
+        @classmethod
+        def rotated_cb(cls) -> CommandBuilder:
+            cb = CommandBuilder("rotated")
+            nt = lambda param: (param, _gt(cls.rotated, param))
+            cb.add_param(*nt("yaw"), range=lambda x: -180 <= x <= 180)
+            cb.add_param(*nt("pitch"), range=lambda x: -90 <= x <= 90)
+            return cb
+
+        @_check_run
+        def rotated_entity(self, targets: Union[JavaSelector, UUID]) -> Self:
+            cb = self.rotated_entity_cb()
+            self.command_strings.append(cb.build(targets=targets))
+            return self
+        @classmethod
+        def rotated_entity_cb(cls) -> CommandBuilder:
+            cb = CommandBuilder("rotated as")
+            nt = lambda param: (param, _gt(cls.rotated_entity, param))
+            cb.add_param(*nt("targets"))
+            return cb
+
+        @_check_run
+        def cond_block(self, cond: Literal["if", "unless"], *,
+                       position: str, # TODO coord (& block type) classes when they are written
+                       block: str) -> Self:
+            cb = self.cond_block_cb()
+            self.command_strings.append(cb.build(cond=cond, position=position, block=block))
+            return self
+        @classmethod
+        def cond_block_cb(cls) -> CommandBuilder:
+            cb = CommandBuilder()
+            nt = lambda param: (param, _gt(cls.cond_block, param))
+            cb.add_switch("cond", _go(cls.cond_block, "cond"))
+            cb.add_literal("block")
+            cb.add_param(*nt("position"))
+            cb.add_param(*nt("block"))
+            return cb
+
+        @_check_run
+        def cond_blocks(self, cond: Literal["if", "unless"], *,
+                        start: str, # TODO coord classes when they are written
+                        end: str,
+                        destination: str,
+                        scan_mode: Literal["all", "masked"]) -> Self:
+            cb = self.cond_blocks_cb()
+            self.command_strings.append(cb.build(cond=cond, start=start, end=end, destination=destination, scan_mode=scan_mode))
+            return self
+        @classmethod
+        def cond_blocks_cb(cls) -> CommandBuilder:
+            cb = CommandBuilder()
+            nt = lambda param: (param, _gt(cls.cond_blocks, param))
+            cb.add_switch("cond", _go(cls.cond_blocks, "cond"))
+            cb.add_literal("blocks")
+            cb.add_param(*nt("start"))
+            cb.add_param(*nt("end"))
+            cb.add_param(*nt("destination"))
+            cb.add_switch("scan_mode", _go(cls.cond_blocks, "scan_mode"))
+            return cb
+
+        @_check_run
+        def cond_data(self, cond: Literal["if", "unless"], *,
+                      block: str,# TODO add Coordinates, ResourceLocation, NBTPath class when it is written
+                      entity: Union[JavaSelector, UUID],
+                      storage: str,
+                      path: str) -> Self:
+            cb = self.cond_data_cb()
+            self.command_strings.append(cb.build(cond=cond, block=block, entity=entity, storage=storage, path=path))
+            return self
+        @classmethod
+        def cond_data_cb(cls) -> CommandBuilder:
+            cb = CommandBuilder()
+            nt = lambda param: (param, _gt(cls.cond_data, param))
+            cb.add_switch("cond", _go(cls.cond_data, "cond"))
+            cb.add_literal("data")
+            node = cb.add_branch_node()
+            node.add_branch(literal="block").add_param(*nt("block"))
+            node.add_branch(literal="entity").add_param(*nt("entity"))
+            node.add_branch(literal="storage").add_param(*nt("storage"))
+            cb.add_param(*nt("path"))
+            return cb
+
+        @_check_run
+        def cond_entity(self, cond: Literal["if", "unless"], *,
+                        targets: Union[JavaSelector, UUID]) -> Self:
+            cb = self.cond_entity_cb()
+            self.command_strings.append(cb.build(cond=cond, targets=targets))
+            return self
+        @classmethod
+        def cond_entity_cb(cls) -> CommandBuilder:
+            cb = CommandBuilder()
+            nt = lambda param: (param, _gt(cls.cond_entity, param))
+            cb.add_switch("cond", _go(cls.cond_entity, "cond"))
+            cb.add_literal("entity")
+            cb.add_param(*nt("entity"))
+            return cb
+
+        @_check_run
+        def cond_predicate(self, cond: Literal["if", "unless"], *,
+                           predicate: str) -> Self: # TODO add Predicate class when it is written
+            cb = self.cond_predicate_cb()
+            self.command_strings.append(cb.build(cond=cond, predicate=predicate))
+            return self
+        @classmethod
+        def cond_predicate_cb(cls) -> CommandBuilder:
+            cb = CommandBuilder()
+            nt = lambda param: (param, _gt(cls.cond_predicate, param))
+            cb.add_switch("cond", _go(cls.cond_predicate, "cond"))
+            cb.add_literal("predicate")
+            cb.add_param(*nt("predicate"))
+            return cb
+
+        @_check_run
+        def cond_score(self, cond: Literal["if", "unless"], *,
+                       target: Union[Union[JavaSelector, UUID], Literal["*"]],
+                       target_objective: str,
+                       comparator: Literal["<", "<=", "=", ">=", ">", "matches"],
+                       source: Optional[Union[Union[JavaSelector, UUID], Literal["*"]]]=None,
+                       source_objective: Optional[str]=None,
+                       range_: Optional[Union[str, int]]=None) -> Self:
+            cb = self.cond_score_cb()
+            self.command_strings.append(cb.build(cond=cond, target=target, target_objective=target_objective,
+                                                 comparator=comparator, source=source, source_objective=source_objective,
+                                                 range=range_))
+            return self
+        @classmethod
+        def cond_score_cb(cls) -> CommandBuilder:
+            cb = CommandBuilder()
+            nt = lambda param: (param, _gt(cls.cond_score, param))
+            cb.add_switch("cond", _go(cls.cond_score, "cond"))
+            cb.add_literal("score")
+            cb.add_param(*nt("target"))
+            cb.add_param(*nt("target_objective"))
+            node = cb.add_branch_node()
+            node.add_branch(switch_name="comparator", switch_options=["matches"]).add_param(*nt("range"))
+            cb_others = node.add_branch(switch_name="comparator", switch_options=["<", "<=", "=", ">=", ">"])
+            cb_others.add_param(*nt("source"))
+            cb_others.add_param(*nt("source_objective"))
+            return cb
+
+        @_check_run
+        def store_block(self, what: Literal["result", "success"], *,
+                        position: str,  # TODO add Coordinates class when it is written
+                        path: str,  # TODO add NBTPath class when it is written
+                        type_: Literal["byte", "short", "int", "long", "float", "double"],
+                        scale: float) -> Self:
+            cb = self.store_block_cb()
+            self.command_strings.append(cb.build(what=what, position=position, path=path, type=type_, scale=scale))
+            return self
+        @classmethod
+        def store_block_cb(cls) -> CommandBuilder:
+            cb = CommandBuilder("store")
+            nt = lambda param: (param, _gt(cls.store_block, param))
+            cb.add_switch("what", _go(cls.store_block, "what"))
+            cb.add_literal("block")
+            cb.add_param(*nt("position"))
+            cb.add_param(*nt("path"))
+            cb.add_switch("type", _go(cls.store_block, "type"))
+            cb.add_param(*nt("scale"))
+            return cb
+
+        @_check_run
+        def store_bossbar(self, what: Literal["result", "success"], *,
+                          id_: str,  # TODO add ResourceLocation class when it is written
+                          value: Literal["value", "max"]) -> Self:
+            cb = self.store_bossbar_cb()
+            self.command_strings.append(cb.build(what=what, id=id_, value=value))
+            return self
+        @classmethod
+        def store_bossbar_cb(cls) -> CommandBuilder:
+            cb = CommandBuilder("store")
+            nt = lambda param: (param, _gt(cls.store_block, param))
+            cb.add_switch("what", _go(cls.store_bossbar, "what"))
+            cb.add_literal("bossbar")
+            cb.add_param(*nt("id"))
+            cb.add_switch("value", _go(cls.store_bossbar, "value"))
+            return cb
+
+        @_check_run
+        def store_entity(self, what: Literal["result", "success"], *,
+                         target: JavaSelector,
+                         path: str,  # TODO add NBTPath class when it is written
+                         type_: Literal["byte", "short", "int", "long", "float", "double"],
+                         scale: float) -> Self:
+            cb = self.store_entity_cb()
+            self.command_strings.append(cb.build(what=what, target=target, path=path, type=type_, scale=scale))
+            return self
+        @classmethod
+        def store_entity_cb(cls) -> CommandBuilder:
+            cb = CommandBuilder("store")
+            nt = lambda param: (param, _gt(cls.store_entity, param))
+            cb.add_switch("what", _go(cls.store_entity, "what"))
+            cb.add_literal("entity")
+            cb.add_param(*nt("target"))
+            cb.add_param(*nt("path"))
+            cb.add_switch("type", _go(cls.store_entity, "type"))
+            cb.add_param(*nt("scale"))
+            return cb
+
+        @_check_run
+        def store_score(self, what: Literal["result", "success"], *,
+                        target: Union[Union[JavaSelector, UUID], Literal["*"]],
+                        objective: str) -> Self:
+            cb = self.store_score_cb()
+            self.command_strings.append(cb.build(what=what, target=target, objective=objective))
+            return self
+        @classmethod
+        def store_score_cb(cls) -> CommandBuilder:
+            cb = CommandBuilder("store")
+            nt = lambda param: (param, _gt(cls.store_score, param))
+            cb.add_switch("what", _go(cls.store_score, "what"))
+            cb.add_literal("score")
+            cb.add_param(*nt("target"))
+            cb.add_param(*nt("objective"))
+            return cb
+
+        @_check_run
+        def store_storage(self, what: Literal["result", "success"], *,
+                          target: str,  # TODO add ResourceLocation class when it is written
+                          path: str,  # TODO add NBTPath class when it is written
+                          type_: Literal["byte", "short", "int", "long", "float", "double"],
+                          scale: float) -> Self:
+            cb = self.store_storage_cb()
+            self.command_strings.append(cb.build(what=what, target=target, path=path, type=type_, scale=scale))
+            return self
+        @classmethod
+        def store_storage_cb(cls) -> CommandBuilder:
+            cb = CommandBuilder("store")
+            nt = lambda param: (param, _gt(cls.store_storage, param))
+            cb.add_switch("what", _go(cls.store_storage, "what"))
+            cb.add_literal("storage")
+            cb.add_param(*nt("target"))
+            cb.add_param(*nt("path"))
+            cb.add_switch("type", _go(cls.store_storage, "type"))
+            cb.add_param(*nt("scale"))
+            return cb
+
+        @_check_run
+        def run(self, commands: Union[List[ExecutedCommand], ExecutedCommand]):
+            self.command_strings.append("run")
+            self.commands.extend([commands] if not isinstance(commands, list) else [item for sublist in commands for item in sublist])
+        @classmethod
+        def run_cb(cls) -> CommandBuilder:
+            cb = CommandBuilder("run")
+            cb.add_param("command", str)
+            return cb
+
+    EC = ExecutedCommand
+
+    @version(introduced="14w07a")
+    def execute(self, handler: ExecuteCommand) -> Union[ExecutedCommand, List[ExecutedCommand]]:
+        cmds = [] # TODO version checking for subcommands
+        for command in handler.commands:
+            cmd = ExecutedCommand(self.fh, "execute", " ".join(handler.command_strings)+" "+command.command_string)
+            self.fh.commands[self.fh.commands.index(command)] = cmd
+            cmds.append(cmd)
+        return cmds[0] if len(cmds) == 1 else cmds
+
+    @version(introduced="b1.5p5")
+    def experience(self, mode: Literal["add", "set", "query"], *,
+                   targets: Union[JavaSelector, UUID],
+                   amount: Optional[int]=None,
+                   unit: Optional[Literal["levels", "points"]]=None) -> ExecutedCommand:
+        cb = self.experience_cb()
+        cmd = ExecutedCommand(self.fh, "experience", cb.build(mode=mode, targets=targets, amount=amount, unit=unit))
+        self.fh.commands.append(cmd)
+        return cmd
+    xp = experience
+    @classmethod
+    def experience_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("experience")
+        nt = lambda param: (param, _gt(cls.experience, param))
+        node = cb.add_branch_node()
+        cb_add = node.add_branch("mode", ["add"])
+        cb_add.add_param(*nt("targets"), playeronly=True)
+        cb_add.add_param(*nt("amount"), range=lambda x: -2147483648 <= x <= 2147483647)
+        cb_add.add_switch("unit", _go(cls.experience, "unit"), optional=True)
+        cb_set = node.add_branch("mode", ["set"])
+        cb_set.add_param(*nt("targets"), playeronly=True)
+        cb_set.add_param(*nt("amount"), range=lambda x: 0 <= x <= 2147483647)
+        cb_set.add_switch("unit", _go(cls.experience, "unit"), optional=True)
+        cb_query = node.add_branch("mode", ["query"])
+        cb_query.add_param(*nt("targets"), playeronly=True)
+        cb_query.add_switch("unit", _go(cls.experience, "unit"))
+        return cb
+    xp_cb = experience_cb

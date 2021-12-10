@@ -1,10 +1,11 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 from pymcfunc.selectors import UniversalSelector, JavaSelector, BedrockSelector
 from pymcfunc.variables import JavaVariable, BedrockVariable
 import pymcfunc.entities as entities
 from pymcfunc.entities import Entity
-from pymcfunc.raw_commands import UniversalRawCommands, JavaRawCommands, BedrockRawCommands
+from pymcfunc.raw_commands import UniversalRawCommands, JavaRawCommands, BedrockRawCommands, ExecutedCommand
+
 if TYPE_CHECKING:
     from pymcfunc.pack import JavaPack
 
@@ -20,12 +21,12 @@ class UniversalFuncHandler:
     sel = UniversalSelector()
 
     def __init__(self, p):
-        self.commands = []
+        self.commands: List[ExecutedCommand] = []
         self.r = UniversalRawCommands(self)
         self.p = p
 
     def __str__(self):
-        return "\n".join(self.commands)
+        return "\n".join(c.command_string for c in self.commands)
 
     def __iter__(self):
         for i in self.commands:
