@@ -4,6 +4,7 @@ import inspect
 import json
 import warnings
 from functools import wraps
+from types import NoneType
 from typing import Dict, Optional, Any, Callable, Literal, Tuple, get_args, TYPE_CHECKING, Union, TypeAlias, List
 from uuid import UUID
 
@@ -18,6 +19,8 @@ if TYPE_CHECKING:
     from pymcfunc.func_handler import UniversalFuncHandler
 
 RawJson: TypeAlias = Union[dict, list]
+class _MissingType(NoneType): pass
+Missing = _MissingType()
 
 def _get_default(func: Callable[..., Any], param: str) -> Any:
     return inspect.signature(func).parameters[param].default
@@ -458,9 +461,50 @@ class BedrockRawCommands(UniversalRawCommands):
              block_states: Optional[str]=None,
              fill_mode: Literal["destroy", "hollow", "keep", "outline", "replace"]="replace",
              replace_block: Optional[str]=None,
-             replace_data_value: Optional[int]=None):
-        pass
+             replace_data_value: Optional[int]=None) -> ExecutedCommand:
+        cb = self.fill_cb()
+        self.param_version_introduced("block_states", block_states, "1.16.210.53")
+        cmd = ExecutedCommand(self.fh, "fill", cb.build(from_=from_, to=to, block=block, tile_data=tile_data,
+                                                        block_states=block_states, fill_mode=fill_mode,
+                                                        replace_block=replace_block, replace_data_value=replace_data_value))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def fill_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("fill")
+        nt = lambda param: (param, _gt(cls.fill, "fill"))
+        cb.add_param(*nt("from_"))
+        cb.add_param(*nt("to"))
+        cb.add_param(*nt("block"))
+        node = cb.add_branch_node()
+        node.add_branch().add_param(*nt("tile_data"), default=_gd(cls.fill, "tile_data"))
+        node.add_branch().add_param(*nt("block_states"))
+        node2 = cb.add_branch_node()
+        cb_replace = node2.add_branch(switch_name="mode", switch_options=["replace"])
+        cb_replace.add_param(*nt("replace_block"), optional=True)
+        cb_replace.add_param(*nt("replace_data_value"), optional=True)
+        node2.add_branch(switch_name="mode", switch_options=["destroy", "hollow", "keep", "outline"])
+        return cb
 
+    @version(introduced="1.16.100.54")
+    def fog(self, mode: Literal["push", "pop", "remove"], *,
+            player: BedrockSelector=BedrockSelector.s,
+            fog_id: Optional[str]=None,
+            user_provided_id: str) -> ExecutedCommand:
+        cb = self.fog_cb()
+        cmd = ExecutedCommand(self.fh, "fog", cb.build(player=player, mode=mode, fog_id=fog_id, user_provided_id=user_provided_id))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def fog_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("fog")
+        nt = lambda param: (param, _gt(cls.fog, "fog"))
+        cb.add_param(*nt("player"))
+        node = cb.add_branch_node()
+        node.add_branch(switch_name="mode", switch_options=["push"]).add_param(*nt("fog_id"), spaces="q")
+        node.add_branch(switch_name="mode", switch_options=["pop", "remove"])
+        cb.add_param(*nt("user_provided_id"), spaces="q")
+        return cb
 
 
 class JavaRawCommands(UniversalRawCommands):
@@ -706,7 +750,7 @@ class JavaRawCommands(UniversalRawCommands):
                     color: Optional[Literal["blue", "green", "pink", "purple", "red", "white", "yellow"]]=None,
                     max_: Optional[int]=None,
                     name: Optional[Union[str, RawJson]]=None,
-                    players: Optional[Union[JavaSelector, UUID]]=None,
+                    players: Union[Optional[Union[JavaSelector, UUID]], Missing]=Missing,
                     style: Optional[Literal["notched_6", "notched_10", "notched_12", "notched_20", "progress"]]=None,
                     value: Optional[int]=None,
                     visible: Optional[bool]=None) -> ExecutedCommand:
@@ -723,7 +767,7 @@ class JavaRawCommands(UniversalRawCommands):
         node.add_branch(literal="color").add_switch("color", _go(cls.bossbar_set, "color"))
         node.add_branch(literal="max").add_param(*nt("max"), range=lambda x: 1 <= x <= 2147483647)
         node.add_branch(literal="name").add_param(*nt("name"))
-        node.add_branch(literal="players").add_param(*nt("players"), playeronly=True, optional=True)
+        node.add_branch(literal="players").add_param(*nt("players"), playeronly=True, optional=True, default=_gd(cls.bossbar_set, "players"))
         node.add_branch(literal="style").add_switch("style", _go(cls.bossbar_set, "style"))
         node.add_branch(literal="value").add_param(*nt("value"), range=lambda x: 0 <= x <= 2147483647)
         node.add_branch(literal="visible").add_param(*nt("visible"))
@@ -1481,3 +1525,77 @@ class JavaRawCommands(UniversalRawCommands):
         cb_query.add_switch("unit", _go(cls.experience, "unit"))
         return cb
     xp_cb = experience_cb
+
+    @version(introduced="14w03a")
+    def fill(self, from_: str, # TODO add Coordinates class when it is written
+             to: str,
+             block: str,
+             mode: Literal["destroy", "hollow", "keep", "outline", "replace"]="replace",
+             filter_: Optional[str]=None) -> ExecutedCommand:
+        cb = self.fill_cb()
+        cmd = ExecutedCommand(self.fh, "fill", cb.build(from_=from_, to=to, block=block, mode=mode, filter=filter_))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def fill_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("fill")
+        nt = lambda param: (param, _gt(cls.fill, param))
+        cb.add_param(*nt("from_"))
+        cb.add_param(*nt("to"))
+        cb.add_param(*nt("block"))
+        node = cb.add_branch_node()
+        node.add_branch(switch_name="mode", switch_options=["replace"]).add_param(*nt("filter"), optional=True)
+        node.add_branch(switch_name="mode", switch_options=["destroy", "hollow", "keep", "outline"])
+        return cb
+
+    @version(introduced="18w31a")
+    def forceload_add(self, from_: str, to: Optional[str]=None) -> ExecutedCommand: # TODO add Chunk coords when it is written
+        cb = self.forceload_add_cb()
+        cmd = ExecutedCommand(self.fh, "forceload", cb.build(from_=from_, to=to))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def forceload_add_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("forceload add")
+        nt = lambda param: (param, _gt(cls.forceload_add, param))
+        cb.add_param(*nt("from_"))
+        cb.add_param(*nt("to"), optional=True)
+        return cb
+
+    @version(introduced="18w31a")
+    def forceload_remove(self, from_: str,
+                         to: Optional[str] = None) -> ExecutedCommand:  # TODO add Chunk coords when it is written
+        cb = self.forceload_add_cb()
+        cmd = ExecutedCommand(self.fh, "forceload", cb.build(from_=from_, to=to))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def forceload_remove_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("forceload remove")
+        nt = lambda param: (param, _gt(cls.forceload_add, param))
+        cb.add_param(*nt("from_"))
+        cb.add_param(*nt("to"), optional=True)
+        return cb
+
+    @version(introduced="18w31a")
+    def forceload_remove_all(self) -> ExecutedCommand:
+        cb = self.forceload_add_cb()
+        cmd = ExecutedCommand(self.fh, "forceload", "forceload remove all")
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def forceload_remove_all_cb(cls) -> CommandBuilder:
+        return CommandBuilder("forceload remove all")
+
+    @version(introduced="18w31a")
+    def forceload_query(self, pos: Optional[str]=None) -> ExecutedCommand:
+        cb = self.forceload_query_cb()
+        cmd = ExecutedCommand(self.fh, "forceload", cb.build(pos=pos))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def forceload_query_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("forceload")
+        nt = lambda param: (param, _gt(cls.forceload_query, param))
+        cb.add_param(*nt("pos"), optional=True)
+        return cb
