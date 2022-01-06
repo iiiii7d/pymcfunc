@@ -874,12 +874,98 @@ class BedrockRawCommands(UniversalRawCommands):
         cmd = ExecutedCommand(self.fh, "ops", cb.build(view=view))
         self.fh.commands.append(cmd)
         return cmd
+    permissions = ops
     @classmethod
     def ops_cb(cls) -> CommandBuilder:
         cb = CommandBuilder("ops")
         cb.add_switch(*_go(cls.ops, "view"))
         return cb
+    permissions_cb = ops_cb
 
+    @version(introduced="1.0.5.0")
+    def particle(self, effect: str, position: str) -> ExecutedCommand: # TODO Coord class
+        cb = self.particle_cb()
+        cmd = ExecutedCommand(self.fh, "particle", cb.build(effect=effect, position=position))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def particle_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("particle")
+        nt = lambda param: (param, _gt(cls.particle, param))
+        cb.add_param(*nt("effect"))
+        cb.add_param(*nt("position"))
+        return cb
+
+    @version(introduced="1.16.100.52")
+    def playanimation(self, target: Union[str, BedrockSelector], *,
+                      animation: str,
+                      next_state: Optional[str]=None,
+                      blend_out_time: float,
+                      stop_expression: str, # TODO MoLang
+                      controller: str) -> ExecutedCommand:
+        cb = self.playanimation_cb()
+        cmd = ExecutedCommand(self.fh, "playanimation", cb.build(target=target, animation=animation, next_state=next_state,
+                                                                 blend_out_time=blend_out_time, stop_expression=stop_expression,
+                                                                 controller=controller))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def playanimation_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("playanimation")
+        nt = lambda param: (param, _gt(cls.playanimation, param))
+        cb.add_param(*nt("target"))
+        cb.add_param(*nt("animation"), spaces="q", regex=r"\.v1\.0$")
+        cb.add_param(*nt("next_states"), spaces="q")
+        cb.add_param(*nt("blend_out_time"))
+        cb.add_param(*nt("stop_expression"), spaces="q")
+        cb.add_param(*nt("controller"), spaces="q")
+        return cb
+
+    @version(introduced="1.0.5.0")
+    def playsound(self, sound: str,
+                  player: Union[str, BedrockSelector],
+                  position: Optional[str]=None, # TODO Coord class
+                  volume: float=1.0,
+                  pitch: float=1.0,
+                  minimum_volume: float=0.0) -> ExecutedCommand:
+        cb = self.playsound_cb()
+        cmd = ExecutedCommand(self.fh, "playsound", cb.build(sound=sound, player=player, position=position, volume=volume,
+                                                             pitch=pitch, minimum_volume=minimum_volume))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def playsound_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("playsound")
+        nt = lambda param: (param, _gt(cls.playsound, param))
+        cb.add_param(*nt("sound"), spaces="q")
+        cb.add_param(*nt("player"), playeronly=True)
+        cb.add_param(*nt("position"), optional=True)
+        cb.add_param(*nt("volume"), default=_gd(cls.playsound, "volume"))
+        cb.add_param(*nt("pitch"), default=_gd(cls.playsound, "pitch"))
+        cb.add_param(*nt("minimum_volume"), default=_gd(cls.playsound, "minimum_volume"))
+        return cb
+
+    @version(introduced="1.8.0.8")
+    def reload(self) -> ExecutedCommand:
+        cmd = ExecutedCommand(self.fh, "reload", "reload")
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def reload_cb(cls) -> CommandBuilder:
+        return CommandBuilder("reload")
+
+    @education_edition
+    def remove(self, targets: Optional[BedrockSelector]=None) -> ExecutedCommand:
+        cb = self.remove_cb()
+        cmd = ExecutedCommand(self.fh, "remove", cb.build(targets=targets))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def remove_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("remove")
+        nt = lambda param: (param, _gt(cls.remove, param))
+        cb.add_param(*nt("targets"))
+        return cb
 
 class JavaRawCommands(UniversalRawCommands):
     """
@@ -2260,7 +2346,7 @@ class JavaRawCommands(UniversalRawCommands):
         return cb
 
     @version(introduced="a1.0.16")
-    def pardon(self, target: Union[str, JavaSelector]):
+    def pardon(self, target: Union[str, JavaSelector]) -> ExecutedCommand:
         cb = self.pardon_cb()
         cmd = ExecutedCommand(self.fh, "pardon", cb.build(target=target))
         self.fh.commands.append(cmd)
@@ -2274,7 +2360,7 @@ class JavaRawCommands(UniversalRawCommands):
         return cb
 
     @version(introduced="a1.0.16")
-    def pardon_ip(self, target: str):
+    def pardon_ip(self, target: str) -> ExecutedCommand:
         cb = self.pardon_ip_cb()
         cmd = ExecutedCommand(self.fh, "pardon-ip", cb.build(target=target))
         self.fh.commands.append(cmd)
@@ -2286,3 +2372,110 @@ class JavaRawCommands(UniversalRawCommands):
         cb.add_param(*nt("target"),  regex=r"^[ A-Za-z0-9\-+\._]*$")
         cb.add_param(*nt("reason"), default=_gd(cls.pardon, "reason"), spaces=True)
         return cb
+
+    @version(introduced="14w04a")
+    def particle(self, *, particle: str, # TODO Particle class
+                 pos: str="~ ~ ~", # TODO Coord class
+                 delta: Optional[str]=None,
+                 speed: Optional[float]=None,
+                 count: Optional[int]=None,
+                 display_mode: Literal["force", "normal"]="normal",
+                 viewers: Optional[Union[Union[JavaSelector, UUID], str]]=None) -> ExecutedCommand:
+        cb = self.particle_cb()
+        cmd = ExecutedCommand(self.fh, "particle", cb.build(particle=particle, pos=pos, delta=delta, speed=speed, count=count,
+                                                            display_mode=display_mode, viewers=viewers))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def particle_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("particle")
+        nt = lambda param: (param, _gt(cls.particle, param))
+        cb.add_param(*nt("particle")),
+        node = cb.add_branch_node()
+        node.add_branch().add_param(*nt("pos"), default=_gd(cls.particle, "pos"))
+        cb2 = node.add_branch()
+        cb2.add_param(*nt("pos"))
+        cb2.add_param(*nt("delta"))
+        cb2.add_param(*nt("speed"), range=lambda x: 0.0 <= x <= 340282356779733661637539395458142568447.9)
+        cb2.add_param(*nt("count"), range=lambda x: 0 <= x <= 2147483647)
+        cb2.add_switch(*_go(cls.particle, "display_mode"), default=_gd(cls.particle, "display_mode"))
+        cb2.add_param(*nt("viewers"), optional=True, playeronly=True)
+        return cb
+
+    @version(introduced="1.17pre1")
+    def perf(self, switch: Literal["start", "stop"]) -> ExecutedCommand:
+        cb = self.perf_cb()
+        cmd = ExecutedCommand(self.fh, "perf", cb.build(switch=switch))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def perf_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("perf")
+        cb.add_switch(*_go(cls.perf, "switch"))
+        return cb
+
+    @version(introduced="1.16.1pre")
+    def playsound(self, sound: str, *, # TODO ResourceLocation class
+                  source: Literal["master", "music", "record", "weather", "block",
+                                  "hostile", "neutral", "player", "ambient", "voice"],
+                  targets: Union[Union[JavaSelector, UUID], str],
+                  position: Optional[str]=None, # TODO Coord class
+                  volume: float=1.0,
+                  pitch: float=1.0,
+                  minimum_volume: float=0.0) -> ExecutedCommand:
+        cb = self.playsound_cb()
+        cmd = ExecutedCommand(self.fh, "playsound", cb.build(sound=sound, source=source, targets=targets, position=position,
+                                                             volume=volume, pitch=pitch, minimum_volume=minimum_volume))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def playsound_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("playsound")
+        nt = lambda param: (param, _gt(cls.playsound, param))
+        cb.add_param(*nt("sound"))
+        cb.add_switch(*_go(cls.playsound, "source"))
+        cb.add_param(*nt("targets"), playeronly=True)
+        cb.add_param(*nt("position"), optional=True)
+        cb.add_param(*nt("volume"), default=_gd(cls.playsound, "volume"), range=lambda x: x >= 0)
+        cb.add_param(*nt("pitch"), default=_gd(cls.playsound, "pitch"), range=lambda x: 0 <= x <= 2)
+        cb.add_param(*nt("minimum_volume"), default=_gd(cls.playsound, "minimum_volume"), range=lambda x: 0 <= x <= 1)
+        return cb
+
+    @version(introduced="12w24a")
+    def publish(self, port: int) -> ExecutedCommand:
+        cb = self.publish_cb()
+        cmd = ExecutedCommand(self.fh, "publish", cb.build(port=port))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def publish_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("publish")
+        nt = lambda param: (param, _gt(cls.publish, param))
+        cb.add_param(*nt("port"), range=lambda x: 0 <= x <= 65535)
+        return cb
+
+    @version(introduced="17w13a")
+    def recipe(self, action: Literal["give", "take"],
+               targets: Union[Union[JavaSelector, UUID], str],
+               recipe: Union[str, Literal["*"]]) -> ExecutedCommand: # TODO ResourceLocation
+        cb = self.recipe_cb()
+        cmd = ExecutedCommand(self.fh, "recipe", cb.build(action=action, targets=targets, recipe=recipe))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def recipe_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("recipe")
+        nt = lambda param: (param, _gt(cls.recipe, param))
+        cb.add_switch(*_go(cls.recipe, "action"))
+        cb.add_param(*nt("targets"), playeronly=True)
+        cb.add_param(*nt("recipe"))
+        return cb
+
+    @version(introduced="17w18a")
+    def reload(self) -> ExecutedCommand:
+        cmd = ExecutedCommand(self.fh, "reload", "reload")
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def reload_cb(cls) -> CommandBuilder:
+        return CommandBuilder("reload")
