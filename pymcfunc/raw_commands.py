@@ -19,6 +19,8 @@ if TYPE_CHECKING:
     from pymcfunc.func_handler import UniversalFuncHandler
 
 RawJson: TypeAlias = Union[dict, list]
+
+# noinspection PyFinal
 class _MissingType(NoneType): pass
 Missing = _MissingType()
 
@@ -288,7 +290,7 @@ class BedrockRawCommands(UniversalRawCommands):
     #/dedicatedwsserver
 
     @version(introduced="a1.0.16")
-    def deop(self, target: BedrockSelector) -> ExecutedCommand:
+    def deop(self, target: Union[str, BedrockSelector]) -> ExecutedCommand:
         cb = self.deop_cb()
         cmd = ExecutedCommand(self.fh, "deop", cb.build(target=target))
         self.fh.commands.append(cmd)
@@ -506,6 +508,378 @@ class BedrockRawCommands(UniversalRawCommands):
         cb.add_param(*nt("user_provided_id"), spaces="q")
         return cb
 
+    @version(introduced="1.8.0.8")
+    def function(self, name: str) -> ExecutedCommand:  # TODO add ResourceLocation when it is written
+        cb = self.function_cb()
+        cmd = ExecutedCommand(self.fh, "function", cb.build(name=name))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def function_cb(cls):
+        cb = CommandBuilder("function")
+        nt = lambda param: (param, _gt(cls.function, param))
+        cb.add_param(*nt("name"))
+        return cb
+
+    @version(introduced="0.16.0b1")
+    def gamemode(self, mode: Literal["survival", "creative", "adventure", "s", "c", "a", 0, 1, 2],
+                 target: Union[BedrockSelector, str] = BedrockSelector.s) -> ExecutedCommand:
+        cb = self.gamemode_cb()
+        self.option_version_introduced("mode", mode, "1.1.0.0", "adventure")
+        self.option_version_introduced("mode", mode, "1.1.0.0", "a")
+        self.option_version_introduced("mode", mode, "1.1.0.0", 2)
+        cmd = ExecutedCommand(self.fh, "gamemode", cb.build(mode=mode, target=target))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def gamemode_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("gamemode")
+        nt = lambda param: (param, _gt(cls.gamemode, param))
+        cb.add_param(*nt("mode"))
+        cb.add_param(*nt("target"), default=_gd(cls.gamemode, "target"), playeronly=True)
+        return cb
+
+    @version(introduced="1.0.5.0")
+    def gamerule(self, rule_name: str, value: Union[bool, int]) -> ExecutedCommand:
+        cb = self.gamerule_cb()
+        cmd = ExecutedCommand(self.fh, "gamerule", cb.build(rule_name=rule_name, value=value))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def gamerule_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("gamerule")
+        nt = lambda param: (param, _gt(cls.gamerule, param))
+        cb.add_param(*nt("rule_name"))
+        cb.add_param(*nt("value"), optional=True)
+        return cb
+
+    @version(introduced="1.16.210.60")
+    def gametest_runthis(self) -> ExecutedCommand:
+        cmd = ExecutedCommand(self.fh, "gametest", "gametest runthis")
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def gametest_runthis_cb(cls) -> CommandBuilder:
+        return CommandBuilder("gametest runthis")
+
+    @version(introduced="1.16.210.60")
+    def gametest_run(self, test_name: str, rotation_steps: Optional[int]=None) -> ExecutedCommand:
+        cb = self.gametest_run_cb()
+        cmd = ExecutedCommand(self.fh, "gametest", cb.build(test_name=test_name, rotation_steps=rotation_steps))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def gametest_run_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("gametest run")
+        nt = lambda param: (param, _gt(cls.gametest_run, param))
+        cb.add_param(*nt("test_name"))
+        cb.add_param(*nt("rotation_steps"), optional=True)
+        return cb
+
+    @version(introduced="1.16.210.60")
+    def gametest_runset(self, tag: Optional[str]=None, rotation_steps: Optional[int]=None) -> ExecutedCommand:
+        cb = self.gametest_run_cb()
+        cmd = ExecutedCommand(self.fh, "gametest", cb.build(tag=tag, rotation_steps=rotation_steps))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def gametest_runset_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("gametest runset")
+        nt = lambda param: (param, _gt(cls.gametest_runset, param))
+        cb.add_param(*nt("tag"), optional=True)
+        cb.add_param(*nt("rotation_steps"), optional=True)
+        return cb
+
+    @version(introduced="1.16.210.60")
+    def gametest_clearall(self, radius: Optional[int]=None) -> ExecutedCommand:
+        cb = self.gametest_clearall_cb()
+        cmd = ExecutedCommand(self.fh, "gametest", cb.build(radius=radius))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def gametest_clearall_cb(cls):
+        cb = CommandBuilder("gametest clearall")
+        nt = lambda param: (param, _gt(cls.gametest_clearall, param))
+        cb.add_param(*nt("radius"), optional=True)
+        return cb
+
+    @version(introduced="1.16.210.60")
+    def gametest_pos(self) -> ExecutedCommand:
+        cmd = ExecutedCommand(self.fh, "gametest", "gametest pos")
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def gametest_pos_cb(cls) -> CommandBuilder:
+        return CommandBuilder("gametest pos")
+
+    @version(introduced="1.16.210.60")
+    def gametest_create(self, test_name: str, width: Optional[int]=None, height: Optional[int]=None, depth: Optional[int]=None) -> ExecutedCommand:
+        cb = self.gametest_clearall_cb()
+        cmd = ExecutedCommand(self.fh, "gametest", cb.build(test_name=test_name, width=width, height=height, depth=depth))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def gametest_create_cb(cls):
+        cb = CommandBuilder("gametest create")
+        nt = lambda param: (param, _gt(cls.gametest_create, param))
+        cb.add_param(*nt("test_name"))
+        cb.add_param(*nt("width"), optional=True, range=lambda x: 0 <= x <= 2147483647)
+        cb.add_param(*nt("height"), optional=True, range=lambda x: 0 <= x <= 2147483647)
+        cb.add_param(*nt("depth"), optional=True, range=lambda x: 0 <= x <= 2147483647)
+        return cb
+
+    @version(introduced="1.16.210.60")
+    def gametest_runthese(self) -> ExecutedCommand:
+        cmd = ExecutedCommand(self.fh, "gametest", "gametest runthese")
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def gametest_runthese_cb(cls) -> CommandBuilder:
+        return CommandBuilder("gametest runthese")
+
+    @version(introduced="0.16.0b1")
+    def give(self, player: Union[str, BedrockSelector],
+             item_name: str,
+             amount: int=1,
+             data: int=0,
+             components: Optional[dict]=None) -> ExecutedCommand: # add ItemComponents class when it is written
+        cb = self.give_cb()
+        cmd = ExecutedCommand(self.fh, "give", cb.build(player=player, item_name=item_name, amount=amount, data=data, components=components))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def give_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("give")
+        nt = lambda param: (param, _gt(cls.give, param))
+        cb.add_param(*nt("player"), playeronly=True)
+        cb.add_param(*nt("item_name"))
+        cb.add_param(*nt("amount"), default=_gd(cls.give, "amount"))
+        cb.add_param(*nt("data"), default=_gd(cls.give, "data"))
+        cb.add_param(*nt("components"), optional=True)
+        return cb
+
+    @version(introduced="1.2.0.1")
+    @education_edition
+    def immutable(self, value: Optional[bool]=False) -> ExecutedCommand:
+        cb = self.immutable_cb()
+        cmd = ExecutedCommand(self.fh, "immutable", cb.build(value=value))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def immutable_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("immutable")
+        nt = lambda param: (param, _gt(cls.immutable, param))
+        cb.add_param(*nt("value"), optional=True)
+        return cb
+
+    @version(introduced="1.16.0.57")
+    def kick(self, target: Union[BedrockSelector, str],
+             reason: str = "Kicked by an operator") -> ExecutedCommand:
+        cb = self.kick_cb()
+        cmd = ExecutedCommand(self.fh, "kick", cb.build(target=target, reason=reason))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def kick_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("kick")
+        nt = lambda param: (param, _gt(cls.kick, param))
+        cb.add_param(*nt("target"), playeronly=True)
+        cb.add_param(*nt("reason"), default=_gd(cls.kick, "reason"))
+        return cb
+
+    @version(introduced="1.16.0b1")
+    def kill(self, target: Union[Union[BedrockSelector, UUID], str]=BedrockSelector.s) -> ExecutedCommand:
+        cb = self.kick_cb()
+        cmd = ExecutedCommand(self.fh, "kick", cb.build(target=target))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def kill_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("kick")
+        nt = lambda param: (param, _gt(cls.kick, param))
+        cb.add_param(*nt("target"))
+        return cb
+
+    @version(introduced="1.16.0b1")
+    def list(self) -> ExecutedCommand:
+        cmd = ExecutedCommand(self.fh, "list", "list")
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def list_cb(cls) -> CommandBuilder:
+        return CommandBuilder("list")
+
+    @version(introduced="0.17.0.1")
+    def locate(self, structure: str) -> ExecutedCommand:
+        cb = self.locate_cb()
+        cmd = ExecutedCommand(self.fh, "locate", cb.build(structure=structure))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def locate_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("locate")
+        nt = lambda param: (param, _gt(cls.locate, param))
+        cb.add_param(*nt("structure"))
+        return cb
+
+    @version(introduced="1.18.0.21")
+    def loot(self, *,
+             position: str, # TODO Coord class
+             loot_table: str, # TODO LootTable class
+             tool: Union[str, Literal["mainhand", "offland"]]) -> ExecutedCommand: # TODO Item class?
+        cb = self.loot_cb()
+        cmd = ExecutedCommand(self.fh, "loot", cb.build(position=position, loot_table=loot_table, tool=tool))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def loot_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("loot spawn")
+        nt = lambda param: (param, _gt(cls.loot, param))
+        cb.add_param(*nt("position"))
+        cb.add_literal("loot")
+        cb.add_param(*nt("loot_table"))
+        cb.add_param(*nt("tool"))
+        return cb
+
+    @version(introduced="1.0.5.0")
+    def me(self, msg: str) -> ExecutedCommand:
+        cb = self.me_cb()
+        cmd = ExecutedCommand(self.fh, "me", cb.build(msg=msg))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def me_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("me")
+        nt = lambda param: (param, _gt(cls.me, param))
+        cb.add_param(*nt("msg"))
+        return cb
+
+    @version(introduced="1.11.0.3")
+    def mobevent(self, event: Literal["minecraft:pillager_patrols_event",
+                                      "minecraft:wandering_trader_event",
+                                      "events_enabled"],
+                 value: Optional[bool]=None) -> ExecutedCommand:
+        cb = self.mobevent_cb()
+        cmd = ExecutedCommand(self.fh, "mobevent", cb.build(event=event, value=value))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def mobevent_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("mobevent")
+        nt = lambda param: (param, _gt(cls.mobevent, param))
+        cb.add_switch(*_go(cls.mobevent, "event"))
+        cb.add_param(*nt("value"), optional=True)
+        return cb
+
+    @version(introduced="0.16.0b1")
+    def msg(self, targets: Union[BedrockSelector, str], message: str) -> ExecutedCommand:
+        cb = self.msg_cb()
+        cmd = ExecutedCommand(self.fh, "msg", cb.build(targets=targets, message=message))
+        self.fh.commands.append(cmd)
+        return cmd
+    tell = w = msg
+    @classmethod
+    def msg_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("msg")
+        nt = lambda param: (param, _gt(cls.msg, param))
+        cb.add_param(*nt("targets"), playeronly=True)
+        cb.add_param(*nt("message"))
+        return cb
+    tell_cb = w_cb = msg_cb
+
+    @version(introduced="1.16.100.58")
+    def music_play(self, *,
+                   track_name: str,
+                   volume: Optional[float]=None,
+                   fade_seconds: Optional[float]=None,
+                   repeat_mode: Literal["loop", "play_once"]="play_once"):
+        cb = self.music_play_cb()
+        cmd = ExecutedCommand(self.fh, "music", cb.build(track_name=track_name, volume=volume,
+                                                         fade_seconds=fade_seconds, repeat_mode=repeat_mode))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def music_play_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("music play")
+        nt = lambda param: (param, _gt(cls.music_play, param))
+        cb.add_param(*nt("track_name"), spaces="q"),
+        cb.add_param(*nt("volume"), range=lambda x: 0 <= x <= 1)
+        cb.add_param(*nt("fade_seconds"), range=lambda x: 0 <= x <= 10)
+        cb.add_switch(*_go(cls.music_play, "repeat_mode"), default=_gd(cls.music_play, "repeat_mode"))
+        return cb
+
+    @version(introduced="1.16.100.58")
+    def music_queue(self, *,
+                    track_name: str,
+                    volume: Optional[float] = None,
+                    fade_seconds: Optional[float] = None,
+                    repeat_mode: Literal["loop", "play_once"] = "play_once"):
+        cb = self.music_queue_cb()
+        cmd = ExecutedCommand(self.fh, "music", cb.build(track_name=track_name, volume=volume,
+                                                         fade_seconds=fade_seconds, repeat_mode=repeat_mode))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def music_queue_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("music queue")
+        nt = lambda param: (param, _gt(cls.music_queue, param))
+        cb.add_param(*nt("track_name"), spaces="q"),
+        cb.add_param(*nt("volume"), range=lambda x: 0 <= x <= 1)
+        cb.add_param(*nt("fade_seconds"), range=lambda x: 0 <= x <= 10)
+        cb.add_switch(*_go(cls.music_queue, "repeat_mode"), default=_gd(cls.music_queue, "repeat_mode"))
+        return cb
+
+    @version(introduced="1.16.100.58")
+    def music_stop(self, fade_seconds: Optional[float] = None,):
+        cb = self.music_stop_cb()
+        cmd = ExecutedCommand(self.fh, "music", cb.build(fade_seconds=fade_seconds))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def music_stop_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("music stop")
+        nt = lambda param: (param, _gt(cls.music_play, param))
+        cb.add_param(*nt("fade_seconds"), range=lambda x: 0 <= x <= 10)
+        return cb
+
+    @version(introduced="1.16.100.58")
+    def music_volume(self, volume: Optional[float]):
+        cb = self.music_volume_cb()
+        cmd = ExecutedCommand(self.fh, "music", cb.build(volume=volume))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def music_volume_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("music volume")
+        nt = lambda param: (param, _gt(cls.music_volume, param))
+        cb.add_param(*nt("volume"), range=lambda x: 0 <= x <= 1)
+        return cb
+
+    @version(introduced="a1.0.16")
+    def op(self, target: Union[str, BedrockSelector]) -> ExecutedCommand:
+        cb = self.op_cb()
+        cmd = ExecutedCommand(self.fh, "op", cb.build(target=target))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def op_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("op")
+        nt = lambda param: (param, _gt(cls.op, param))
+        cb.add_param(*nt("target"), playeronly=True, singleonly=True)
+        return cb
+
+    # version unknown
+    def ops(self, view: Literal["list", "reload"]) -> ExecutedCommand:
+        cb = self.ops_cb()
+        cmd = ExecutedCommand(self.fh, "ops", cb.build(view=view))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def ops_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("ops")
+        cb.add_switch(*_go(cls.ops, "view"))
+        return cb
+
 
 class JavaRawCommands(UniversalRawCommands):
     """
@@ -656,7 +1030,7 @@ class JavaRawCommands(UniversalRawCommands):
         return cb
 
     @version(introduced="a1.0.16")
-    def ban(self, target: JavaSelector, reason: Optional[str]="Banned by an operator."):
+    def ban(self, target: Union[str, JavaSelector], reason: Optional[str]="Banned by an operator"):
         cb = self.ban_cb()
         cmd = ExecutedCommand(self.fh, "ban", cb.build(target=target, reason=reason))
         self.fh.commands.append(cmd)
@@ -670,7 +1044,7 @@ class JavaRawCommands(UniversalRawCommands):
         return cb
 
     @version(introduced="a1.0.16")
-    def ban_ip(self, target: Union[str, JavaSelector], reason: Optional[str]="Banned by an operator."):
+    def ban_ip(self, target: Union[str, JavaSelector], reason: Optional[str]="Banned by an operator"):
         cb = self.ban_ip_cb()
         cmd = ExecutedCommand(self.fh, "ban-ip", cb.build(target=target, reason=reason))
         self.fh.commands.append(cmd)
@@ -1034,7 +1408,7 @@ class JavaRawCommands(UniversalRawCommands):
         return cb
 
     @version(introduced="a1.0.16")
-    def deop(self, targets: JavaSelector) -> ExecutedCommand:
+    def deop(self, targets: Union[str, JavaSelector]) -> ExecutedCommand:
         cb = self.deop_cb()
         cmd = ExecutedCommand(self.fh, "deop", cb.build(target=targets))
         self.fh.commands.append(cmd)
@@ -1579,7 +1953,6 @@ class JavaRawCommands(UniversalRawCommands):
 
     @version(introduced="18w31a")
     def forceload_remove_all(self) -> ExecutedCommand:
-        cb = self.forceload_add_cb()
         cmd = ExecutedCommand(self.fh, "forceload", "forceload remove all")
         self.fh.commands.append(cmd)
         return cmd
@@ -1598,4 +1971,318 @@ class JavaRawCommands(UniversalRawCommands):
         cb = CommandBuilder("forceload")
         nt = lambda param: (param, _gt(cls.forceload_query, param))
         cb.add_param(*nt("pos"), optional=True)
+        return cb
+
+    @version(introduced="1.12pre1")
+    def function(self, name: str) -> ExecutedCommand: # TODO add ResourceLocation and tag when it is written
+        cb = self.function_cb()
+        cmd = ExecutedCommand(self.fh, "function", cb.build(name=name))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def function_cb(cls):
+        cb = CommandBuilder("function")
+        nt = lambda param: (param, _gt(cls.function, param))
+        cb.add_param(*nt("name"))
+        return cb
+
+    @version(introduced="b1.8pre")
+    def gamemode(self, mode: Literal["survival", "creative", "adventure", "spectator"],
+                 target: Union[Union[JavaSelector, UUID], str]=JavaSelector.s) -> ExecutedCommand:
+        cb = self.gamemode_cb()
+        self.option_version_introduced("mode", mode, "14w05a", "spectator")
+        cmd = ExecutedCommand(self.fh, "gamemode", cb.build(mode=mode, target=target))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def gamemode_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("gamemode")
+        nt = lambda param: (param, _gt(cls.gamemode, param))
+        cb.add_param(*nt("mode"))
+        cb.add_param(*nt("target"), default=_gd(cls.gamemode, "target"), playeronly=True)
+        return cb
+
+    @version(introduced="12w32a")
+    def gamerule(self, rule_name: str, value: Union[bool, int]) -> ExecutedCommand:
+        cb = self.gamerule_cb()
+        cmd = ExecutedCommand(self.fh, "gamerule", cb.build(rule_name=rule_name, value=value))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def gamerule_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("gamerule")
+        nt = lambda param: (param, _gt(cls.gamerule, param))
+        cb.add_param(*nt("rule_name"))
+        cb.add_param(*nt("value"), optional=True)
+        return cb
+
+    @version(introduced="a1.0.15")
+    def give(self, target: Union[Union[JavaSelector, UUID], str], item: str, count: int=1) -> ExecutedCommand:
+        cb = self.give_cb()
+        cmd = ExecutedCommand(self.fh, "give", cb.build(target=target, item=item, count=count))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def give_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("give")
+        nt = lambda param: (param, _gt(cls.give, param))
+        cb.add_param(*nt("target"), playeronly=True)
+        cb.add_param(*nt("item"))
+        cb.add_param(*nt("count"), default=_gd(cls.give, "count"))
+        return cb
+
+    @version(introduced="20w46a")
+    def item_modify(self, *,
+                    block: Optional[str] = None,  # TODO add Coord class when it is written
+                    entity: Optional[Union[str, Union[JavaSelector, UUID]]] = None,
+                    slot: str,  # TODO class for slots?
+                    modifier: Optional[str]=None) -> ExecutedCommand: # TODO ResourceLocation and ItemModifier class
+        cb = self.item_modify_cb()
+        cmd = ExecutedCommand(self.fh, "item", cb.build(block=block, entity=entity, slot=slot, modifier=modifier))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def item_modify_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("item modify")
+        nt = lambda param: (param, _gt(cls.item_modify, param))
+        node = cb.add_branch_node()
+        node.add_branch(literal="block").add_param(*nt("block"))
+        node.add_branch(literal="entity").add_param(*nt("entity"))
+        cb.add_param(*nt("slot"))
+        cb.add_param(*nt("modifier"))
+        return cb
+
+    @version(introduced="20w46a")
+    def item_replace(self, *,
+                     block: Optional[str]=None, # TODO add Coord class when it is written
+                     entity: Optional[Union[str, Union[JavaSelector, UUID]]]=None,
+                     slot: str, # TODO class for slots?
+                     replace_mode: Literal["with", "from"],
+                     item: Optional[str]=None,
+                     count: int=1,
+                     from_block: Optional[str]=None,  # TODO add Coord class when it is written
+                     from_entity: Optional[Union[str, Union[JavaSelector, UUID]]]=None,
+                     from_slot: Optional[str]=None,
+                     modifier: Optional[str]=None) -> ExecutedCommand: # TODO ResourceLocation and ItemModifier class
+        cb = self.item_replace_cb()
+        cmd = ExecutedCommand(self.fh, "item", cb.build(block=block, entity=entity, slot=slot, replace_mode=replace_mode,
+                                                        modifier=modifier, item=item, count=count, from_block=from_block,
+                                                        from_entity=from_entity, from_slot=from_slot))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def item_replace_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("item replace")
+        nt = lambda param: (param, _gt(cls.item_replace, param))
+        node = cb.add_branch_node()
+        node.add_branch(literal="block").add_param(*nt("block"))
+        node.add_branch(literal="entity").add_param(*nt("entity"))
+        cb.add_param(*nt("slot"))
+        node2 = cb.add_branch_node()
+        cb_with = node2.add_branch(switch_name="replace_mode", switch_options=["with"])
+        cb_with.add_param(*nt("item"))
+        cb_with.add_param(*nt("count"), default=_gd(cls.item_replace, "count"))
+        cb_from = node2.add_branch(switch_name="replace_mode", switch_options=["from"])
+        node3 = cb_from.add_branch_node()
+        node3.add_branch(literal="block").add_param(*nt("block"))
+        node3.add_branch(literal="entity").add_param(*nt("entity"))
+        cb_from.add_param(*nt("from_slot"))
+        cb_from.add_param(*nt("modifier"), optional=True)
+        return cb
+
+    @version(introduced="21w37a")
+    def jfr(self, switch: Literal["start", "stop"]) -> ExecutedCommand:
+        cb = self.jfr_cb()
+        cmd = ExecutedCommand(self.fh, "jfr", cb.build(switch=switch))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def jfr_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("jfr")
+        cb.add_switch(*_go(cls.jfr, "switch"))
+        return cb
+
+    @version(introduced="1.0.16")
+    def kick(self, target: Union[Union[JavaSelector, UUID], str], reason: str="Kicked by an operator") -> ExecutedCommand:
+        cb = self.kick_cb()
+        cmd = ExecutedCommand(self.fh, "kick", cb.build(target=target, reason=reason))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def kick_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("kick")
+        nt = lambda param: (param, _gt(cls.kick, param))
+        cb.add_param(*nt("target"), playeronly=True)
+        cb.add_param(*nt("reason"), default=_gd(cls.kick, "reason"))
+        return cb
+
+    @version(introduced="a1.2.6")
+    def kill(self, target: Union[Union[JavaSelector, UUID], str]=JavaSelector.s) -> ExecutedCommand:
+        cb = self.kick_cb()
+        cmd = ExecutedCommand(self.fh, "kick", cb.build(target=target))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def kill_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("kick")
+        nt = lambda param: (param, _gt(cls.kick, param))
+        cb.add_param(*nt("target"))
+        return cb
+
+    @version(introduced="a1.0.16_02")
+    def list(self, uuids: bool=True) -> ExecutedCommand:
+        cmd = ExecutedCommand(self.fh, "list", "list uuids" if uuids else "list")
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def list_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("list")
+        cb.add_branch_node(optional=True).add_branch(literal="uuids")
+        return cb
+
+    @version(introduced="16w39a")
+    def locate(self, structure: str) -> ExecutedCommand:
+        cb = self.locate_cb()
+        cmd = ExecutedCommand(self.fh, "locate", cb.build(structure=structure))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def locate_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("locate")
+        nt = lambda param: (param, _gt(cls.locate, param))
+        cb.add_param(*nt("structure"))
+        return cb
+
+    @version(introduced="20w06a")
+    def locatebiome(self, biome: str) -> ExecutedCommand: # TODO ResourceLocation
+        cb = self.locate_cb()
+        cmd = ExecutedCommand(self.fh, "locatebiome", cb.build(biome=biome))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def locatebiome_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("locatebiome")
+        nt = lambda param: (param, _gt(cls.locatebiome, param))
+        cb.add_param(*nt("biome"))
+        return cb
+
+    @version(introduced="18w43a")
+    def loot(self, *,
+             spawn_target_pos: Optional[str]=None, # TODO Coord
+             replace_entities: Optional[Union[Union[JavaSelector, UUID], str]]=None,
+             replace_block: Optional[str]=None,
+             replace_slot: Optional[str]=None, # TODO Slot class
+             replace_count: Optional[int]=None,
+             give_players: Optional[Union[Union[JavaSelector, UUID], str]]=None,
+             insert_target_pos: Optional[str]=None, # TODO Coord
+             fish_loot_table: Optional[str]=None, # TODO LootTable, ResourceLocation class
+             fish_pos: Optional[str]=None, # TODO coord
+             fish_tool: Optional[Union[str, Literal["mainhand", "offhand"]]]=None, # TODO item class?
+             loot_loot_table: Optional[str]=None,
+             kill_target: Optional[Union[Union[JavaSelector, UUID], str]]=None,
+             mine_pos: Optional[str]=None,  # TODO coord
+             mine_tool: Optional[Union[str, Literal["mainhand", "offhand"]]]=None) -> ExecutedCommand:  # TODO item class?
+        cb = self.loot_cb()
+        cmd = ExecutedCommand(self.fh, "loot", cb.build(spawn_target_pos=spawn_target_pos, replace_entities=replace_entities,
+                                                        replace_block=replace_block, replace_slot=replace_slot,
+                                                        replace_count=replace_count, give_players=give_players,
+                                                        insert_target_pos=insert_target_pos, fish_loot_table=fish_loot_table,
+                                                        fish_pos=fish_pos, fish_tool=fish_tool, loot_loot_table=loot_loot_table,
+                                                        kill_target=kill_target, mine_pos=mine_pos, mine_tool=mine_tool))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def loot_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("loot")
+        nt = lambda param: (param, _gt(cls.loot, param))
+        node = cb.add_branch_node()
+        node.add_branch(literal="spawn").add_param(*nt("spawn_target_pos"))
+        cb_target_replace = node.add_branch(literal="replace")
+        node2 = cb_target_replace.add_branch_node()
+        node2.add_branch(literal="entity").add_param(*nt("replace_entities"))
+        node2.add_branch(literal="block").add_param(*nt("replace_block"))
+        cb_target_replace.add_param(*nt("replace_slot"))
+        cb_target_replace.add_param(*nt("replace_count"), optional=True, range=lambda x: 0 <= x <= 2147483647)
+        node.add_branch(literal="give").add_param(*nt("give_players"), playeronly=True)
+        node.add_branch(literal="insert").add_param(*nt("insert_target_pos"))
+        node3 = cb.add_branch_node()
+        cb_fish = node3.add_branch(literal="fish")
+        cb_fish.add_param(*nt("fish_loot_table"))
+        cb_fish.add_param(*nt("fish_pos"))
+        cb_fish.add_param(*nt("fish_tool"))
+        node3.add_branch(literal="loot").add_param(*nt("loot_loot_table"))
+        node3.add_branch(literal="kill").add_param(*nt("kill_target"), singleonly=True)
+        cb_mine = node3.add_branch(literal="mine")
+        cb_mine.add_param(*nt("mine_pos"))
+        cb_mine.add_param(*nt("mine_tool"))
+        return cb
+
+    # version unknown
+    def me(self, msg: str) -> ExecutedCommand:
+        cb = self.me_cb()
+        cmd = ExecutedCommand(self.fh, "me", cb.build(msg=msg))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def me_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("me")
+        nt = lambda param: (param, _gt(cls.me, param))
+        cb.add_param(*nt("msg"))
+        return cb
+
+    @version(introduced="a1.0.16_02")
+    def msg(self, targets: Union[Union[JavaSelector, UUID], str], message: str) -> ExecutedCommand:
+        cb = self.msg_cb()
+        cmd = ExecutedCommand(self.fh, "msg", cb.build(targets=targets, message=message))
+        self.fh.commands.append(cmd)
+        return cmd
+    tell = w = msg
+    @classmethod
+    def msg_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("msg")
+        nt = lambda param: (param, _gt(cls.msg, param))
+        cb.add_param(*nt("targets"), playeronly=True)
+        cb.add_param(*nt("message"))
+        return cb
+    tell_cb = w_cb = msg_cb
+
+    @version(introduced="a1.0.16")
+    def op(self, targets: Union[str, JavaSelector]) -> ExecutedCommand:
+        cb = self.op_cb()
+        cmd = ExecutedCommand(self.fh, "op", cb.build(target=targets))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def op_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("op")
+        nt = lambda param: (param, _gt(cls.op, param))
+        cb.add_param(*nt("targets"), playeronly=True)
+        return cb
+
+    @version(introduced="a1.0.16")
+    def pardon(self, target: Union[str, JavaSelector]):
+        cb = self.pardon_cb()
+        cmd = ExecutedCommand(self.fh, "pardon", cb.build(target=target))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def pardon_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("pardon")
+        nt = lambda param: (param, _gt(cls.pardon, param))
+        cb.add_param(*nt("target"), playeronly=True)
+        cb.add_param(*nt("reason"), default=_gd(cls.pardon, "reason"), spaces=True)
+        return cb
+
+    @version(introduced="a1.0.16")
+    def pardon_ip(self, target: str):
+        cb = self.pardon_ip_cb()
+        cmd = ExecutedCommand(self.fh, "pardon-ip", cb.build(target=target))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def pardon_ip_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("pardon-ip")
+        nt = lambda param: (param, _gt(cls.pardon_ip, param))
+        cb.add_param(*nt("target"),  regex=r"^[ A-Za-z0-9\-+\._]*$")
+        cb.add_param(*nt("reason"), default=_gd(cls.pardon, "reason"), spaces=True)
         return cb
