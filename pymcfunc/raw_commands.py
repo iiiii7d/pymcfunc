@@ -966,6 +966,60 @@ class BedrockRawCommands(UniversalRawCommands):
         nt = lambda param: (param, _gt(cls.remove, param))
         cb.add_param(*nt("targets"))
         return cb
+    
+    @version(introduced="1.0.5.0")
+    def replaceitem(self, *,
+                    block: Optional[str]=None, # TODO Coord class
+                    entity: Optional[Union[str, BedrockSelector]]=None,
+                    slot_type: str, # TODO Slot class
+                    slot_id: int,
+                    old_item_handling: Optional[Literal["destroy", "keep"]]=None,
+                    item_name: str,
+                    amount: int=1,
+                    data: int=0,
+                    components: Optional[dict]=None) -> ExecutedCommand: # TODO ItemComponents class
+        cb = self.replaceitem_cb()
+        cmd = ExecutedCommand(self.fh, "replaceitem", cb.build(block=block, entity=entity, slot_type=slot_type, slot_id=slot_id,
+                                                               old_item_handling=old_item_handling, item_name=item_name,
+                                                               amount=amount, data=data, components=components))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def replaceitem_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("replaceitem")
+        nt = lambda param: (param, _gt(cls.replaceitem, param))
+        node = cb.add_branch_node()
+        node.add_branch(literal="block").add_param(*nt("block"))
+        node.add_branch(literal="entity").add_param(*nt("entity"))
+        cb.add_param(*nt("slot_type"))
+        cb.add_param(*nt("slot_id"), range=lambda x: -2147483648 <= x <= 2147483647)
+        cb.add_branch_node(optional=True).add_branch().add_switch(*_go(cls.replaceitem, "old_item_handling"))
+        cb.add_param(*nt("item_name"))
+        cb.add_param(*nt("amount"), default=_gd(cls.replaceitem, "amount"), range=lambda x: 1 <= x <= 64)
+        cb.add_param(*nt("data"), default=_gd(cls.replaceitem, "data"), range=lambda x: -2147483648 <= x <= 2147483647)
+        cb.add_param(*nt("components"), optional=True)
+        return cb
+
+    @version(introduced="1.16.100.52")
+    def ride_start_riding(self, *,
+                          riders: Union[str, BedrockSelector],
+                          ride: Union[str, BedrockSelector],
+                          teleport_rules: Literal["teleport_ride", "teleport_rider"]="teleport_rider",
+                          fill_type: Optional[Literal["if_group_fits", "until_full"]]=None) -> ExecutedCommand:
+        cb = self.ride_start_riding.cb()
+        cmd = ExecutedCommand(self.fh, "ride", cb.build(riders=riders, ride=ride, teleport_rules=teleport_rules, fill_type=fill_type))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def ride_start_riding_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("ride")
+        nt = lambda param: (param, _gt(cls.ride_start_riding, param))
+        cb.add_param(*nt("riders"))
+        cb.add_literal("start_riding")
+        cb.add_param(*nt("ride"), singleonly=True)
+        cb.add_switch(*_go(cls.ride_start_riding, "teleport_rules"))
+        cb.add_switch(*_go(cls.ride_start_riding, "fill_type"))
+        return cb
 
 class JavaRawCommands(UniversalRawCommands):
     """
@@ -2479,3 +2533,5 @@ class JavaRawCommands(UniversalRawCommands):
     @classmethod
     def reload_cb(cls) -> CommandBuilder:
         return CommandBuilder("reload")
+
+    # TODO replaceitem for java
