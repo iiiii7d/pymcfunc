@@ -22,6 +22,8 @@ Changelogs: https://pymcfunc.readthedocs.io/en/latest/changelog.html
 
 **Documentation: https://pymcfunc.readthedocs.io/en/latest/**
 
+## Note: currently being rewritten for v0.5
+
 ## Why pymcfunc?
 It would seem pretty obvious to program directly with Minecraft commands into functions;
 however things start to get complicated when you try to do things that are simple in regular

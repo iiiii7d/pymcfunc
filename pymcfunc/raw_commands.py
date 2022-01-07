@@ -783,7 +783,7 @@ class BedrockRawCommands(UniversalRawCommands):
         cb = CommandBuilder("msg")
         nt = lambda param: (param, _gt(cls.msg, param))
         cb.add_param(*nt("targets"), playeronly=True)
-        cb.add_param(*nt("message"))
+        cb.add_param(*nt("message"), spaces=True)
         return cb
     tell_cb = w_cb = msg_cb
 
@@ -914,7 +914,7 @@ class BedrockRawCommands(UniversalRawCommands):
         cb = CommandBuilder("playanimation")
         nt = lambda param: (param, _gt(cls.playanimation, param))
         cb.add_param(*nt("target"))
-        cb.add_param(*nt("animation"), spaces="q", regex=r"\.v1\.0$")
+        cb.add_param(*nt("animation"), spaces="q", regex=r"^.*(?<!\.v1\.0)$")
         cb.add_param(*nt("next_states"), spaces="q")
         cb.add_param(*nt("blend_out_time"))
         cb.add_param(*nt("stop_expression"), spaces="q")
@@ -1019,6 +1019,341 @@ class BedrockRawCommands(UniversalRawCommands):
         cb.add_param(*nt("ride"), singleonly=True)
         cb.add_switch(*_go(cls.ride_start_riding, "teleport_rules"))
         cb.add_switch(*_go(cls.ride_start_riding, "fill_type"))
+        return cb
+
+    @version(introduced="1.16.100.52")
+    def ride_stop_riding(self, *, riders: Union[str, BedrockSelector]) -> ExecutedCommand:
+        cb = self.ride_stop_riding_cb()
+        cmd = ExecutedCommand(self.fh, "ride", cb.build(riders=riders))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def ride_stop_riding_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("ride")
+        nt = lambda param: (param, _gt(cls.ride_stop_riding, param))
+        cb.add_param(*nt("riders"))
+        cb.add_literal("stop_riding")
+        return cb
+
+    @version(introduced="1.16.100.52")
+    def ride_evict_riders(self, *, rides: Union[str, BedrockSelector]) -> ExecutedCommand:
+        cb = self.ride_evict_riders_cb()
+        cmd = ExecutedCommand(self.fh, "ride", cb.build(rides=rides))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def ride_evict_riders_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("ride")
+        nt = lambda param: (param, _gt(cls.ride_evict_riders, param))
+        cb.add_param(*nt("rides"))
+        cb.add_literal("evict_riders")
+        return cb
+
+    @version(introduced="1.16.100.52")
+    def ride_summon_rider(self, *,
+                          rides: Union[str, BedrockSelector],
+                          entity_type: str,
+                          spawn_event: Optional[str]=None,
+                          name_tag: Optional[str]=None) -> ExecutedCommand:
+        cb = self.ride_summon_rider_cb()
+        cmd = ExecutedCommand(self.fh, "ride", cb.build(rides=rides, entity_type=entity_type,
+                                                        spawn_event=spawn_event, name_tag=name_tag))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def ride_summon_rider_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("ride")
+        nt = lambda param: (param, _gt(cls.ride_summon_rider, param))
+        cb.add_param(*nt("rides"))
+        cb.add_literal("summon_rider")
+        cb.add_param(*nt("entity_type"))
+        cb.add_param(*nt("spawn_event"), spaces="q", optional=True)
+        cb.add_param(*nt("name_tag"), spaces="q", optional=True)
+        return cb
+
+    @version(introduced="1.16.100.52")
+    def ride_summon_ride(self, *,
+                         riders: Union[str, BedrockSelector],
+                         entity_type: str,
+                         ride_rules: Literal["no_ride_change", "reassign_rides", "skip_riders"]="reassign_rides",
+                         spawn_event: Optional[str] = None,
+                         name_tag: Optional[str] = None) -> ExecutedCommand:
+        cb = self.ride_summon_rider_cb()
+        cmd = ExecutedCommand(self.fh, "ride", cb.build(riders=riders, entity_type=entity_type, ride_rules=ride_rules,
+                                                        spawn_event=spawn_event, name_tag=name_tag))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def ride_summon_ride_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("ride")
+        nt = lambda param: (param, _gt(cls.ride_summon_ride, param))
+        cb.add_param(*nt("riders"))
+        cb.add_literal("summon_ride")
+        cb.add_param(*nt("entity_type"))
+        cb.add_switch(*_go(cls.ride_summon_ride, "ride_rules"), default=_gd(cls.ride_summon_ride, "ride_rules"))
+        cb.add_param(*nt("spawn_event"), spaces="q")
+        cb.add_param(*nt("name_tag"), spaces="q")
+        return cb
+
+    @version(introduced="1.6.1")
+    def save(self, action: Literal["hold", "query", "resume"]) -> ExecutedCommand:
+        cb = self.save_cb()
+        cmd = ExecutedCommand(self.fh, "save", cb.build(action=action))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def save_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("save")
+        cb.add_switch(*_go(cls.save, "action"))
+        return cb
+
+    @version(introduced="0.16.0b1")
+    def say(self, msg: str) -> ExecutedCommand:
+        cb = self.say_cb()
+        cmd = ExecutedCommand(self.fh, "say", cb.build(msg=msg))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def say_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("say")
+        nt = lambda param: (param, _gt(cls.say, param))
+        cb.add_param(*nt("msg"), spaces=True)
+        return cb
+
+    @version(introduced="1.16.100.59")
+    def schedule_on_area_loaded_add(self, *,
+                                    cuboid_from: str, # TODO Coord class
+                                    cuboid_to: str,
+                                    circle_center: str,
+                                    circle_radius: int,
+                                    tickingarea_name: str,
+                                    function: str) -> ExecutedCommand: # TODO Function class
+        cb = self.schedule_on_area_loaded_add_cb()
+        cmd = ExecutedCommand(self.fh, "schedule", cb.build(cuboid_from=cuboid_from, cuboid_to=cuboid_to, circle_center=circle_center,
+                                                            circle_radius=circle_radius, tickingarea_name=tickingarea_name, function=function))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def schedule_on_area_loaded_add_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("schedule on_area_loaded add")
+        nt = lambda param: (param, _gt(cls.schedule_on_area_loaded_add, param))
+        node = cb.add_branch_node()
+        cb_cuboid = node.add_branch()
+        cb_cuboid.add_param(*nt("cuboid_from"))
+        cb_cuboid.add_param(*nt("cuboid_to"))
+        cb_circle = node.add_branch(literal="circle")
+        cb_circle.add_param(*nt("circle_center"))
+        cb_circle.add_param(*nt("circle_radius"), range=lambda x: 0 <= x <= 2147483647)
+        node.add_branch(literal="tickingarea").add_param(*nt("tickingarea_name"))
+        cb.add_param(*nt("function"))
+        return cb
+
+    @version(introduced="1.7.0.2")
+    def scoreboard_objectives_list(self) -> ExecutedCommand:
+        cmd = ExecutedCommand(self.fh, "scoreboard", "scoreboard objectives list")
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def scoreboard_objectives_list_cb(cls) -> CommandBuilder:
+        return CommandBuilder("scoreboard objectives list")
+
+    @version(introduced="1.7.0.2")
+    def scoreboard_objectives_add(self, objective: str,
+                                  displayname: Optional[Union[str, RawJson]]=None) -> ExecutedCommand:
+        cb = self.scoreboard_objectives_add_cb()
+        cmd = ExecutedCommand(self.fh, "scoreboard", cb.build(objective=objective,
+                                                              displayname=json.dumps(displayname) if isinstance(displayname, str) else displayname))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def scoreboard_objectives_add_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("scoreboard objectives add")
+        nt = lambda param: (param, _gt(cls.scoreboard_objectives_add, param))
+        cb.add_param(*nt("objective"), regex=r"^[ A-Za-z0-9\-+\._]*$", spaces="q")
+        cb.add_literal("dummy")
+        cb.add_param(*nt("displayname"), regex=r"^[ A-Za-z0-9\-+\._]*$", optional=True)
+        return cb
+
+    @version(introduced="1.7.0.2")
+    def scoreboard_objectives_remove(self, objective: str) -> ExecutedCommand:
+        cb = self.scoreboard_objectives_remove_cb()
+        cmd = ExecutedCommand(self.fh, "scoreboard", cb.build(objective=objective))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def scoreboard_objectives_remove_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("scoreboard objectives remove")
+        nt = lambda param: (param, _gt(cls.scoreboard_objectives_remove, param))
+        cb.add_param(*nt("objective"), regex=r"^[ A-Za-z0-9\-+\._]*$", spaces="q")
+        return cb
+
+    @version(introduced="1.7.0.2")
+    def scoreboard_objectives_setdisplay(self,
+                                         slot: Literal["list", "sidebar", "belowname"],
+                                         objective: str,
+                                         sort_order: Optional[Literal["ascending", "descending"]]=None) -> ExecutedCommand:
+        cb = self.scoreboard_objectives_setdisplay_cb()
+        cmd = ExecutedCommand(self.fh, "scoreboard", cb.build(slot=slot, objective=objective, sort_order=sort_order))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def scoreboard_objectives_setdisplay_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("scoreboard objectives setdisplay")
+        nt = lambda param: (param, _gt(cls.scoreboard_objectives_setdisplay, param))
+        node = cb.add_branch_node()
+        cb_belowname = node.add_branch(switch_name="slot", switch_options=["belowname"])
+        cb_belowname.add_param(*nt("objective"), regex=r"^[ A-Za-z0-9\-+\._]*$")
+        cb_other = node.add_branch(switch_name="slot", switch_options=["list, sidebar"])
+        cb_other.add_param(*nt("objective"), regex=r"^[ A-Za-z0-9\-+\._]*$")
+        cb_other.add_switch(*_go(cls.scoreboard_objectives_setdisplay, "sort_order"), optional=True)
+        return cb
+
+    @version(introduced="1.7.0.2")
+    def scoreboard_players_list(self, targets: Optional[Union[BedrockSelector, str]]=None) -> ExecutedCommand:
+        cb = self.scoreboard_players_list_cb()
+        cmd = ExecutedCommand(self.fh, "scoreboard", cb.build(targets=targets))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def scoreboard_players_list_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("scoreboard players list")
+        nt = lambda param: (param, _gt(cls.scoreboard_players_list, param))
+        cb.add_param(*nt("targets"))
+        return cb
+
+    @version(introduced="1.7.0.2")
+    def scoreboard_players_set(self,
+                               target: Union[BedrockSelector, str],
+                               objective: str,
+                               score: int) -> ExecutedCommand:
+        cb = self.scoreboard_players_set_cb()
+        cmd = ExecutedCommand(self.fh, "scoreboard", cb.build(target=target, objective=objective, score=score))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def scoreboard_players_set_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("scoreboard players set")
+        nt = lambda param: (param, _gt(cls.scoreboard_players_set, param))
+        cb.add_param(*nt("target"))
+        cb.add_param(*nt("objective"), regex=r"^[ A-Za-z0-9\-+\._]*$", spaces="q")
+        cb.add_param(*nt("set"))
+        return cb
+
+    @version(introduced="1.7.0.2")
+    def scoreboard_players_add(self,
+                               target: Union[BedrockSelector, str],
+                               objective: str,
+                               score: int) -> ExecutedCommand:
+        cb = self.scoreboard_players_add_cb()
+        cmd = ExecutedCommand(self.fh, "scoreboard", cb.build(target=target, objective=objective, score=score))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def scoreboard_players_add_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("scoreboard players add")
+        nt = lambda param: (param, _gt(cls.scoreboard_players_add, param))
+        cb.add_param(*nt("target"))
+        cb.add_param(*nt("objective"), regex=r"^[ A-Za-z0-9\-+\._]*$", spaces="q")
+        cb.add_param(*nt("set"))
+        return cb
+
+    @version(introduced="1.7.0.2")
+    def scoreboard_players_remove(self,
+                                  target: Union[BedrockSelector, str],
+                                  objective: str,
+                                  score: int) -> ExecutedCommand:
+        cb = self.scoreboard_players_remove_cb()
+        cmd = ExecutedCommand(self.fh, "scoreboard", cb.build(target=target, objective=objective, score=score))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def scoreboard_players_remove_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("scoreboard players remove")
+        nt = lambda param: (param, _gt(cls.scoreboard_players_remove, param))
+        cb.add_param(*nt("target"))
+        cb.add_param(*nt("objective"), regex=r"^[ A-Za-z0-9\-+\._]*$", spaces="q")
+        cb.add_param(*nt("set"))
+        return cb
+
+    @version(introduced="1.7.0.2")
+    def scoreboard_players_random(self,
+                                  target: Union[BedrockSelector, str],
+                                  objective: str,
+                                  min_: int,
+                                  max_: int) -> ExecutedCommand:
+        cb = self.scoreboard_players_random_cb()
+        cmd = ExecutedCommand(self.fh, "scoreboard", cb.build(target=target, objective=objective, min=min_, max=max_))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def scoreboard_players_random_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("scoreboard players random")
+        nt = lambda param: (param, _gt(cls.scoreboard_players_random, param))
+        cb.add_param(*nt("target"))
+        cb.add_param(*nt("objective"), regex=r"^[ A-Za-z0-9\-+\._]*$", spaces="q")
+        cb.add_param(*nt("min"))
+        cb.add_param(*nt("max"))
+        return cb
+
+    @version(introduced="1.7.0.2")
+    def scoreboard_players_reset(self,
+                                 target: Union[BedrockSelector, str],
+                                 objective: Optional[str]=None) -> ExecutedCommand:
+        cb = self.scoreboard_players_reset_cb()
+        cmd = ExecutedCommand(self.fh, "scoreboard", cb.build(target=target, objective=objective))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def scoreboard_players_reset_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("scoreboard players reset")
+        nt = lambda param: (param, _gt(cls.scoreboard_players_reset, param))
+        cb.add_param(*nt("target"))
+        cb.add_param(*nt("objective"), regex=r"^[ A-Za-z0-9\-+\._]*$", optional=True, spaces="q")
+        return cb
+
+    @version(introduced="1.7.0.2")
+    def scoreboard_players_test(self,
+                                target: Union[BedrockSelector, str],
+                                objective: str,
+                                min_: Union[int, Literal["*"]],
+                                max_: Optional[Union[int, Literal["*"]]]=None) -> ExecutedCommand:
+        cb = self.scoreboard_players_test_cb()
+        cmd = ExecutedCommand(self.fh, "scoreboard", cb.build(target=target, objective=objective, min=min_, max=max_))
+        self.fh.commands.append(cmd)
+        return cmd
+
+    @classmethod
+    def scoreboard_players_test_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("scoreboard players test")
+        nt = lambda param: (param, _gt(cls.scoreboard_players_test, param))
+        cb.add_param(*nt("target"))
+        cb.add_param(*nt("objective"), regex=r"^[ A-Za-z0-9\-+\._]*$", spaces="q")
+        cb.add_param(*nt("min"))
+        cb.add_param(*nt("max"), optional=True)
+        return cb
+
+    @version(introduced="1.7.0.2")
+    def scoreboard_players_operation(self, *,
+                                     target: Union[JavaSelector, str],
+                                     target_objective: str,
+                                     operation: Literal["+=", "-=", "*=", "/=", "%=", "=", "<", ">", "><"],
+                                     source: Union[JavaSelector, str],
+                                     source_objective: str) -> ExecutedCommand:
+        cb = self.scoreboard_players_operation_cb()
+        cmd = ExecutedCommand(self.fh, "scoreboard", cb.build(target=target, target_objective=target_objective,
+                                                              operation=operation, source=source,
+                                                              source_objective=source_objective))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def scoreboard_players_operation_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("scoreboard players operation")
+        nt = lambda param: (param, _gt(cls.scoreboard_players_operation, param))
+        cb.add_param(*nt("target"))
+        cb.add_param(*nt("target_objective"), regex=r"^[ A-Za-z0-9\-+\._]*$", spaces="q")
+        cb.add_switch(*_go(cls.scoreboard_players_operation, "operation"))
+        cb.add_param(*nt("source"))
+        cb.add_param(*nt("source_objective"), regex=r"^[ A-Za-z0-9\-+\._]*$", spaces="q")
         return cb
 
 class JavaRawCommands(UniversalRawCommands):
@@ -2270,7 +2605,7 @@ class JavaRawCommands(UniversalRawCommands):
         return cb
 
     @version(introduced="a1.0.16_02")
-    def list(self, uuids: bool=True) -> ExecutedCommand:
+    def list(self, uuids: bool=False) -> ExecutedCommand:
         cmd = ExecutedCommand(self.fh, "list", "list uuids" if uuids else "list")
         self.fh.commands.append(cmd)
         return cmd
@@ -2382,7 +2717,7 @@ class JavaRawCommands(UniversalRawCommands):
         cb = CommandBuilder("msg")
         nt = lambda param: (param, _gt(cls.msg, param))
         cb.add_param(*nt("targets"), playeronly=True)
-        cb.add_param(*nt("message"))
+        cb.add_param(*nt("message"), spaces=True)
         return cb
     tell_cb = w_cb = msg_cb
 
@@ -2535,3 +2870,292 @@ class JavaRawCommands(UniversalRawCommands):
         return CommandBuilder("reload")
 
     # TODO replaceitem for java
+
+    @version(introduced="a1.0.16_01")
+    def save_all(self, flush: bool=False) -> ExecutedCommand:
+        cmd = ExecutedCommand(self.fh, "save-all", "save-all flush" if flush else "save-all")
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def save_all_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("save-all")
+        cb.add_branch_node(optional=True).add_branch(literal="flush")
+        return cb
+
+    @version(introduced="a1.0.16_01")
+    def save_off(self) -> ExecutedCommand:
+        cmd = ExecutedCommand(self.fh, "save-off", "save-off")
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def save_off_cb(cls) -> CommandBuilder:
+        return CommandBuilder("save-off")
+
+    @version(introduced="a1.0.16_01")
+    def save_on(self) -> ExecutedCommand:
+        cmd = ExecutedCommand(self.fh, "save-on", "save-on")
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def save_on_cb(cls) -> CommandBuilder:
+        return CommandBuilder("save-on")
+
+    @version(introduced="0.0.16a_01")
+    def say(self, msg: str) -> ExecutedCommand:
+        cb = self.say_cb()
+        cmd = ExecutedCommand(self.fh, "say", cb.build(msg=msg))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def say_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("say")
+        nt = lambda param: (param, _gt(cls.say, param))
+        cb.add_param(*nt("msg"), spaces=True)
+        return cb
+
+    @version(introduced="18w43a")
+    def schedule_function(self, function: str, # TODO Function class?
+                          time: Union[str, int],
+                          mode: Literal["append", "replace"]="replace") -> ExecutedCommand:
+        cb = self.schedule_function_cb()
+        self.option_version_introduced("mode", mode, "19w38a", "append")
+        cmd = ExecutedCommand(self.fh, "schedule", cb.build(function=function, time=time, mode=mode))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def schedule_function_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("schedule function")
+        nt = lambda param: (param, _gt(cls.schedule_function, param))
+        cb.add_param(*nt("function"))
+        cb.add_param(*nt("time"))
+        cb.add_switch(*_go(cls.schedule_function, "mode"), default=_gd(cls.schedule_function, "mode"))
+        return cb
+
+    @version(introduced="18w43a")
+    def schedule_clear(self, function: str) -> ExecutedCommand:
+        cb = self.schedule_clear_cb()
+        cmd = ExecutedCommand(self.fh, "schedule", cb.build(function=function))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def schedule_clear_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("schedule clear")
+        nt = lambda param: (param, _gt(cls.schedule_clear, param))
+        cb.add_param(*nt("function"), spaces=True)
+        return cb
+
+    @version(introduced="13w04a")
+    def scoreboard_objectives_list(self) -> ExecutedCommand:
+        cmd = ExecutedCommand(self.fh, "scoreboard", "scoreboard objectives list")
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def scoreboard_objectives_list_cb(cls) -> CommandBuilder:
+        return CommandBuilder("scoreboard objectives list")
+
+    @version(introduced="13w04a")
+    def scoreboard_objectives_add(self, objective: str,
+                                  criteria: str, # TODO Criteria class
+                                  displayname: Optional[Union[str, RawJson]]=None) -> ExecutedCommand:
+        cb = self.scoreboard_objectives_add_cb()
+        cmd = ExecutedCommand(self.fh, "scoreboard", cb.build(objective=objective, criteria=criteria,
+                                                              displayname=json.dumps(displayname) if isinstance(displayname, str) else displayname))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def scoreboard_objectives_add_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("scoreboard objectives add")
+        nt = lambda param: (param, _gt(cls.scoreboard_objectives_add, param))
+        cb.add_param(*nt("objective"), regex=r"^[ A-Za-z0-9\-+\._]*$")
+        cb.add_param(*nt("criteria"))
+        cb.add_param(*nt("displayname"), regex=r"^[ A-Za-z0-9\-+\._]*$", optional=True)
+        return cb
+
+    @version(introduced="13w04a")
+    def scoreboard_objectives_remove(self, objective: str) -> ExecutedCommand:
+        cb = self.scoreboard_objectives_remove_cb()
+        cmd = ExecutedCommand(self.fh, "scoreboard", cb.build(objective=objective))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def scoreboard_objectives_remove_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("scoreboard objectives remove")
+        nt = lambda param: (param, _gt(cls.scoreboard_objectives_remove, param))
+        cb.add_param(*nt("objective"), regex=r"^[ A-Za-z0-9\-+\._]*$")
+        return cb
+
+    @version(introduced="13w04a")
+    def scoreboard_objectives_setdisplay(self,
+                                         slot: Literal["list", "sidebar", "belowname"],
+                                         objective: str) -> ExecutedCommand:
+        cb = self.scoreboard_objectives_setdisplay_cb()
+        cmd = ExecutedCommand(self.fh, "scoreboard", cb.build(slot=slot, objective=objective))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def scoreboard_objectives_setdisplay_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("scoreboard objectives setdisplay")
+        nt = lambda param: (param, _gt(cls.scoreboard_objectives_setdisplay, param))
+        cb.add_switch(*_go(cls.scoreboard_objectives_setdisplay, "slot"))
+        cb.add_param(*nt("objective"), regex=r"^[ A-Za-z0-9\-+\._]*$")
+        return cb
+
+    @version(introduced="1.13pre7")
+    def scoreboard_objectives_modify(self, objective: str, *,
+                                     displayname: Optional[Union[str, RawJson]]=None,
+                                     rendertype: Optional[Literal["hearts", "integer"]]=None):
+        cb = self.scoreboard_objectives_modify_cb()
+        self.param_version_introduced("rendertype", rendertype, "1.13pre8")
+        cmd = ExecutedCommand(self.fh, "scoreboard", cb.build(objective=objective,
+                                                              displayname=json.dumps(displayname) if isinstance(displayname, str) else displayname,
+                                                              rendertype=rendertype))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def scoreboard_objectives_modify_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("scoreboard objectives modify")
+        nt = lambda param: (param, _gt(cls.scoreboard_objectives_modify, param))
+        cb.add_param(*nt("objective"), regex=r"^[ A-Za-z0-9\-+\._]*$")
+        node = cb.add_branch_node()
+        node.add_branch(literal="displayname").add_param(*nt("displayname"))
+        node.add_branch(literal="rendertype").add_switch(*_go(cls.scoreboard_objectives_modify, "rendertype"))
+        return cb
+
+    @version(introduced="13w04a")
+    def scoreboard_players_list(self, targets: Optional[Union[Union[JavaSelector, UUID], str]]=None) -> ExecutedCommand:
+        cb = self.scoreboard_players_list_cb()
+        cmd = ExecutedCommand(self.fh, "scoreboard", cb.build(targets=targets))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def scoreboard_players_list_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("scoreboard players list")
+        nt = lambda param: (param, _gt(cls.scoreboard_players_list, param))
+        cb.add_param(*nt("targets"), singleonly=True)
+        return cb
+
+    @version(introduced="13w04a")
+    def scoreboard_players_get(self,
+                               target: Union[Union[JavaSelector, UUID], str],
+                               objective: str) -> ExecutedCommand:
+        cb = self.scoreboard_players_get_cb()
+        cmd = ExecutedCommand(self.fh, "scoreboard", cb.build(target=target, objective=objective))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def scoreboard_players_get_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("scoreboard players get")
+        nt = lambda param: (param, _gt(cls.scoreboard_players_get, param))
+        cb.add_param(*nt("target"), singleonly=True)
+        cb.add_param(*nt("objective"), regex=r"^[ A-Za-z0-9\-+\._]*$")
+        return cb
+
+    @version(introduced="13w04a")
+    def scoreboard_players_set(self,
+                               target: Union[Union[JavaSelector, UUID], str],
+                               objective: str,
+                               score: int) -> ExecutedCommand:
+        cb = self.scoreboard_players_set_cb()
+        cmd = ExecutedCommand(self.fh, "scoreboard", cb.build(target=target, objective=objective, score=score))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def scoreboard_players_set_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("scoreboard players set")
+        nt = lambda param: (param, _gt(cls.scoreboard_players_set, param))
+        cb.add_param(*nt("target"))
+        cb.add_param(*nt("objective"), regex=r"^[ A-Za-z0-9\-+\._]*$")
+        cb.add_param(*nt("set"))
+        return cb
+
+    @version(introduced="13w04a")
+    def scoreboard_players_add(self,
+                               target: Union[Union[JavaSelector, UUID], str],
+                               objective: str,
+                               score: int) -> ExecutedCommand:
+        cb = self.scoreboard_players_add_cb()
+        cmd = ExecutedCommand(self.fh, "scoreboard", cb.build(target=target, objective=objective, score=score))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def scoreboard_players_add_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("scoreboard players add")
+        nt = lambda param: (param, _gt(cls.scoreboard_players_add, param))
+        cb.add_param(*nt("target"))
+        cb.add_param(*nt("objective"), regex=r"^[ A-Za-z0-9\-+\._]*$")
+        cb.add_param(*nt("set"), range=lambda x: 0 <= x <= 2147483647)
+        return cb
+
+    @version(introduced="13w04a")
+    def scoreboard_players_remove(self,
+                                  target: Union[Union[JavaSelector, UUID], str],
+                                  objective: str,
+                                  score: int) -> ExecutedCommand:
+        cb = self.scoreboard_players_remove_cb()
+        cmd = ExecutedCommand(self.fh, "scoreboard", cb.build(target=target, objective=objective, score=score))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def scoreboard_players_remove_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("scoreboard players remove")
+        nt = lambda param: (param, _gt(cls.scoreboard_players_remove, param))
+        cb.add_param(*nt("target"))
+        cb.add_param(*nt("objective"), regex=r"^[ A-Za-z0-9\-+\._]*$")
+        cb.add_param(*nt("set"), range=lambda x: 0 <= x <= 2147483647)
+        return cb
+
+    @version(introduced="13w04a")
+    def scoreboard_players_reset(self,
+                                 target: Union[Union[JavaSelector, UUID], str],
+                                 objective: Optional[str]=None) -> ExecutedCommand:
+        cb = self.scoreboard_players_reset_cb()
+        cmd = ExecutedCommand(self.fh, "scoreboard", cb.build(target=target, objective=objective))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def scoreboard_players_reset_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("scoreboard players reset")
+        nt = lambda param: (param, _gt(cls.scoreboard_players_reset, param))
+        cb.add_param(*nt("target"))
+        cb.add_param(*nt("objective"), regex=r"^[ A-Za-z0-9\-+\._]*$", optional=True)
+        return cb
+
+    @version(introduced="13w04a")
+    def scoreboard_players_enable(self,
+                                  target: Union[Union[JavaSelector, UUID], str],
+                                  objective: str) -> ExecutedCommand:
+        cb = self.scoreboard_players_enable_cb()
+        cmd = ExecutedCommand(self.fh, "scoreboard", cb.build(target=target, objective=objective))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def scoreboard_players_enable_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("scoreboard players enable")
+        nt = lambda param: (param, _gt(cls.scoreboard_players_enable, param))
+        cb.add_param(*nt("target"))
+        cb.add_param(*nt("objective"), regex=r"^[ A-Za-z0-9\-+\._]*$")
+        return cb
+
+    @version(introduced="13w04a")
+    def scoreboard_players_operation(self, *,
+                                     target: Union[Union[JavaSelector, UUID], str],
+                                     target_objective: str,
+                                     operation: Literal["+=", "-=", "*=", "/=", "%=", "=", "<", ">", "><"],
+                                     source: Union[Union[JavaSelector, UUID], str],
+                                     source_objective: str) -> ExecutedCommand:
+        cb = self.scoreboard_players_operation_cb()
+        cmd = ExecutedCommand(self.fh, "scoreboard", cb.build(target=target, target_objective=target_objective,
+                                                              operation=operation, source=source,
+                                                              source_objective=source_objective))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def scoreboard_players_operation_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("scoreboard players operation")
+        nt = lambda param: (param, _gt(cls.scoreboard_players_operation, param))
+        cb.add_param(*nt("target"))
+        cb.add_param(*nt("target_objective"), regex=r"^[ A-Za-z0-9\-+\._]*$")
+        cb.add_switch(*_go(cls.scoreboard_players_operation, "operation"))
+        cb.add_param(*nt("source"))
+        cb.add_param(*nt("source_objective"), regex=r"^[ A-Za-z0-9\-+\._]*$")
+        return cb
