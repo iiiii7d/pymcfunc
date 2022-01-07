@@ -1356,6 +1356,42 @@ class BedrockRawCommands(UniversalRawCommands):
         cb.add_param(*nt("source_objective"), regex=r"^[ A-Za-z0-9\-+\._]*$", spaces="q")
         return cb
 
+    @version(introduced="0.16.0b1")
+    def setblock(self, pos: str,  # TODO Coord class
+                 block: str,
+                 tile_data: int=0,
+                 block_states: Optional[dict]=None, # TODO BlockStates class
+                 mode: Literal["destroy", "keep", "replace"]="replace") -> ExecutedCommand:
+        cb = self.setblock_cb()
+        cmd = ExecutedCommand(self.fh, "setblock", cb.build(pos=pos, block=block, tile_data=tile_data,
+                                                            block_states=block_states, mode=mode))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def setblock_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("setblock")
+        nt = lambda param: (param, _gt(cls.setblock, param))
+        cb.add_param(*nt("pos"))
+        cb.add_param(*nt("block"))
+        node = cb.add_branch_node(optional=True)
+        node.add_branch().add_param(*nt("tile_data"), _gd(cls.setblock, "tile_data"), range=lambda x: 0 <= x <= 65536)
+        node.add_branch().add_param(*nt("block_states"))
+        cb.add_param(*nt("mode"), default=_gd(cls.setblock, "mode"))
+        return cb
+
+    @version(introduced="a1.1.0.3")
+    def setmaxplayers(self, max_players: int) -> ExecutedCommand:
+        cb = self.setmaxplayers_cb()
+        cmd = ExecutedCommand(self.fh, "setmaxplayers", cb.build(max_players=max_players))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def setmaxplayers_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("setmaxplayers")
+        nt = lambda param: (param, _gt(cls.setmaxplayers, param))
+        cb.add_param(*nt("max_players"), range=lambda x: 1 <= x <= 30)
+        return cb
+
 class JavaRawCommands(UniversalRawCommands):
     """
     A container for raw Minecraft commands that are specially for Java Edition.
@@ -3158,4 +3194,43 @@ class JavaRawCommands(UniversalRawCommands):
         cb.add_switch(*_go(cls.scoreboard_players_operation, "operation"))
         cb.add_param(*nt("source"))
         cb.add_param(*nt("source_objective"), regex=r"^[ A-Za-z0-9\-+\._]*$")
+        return cb
+
+    @version(introduced="12w21a")
+    def seed(self) -> ExecutedCommand:
+        cmd = ExecutedCommand(self.fh, "seed", "seed")
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def seed_cb(cls) -> CommandBuilder:
+        return CommandBuilder("seed")
+
+    @version(introduced="13w37a")
+    def setblock(self, pos: str, # TODO Coord class
+                 block: str,
+                 mode: Literal["destroy", "keep", "replace"]="replace") -> ExecutedCommand:
+        cb = self.setblock_cb()
+        cmd = ExecutedCommand(self.fh, "setblock", cb.build(pos=pos, block=block, mode=mode))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def setblock_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("setblock")
+        nt = lambda param: (param, _gt(cls.setblock, param))
+        cb.add_param(*nt("pos"))
+        cb.add_param(*nt("block"))
+        cb.add_param(*nt("mode"), default=_gd(cls.setblock, "mode"))
+        return cb
+
+    @version(introduced="13w38a")
+    def setidletimeout(self, minutes: int) -> ExecutedCommand:
+        cb = self.setidletimeout_cb()
+        cmd = ExecutedCommand(self.fh, "setidletimeout", cb.build(minutes=minutes))
+        self.fh.commands.append(cmd)
+        return cmd
+    @classmethod
+    def setidletimeout_cb(cls) -> CommandBuilder:
+        cb = CommandBuilder("setidletimeout")
+        nt = lambda param: (param, _gt(cls.setidletimeout, param))
+        cb.add_param(*nt("minutes"), range=lambda x: 0 <= x <= 2147483647)
         return cb
