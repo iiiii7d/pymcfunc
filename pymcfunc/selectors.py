@@ -116,7 +116,7 @@ class JavaSelector(UniversalSelector):
         pass
 
     @staticmethod
-    def range(minv: int=0, maxv: int=inf):
+    def range(minv: int=0, maxv: int=inf) -> str:
         """Returns a range of values, as it is represented in Minecraft commands.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaSelectors.range"""
         if minv > maxv:

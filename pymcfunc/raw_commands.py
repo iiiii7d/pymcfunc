@@ -247,7 +247,7 @@ class BedrockRawCommands(UniversalRawCommands):
               clone_mode: Literal["force", "move", "normal"]="normal",
               tile_name: Optional[Union[str, int]]=None,
               tile_data: int=-1,
-              block_states: Optional[Dict[str, Any]]=None) -> ExecutedCommand: # TODO add block predicate thingy when it is written
+              block_states: Optional[Dict[str, Any]]=None) -> ExecutedCommand: # TODO add block state thingy when it is written
         cb = self.clone_cb()
         self.param_version_introduced("block_states", block_states, "1.16.210.53")
         cmd = ExecutedCommand(self.fh, "clone", cb.build(begin=begin, end=end, destination=destination, mask_mode=mask_mode,
@@ -266,7 +266,7 @@ class BedrockRawCommands(UniversalRawCommands):
         cb_filtered.add_switch("clone_mode", _go(cls.clone, "clone_mode"))
         cb_filtered.add_param(*nt("tile_name"))
         node2 = cb_filtered.add_branch_node()
-        node2.add_branch().add_param(*nt("tile_data"), default=_gd(cls.clone, "tile_data"))
+        node2.add_branch().add_param(*nt("tile_data"), default=_gd(cls.clone, "tile_data"), range=lambda x: -1 <= x <= 65536)
         node2.add_branch().add_param(*nt("block_states"))
         cb_others = node.add_branch("mask_mode", ["replace", "masked"])
         cb_others.add_switch("clone_mode", _go(cls.clone, "clone_mode"))

@@ -1,0 +1,2 @@
+class ResourceLocation:
+    pass
