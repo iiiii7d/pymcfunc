@@ -12,38 +12,45 @@ class UniversalSelector:
        If an argument is repeatable, you can express multiple values of the same argument in lists, sets, or tuples.
        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalSelectors"""
 
-    def select(self, var: str, **kwargs):
+    @classmethod
+    def select(cls, var: str, **kwargs):
         """Returns a selector, given the selector variable and optional arguments.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalSelectors.select"""
         internal.options(var, ['p', 'r', 'a', 'e', 's'])
-        return "@"+var+self._sel_args(**kwargs)
+        return "@"+var+cls._sel_args(cls, **kwargs)
 
-    def nearest_player(self, **kwargs):
+    @classmethod
+    def nearest_player(cls, **kwargs):
         """Alias of select('p', **kwargs)."""
-        return self.select('p', **kwargs)
+        return cls.select('p', **kwargs)
     p = nearest_player
 
-    def random_player(self, **kwargs):
+    @classmethod
+    def random_player(cls, **kwargs):
         """Alias of select('r', **kwargs)."""
-        return self.select('p', **kwargs)
+        return cls.select('p', **kwargs)
     r = random_player
 
-    def all_players(self, **kwargs):
+    @classmethod
+    def all_players(cls, **kwargs):
         """Alias of select('a', **kwargs)."""
-        return self.select('a', **kwargs)
+        return cls.select('a', **kwargs)
     a = all_players
 
-    def all_entities(self, **kwargs):
+    @classmethod
+    def all_entities(cls, **kwargs):
         """Alias of select('e', **kwargs)."""
-        return self.select('e', **kwargs)
+        return cls.select('e', **kwargs)
     e = all_entities
 
-    def executor(self, **kwargs):
+    @classmethod
+    def executor(cls, **kwargs):
         """Alias of select('s', **kwargs)."""
-        return self.select('s', **kwargs)
+        return cls.select('s', **kwargs)
     s = executor
 
-    def _sel_args(self, **kwargs):
+    @staticmethod
+    def _sel_args(cls, **kwargs) -> str:
         args = []
         BEDROCK = ["x", "y", "z", "rmax", "rmin", "dx", "dy", "dz", "scores", "tag",
                    "c", "lmax", "lmin", "m", "name", "rxmax", "rxmin", "rymax", "rymin", "type", "family",
@@ -77,16 +84,16 @@ class UniversalSelector:
         }
 
         for k, v in kwargs.items():
-            keylist = BEDROCK if type(self) == BedrockSelector else JAVA
-            optionslist = OPTIONS_BEDROCK if type(self) == BedrockSelector else OPTIONS_JAVA
+            keylist = BEDROCK if type(cls) == BedrockSelector else JAVA
+            optionslist = OPTIONS_BEDROCK if type(cls) == BedrockSelector else OPTIONS_JAVA
             if k not in keylist:
                 raise KeyError(f"Invalid target selector argument '{k}'")
             if k in optionslist.keys():
                 if not str(v) in optionslist[k]:
                     raise errors.OptionError(optionslist[k], v)
-            if k in ALIASES and type(self) == BedrockSelector:
+            if k in ALIASES and type(cls) == BedrockSelector:
                 args.append(f"{ALIASES[k]}={v}")
-            elif k in EXPAND and type(self) == BedrockSelector:
+            elif k in EXPAND and type(cls) == BedrockSelector:
                 for i in EXPAND[k]:
                     v = json.dumps(v) if isinstance(v, dict) else v
                     args.append(f"{i}={v}")
@@ -147,4 +154,3 @@ def cuboid(pos1: Sequence[int], pos2: Sequence[int], dims: str='xyz') -> Dict[st
         out[dim] = minv
         out['d'+dim] = d
     return out
-

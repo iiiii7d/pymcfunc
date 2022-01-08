@@ -4,14 +4,15 @@ import inspect
 import json
 import warnings
 from functools import wraps
-from types import NoneType
 from typing import Dict, Optional, Any, Callable, Literal, Tuple, get_args, TYPE_CHECKING, Union, TypeAlias, List
 from uuid import UUID
 
 from typing_extensions import Self
 
 from pymcfunc.command_builder import CommandBuilder
+from pymcfunc.coord import Coord, BlockCoord
 from pymcfunc.errors import FutureCommandWarning, DeprecatedCommandWarning, EducationEditionWarning
+from pymcfunc.nbt import Int, Path
 from pymcfunc.selectors import JavaSelector, BedrockSelector
 from pymcfunc.version import JavaVersion, BedrockVersion
 
@@ -19,9 +20,9 @@ if TYPE_CHECKING:
     from pymcfunc.func_handler import UniversalFuncHandler
 
 RawJson: TypeAlias = Union[dict, list]
+ResourceLocation: TypeAlias = str
 
-# noinspection PyFinal
-class _MissingType(NoneType): pass
+class _MissingType: pass
 Missing = _MissingType()
 
 def _get_default(func: Callable[..., Any], param: str) -> Any:
@@ -156,7 +157,7 @@ class BedrockRawCommands(UniversalRawCommands):
     alwaysday_cb = daylock_cb
 
     @version(introduced="1.16.100.57")
-    def camerashake_add(self, target: BedrockSelector=BedrockSelector.s,
+    def camerashake_add(self, target: BedrockSelector=BedrockSelector.s(),
                         intensity: Optional[float]=None,
                         seconds: Optional[float]=None,
                         shake_type: Optional[Literal["positional", "rotational"]]=None) -> ExecutedCommand:
@@ -177,7 +178,7 @@ class BedrockRawCommands(UniversalRawCommands):
         return cb
 
     @version(introduced="1.16.210.54")
-    def camerashake_stop(self, target: BedrockSelector=BedrockSelector.s) -> ExecutedCommand:
+    def camerashake_stop(self, target: BedrockSelector=BedrockSelector.s()) -> ExecutedCommand:
         cb = self.camerashake_stop_cb()
         cmd = ExecutedCommand(self.fh, "camerashake", cb.build(target=target))
         self.fh.commands.append(cmd)
@@ -207,7 +208,7 @@ class BedrockRawCommands(UniversalRawCommands):
         return cb
 
     @version(introduced="1.0.5.0")
-    def clear(self, player: BedrockSelector=BedrockSelector.s,
+    def clear(self, player: BedrockSelector=BedrockSelector.s(),
               item: Union[str, int]=None, # TODO add block predicate thingy when it is written
               data: int=-1,
               max_count: int=-1) -> ExecutedCommand:
@@ -221,12 +222,12 @@ class BedrockRawCommands(UniversalRawCommands):
         nt = lambda param: (param, _gt(cls.clear, param))
         cb.add_param(*nt("player"), default=_gd(cls.clear, "player"), optional=True, playeronly=True)
         cb.add_param(*nt("item"), optional=True)
-        cb.add_param(*nt("data"), optional=True, range=lambda x: -1 <= x <= 2147483647)
-        cb.add_param(*nt("max_count"), optional=True, range=lambda x: -1 <= x <= 2147483647)
+        cb.add_param(*nt("data"), optional=True, range=lambda x: -1 <= x <= Int.max)
+        cb.add_param(*nt("max_count"), optional=True, range=lambda x: -1 <= x <= Int.max)
         return cb
 
     @version(introduced="1.16.100.57")
-    def clearspawnpoint(self, player: BedrockSelector=BedrockSelector.s) -> ExecutedCommand:
+    def clearspawnpoint(self, player: BedrockSelector=BedrockSelector.s()) -> ExecutedCommand:
         cb = self.clearspawnpoint_cb()
         cmd = ExecutedCommand(self.fh, "clearspawnpoint", cb.build(player=player))
         self.fh.commands.append(cmd)
@@ -240,9 +241,9 @@ class BedrockRawCommands(UniversalRawCommands):
 
     @version(introduced="0.16.0b1")
     def clone(self, *,
-              begin: str, # TODO add Coordinates class when it is written
-              end: str,
-              destination: str,
+              begin: BlockCoord,
+              end: BlockCoord,
+              destination: BlockCoord,
               mask_mode: Literal["replace", "masked", "filtered"]="replace",
               clone_mode: Literal["force", "move", "normal"]="normal",
               tile_name: Optional[Union[str, int]]=None,
@@ -358,7 +359,7 @@ class BedrockRawCommands(UniversalRawCommands):
         nt = lambda param: (param, _gt(cls.effect_give, param))
         cb.add_param(*nt("targets"))
         cb.add_param(*nt("effect"))
-        cb.add_param(*nt("seconds"), default=_gd(cls.effect_give, "seconds"), range=lambda x: 0 <= x <= 2147483647)
+        cb.add_param(*nt("seconds"), default=_gd(cls.effect_give, "seconds"), range=lambda x: 0 <= x <= Int.max)
         cb.add_param(*nt("amplifier"), default=_gd(cls.effect_give, "amplifier"), range=lambda x: 0 <= x <= 255)
         cb.add_param(*nt("hide_particles"), default=False)
         return cb
@@ -389,7 +390,7 @@ class BedrockRawCommands(UniversalRawCommands):
         nt = lambda param: (param, _gt(cls.enchant, param))
         cb.add_param(*nt("target"))
         cb.add_param(*nt("enchantment"))
-        cb.add_param(*nt("level"), range=lambda x: 1 <= x <= 2147483647, default=_gd(cls.enchant, "level"))
+        cb.add_param(*nt("level"), range=lambda x: 1 <= x <= Int.max, default=_gd(cls.enchant, "level"))
         return cb
 
     @version(introduced="1.16.100.57")
@@ -408,8 +409,8 @@ class BedrockRawCommands(UniversalRawCommands):
 
     @version(introduced="0.16.0b1")
     def execute(self, origin: BedrockSelector, *,
-                position: str, # TODO add coordinate class when its written
-                detect_pos: Optional[str]=None,
+                position: Coord,
+                detect_pos: Optional[Coord]=None,
                 detect_block: Optional[str]=None,
                 detect_data: int=-1,
                 commands: Union[ExecutedCommand, List[ExecutedCommand]]) -> Union[ExecutedCommand, List[ExecutedCommand]]:
@@ -441,7 +442,7 @@ class BedrockRawCommands(UniversalRawCommands):
     def xp(self, *,
            amount: int,
            levels: bool=False,
-           player: BedrockSelector=BedrockSelector.s) -> ExecutedCommand:
+           player: BedrockSelector=BedrockSelector.s()) -> ExecutedCommand:
         cb = self.xp_cb()
         cmd = ExecutedCommand(self.fh, "xp", cb.build(amount=str(amount)+"L" if levels else amount, player=player))
         self.fh.commands.append(cmd)
@@ -450,14 +451,14 @@ class BedrockRawCommands(UniversalRawCommands):
     def xp_cb(cls) -> CommandBuilder:
         cb = CommandBuilder("xp")
         nt = lambda param: (param, _gt(cls.xp, "player"))
-        cb.add_param("amount", Union[str, int], range=lambda x: 0 <= x <= 2147483647)
+        cb.add_param("amount", Union[str, int], range=lambda x: 0 <= x <= Int.max)
         cb.add_param(*nt("player"), optional=True, default=_gd(cls.xp, "player"))
         return cb
 
     @version(introduced="0.16.0b1")
     def fill(self, *,
-             from_: str, # TODO Coords and BlockStates classes when they are written
-             to: str,
+             from_: BlockCoord,
+             to: BlockCoord,
              block: str,
              tile_data: int=0,
              block_states: Optional[str]=None,
@@ -490,7 +491,7 @@ class BedrockRawCommands(UniversalRawCommands):
 
     @version(introduced="1.16.100.54")
     def fog(self, mode: Literal["push", "pop", "remove"], *,
-            player: BedrockSelector=BedrockSelector.s,
+            player: BedrockSelector=BedrockSelector.s(),
             fog_id: Optional[str]=None,
             user_provided_id: str) -> ExecutedCommand:
         cb = self.fog_cb()
@@ -523,7 +524,7 @@ class BedrockRawCommands(UniversalRawCommands):
 
     @version(introduced="0.16.0b1")
     def gamemode(self, mode: Literal["survival", "creative", "adventure", "s", "c", "a", 0, 1, 2],
-                 target: Union[BedrockSelector, str] = BedrockSelector.s) -> ExecutedCommand:
+                 target: Union[BedrockSelector, str] = BedrockSelector.s()) -> ExecutedCommand:
         cb = self.gamemode_cb()
         self.option_version_introduced("mode", mode, "1.1.0.0", "adventure")
         self.option_version_introduced("mode", mode, "1.1.0.0", "a")
@@ -623,9 +624,9 @@ class BedrockRawCommands(UniversalRawCommands):
         cb = CommandBuilder("gametest create")
         nt = lambda param: (param, _gt(cls.gametest_create, param))
         cb.add_param(*nt("test_name"))
-        cb.add_param(*nt("width"), optional=True, range=lambda x: 0 <= x <= 2147483647)
-        cb.add_param(*nt("height"), optional=True, range=lambda x: 0 <= x <= 2147483647)
-        cb.add_param(*nt("depth"), optional=True, range=lambda x: 0 <= x <= 2147483647)
+        cb.add_param(*nt("width"), optional=True, range=lambda x: 0 <= x <= Int.max)
+        cb.add_param(*nt("height"), optional=True, range=lambda x: 0 <= x <= Int.max)
+        cb.add_param(*nt("depth"), optional=True, range=lambda x: 0 <= x <= Int.max)
         return cb
 
     @version(introduced="1.16.210.60")
@@ -688,7 +689,7 @@ class BedrockRawCommands(UniversalRawCommands):
         return cb
 
     @version(introduced="1.16.0b1")
-    def kill(self, target: Union[Union[BedrockSelector, UUID], str]=BedrockSelector.s) -> ExecutedCommand:
+    def kill(self, target: Union[Union[BedrockSelector, UUID], str]=BedrockSelector.s()) -> ExecutedCommand:
         cb = self.kick_cb()
         cmd = ExecutedCommand(self.fh, "kick", cb.build(target=target))
         self.fh.commands.append(cmd)
@@ -724,7 +725,7 @@ class BedrockRawCommands(UniversalRawCommands):
 
     @version(introduced="1.18.0.21")
     def loot(self, *,
-             position: str, # TODO Coord class
+             position: BlockCoord,
              loot_table: str, # TODO LootTable class
              tool: Union[str, Literal["mainhand", "offland"]]) -> ExecutedCommand: # TODO Item class?
         cb = self.loot_cb()
@@ -883,7 +884,7 @@ class BedrockRawCommands(UniversalRawCommands):
     permissions_cb = ops_cb
 
     @version(introduced="1.0.5.0")
-    def particle(self, effect: str, position: str) -> ExecutedCommand: # TODO Coord class
+    def particle(self, effect: str, position: Coord) -> ExecutedCommand:
         cb = self.particle_cb()
         cmd = ExecutedCommand(self.fh, "particle", cb.build(effect=effect, position=position))
         self.fh.commands.append(cmd)
@@ -924,7 +925,7 @@ class BedrockRawCommands(UniversalRawCommands):
     @version(introduced="1.0.5.0")
     def playsound(self, sound: str,
                   player: Union[str, BedrockSelector],
-                  position: Optional[str]=None, # TODO Coord class
+                  position: Optional[Coord]=None,
                   volume: float=1.0,
                   pitch: float=1.0,
                   minimum_volume: float=0.0) -> ExecutedCommand:
@@ -969,7 +970,7 @@ class BedrockRawCommands(UniversalRawCommands):
     
     @version(introduced="1.0.5.0")
     def replaceitem(self, *,
-                    block: Optional[str]=None, # TODO Coord class
+                    block: Optional[BlockCoord]=None,
                     entity: Optional[Union[str, BedrockSelector]]=None,
                     slot_type: str, # TODO Slot class
                     slot_id: int,
@@ -992,11 +993,11 @@ class BedrockRawCommands(UniversalRawCommands):
         node.add_branch(literal="block").add_param(*nt("block"))
         node.add_branch(literal="entity").add_param(*nt("entity"))
         cb.add_param(*nt("slot_type"))
-        cb.add_param(*nt("slot_id"), range=lambda x: -2147483648 <= x <= 2147483647)
+        cb.add_param(*nt("slot_id"), range=lambda x: Int.min <= x <= Int.max)
         cb.add_branch_node(optional=True).add_branch().add_switch(*_go(cls.replaceitem, "old_item_handling"))
         cb.add_param(*nt("item_name"))
         cb.add_param(*nt("amount"), default=_gd(cls.replaceitem, "amount"), range=lambda x: 1 <= x <= 64)
-        cb.add_param(*nt("data"), default=_gd(cls.replaceitem, "data"), range=lambda x: -2147483648 <= x <= 2147483647)
+        cb.add_param(*nt("data"), default=_gd(cls.replaceitem, "data"), range=lambda x: Int.min <= x <= Int.max)
         cb.add_param(*nt("components"), optional=True)
         return cb
 
@@ -1122,9 +1123,9 @@ class BedrockRawCommands(UniversalRawCommands):
 
     @version(introduced="1.16.100.59")
     def schedule_on_area_loaded_add(self, *,
-                                    cuboid_from: str, # TODO Coord class
-                                    cuboid_to: str,
-                                    circle_center: str,
+                                    cuboid_from: BlockCoord,
+                                    cuboid_to: BlockCoord,
+                                    circle_center: BlockCoord,
                                     circle_radius: int,
                                     tickingarea_name: str,
                                     function: str) -> ExecutedCommand: # TODO Function class
@@ -1143,7 +1144,7 @@ class BedrockRawCommands(UniversalRawCommands):
         cb_cuboid.add_param(*nt("cuboid_to"))
         cb_circle = node.add_branch(literal="circle")
         cb_circle.add_param(*nt("circle_center"))
-        cb_circle.add_param(*nt("circle_radius"), range=lambda x: 0 <= x <= 2147483647)
+        cb_circle.add_param(*nt("circle_radius"), range=lambda x: 0 <= x <= Int.max)
         node.add_branch(literal="tickingarea").add_param(*nt("tickingarea_name"))
         cb.add_param(*nt("function"))
         return cb
@@ -1357,7 +1358,7 @@ class BedrockRawCommands(UniversalRawCommands):
         return cb
 
     @version(introduced="0.16.0b1")
-    def setblock(self, pos: str,  # TODO Coord class
+    def setblock(self, pos: BlockCoord,
                  block: str,
                  tile_data: int=0,
                  block_states: Optional[dict]=None, # TODO BlockStates class
@@ -1650,16 +1651,16 @@ class JavaRawCommands(UniversalRawCommands):
         nt = lambda param: (param, _gt(cls.bossbar_set, param))
         node = cb.add_branch_node()
         node.add_branch(literal="color").add_switch("color", _go(cls.bossbar_set, "color"))
-        node.add_branch(literal="max").add_param(*nt("max"), range=lambda x: 1 <= x <= 2147483647)
+        node.add_branch(literal="max").add_param(*nt("max"), range=lambda x: 1 <= x <= Int.max)
         node.add_branch(literal="name").add_param(*nt("name"))
         node.add_branch(literal="players").add_param(*nt("players"), playeronly=True, optional=True, default=_gd(cls.bossbar_set, "players"))
         node.add_branch(literal="style").add_switch("style", _go(cls.bossbar_set, "style"))
-        node.add_branch(literal="value").add_param(*nt("value"), range=lambda x: 0 <= x <= 2147483647)
+        node.add_branch(literal="value").add_param(*nt("value"), range=lambda x: 0 <= x <= Int.max)
         node.add_branch(literal="visible").add_param(*nt("visible"))
         return cb
 
     @version(introduced="17w45a")
-    def clear(self, target: JavaSelector=JavaSelector.s,
+    def clear(self, target: JavaSelector=JavaSelector.s(),
               item: Optional[str]=None, # TODO item predicate thingy
               count: Optional[int]=None) -> ExecutedCommand:
         if self.fh.p.version < JavaVersion("17w45a"):
@@ -1674,7 +1675,7 @@ class JavaRawCommands(UniversalRawCommands):
         nt = lambda param: (param, _gt(cls.clear, param))
         cb.add_param(*nt("target"), default=_gd(cls.clear, "target"), optional=True, playeronly=True)
         cb.add_param(*nt("item"), optional=True)
-        cb.add_param(*nt("count"), optional=True, range=lambda x: 0 <= x <= 2147483647)
+        cb.add_param(*nt("count"), optional=True, range=lambda x: 0 <= x <= Int.max)
         return cb
     @version(introduced="12w37a", deprecated="17w45a")
     def clear_pre17w45a(self, target: JavaSelector=JavaSelector.p,
@@ -1701,9 +1702,9 @@ class JavaRawCommands(UniversalRawCommands):
 
     @version(introduced="14w03a")
     def clone(self, *,
-              begin: str, # TODO add Coordinates class when it is written
-              end: str,
-              destination: str,
+              begin: BlockCoord,
+              end: BlockCoord,
+              destination: BlockCoord,
               mask_mode: Literal["replace", "masked", "filtered"]="replace",
               clone_mode: Literal["force", "move", "normal"]="normal",
               filter_: Optional[str]=None) -> ExecutedCommand: # TODO add block predicate when it is written
@@ -1729,10 +1730,10 @@ class JavaRawCommands(UniversalRawCommands):
 
     @version(introduced="17w45b")
     def data_get(self,
-                 block: Optional[str]=None,
-                 entity: Optional[Union[JavaSelector, UUID]]=None,  # TODO add Coordinates class when it is written
+                 block: Optional[BlockCoord]=None,
+                 entity: Optional[Union[JavaSelector, UUID]]=None,
                  storage: Optional[str]=None, # TODO add ResourceLocation class when it is written
-                 path: Optional[str]=None, # TODO add NBTPath class when it is written
+                 path: Optional[Path]=None,
                  scale: Optional[float]=None) -> ExecutedCommand:
         cb = self.data_get_cb()
         self.param_version_introduced("storage", storage, "19w38a")
@@ -1753,8 +1754,8 @@ class JavaRawCommands(UniversalRawCommands):
 
     @version(introduced="17w45b")
     def data_merge(self, *,
-                   block: Optional[str]=None,
-                   entity: Optional[Union[JavaSelector, UUID]]=None,  # TODO add Coordinates class when it is written
+                   block: Optional[BlockCoord]=None,
+                   entity: Optional[Union[JavaSelector, UUID]]=None,
                    storage: Optional[str]=None,
                    nbt: dict) -> ExecutedCommand: # TODO add NBT class when it is written
         cb = self.data_merge_cb()
@@ -1776,16 +1777,16 @@ class JavaRawCommands(UniversalRawCommands):
 
     @version(introduced="18w43a")
     def data_modify(self, *,
-                    block: Optional[str]=None,
-                    entity: Optional[Union[JavaSelector, UUID]]=None,  # TODO add Coordinates class when it is written
+                    block: Optional[BlockCoord]=None,
+                    entity: Optional[Union[JavaSelector, UUID]]=None,
                     storage: Optional[str]=None,
-                    target_path: str, # TODO add NBTPath when it is written
+                    target_path: Path,
                     mode: Literal["add", "index", "merge", "prepend", "set"],
                     index: Optional[int]=None,
-                    from_block: Optional[str]=None,
-                    from_entity: Optional[Union[JavaSelector, UUID]]=None,  # TODO add Coordinates class when it is written
+                    from_block: Optional[BlockCoord]=None,
+                    from_entity: Optional[Union[JavaSelector, UUID]]=None,
                     from_storage: Optional[str]=None,
-                    source_path: Optional[str]=None, # TODO add NBTPath when it is written
+                    source_path: Optional[Path]=None,
                     value: Optional[Any]=None) -> ExecutedCommand:
         cb = self.data_modify_cb()
         self.param_version_introduced("storage", storage, "19w38a")
@@ -1804,7 +1805,7 @@ class JavaRawCommands(UniversalRawCommands):
         node.add_branch(literal="storage").add_param(*nt("storage"))
         cb.add_param(*nt("target_path"))
         node2 = cb.add_branch_node()
-        node2.add_branch("mode", ["index"]).add_param(*nt("index"), range=lambda x: -2147483648 <= x <= 2147483647)
+        node2.add_branch("mode", ["index"]).add_param(*nt("index"), range=lambda x: Int.min <= x <= Int.max)
         node2.add_branch("mode", ["add", "merge", "prepend", "set"])
         node3 = cb.add_branch_node()
         cb_from = node3.add_branch(literal="from")
@@ -1818,10 +1819,10 @@ class JavaRawCommands(UniversalRawCommands):
 
     @version(introduced="17w45b")
     def data_remove(self, *,
-                    block: Optional[str]=None,
-                    entity: Optional[Union[JavaSelector, UUID]]=None,  # TODO add Coordinates class when it is written
+                    block: Optional[BlockCoord]=None,
+                    entity: Optional[Union[JavaSelector, UUID]]=None,
                     storage: Optional[str]=None,
-                    path: str) -> ExecutedCommand: # TODO add NBTPath class when it is written
+                    path: Path) -> ExecutedCommand:
         cb = self.data_remove_cb()
         self.param_version_introduced("storage", storage, "19w38a")
         cmd = ExecutedCommand(self.fh, "data",
@@ -1969,7 +1970,7 @@ class JavaRawCommands(UniversalRawCommands):
     
     @version(introduced="1.6.1p")
     def effect_clear(self,
-                     targets: Union[JavaSelector, UUID]=JavaSelector.s,
+                     targets: Union[JavaSelector, UUID]=JavaSelector.s(),
                      effect: Optional[str]=None) -> ExecutedCommand:
         cb = self.effect_clear_cb()
         cmd = ExecutedCommand(self.fh, "effect", cb.build(targets=targets, effect=effect))
@@ -1995,7 +1996,7 @@ class JavaRawCommands(UniversalRawCommands):
         nt = lambda param: (param, _gt(cls.enchant, param))
         cb.add_param(*nt("target"))
         cb.add_param(*nt("enchantment"))
-        cb.add_param(*nt("level"), range=lambda x: 0 <= x <= 2147483647, default=_gd(cls.enchant, "level"))
+        cb.add_param(*nt("level"), range=lambda x: 0 <= x <= Int.max, default=_gd(cls.enchant, "level"))
         return cb
 
     class ExecuteCommand:
@@ -2061,7 +2062,7 @@ class JavaRawCommands(UniversalRawCommands):
             return cb
 
         @_check_run
-        def facing_position(self, position: str) -> Self: # TODO Coord class when it is written
+        def facing_position(self, position: Coord) -> Self:
             cb = self.facing_position_cb()
             self.command_strings.append(cb.build(position=position))
             return self
@@ -2098,7 +2099,7 @@ class JavaRawCommands(UniversalRawCommands):
             return cb
 
         @_check_run
-        def positioned_position(self, position: str) -> Self:  # TODO Coord class when it is written
+        def positioned_position(self, position: Coord) -> Self:
             cb = self.positioned_position_cb()
             self.command_strings.append(cb.build(position=position))
             return self
@@ -2148,7 +2149,7 @@ class JavaRawCommands(UniversalRawCommands):
 
         @_check_run
         def cond_block(self, cond: Literal["if", "unless"], *,
-                       position: str, # TODO coord (& block type) classes when they are written
+                       position: BlockCoord, # TODO BlockType class
                        block: str) -> Self:
             cb = self.cond_block_cb()
             self.command_strings.append(cb.build(cond=cond, position=position, block=block))
@@ -2165,9 +2166,9 @@ class JavaRawCommands(UniversalRawCommands):
 
         @_check_run
         def cond_blocks(self, cond: Literal["if", "unless"], *,
-                        start: str, # TODO coord classes when they are written
-                        end: str,
-                        destination: str,
+                        start: BlockCoord,
+                        end: BlockCoord,
+                        destination: BlockCoord,
                         scan_mode: Literal["all", "masked"]) -> Self:
             cb = self.cond_blocks_cb()
             self.command_strings.append(cb.build(cond=cond, start=start, end=end, destination=destination, scan_mode=scan_mode))
@@ -2186,10 +2187,10 @@ class JavaRawCommands(UniversalRawCommands):
 
         @_check_run
         def cond_data(self, cond: Literal["if", "unless"], *,
-                      block: str,# TODO add Coordinates, ResourceLocation, NBTPath class when it is written
+                      block: BlockCoord,# TODO add ResourceLocation
                       entity: Union[JavaSelector, UUID],
                       storage: str,
-                      path: str) -> Self:
+                      path: Path) -> Self:
             cb = self.cond_data_cb()
             self.command_strings.append(cb.build(cond=cond, block=block, entity=entity, storage=storage, path=path))
             return self
@@ -2266,8 +2267,8 @@ class JavaRawCommands(UniversalRawCommands):
 
         @_check_run
         def store_block(self, what: Literal["result", "success"], *,
-                        position: str,  # TODO add Coordinates class when it is written
-                        path: str,  # TODO add NBTPath class when it is written
+                        position: BlockCoord,
+                        path: Path,
                         type_: Literal["byte", "short", "int", "long", "float", "double"],
                         scale: float) -> Self:
             cb = self.store_block_cb()
@@ -2305,7 +2306,7 @@ class JavaRawCommands(UniversalRawCommands):
         @_check_run
         def store_entity(self, what: Literal["result", "success"], *,
                          target: JavaSelector,
-                         path: str,  # TODO add NBTPath class when it is written
+                         path: Path,
                          type_: Literal["byte", "short", "int", "long", "float", "double"],
                          scale: float) -> Self:
             cb = self.store_entity_cb()
@@ -2343,7 +2344,7 @@ class JavaRawCommands(UniversalRawCommands):
         @_check_run
         def store_storage(self, what: Literal["result", "success"], *,
                           target: str,  # TODO add ResourceLocation class when it is written
-                          path: str,  # TODO add NBTPath class when it is written
+                          path: Path,
                           type_: Literal["byte", "short", "int", "long", "float", "double"],
                           scale: float) -> Self:
             cb = self.store_storage_cb()
@@ -2399,11 +2400,11 @@ class JavaRawCommands(UniversalRawCommands):
         node = cb.add_branch_node()
         cb_add = node.add_branch("mode", ["add"])
         cb_add.add_param(*nt("targets"), playeronly=True)
-        cb_add.add_param(*nt("amount"), range=lambda x: -2147483648 <= x <= 2147483647)
+        cb_add.add_param(*nt("amount"), range=lambda x: Int.min <= x <= Int.max)
         cb_add.add_switch("unit", _go(cls.experience, "unit"), optional=True)
         cb_set = node.add_branch("mode", ["set"])
         cb_set.add_param(*nt("targets"), playeronly=True)
-        cb_set.add_param(*nt("amount"), range=lambda x: 0 <= x <= 2147483647)
+        cb_set.add_param(*nt("amount"), range=lambda x: 0 <= x <= Int.max)
         cb_set.add_switch("unit", _go(cls.experience, "unit"), optional=True)
         cb_query = node.add_branch("mode", ["query"])
         cb_query.add_param(*nt("targets"), playeronly=True)
@@ -2412,8 +2413,8 @@ class JavaRawCommands(UniversalRawCommands):
     xp_cb = experience_cb
 
     @version(introduced="14w03a")
-    def fill(self, from_: str, # TODO add Coordinates class when it is written
-             to: str,
+    def fill(self, from_: BlockCoord,
+             to: BlockCoord,
              block: str,
              mode: Literal["destroy", "hollow", "keep", "outline", "replace"]="replace",
              filter_: Optional[str]=None) -> ExecutedCommand:
@@ -2499,7 +2500,7 @@ class JavaRawCommands(UniversalRawCommands):
 
     @version(introduced="b1.8pre")
     def gamemode(self, mode: Literal["survival", "creative", "adventure", "spectator"],
-                 target: Union[Union[JavaSelector, UUID], str]=JavaSelector.s) -> ExecutedCommand:
+                 target: Union[Union[JavaSelector, UUID], str]=JavaSelector.s()) -> ExecutedCommand:
         cb = self.gamemode_cb()
         self.option_version_introduced("mode", mode, "14w05a", "spectator")
         cmd = ExecutedCommand(self.fh, "gamemode", cb.build(mode=mode, target=target))
@@ -2544,7 +2545,7 @@ class JavaRawCommands(UniversalRawCommands):
 
     @version(introduced="20w46a")
     def item_modify(self, *,
-                    block: Optional[str] = None,  # TODO add Coord class when it is written
+                    block: Optional[BlockCoord] = None,
                     entity: Optional[Union[str, Union[JavaSelector, UUID]]] = None,
                     slot: str,  # TODO class for slots?
                     modifier: Optional[str]=None) -> ExecutedCommand: # TODO ResourceLocation and ItemModifier class
@@ -2565,13 +2566,13 @@ class JavaRawCommands(UniversalRawCommands):
 
     @version(introduced="20w46a")
     def item_replace(self, *,
-                     block: Optional[str]=None, # TODO add Coord class when it is written
+                     block: Optional[BlockCoord]=None,
                      entity: Optional[Union[str, Union[JavaSelector, UUID]]]=None,
                      slot: str, # TODO class for slots?
                      replace_mode: Literal["with", "from"],
                      item: Optional[str]=None,
                      count: int=1,
-                     from_block: Optional[str]=None,  # TODO add Coord class when it is written
+                     from_block: Optional[BlockCoord]=None,
                      from_entity: Optional[Union[str, Union[JavaSelector, UUID]]]=None,
                      from_slot: Optional[str]=None,
                      modifier: Optional[str]=None) -> ExecutedCommand: # TODO ResourceLocation and ItemModifier class
@@ -2628,7 +2629,7 @@ class JavaRawCommands(UniversalRawCommands):
         return cb
 
     @version(introduced="a1.2.6")
-    def kill(self, target: Union[Union[JavaSelector, UUID], str]=JavaSelector.s) -> ExecutedCommand:
+    def kill(self, target: Union[Union[JavaSelector, UUID], str]=JavaSelector.s()) -> ExecutedCommand:
         cb = self.kick_cb()
         cmd = ExecutedCommand(self.fh, "kick", cb.build(target=target))
         self.fh.commands.append(cmd)
@@ -2679,19 +2680,19 @@ class JavaRawCommands(UniversalRawCommands):
 
     @version(introduced="18w43a")
     def loot(self, *,
-             spawn_target_pos: Optional[str]=None, # TODO Coord
+             spawn_target_pos: Optional[Coord]=None,
              replace_entities: Optional[Union[Union[JavaSelector, UUID], str]]=None,
              replace_block: Optional[str]=None,
              replace_slot: Optional[str]=None, # TODO Slot class
              replace_count: Optional[int]=None,
              give_players: Optional[Union[Union[JavaSelector, UUID], str]]=None,
-             insert_target_pos: Optional[str]=None, # TODO Coord
+             insert_target_pos: Optional[Coord]=None,
              fish_loot_table: Optional[str]=None, # TODO LootTable, ResourceLocation class
-             fish_pos: Optional[str]=None, # TODO coord
+             fish_pos: Optional[Coord]=None,
              fish_tool: Optional[Union[str, Literal["mainhand", "offhand"]]]=None, # TODO item class?
              loot_loot_table: Optional[str]=None,
              kill_target: Optional[Union[Union[JavaSelector, UUID], str]]=None,
-             mine_pos: Optional[str]=None,  # TODO coord
+             mine_pos: Optional[BlockCoord]=None,
              mine_tool: Optional[Union[str, Literal["mainhand", "offhand"]]]=None) -> ExecutedCommand:  # TODO item class?
         cb = self.loot_cb()
         cmd = ExecutedCommand(self.fh, "loot", cb.build(spawn_target_pos=spawn_target_pos, replace_entities=replace_entities,
@@ -2713,7 +2714,7 @@ class JavaRawCommands(UniversalRawCommands):
         node2.add_branch(literal="entity").add_param(*nt("replace_entities"))
         node2.add_branch(literal="block").add_param(*nt("replace_block"))
         cb_target_replace.add_param(*nt("replace_slot"))
-        cb_target_replace.add_param(*nt("replace_count"), optional=True, range=lambda x: 0 <= x <= 2147483647)
+        cb_target_replace.add_param(*nt("replace_count"), optional=True, range=lambda x: 0 <= x <= Int.max)
         node.add_branch(literal="give").add_param(*nt("give_players"), playeronly=True)
         node.add_branch(literal="insert").add_param(*nt("insert_target_pos"))
         node3 = cb.add_branch_node()
@@ -2800,7 +2801,7 @@ class JavaRawCommands(UniversalRawCommands):
 
     @version(introduced="14w04a")
     def particle(self, *, particle: str, # TODO Particle class
-                 pos: str="~ ~ ~", # TODO Coord class
+                 pos: Coord=Coord.at_executor(),
                  delta: Optional[str]=None,
                  speed: Optional[float]=None,
                  count: Optional[int]=None,
@@ -2822,7 +2823,7 @@ class JavaRawCommands(UniversalRawCommands):
         cb2.add_param(*nt("pos"))
         cb2.add_param(*nt("delta"))
         cb2.add_param(*nt("speed"), range=lambda x: 0.0 <= x <= 340282356779733661637539395458142568447.9)
-        cb2.add_param(*nt("count"), range=lambda x: 0 <= x <= 2147483647)
+        cb2.add_param(*nt("count"), range=lambda x: 0 <= x <= Int.max)
         cb2.add_switch(*_go(cls.particle, "display_mode"), default=_gd(cls.particle, "display_mode"))
         cb2.add_param(*nt("viewers"), optional=True, playeronly=True)
         return cb
@@ -2844,7 +2845,7 @@ class JavaRawCommands(UniversalRawCommands):
                   source: Literal["master", "music", "record", "weather", "block",
                                   "hostile", "neutral", "player", "ambient", "voice"],
                   targets: Union[Union[JavaSelector, UUID], str],
-                  position: Optional[str]=None, # TODO Coord class
+                  position: Optional[Coord]=None,
                   volume: float=1.0,
                   pitch: float=1.0,
                   minimum_volume: float=0.0) -> ExecutedCommand:
@@ -3119,7 +3120,7 @@ class JavaRawCommands(UniversalRawCommands):
         nt = lambda param: (param, _gt(cls.scoreboard_players_add, param))
         cb.add_param(*nt("target"))
         cb.add_param(*nt("objective"), regex=r"^[ A-Za-z0-9\-+\._]*$")
-        cb.add_param(*nt("set"), range=lambda x: 0 <= x <= 2147483647)
+        cb.add_param(*nt("set"), range=lambda x: 0 <= x <= Int.max)
         return cb
 
     @version(introduced="13w04a")
@@ -3137,7 +3138,7 @@ class JavaRawCommands(UniversalRawCommands):
         nt = lambda param: (param, _gt(cls.scoreboard_players_remove, param))
         cb.add_param(*nt("target"))
         cb.add_param(*nt("objective"), regex=r"^[ A-Za-z0-9\-+\._]*$")
-        cb.add_param(*nt("set"), range=lambda x: 0 <= x <= 2147483647)
+        cb.add_param(*nt("set"), range=lambda x: 0 <= x <= Int.max)
         return cb
 
     @version(introduced="13w04a")
@@ -3206,7 +3207,7 @@ class JavaRawCommands(UniversalRawCommands):
         return CommandBuilder("seed")
 
     @version(introduced="13w37a")
-    def setblock(self, pos: str, # TODO Coord class
+    def setblock(self, pos: BlockCoord,
                  block: str,
                  mode: Literal["destroy", "keep", "replace"]="replace") -> ExecutedCommand:
         cb = self.setblock_cb()
@@ -3232,5 +3233,5 @@ class JavaRawCommands(UniversalRawCommands):
     def setidletimeout_cb(cls) -> CommandBuilder:
         cb = CommandBuilder("setidletimeout")
         nt = lambda param: (param, _gt(cls.setidletimeout, param))
-        cb.add_param(*nt("minutes"), range=lambda x: 0 <= x <= 2147483647)
+        cb.add_param(*nt("minutes"), range=lambda x: 0 <= x <= Int.max)
         return cb
