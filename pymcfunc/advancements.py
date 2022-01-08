@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import inspect
 from collections import Sequence
+from functools import wraps
 from typing import TypeAlias, Union, Literal, Callable, TypedDict, Any
 
+from pymcfunc import func_handler
 from pymcfunc.nbt import Compound, NBT
 
 RawJson: TypeAlias = Union[dict, list]
@@ -20,6 +22,16 @@ class Advancement:
         self.rewards: Rewards | None = None
 
         for k, v in kwargs.items(): setattr(self, k, v)
+
+    def on_advancement_get(self, func: Callable[[func_handler.JavaFuncHandler, ...], Any]):
+        """The function with the tag will be called when the achievement is gotten.
+        More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.advancements.Advancement.on_reward"""
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if self.rewards is None: self.rewards = Rewards()
+            self.rewards.function = func.__name__
+            return func(*args, **kwargs)
+        return wrapper
 
 
 class AdvancementDisplay:
