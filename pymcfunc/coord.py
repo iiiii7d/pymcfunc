@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 from typing import Union
 
@@ -18,9 +20,9 @@ class Coord:
             raise ValueError(f"Caret notation not used for all coordinates (Got {x}, {y} and {z})")
         for name, c in [('x', x), ('y', y), ('z', z)]:
             res = re.search(r"^[~^]?(-?\d*(?:\.\d+)?)$", str(c))
-            if res is None:
+            if res is None or len(str(res)) == 0:
                 raise ValueError(f"Coordinate {name} invalid (Got {c})")
-            if "." in res.group(1): all_int = False
+            if "." in res.group(1) | isinstance(c, float): all_int = False
         if all_int: return BlockCoord.__new__(BlockCoord, x, y, z)
         else: return super().__new__(cls)
 
@@ -32,9 +34,36 @@ class Coord:
     def __str__(self):
         return f"{self.x} {self.y} {self.z}"
 
+    def __iter__(self):
+        for c in (self.x, self.y, self.z): yield c
+
+    def __setattr__(self, *_):
+        raise AttributeError(f"{type(self).__name__} is immutable")
+
     @classmethod
     def at_executor(cls) -> Self:
         return cls("~", "~", "~")
+
+    def to_chunk_coord(self) -> ChunkCoord:
+        x = re.search(r"^[~^]?(-?\d*(?:\.\d+)?)$", str(self.x)).group(1)
+        z = re.search(r"^[~^]?(-?\d*(?:\.\d+)?)$", str(self.z)).group(1)
+        x = "" if x == "" else float(x)//8
+        z = "" if z == "" else float(z)//8
+        x = self.x[0]+str(x) if str(self.x)[0] in ("^", "~") else x
+        z = self.x[0]+str(z) if str(self.z)[0] in ("^", "~") else z
+        return ChunkCoord(x, z)
+
+    def to_block_coord(self) -> BlockCoord:
+        x = re.search(r"^[~^]?(-?\d*(?:\.\d+)?)$", str(self.x)).group(1)
+        y = re.search(r"^[~^]?(-?\d*(?:\.\d+)?)$", str(self.y)).group(1)
+        z = re.search(r"^[~^]?(-?\d*(?:\.\d+)?)$", str(self.z)).group(1)
+        x = "" if x == "" else round(float(x))
+        y = "" if y == "" else round(float(y))
+        z = "" if z == "" else round(float(z))
+        x = self.x[0] + str(x) if str(self.x)[0] in ("^", "~") else x
+        z = self.y[0] + str(y) if str(self.y)[0] in ("^", "~") else y
+        z = self.x[0] + str(z) if str(self.z)[0] in ("^", "~") else z
+        return BlockCoord(x, y, z)
 
 class BlockCoord(Coord):
     x: _IntCoord
@@ -45,4 +74,29 @@ class BlockCoord(Coord):
         return object.__new__(cls)
 
 class ChunkCoord:
-    pass
+    x: _IntCoord
+    z: _IntCoord
+    def __init__(self, x: _IntCoord, z: _IntCoord):
+        if any(str(c).startswith("^") for c in [x, z]) and not all(str(c).startswith("^") for c in [x, z]):
+            raise ValueError(f"Caret notation not used for all coordinates (Got {x} and {z})")
+        for name, c in [('x', x), ('z', z)]:
+            res = re.search(r"^[~^]?(-?\d*(?:\.\d+)?)$", str(c))
+            if res is None:
+                raise ValueError(f"Coordinate {name} invalid (Got {c})")
+            if "." in res.group(1) or isinstance(c, float):
+                raise TypeError(f"Coordinate {name} must be an int (Got {c})")
+        self.x = x
+        self.z = z
+
+    def __str__(self):
+        return f"{self.x} {self.z}"
+
+    def __iter__(self):
+        for c in [self.x, self.z]: yield c
+
+    def __setattr__(self, *_):
+        raise AttributeError(f"{type(self).__name__} is immutable")
+
+    @classmethod
+    def at_executor(cls) -> Self:
+        return cls("~", "~")

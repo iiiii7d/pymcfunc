@@ -10,7 +10,7 @@ from uuid import UUID
 from typing_extensions import Self
 
 from pymcfunc.command_builder import CommandBuilder
-from pymcfunc.coord import Coord, BlockCoord
+from pymcfunc.coord import Coord, BlockCoord, ChunkCoord
 from pymcfunc.errors import FutureCommandWarning, DeprecatedCommandWarning, EducationEditionWarning
 from pymcfunc.nbt import Int, Path
 from pymcfunc.selectors import JavaSelector, BedrockSelector
@@ -2435,7 +2435,7 @@ class JavaRawCommands(UniversalRawCommands):
         return cb
 
     @version(introduced="18w31a")
-    def forceload_add(self, from_: str, to: Optional[str]=None) -> ExecutedCommand: # TODO add Chunk coords when it is written
+    def forceload_add(self, from_: ChunkCoord, to: Optional[ChunkCoord]=None) -> ExecutedCommand:
         cb = self.forceload_add_cb()
         cmd = ExecutedCommand(self.fh, "forceload", cb.build(from_=from_, to=to))
         self.fh.commands.append(cmd)
@@ -2449,8 +2449,8 @@ class JavaRawCommands(UniversalRawCommands):
         return cb
 
     @version(introduced="18w31a")
-    def forceload_remove(self, from_: str,
-                         to: Optional[str] = None) -> ExecutedCommand:  # TODO add Chunk coords when it is written
+    def forceload_remove(self, from_: ChunkCoord,
+                         to: Optional[ChunkCoord] = None) -> ExecutedCommand:
         cb = self.forceload_add_cb()
         cmd = ExecutedCommand(self.fh, "forceload", cb.build(from_=from_, to=to))
         self.fh.commands.append(cmd)

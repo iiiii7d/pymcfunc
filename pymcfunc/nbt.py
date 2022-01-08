@@ -53,6 +53,9 @@ def _numerical(min_: str | float, max_: str | float, type_: type, suffix: str=""
 
             def __str__(self):
                 return str(self._val) + suffix
+            
+            def py(self) -> val_type:
+                return self._val
         return NumericalNBT
     return decorator
 
@@ -77,8 +80,7 @@ def _sequential(type_: type, prefix: str=""):
                         if not isinstance(v, type(val[0])):
                             raise TypeError(f"value must be of type {type(val[0]).__name__} (Got {v})")
 
-                val_type = self.val_type
-                self._val: val_type = val
+                self._val = val
                 self.__setattr__ = _immutable_lock
 
             def __str__(self):
@@ -94,6 +96,7 @@ def _sequential(type_: type, prefix: str=""):
                 return self._val[index]
 
             def __setitem__(self, index: int, val: content_type):
+                val = NBT(val) if not issubclass(type(val), NBT) else val
                 if not isinstance(val, self.content_type):
                     raise TypeError(f"value must be of type {self.content_type.__name__} (Got {val})")
                 self._val[index] = val
@@ -108,6 +111,9 @@ def _sequential(type_: type, prefix: str=""):
                 if not isinstance(val, self.content_type):
                     raise TypeError(f"value must be of type {self.content_type.__name__} (Got {val})")
                 self._val.insert(index, val)
+                
+            def py(self) -> list[content_type]:
+                return [i.py() for i in self._val]
 
         return SequentialNBT
     return decorator
@@ -139,15 +145,17 @@ class NBT:
         raise TypeError(f"Type {type(val).__name__} not supported as NBT value (Got {val})")
 
     def __init__(self, val: val_type):
-        val_type = self.val_type
-        if not isinstance(val, val_type):
-            raise TypeError(f"value must be of type {val_type.__name__} (Got {val})")
-        self._val: val_type = val
+        if not isinstance(val, self.val_type):
+            raise TypeError(f"value must be of type {self.val_type.__name__} (Got {val})")
+        self._val = val
 
         self.__setattr__ = _immutable_lock
 
     def __repr__(self):
         return type(self).__name__+"("+str(self)+")"
+    
+    def py(self) -> val_type:
+        return self._val
 
 @_numerical(-128, 127, int, "b")
 class Byte(NBT): pass
@@ -188,16 +196,20 @@ class Boolean(NBT):
     val_type = bool
     def __str__(self):
         return "true" if self._val else "false"
+    
+    def py(self) -> val_type:
+        # noinspection PyTypeChecker
+        return self._val
 
 class Compound(NBT, dict):
     val_type = dict
 
     # noinspection PyMissingConstructor
     def __init__(self, val: dict[str, Any]):
-        val_type = self.val_type
-        self._val: val_type = {str(k): NBT(v) for k, v in val.items()}
+        self._val = {str(k): NBT(v) for k, v in val.items()}
 
         def _immutable_lock2(self2, key: str, value: Any):
+            value = NBT(value) if not issubclass(type(value), NBT) else value
             if key == "_val": _immutable_lock()
             self2._val[key] = value
 
@@ -232,3 +244,9 @@ class Compound(NBT, dict):
 
     def __str__(self) -> str:
         return "{"+",".join(k+":"+str(v) for k, v in self.items())+"}"
+
+    def py(self) -> dict[str, Any]:
+        return {k: v.py() for k, v in self._val}
+
+class Template(Compound):
+    pass
