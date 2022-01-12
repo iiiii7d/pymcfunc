@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing import Literal, TypedDict
+from typing import Literal
 
-from pymcfunc.nbt import Float, Int, Double, NBT
+from pymcfunc.nbt import Float, Int, Double, NBT, Compound
 
 
 class Range:
@@ -113,13 +113,197 @@ class EntityJson:
             return d
 
     class Player:
-        pass
+        def __init__(self, **kwargs):
+            self.looking_at: EntityJson | None = None
+            self.advancements: dict[str, bool | dict[str, bool]] | None = None
+            self.gamemode: Literal["survival", "adventure", "creative", "spectator"] | None = None
+            self.level: int | IntRange | None = None
+            self.recipes: dict[str, bool] | None = None
+            self.stats: list[EntityJson.Player.Statistic] | None = None
+
+            for k, v in kwargs.items(): setattr(self, k, v)
+
+        class Statistic:
+            def __init__(self, **kwargs):
+                self.type: Literal["minecraft:custom", "minecraft:crafted", "minecraft:used", "minecraft:broken",
+                                   "minecraft:mined", "minecraft:killed", "minecraft:picked_up", "minecraft:dropped",
+                                   "minecraft:killed_by"] | None = None
+                self.stat: str | None = None
+                self.value: int | IntRange | None = None
+
+                for k, v in kwargs.items(): setattr(self, k, v)
+
+            def json(self) -> dict:
+                d: dict = {}
+                for attr in ['type', 'stat', 'value']:
+                    if getattr(self, attr) is not None:
+                        d[attr] = getattr(self, attr)
+                        if 'json' in dir(d[attr]):
+                            d[attr] = d[attr].json()
+                return d
+
+        def json(self) -> dict:
+            d: dict = {}
+            for attr in ['looking_at', 'advancements', 'gamemode', 'level', 'recipes', 'stats']:
+                if getattr(self, attr) is not None:
+                    d[attr] = getattr(self, attr)
+                    if 'json' in dir(d[attr]):
+                        d[attr] = d[attr].json()
+                    if isinstance(d[attr], list):
+                        for i, item in enumerate(d[attr]):
+                            if 'json' in dir(item):
+                                d[attr][i] = item.json()
+            return d
+
     class LightningBolt:
-        pass
-    # TODO classes for distance and equipment?
+        def __init__(self, **kwargs):
+            self.blocks_set_on_fire: int | None = None
+            self.entity_struck: EntityJson | None = None
+
+            for k, v in kwargs.items(): setattr(self, k, v)
+            
+        def json(self) -> dict:
+            d: dict = {}
+            for attr in ['blocks_set_on_fire', 'entity_struck']:
+                if getattr(self, attr) is not None:
+                    d[attr] = getattr(self, attr)
+                    if 'json' in dir(d[attr]):
+                        d[attr] = d[attr].json()
+            return d
+        
+    def json(self) -> dict:
+        d: dict = {}
+        for attr in ['distance', 'effects', 'equipment', 'flags', 'lightning_bolt', 'location', 'nbt', 'passenger',
+                     'player', 'stepping_on', 'team', 'type', 'targeted_entity', 'vehicle',
+                     'fishing_hook_in_open_water']:
+            if getattr(self, attr) is not None:
+                if attr == 'effects':
+                    d[attr] = {e.name: e.json for e in getattr(self, attr)}
+                    continue
+                elif attr == 'fishing_hook_in_open_water':
+                    d['fishing_hook'] = {'in_open_water': getattr(self, attr)}
+                    continue
+                d[attr] = getattr(self, attr)
+                if 'json' in dir(d[attr]):
+                    d[attr] = d[attr].json()
+                if isinstance(d[attr], list):
+                    for i, item in enumerate(d[attr]):
+                        if 'json' in dir(item):
+                            d[attr][i] = item.json()
+                elif isinstance(d[attr], dict):
+                    for k, v in d[attr]:
+                        if 'json' in dir(v):
+                            d[attr][k] = v.json()
+        return d
 
 class LocationJson:
-    pass
+    def __init__(self, **kwargs):
+        self.biome: str | None = None
+        self.block: LocationJson.Block | None = None
+        self.dimension: str | None = None
+        self.feature: str | None = None
+        self.fluid: LocationJson.Fluid | None = None
+        self.light: int | IntRange | None = None
+        self.position: dict[Literal["x", "y", "z"], float | DoubleRange] | None = None
+        self.smokey: bool | None = None
+
+        for k, v in kwargs.items(): setattr(self, k, v)
+
+    class Block:
+        def __init__(self, **kwargs):
+            self.blocks: list[str] | None = None
+            self.tag: str | None = None
+            self.nbt: Compound | None = None
+            self.state: dict[str, str | int | bool | IntRange] | None = None
+
+            for k, v in kwargs.items(): setattr(self, k, v)
+
+        def json(self) -> dict:
+            d: dict = {}
+            for attr in ['blocks', 'tag', 'nbt', 'state']:
+                if getattr(self, attr) is not None:
+                    d[attr] = getattr(self, attr)
+                    if 'json' in dir(d[attr]):
+                        d[attr] = d[attr].json()
+                    if isinstance(d[attr], dict):
+                        for k, v in d[attr]:
+                            if 'json' in dir(v):
+                                d[attr][k] = v.json()
+                    elif isinstance(d[attr], Compound):
+                        d[attr] = str(d[attr])
+            return d
+
+    class Fluid:
+        def __init__(self, **kwargs):
+            self.fluid: str | None = None
+            self.state: dict[str, str | int | bool | IntRange] | None = None
+
+            for k, v in kwargs.items(): setattr(self, k, v)
+
+        def json(self) -> dict:
+            d: dict = {}
+            for attr in ['fluid', 'state']:
+                if getattr(self, attr) is not None:
+                    d[attr] = getattr(self, attr)
+                    if 'json' in dir(d[attr]):
+                        d[attr] = d[attr].json()
+                    if isinstance(d[attr], dict):
+                        for k, v in d[attr]:
+                            if 'json' in dir(v):
+                                d[attr][k] = v.json()
+            return d
+
+    def json(self) -> dict:
+        d: dict = {}
+        for attr in ['biome', 'block', 'dimension', 'feature', 'fluid', 'light', 'position', 'smokey']:
+            if getattr(self, attr) is not None:
+                d[attr] = getattr(self, attr)
+                if 'json' in dir(d[attr]):
+                    d[attr] = d[attr].json()
+                if isinstance(d[attr], dict):
+                    for k, v in d[attr]:
+                        if 'json' in dir(v):
+                            d[attr][k] = v.json()
+        return d
 
 class ItemJson:
-    pass
+    def __init__(self, **kwargs):
+        self.count: int | IntRange | None = None
+        self.durability: int | IntRange | None = None
+        self.enchantments: list[ItemJson.Enchantment] | None = None
+        self.stored_enchantments: list[ItemJson.Enchantment] | None = None
+        self.items: list[str] | None = None
+        self.nbt: Compound | None = None
+        self.potion: str | None = None
+        self.tag: str | None = None
+
+        for k, v in kwargs.items(): setattr(self, k, v)
+
+    class Enchantment:
+        def __init__(self, **kwargs):
+            self.enchantment: str | None = None
+            self.levels: int | IntRange | None = None
+
+            for k, v in kwargs.items(): setattr(self, k, v)
+
+        def json(self) -> dict:
+            d: dict = {}
+            for attr in ['enchantment', 'levels']:
+                if getattr(self, attr) is not None:
+                    d[attr] = getattr(self, attr)
+                    if 'json' in dir(d[attr]):
+                        d[attr] = d[attr].json()
+            return d
+
+    def json(self) -> dict:
+        d: dict = {}
+        for attr in ['count', 'durability', 'enchantments', 'stored_enchantments', 'items', 'nbt', 'potion', 'tag']:
+            if getattr(self, attr) is not None:
+                d[attr] = getattr(self, attr)
+                if 'json' in dir(d[attr]):
+                    d[attr] = d[attr].json()
+                if isinstance(d[attr], list):
+                    for i, item in enumerate(d[attr]):
+                        if 'json' in dir(item):
+                            d[attr][i] = item.json()
+        return d
