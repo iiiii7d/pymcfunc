@@ -20,6 +20,9 @@ class Range:
         self.min: int | str = min_
         self.max: int | str = max_
 
+    def json(self) -> dict:
+        return {'min': self.min, 'max': self.max}
+
 class FloatRange(Range): pass
 class IntRange(Range): pass
 class DoubleRange(Range): pass
@@ -35,12 +38,12 @@ class DamageJson:
         for k, v in kwargs.items(): setattr(self, k, v)
 
     def json(self) -> dict:
-        d = {}
-        if self.blocked is not None: d["blocked"] = self.blocked
-        if self.dealt is not None: d["dealt"] = self.dealt
-        if self.source_entity is not None: d["source_entity"] = self.source_entity.json()
-        if self.taken is not None: d["taken"] = self.taken
-        if self.type is not None: d["type"] = self.type.json()
+        d: dict = {}
+        for attr in ['blocked', 'dealt', 'source_entity', 'taken', 'type']:
+            if getattr(self, attr) is not None:
+                d[attr] = getattr(self, attr)
+                if 'json' in dir(d[attr]):
+                    d[attr] = d[attr].json()
         return d
 
 class DamageTypeJson:
@@ -59,17 +62,14 @@ class DamageTypeJson:
         for k, v in kwargs.items(): setattr(self, k, v)
 
     def json(self) -> dict:
-        d = {}
-        if self.bypasses_armor is not None: d["bypasses_armor"] = self.bypasses_armor
-        if self.bypasses_invulnerability is not None: d["bypasses_invulnerability"] = self.bypasses_invulnerability.json()
-        if self.bypasses_magic is not None: d["bypasses_magic"] = self.bypasses_magic
-        if self.direct_entity is not None: d["direct_entity"] = self.direct_entity
-        if self.is_explosion is not None: d["is_explosion"] = self.is_explosion
-        if self.is_fire is not None: d["is_fire"] = self.is_fire
-        if self.is_magic is not None: d["is_magic"] = self.is_magic
-        if self.is_projectile is not None: d["is_projectile"] = self.is_projectile
-        if self.is_lightning is not None: d["is_lightning"] = self.is_lightning
-        if self.source_entity is not None: d["source_entity"] = self.source_entity.json()
+        d: dict = {}
+        for attr in ['bypassess_armor', 'bypasses_invulnerability', 'bypasses_magic', 'direct_entity',
+                     'is_explosion', 'is_fire', 'is_magic', 'is_projectile', 'is_lightning',
+                     'source_entity']:
+            if getattr(self, attr) is not None:
+                d[attr] = getattr(self, attr)
+                if 'json' in dir(d[attr]):
+                    d[attr] = d[attr].json()
         return d
 
 
@@ -79,24 +79,44 @@ class EntityJson:
         self.effects: list[EntityJson.Effect] | None = None
         self.equipment: dict[Literal["mainhand", "offhand", "head", "chest", "legs", "feet"], ItemJson] | None = None
         self.flags: dict[Literal["is_on_fire", "is_sneaking", "is_sprinting", "is_swimming", "is_baby"], bool] | None = None
-        self.lightning_bolt: dict[_LightningBolt] | None = None
+        self.lightning_bolt: EntityJson.LightningBolt | None = None
         self.location: LocationJson | None = None
         self.nbt: NBT | None = None
         self.passenger: EntityJson | None = None
         self.player: EntityJson.Player | None = None
-        # TODO more here
+        self.stepping_on: LocationJson | None = None
+        self.team: str | None = None # TODO are there specific team names?
+        self.type: str | None = None
+        self.targeted_entity: EntityJson | None = None
+        self.vehicle: str | None = None
+        self.fishing_hook_in_open_water: bool | None = None
+
+        for k, v in kwargs.items(): setattr(self, k, v)
+
     class Effect:
-        pass
+        def __init__(self, name: str, **kwargs):
+            self.name: str = name
+            self.ambient: bool | None = None
+            self.amplifier: int | IntRange | None = None
+            self.duration: int | IntRange | None = None
+            self.visible: bool | None = None
+
+            for k, v in kwargs.items(): setattr(self, k, v)
+
+        def json(self) -> dict:
+            d: dict = {}
+            for attr in ['name', 'ambient', 'amplifier', 'duration', 'visible']:
+                if getattr(self, attr) is not None:
+                    d[attr] = getattr(self, attr)
+                    if 'json' in dir(d[attr]):
+                        d[attr] = d[attr].json()
+            return d
+
     class Player:
         pass
     class LightningBolt:
         pass
     # TODO classes for distance and equipment?
-
-_LightningBolt = TypedDict("_LightningBolt", {
-    "blocks_set_on_fire": int,
-    "entity_struck": EntityJson
-}, total=False)
 
 class LocationJson:
     pass
