@@ -108,8 +108,8 @@ class Criterion:
 
     @staticmethod
     def _trigger(func: Callable[..., Criterion]):
-        def wrapper(*args, **kwargs) -> Criterion:
-            crit = Criterion(args[0])
+        def wrapper(_, name, *__, **kwargs) -> Criterion:
+            crit = Criterion(name)
             crit.trigger = "minecraft:"+func.__name__
             for arg, param in inspect.signature(func).parameters.items():
                 if arg in ("self", "name"): continue

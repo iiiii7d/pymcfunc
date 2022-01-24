@@ -22,7 +22,7 @@ class Coord:
             res = re.search(r"^[~^]?(-?\d*(?:\.\d+)?)$", str(c))
             if res is None or len(str(res)) == 0:
                 raise ValueError(f"Coordinate {name} invalid (Got {c})")
-            if "." in res.group(1) | isinstance(c, float): all_int = False
+            if "." in res.group(1) or isinstance(c, float): all_int = False
         if all_int: return BlockCoord.__new__(BlockCoord, x, y, z)
         else: return super().__new__(cls)
 
@@ -31,14 +31,15 @@ class Coord:
         self.y = y
         self.z = z
 
+        def _immutable_lock(*_):
+            raise AttributeError(f"{type(self).__name__} is immutable")
+        self.__setattr__ = _immutable_lock
+
     def __str__(self):
         return f"{self.x} {self.y} {self.z}"
 
     def __iter__(self):
         for c in (self.x, self.y, self.z): yield c
-
-    def __setattr__(self, *_):
-        raise AttributeError(f"{type(self).__name__} is immutable")
 
     @classmethod
     def at_executor(cls) -> Self:
@@ -88,14 +89,15 @@ class ChunkCoord:
         self.x = x
         self.z = z
 
+        def _immutable_lock(*_):
+            raise AttributeError(f"{type(self).__name__} is immutable")
+        self.__setattr__ = _immutable_lock
+
     def __str__(self):
         return f"{self.x} {self.z}"
 
     def __iter__(self):
         for c in [self.x, self.z]: yield c
-
-    def __setattr__(self, *_):
-        raise AttributeError(f"{type(self).__name__} is immutable")
 
     @classmethod
     def at_executor(cls) -> Self:
