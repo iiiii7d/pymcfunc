@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import inspect
-from typing import Callable, Any, Union, Type, NoReturn, Literal, NewType
+from types import UnionType, NoneType
+from typing import Callable, Any, Union, Type, Literal, Optional, _UnionGenericAlias, TypeVar, _LiteralGenericAlias, \
+    get_args
 
 from pymcfunc.raw_commands import ExecutedCommand
 from pymcfunc.selectors import UniversalSelector
@@ -37,7 +39,10 @@ class SwitchE(Element):
         self.branches = branches
 SE = SwitchE
 
-class _OneTypeParamBase:
+class _Type:
+    def convert(self, instance, varname: str): pass
+
+class _OneTypeParamBase(_Type):
     type_param: type
     def __init__(self, type_param: type):
         self.type_param = type_param
@@ -66,7 +71,6 @@ class _OneTypeParamBase:
     def check(self, instance: type_param | Any, varname: str):
         if not self.__subclasscheck__(type(instance)):
             raise TypeError(f"Value for argument `{varname}` is not of type `{self.type_param.__name__}` (Got `{instance}`)")
-    # TODO checking for Literals and primitives
 
     def convert(self, instance: type_param | Any, varname: str) -> type_param:
         self.check(instance, varname)
@@ -77,7 +81,8 @@ class _OneTypeOneValueParamBase(_OneTypeParamBase):
     def __init__(self, type_param: type, value: Any):
         super().__init__(type_param)
         self.value = value
-    def __class_getitem__(cls, type_param: type, value: Any):
+    def __class_getitem__(cls, i: tuple[type, Any]):
+        type_param, value = i
         return cls(type_param, value)
 
     def __eq__(self, other):
@@ -111,21 +116,27 @@ class Player(_OneTypeParamBase):
         if not instance.playeronly:
             raise ValueError(f"Value for argument `{varname}` selects entities too (Got `{instance}`)")
 
-_Quoted = NewType("_Quoted", Literal["q"])
-class Spacing(_OneTypeOneValueParamBase):
+
+class Range(_OneTypeOneValueParamBase):
     type_param: str
-    value: bool | _Quoted
+    value: tuple[int | float, int | float]
 
     def __instancecheck__(self, instance: type_param | Any):
-        if self.__subclasscheck__(type(instance)):
-            if not self.value: return " " in instance
-            return True
-        return False
+        return self.__subclasscheck__(type(instance)) and self.value[0] <= instance <= self.value[1]
 
     def check(self, instance: type_param | Any, varname: str):
         super().check(instance, varname)
-        if not self.value and " " in instance:
+        if not self.value[0] <= instance <= self.value[1]:
+            raise ValueError(f"Value for argument `{varname}` is out of range {self.value[0]} <= x <= {self.value[1]} (Got `{instance}`)")
+
+class QuotedStr(str, _Type):
+    def convert(self, instance: str, _: str) -> str:
+        return "\""+instance+"\""
+class NoSpaceStr(str, _Type):
+    def convert(self, instance: str, varname: str):
+        if " " in instance:
             raise ValueError(f"Value for argument `{varname}` has spaces (Got `{instance}`)")
+        return instance
 
 
 class Command:
@@ -147,6 +158,36 @@ class Command:
 
     def __call__(self, *args, **kwargs):
         pass
+
+    _T = TypeVar("_T")
+    @staticmethod
+    def _check_and_process_arg(annotation: Type[Any],
+                               value: _T,
+                               varname: str) -> _T:
+        if issubclass(type(annotation), _OneTypeParamBase):
+            annotation: _OneTypeParamBase
+            return annotation.convert(Command._check_and_process_arg(annotation.type_param, value, varname), varname)
+        elif issubclass(type(annotation), _Type):
+            annotation: _Type
+            return annotation.convert(value, varname)
+        elif issubclass(type(annotation), _LiteralGenericAlias):
+            annotation: _LiteralGenericAlias
+            if value not in get_args(annotation):
+                raise ValueError(f"Value for argument `{varname} not in {', '.join(get_args(annotation))} (Got `{value}`)`")
+            return value
+        elif issubclass(type(annotation), (_UnionGenericAlias, UnionType)):
+            annotation: _UnionGenericAlias
+            try:
+                return Command._check_and_process_arg(get_args(annotation)[0], value, varname)
+            except Exception:
+                return Command._check_and_process_arg(get_args(annotation)[1], value, varname)
+        elif issubclass(type(annotation), NoneType):
+            if value is not None: raise ValueError(f"Value for argument `{varname}` is not None (Got `{value}`)")
+            return None
+        else:
+            if not issubclass(type(value), type(annotation)):
+                raise ValueError(f"Value for argument `{varname}` is not of type `{type(annotation).__name__}` (Got `{value}`)")
+            return value
 
     @staticmethod
     def _process_order(order: list | Element, func: Callable[..., ExecutedCommand]) -> tuple[dict[str, Element], dict[str, Element]]:
