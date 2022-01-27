@@ -45,18 +45,6 @@ def _get_options(func: Callable[..., Any], param: str) -> Any:
     return options
 _go = _get_options
 
-class ExecutedCommand:
-    def __init__(self, fh: UniversalFuncHandler, name: str, command_string: str):
-        self.fh = fh
-        self.name = name
-        self.command_string = command_string
-
-    def store_success(self):
-        pass
-
-    def store_result(self):
-        pass
-
 class UniversalRawCommands:
     """
     A container for raw Minecraft commands that are the same for both Java and Bedrock.

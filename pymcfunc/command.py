@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import inspect
 from types import UnionType, NoneType
+# noinspection PyUnresolvedReferences
 from typing import Callable, Any, Union, Type, Literal, Optional, _UnionGenericAlias, TypeVar, _LiteralGenericAlias, \
     get_args
 
-from pymcfunc.raw_commands import ExecutedCommand
+from pymcfunc.func_handler import UniversalFuncHandler
+from pymcfunc.raw_commands import ExecutedCommand, UniversalRawCommands
 from pymcfunc.selectors import UniversalSelector
 
 
@@ -14,12 +16,17 @@ class Element: pass
 class LiteralE(Element):
     content: str
     optional: bool
-    def __init__(self, content: str, optional: bool=False):
+    def __init__(self, content: str):
         self.content = content
-        self.optional = optional
+        self.optional = False
+    def __class_getitem__(cls, name: str):
+            ae = cls(name)
+            ae.optional = True
+            return ae
 LE = LiteralE
 
 class ArgumentE(Element):
+    annotation: Type[Any] | None
     name: str
     type: str
     optional: bool
@@ -31,12 +38,23 @@ class ArgumentE(Element):
         self.optional = False
         self.default = None
         self.options = None
+        self.annotation = None
+    def __class_getitem__(cls, name: str):
+        ae = cls(name)
+        ae.optional = True
+        return ae
 AE = ArgumentE
 
 class SwitchE(Element):
     branches: tuple[list[Element], ...]
+    optional: bool
     def __init__(self, *branches: list[Element]):
         self.branches = branches
+        self.optional = False
+    def __class_getitem__(cls, *branches: list[Element]):
+        ae = cls(*branches)
+        ae.optional = True
+        return ae
 SE = SwitchE
 
 class _Type:
@@ -142,22 +160,31 @@ class NoSpaceStr(str, _Type):
 class Command:
     order: list
     arg_namelist: list[str]
-    args: dict[str, Element]
-    kwargs: dict[str, Element]
+    eles: dict[str, Element]
+    name: str
     @classmethod
-    def command(cls, order: list):
-        def decorator(func: Callable[..., ExecutedCommand]):
+    def command(cls, order: list, cmd_name: str | None = None):
+        def decorator(func: Callable[[UniversalRawCommands, ...], ExecutedCommand]):
             cmd = cls()
             cmd.order = order
+            cmd.name = cmd_name or func.__name__.split("_")[0]
             for name, arg in inspect.signature(func).parameters.items():
+                if name == "self": pass
                 if arg.POSITIONAL_OR_KEYWORD or arg.POSITIONAL_ONLY:
                     cmd.arg_namelist.append(name)
-            cmd.args, cmd.kwargs = cls._process_order(order, func)
+
+                cmd.eles = cls._process_order(order, func)
             return cmd
         return decorator
 
-    def __call__(self, *args, **kwargs):
-        pass
+    def __call__(self, rc: UniversalRawCommands, *args, **kwargs) -> ExecutedCommand:
+        fh = rc.fh
+
+        cmd = ExecutedCommand(fh, self.name, "")
+        fh.commands.append(cmd)
+        return cmd
+
+    def _process_arglist(self): pass
 
     _T = TypeVar("_T")
     @staticmethod
@@ -190,28 +217,52 @@ class Command:
             return value
 
     @staticmethod
-    def _process_order(order: list | Element, func: Callable[..., ExecutedCommand]) -> tuple[dict[str, Element], dict[str, Element]]:
+    def _get_options(annotation: Type[Any]) -> list[Any]:
+        if issubclass(type(annotation), _OneTypeParamBase):
+            annotation: _OneTypeParamBase
+            return Command._get_options(annotation.type_param)
+        elif issubclass(type(annotation), _Type):
+            annotation: _Type
+            return []
+        elif issubclass(type(annotation), _LiteralGenericAlias):
+            annotation: _LiteralGenericAlias
+            return list(get_args(annotation))
+        elif issubclass(type(annotation), (_UnionGenericAlias, UnionType)):
+            annotation: _UnionGenericAlias
+            return [*get_args(annotation)[0], *get_args(annotation)[1]]
+        else: return []
+
+    @staticmethod
+    def _process_order(order: list | Element, func: Callable[..., ExecutedCommand]) -> dict[str, Element]:
         if isinstance(order, list):
-            args = {}; kwargs = {}
+            eles = {}
             for i in order:
-                res_args, res_kwargs = Command._process_order(i, func)
-                args.update(res_args)
-                kwargs.update(res_kwargs)
-            return args, kwargs
+                eles.update(Command._process_order(i, func))
+            return eles
         elif isinstance(order, LE):
-            return {}, {}
+            return {}
         elif isinstance(order, AE):
             arg = inspect.signature(func).parameters[order.name]
-            if arg.POSITIONAL_OR_KEYWORD:
-                return {order.name: order}, {order.name: order}
-            elif arg.POSITIONAL_ONLY:
-                return {order.name: order}, {}
-            else:
-                return {}, {order.name: order}
+            order.default = order.default if arg.default == arg.empty else arg.default
+            if arg.annotation != arg.empty:
+                order.annotation = arg.annotation
+                order.options = Command._get_options(arg.annotation) or None
+            return {order.name: order}
         elif isinstance(order, SE):
-            args = {}; kwargs = {}
+            eles = {}
             for i in order.branches:
-                res_args, res_kwargs = Command._process_order(i, func)
-                args.update(res_args)
-                kwargs.update(res_kwargs)
-            return args, kwargs
+                eles.update(Command._process_order(i, func))
+            return eles
+
+class ExecutedCommand:
+    def __init__(self, fh: UniversalFuncHandler, name: str, command_string: str):
+        self.fh = fh
+        self.name = name
+        self.command_string = command_string
+
+
+    def store_success(self):
+        pass
+
+    def store_result(self):
+        pass
