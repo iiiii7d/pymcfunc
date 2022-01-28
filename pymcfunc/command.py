@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import inspect
+import re
 from types import UnionType, NoneType
 # noinspection PyUnresolvedReferences
 from typing import Callable, Any, Union, Type, Literal, Optional, _UnionGenericAlias, TypeVar, _LiteralGenericAlias, \
-    get_args
+    get_args, Pattern
 
+from pymcfunc.errors import MultipleBranchesSatisfiedError, MissingError, RangeError, OptionError, SpaceError, \
+    MissingArgumentError
 from pymcfunc.func_handler import UniversalFuncHandler
 from pymcfunc.raw_commands import ExecutedCommand, UniversalRawCommands
 from pymcfunc.selectors import UniversalSelector
@@ -20,21 +23,19 @@ class LiteralE(Element):
         self.content = content
         self.optional = False
     def __class_getitem__(cls, name: str):
-            ae = cls(name)
-            ae.optional = True
-            return ae
+        ae = cls(name)
+        ae.optional = True
+        return ae
 LE = LiteralE
 
 class ArgumentE(Element):
     annotation: Type[Any] | None
     name: str
-    type: str
     optional: bool
     default: Any | None
     options: list[Any] | None
     def __init__(self, name: str):
         self.name = name
-        self.type = Any
         self.optional = False
         self.default = None
         self.options = None
@@ -134,6 +135,16 @@ class Player(_OneTypeParamBase):
         if not instance.playeronly:
             raise ValueError(f"Value for argument `{varname}` selects entities too (Got `{instance}`)")
 
+class Regex(_OneTypeOneValueParamBase):
+    type_param: str
+    value: Pattern
+    def __instancecheck__(self, instance: type_param | Any):
+        return self.__subclasscheck__(type(instance)) and re.search(self.value, instance) is not None
+
+    def check(self, instance: type_param | Any, varname: str):
+        super().check(instance, varname)
+        if re.search(self.value, instance) is None:
+            raise ValueError(f"Value for argument `{varname}` does not match pattern `{self.value}`(Got `{instance}`)")
 
 class Range(_OneTypeOneValueParamBase):
     type_param: str
@@ -158,15 +169,17 @@ class NoSpaceStr(str, _Type):
 
 
 class Command:
-    order: list
+    order: list[Element]
     arg_namelist: list[str]
-    eles: dict[str, Element]
+    eles: dict[str, AE]
     name: str
+    func: Callable[[UniversalRawCommands, ...], ExecutedCommand]
     @classmethod
     def command(cls, order: list, cmd_name: str | None = None):
         def decorator(func: Callable[[UniversalRawCommands, ...], ExecutedCommand]):
             cmd = cls()
             cmd.order = order
+            cmd.func = func
             cmd.name = cmd_name or func.__name__.split("_")[0]
             for name, arg in inspect.signature(func).parameters.items():
                 if name == "self": pass
@@ -179,12 +192,87 @@ class Command:
 
     def __call__(self, rc: UniversalRawCommands, *args, **kwargs) -> ExecutedCommand:
         fh = rc.fh
+        for i, arg in enumerate(args):
+            kwargs[self.arg_namelist[i]] = arg
 
         cmd = ExecutedCommand(fh, self.name, "")
         fh.commands.append(cmd)
         return cmd
 
-    def _process_arglist(self): pass
+    def _process_arglist(self, args: dict[str, Any]):
+        command = []
+        defaults_queue = []
+        prev_element_name = ""
+        prev_default_element_name = ""
+        for element in self.order:
+            if isinstance(element, LE):
+                if element.optional:
+                    defaults_queue.append(element.content)
+                    prev_default_element_name = "`" + element.content + "`"
+                else:
+                    command.extend(defaults_queue)
+                    command.append(element.content)
+                    prev_element_name = "`" + element.content + "`"
+            elif isinstance(element, AE):
+                element = self.eles[element.name]
+                element: AE
+                value = args[element.name] if element.name in args else element.default
+
+                if not element.optional and value is None:
+                    raise MissingArgumentError(element.name)
+                if isinstance(value, str) and value == "":
+                    raise ValueError(f"Parameter {element.name} is an empty string")
+
+                if isinstance(value, bool): value = "true" if value else "false"
+                if element.default == value:
+                    if defaults_queue[-1] is None:
+                        raise MissingError(prev_default_element_name, element.name)
+                    defaults_queue.append(str(value) if value is not None else None)
+                    prev_default_element_name = "parameter " + element.name
+                else:
+                    command.extend(defaults_queue)
+                    command.append(str(value))
+                    prev_element_name = "parameter " + element.name
+            elif isinstance(element, SE):
+                exceptions = []
+                possible_branches = []
+                for branch in element.branches:
+                    try:
+                        branch_output = Command.command(branch, self.name)(self.func)._process_arglist(args)
+                        possible_branches.append((branch, branch_output))
+                        # prev_element_name = "parameter "+branch.series[-1].name if isinstance(branch.series[-1], _Parameter) else "`"+str(branch.series[-1])+"`"
+                        break
+                    except Exception as e:
+                        exceptions.append(e)
+                else:
+                    if not element.optional:
+                        exceptions_string = '\n'.join(
+                            b.syntax() + ": " + str(e) for b, e in zip(element.branches, exceptions))
+                        raise ValueError(
+                            f"No branches valid after {prev_element_name}\n\nSyntax:\n{self.syntax()}\n\n" +
+                            f"Individual errors from each branch:\n{exceptions_string}")
+                possible_branches = list(filter(lambda b, o: o != [], possible_branches))
+                satisfied_params = []
+                for branch, _ in possible_branches:
+                    satisfied_branch_params = []
+                    for ele in branch.series:
+                        if isinstance(ele, _Parameter) and ele.name in params.keys():
+                            satisfied_branch_params.append(ele.name)
+                    satisfied_params.append(satisfied_branch_params)
+                satisfied_params_string = []
+                if len(possible_branches) >= 2:
+                    for index, (branch, _) in enumerate(possible_branches):
+                        satisfied_params_string.append(
+                            f"{branch.syntax()}: params {', '.join(satisfied_params[index])} satisfied")
+                    satisfied_params_string = "\n".join(satisfied_params_string)
+                    raise MultipleBranchesSatisfiedError(
+                        f"Multiple branches were satisfied. It is unclear which branch is intended.\n\n{satisfied_params_string}")
+                if len(possible_branches) == 1:
+                    command.extend(defaults_queue)
+                    command.append(possible_branches[1])
+                    prev_element_name = satisfied_params[0][-1]
+
+        return " ".join(command)
 
     _T = TypeVar("_T")
     @staticmethod
