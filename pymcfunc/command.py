@@ -5,12 +5,12 @@ import re
 from types import UnionType, NoneType
 # noinspection PyUnresolvedReferences
 from typing import Callable, Any, Union, Type, Literal, Optional, _UnionGenericAlias, TypeVar, _LiteralGenericAlias, \
-    get_args, Pattern
+    get_args, Pattern, TYPE_CHECKING, Generic, _AnnotatedAlias
 
-from pymcfunc.errors import MultipleBranchesSatisfiedError, MissingError, RangeError, OptionError, SpaceError, \
-    MissingArgumentError
-from pymcfunc.func_handler import UniversalFuncHandler
-from pymcfunc.raw_commands import ExecutedCommand, UniversalRawCommands
+from pymcfunc.errors import MultipleBranchesSatisfiedError, MissingError, MissingArgumentError
+
+if TYPE_CHECKING: from pymcfunc.func_handler import UniversalFuncHandler
+if TYPE_CHECKING: from pymcfunc.raw_commands import UniversalRawCommands
 from pymcfunc.selectors import UniversalSelector
 
 
@@ -34,16 +34,12 @@ class ArgumentE(Element):
     optional: bool
     default: Any | None
     options: list[Any] | None
-    def __init__(self, name: str):
+    def __init__(self, name: str, optional: bool = False, options: list[Any] | None = None):
         self.name = name
-        self.optional = False
+        self.optional = optional
         self.default = None
-        self.options = None
+        self.options = options or None
         self.annotation = None
-    def __class_getitem__(cls, name: str):
-        ae = cls(name)
-        ae.optional = True
-        return ae
 AE = ArgumentE
 
 class SwitchE(Element):
@@ -58,129 +54,74 @@ class SwitchE(Element):
         return ae
 SE = SwitchE
 
-class _Type:
-    def convert(self, instance, varname: str): pass
+class Annotation:
+    check: Callable[[Any, str], None] = lambda _, __, ___: None
+    def convert(self, value: Any, varname: str) -> Any:
+        self.check(value, varname)
+        return value
 
-class _OneTypeParamBase(_Type):
-    type_param: type
-    def __init__(self, type_param: type):
-        self.type_param = type_param
-    def __class_getitem__(cls, type_param: type):
-        return cls(type_param)
-
-    def __instancecheck__(self, instance):
-        return self.__subclasscheck__(type(instance))
-    def __subclasscheck__(self, subclass):
-        return issubclass(subclass, self.type_param)
-
-    def __eq__(self, other):
-        if isinstance(other, type(self)): return self.type_param == other.type_param
-        return False
-    def __hash__(self):
-        return hash(self.type_param)
-
-    def __or__(self, other):
-        return Union[self, other]
-    def __ror__(self, other):
-        return Union[other, self]
-
-    def __repr__(self):
-        return f"{type(self).__name__}[{self.type_param!r}]"
-
-    def check(self, instance: type_param | Any, varname: str):
-        if not self.__subclasscheck__(type(instance)):
-            raise TypeError(f"Value for argument `{varname}` is not of type `{self.type_param.__name__}` (Got `{instance}`)")
-
-    def convert(self, instance: type_param | Any, varname: str) -> type_param:
-        self.check(instance, varname)
-        return instance
-
-class _OneTypeOneValueParamBase(_OneTypeParamBase):
-    value: Any
-    def __init__(self, type_param: type, value: Any):
-        super().__init__(type_param)
-        self.value = value
-    def __class_getitem__(cls, i: tuple[type, Any]):
-        type_param, value = i
-        return cls(type_param, value)
-
-    def __eq__(self, other):
-        if isinstance(other, type(self)): return self.type_param == other.type_param and self.value == other.value
-        return False
-    def __hash__(self):
-        return hash((self.type_param, self.value))
-
-    def __repr__(self):
-        return f"{type(self).__name__}[{self.type_param!r}, {self.value!r}]"
-
-class Single(_OneTypeParamBase):
-    type_param: Type[UniversalSelector]
-
-    def __instancecheck__(self, instance: type_param | Any):
-        return self.__subclasscheck__(type(instance)) and instance.singleonly
-
-    def check(self, instance: type_param | Any, varname: str):
-        super().check(instance, varname)
+class Single(Annotation):
+    @staticmethod
+    def check(instance: UniversalSelector, varname: str):
         if not instance.singleonly:
             raise ValueError(f"Value for argument `{varname}` selects multiple entities (Got `{instance}`)")
 
-class Player(_OneTypeParamBase):
-    type_param: Type[UniversalSelector]
-
-    def __instancecheck__(self, instance: type_param | Any):
-        return self.__subclasscheck__(type(instance)) and instance.playeronly
-
-    def check(self, instance: type_param | Any, varname: str):
-        super().check(instance, varname)
+class Player(Annotation):
+    @staticmethod
+    def check(instance: UniversalSelector, varname: str):
         if not instance.playeronly:
             raise ValueError(f"Value for argument `{varname}` selects entities too (Got `{instance}`)")
 
-class Regex(_OneTypeOneValueParamBase):
-    type_param: str
-    value: Pattern
-    def __instancecheck__(self, instance: type_param | Any):
-        return self.__subclasscheck__(type(instance)) and re.search(self.value, instance) is not None
+class Regex(Annotation):
+    def __init__(self, regex: str):
+        self.regex = regex
 
-    def check(self, instance: type_param | Any, varname: str):
+    def check(self, instance: str, varname: str):
+        if re.search(self.regex, instance) is None:
+            raise ValueError(f"Value for argument `{varname}` does not match pattern `{self.regex}` (Got `{instance}`)")
+PlayerName = Regex("^\w*$")
+
+class Range(Annotation):
+    def __init__(self, min_: int | float, max_: int | float):
+        self.min = min_
+        self.max = max_
+
+    def check(self, instance: int | float, varname: str):
         super().check(instance, varname)
-        if re.search(self.value, instance) is None:
-            raise ValueError(f"Value for argument `{varname}` does not match pattern `{self.value}`(Got `{instance}`)")
+        if not self.min <= instance <= self.max:
+            raise ValueError(f"Value for argument `{varname}` is out of range {self.min} <= x <= {self.max} (Got `{instance}`)")
 
-class Range(_OneTypeOneValueParamBase):
-    type_param: str
-    value: tuple[int | float, int | float]
-
-    def __instancecheck__(self, instance: type_param | Any):
-        return self.__subclasscheck__(type(instance)) and self.value[0] <= instance <= self.value[1]
-
-    def check(self, instance: type_param | Any, varname: str):
-        super().check(instance, varname)
-        if not self.value[0] <= instance <= self.value[1]:
-            raise ValueError(f"Value for argument `{varname}` is out of range {self.value[0]} <= x <= {self.value[1]} (Got `{instance}`)")
-
-class QuotedStr(str, _Type):
-    def convert(self, instance: str, _: str) -> str:
-        return "\""+instance+"\""
-class NoSpaceStr(str, _Type):
-    def convert(self, instance: str, varname: str):
-        if " " in instance:
-            raise ValueError(f"Value for argument `{varname}` has spaces (Got `{instance}`)")
-        return instance
+class Quoted(Annotation):
+    def convert(self, value: str, _: str) -> str:
+        return "\""+value+"\""
+class NoSpace(Annotation):
+    @staticmethod
+    def check(value: str, varname: str):
+        if " " in value:
+            raise ValueError(f"Value for argument `{varname}` has spaces (Got `{value}`)")
 
 
 class Command:
     order: list[Element]
+    fh: UniversalFuncHandler
     arg_namelist: list[str]
     eles: dict[str, AE]
     name: str
+    segment_name: str
     func: Callable[[UniversalRawCommands, ...], ExecutedCommand]
     @classmethod
-    def command(cls, order: list, cmd_name: str | None = None):
+    def command(cls, fh: UniversalFuncHandler,
+                order: list[Element],
+                cmd_name: str | None = None,
+                segment_name: str | None = None):
         def decorator(func: Callable[[UniversalRawCommands, ...], ExecutedCommand]):
             cmd = cls()
             cmd.order = order
+            cmd.fh = fh
             cmd.func = func
             cmd.name = cmd_name or func.__name__.split("_")[0]
+            cmd.segment_name = segment_name or func.__name__.replace("_", " ")
+            cmd.arg_namelist = []
             for name, arg in inspect.signature(func).parameters.items():
                 if name == "self": pass
                 if arg.POSITIONAL_OR_KEYWORD or arg.POSITIONAL_ONLY:
@@ -190,17 +131,41 @@ class Command:
             return cmd
         return decorator
 
-    def __call__(self, rc: UniversalRawCommands, *args, **kwargs) -> ExecutedCommand:
-        fh = rc.fh
+    def __call__(self, *args, **kwargs) -> ExecutedCommand:
         for i, arg in enumerate(args):
             kwargs[self.arg_namelist[i]] = arg
 
-        cmd = ExecutedCommand(fh, self.name, "")
-        fh.commands.append(cmd)
+        cmd = ExecutedCommand(self.fh, self.name, self._process_arglist(kwargs))
+        self.fh.commands.append(cmd)
         return cmd
 
+    def syntax(self) -> str:
+        syntax = []
+        for element in self.order:
+            if isinstance(element, LE):
+                syntax.append(element.content)
+            elif isinstance(element, AE):
+                if element.options:
+                    options = ":" + "|".join(str(o) for o in element.options)
+                else:
+                    options = ""
+                if element.default is not None:
+                    default = "=" + str(element.default)
+                else:
+                    default = ""
+                param_syntax = element.name + options + default
+                if element.default is None:
+                    param_syntax = "<" + param_syntax + ">"
+                else:
+                    param_syntax = "[" + param_syntax + "]"
+                syntax.append(param_syntax)
+            elif isinstance(element, SE):
+                syntax.append("{" + "/".join(Command.command(b, self.name)(self.func).syntax() for b in element.branches) + "}")
+                if element.optional: syntax[-1] = "[" + syntax[-1] + "]"
+        return " ".join(syntax)
+
     def _process_arglist(self, args: dict[str, Any]):
-        command = []
+        command = [self.segment_name]
         defaults_queue = []
         prev_element_name = ""
         prev_default_element_name = ""
@@ -225,7 +190,7 @@ class Command:
 
                 if isinstance(value, bool): value = "true" if value else "false"
                 if element.default == value:
-                    if defaults_queue[-1] is None:
+                    if len(defaults_queue) > 0 and defaults_queue[-1] is None:
                         raise MissingError(prev_default_element_name, element.name)
                     defaults_queue.append(str(value) if value is not None else None)
                     prev_default_element_name = "parameter " + element.name
@@ -236,9 +201,10 @@ class Command:
             elif isinstance(element, SE):
                 exceptions = []
                 possible_branches = []
+                to_subcmd = lambda b: Command.command(b, self.name)(self.func)
                 for branch in element.branches:
                     try:
-                        branch_output = Command.command(branch, self.name)(self.func)._process_arglist(args)
+                        branch_output = to_subcmd(branch)._process_arglist(args)
                         possible_branches.append((branch, branch_output))
                         # prev_element_name = "parameter "+branch.series[-1].name if isinstance(branch.series[-1], _Parameter) else "`"+str(branch.series[-1])+"`"
                         break
@@ -247,7 +213,7 @@ class Command:
                 else:
                     if not element.optional:
                         exceptions_string = '\n'.join(
-                            b.syntax() + ": " + str(e) for b, e in zip(element.branches, exceptions))
+                            to_subcmd(b).syntax() + ": " + str(e) for b, e in zip(element.branches, exceptions))
                         raise ValueError(
                             f"No branches valid after {prev_element_name}\n\nSyntax:\n{self.syntax()}\n\n" +
                             f"Individual errors from each branch:\n{exceptions_string}")
@@ -255,15 +221,15 @@ class Command:
                 satisfied_params = []
                 for branch, _ in possible_branches:
                     satisfied_branch_params = []
-                    for ele in branch.series:
-                        if isinstance(ele, _Parameter) and ele.name in params.keys():
+                    for ele in branch:
+                        if isinstance(ele, AE) and ele.name in args.keys():
                             satisfied_branch_params.append(ele.name)
                     satisfied_params.append(satisfied_branch_params)
                 satisfied_params_string = []
                 if len(possible_branches) >= 2:
                     for index, (branch, _) in enumerate(possible_branches):
                         satisfied_params_string.append(
-                            f"{branch.syntax()}: params {', '.join(satisfied_params[index])} satisfied")
+                            f"{to_subcmd(branch).syntax()}: params {', '.join(satisfied_params[index])} satisfied")
                     satisfied_params_string = "\n".join(satisfied_params_string)
                     raise MultipleBranchesSatisfiedError(
                         f"Multiple branches were satisfied. It is unclear which branch is intended.\n\n{satisfied_params_string}")
@@ -279,12 +245,13 @@ class Command:
     def _check_and_process_arg(annotation: Type[Any],
                                value: _T,
                                varname: str) -> _T:
-        if issubclass(type(annotation), _OneTypeParamBase):
-            annotation: _OneTypeParamBase
-            return annotation.convert(Command._check_and_process_arg(annotation.type_param, value, varname), varname)
-        elif issubclass(type(annotation), _Type):
-            annotation: _Type
-            return annotation.convert(value, varname)
+        if issubclass(type(annotation), _AnnotatedAlias):
+            annotation: _AnnotatedAlias
+            res = Command._check_and_process_arg(get_args(annotation)[0], value, varname)
+            for anno in get_args(annotation)[1:]:
+                anno.check(res, varname)
+                res = anno.convert(res, varname)
+            return res
         elif issubclass(type(annotation), _LiteralGenericAlias):
             annotation: _LiteralGenericAlias
             if value not in get_args(annotation):
@@ -292,10 +259,14 @@ class Command:
             return value
         elif issubclass(type(annotation), (_UnionGenericAlias, UnionType)):
             annotation: _UnionGenericAlias
-            try:
-                return Command._check_and_process_arg(get_args(annotation)[0], value, varname)
-            except Exception:
-                return Command._check_and_process_arg(get_args(annotation)[1], value, varname)
+            exceptions = []
+            for anno in get_args(annotations):
+                try:
+                    return Command._check_and_process_arg(anno, value, varname)
+                except Exception as e:
+                    exceptions.append(e)
+            else:
+                raise exceptions[-1]
         elif issubclass(type(annotation), NoneType):
             if value is not None: raise ValueError(f"Value for argument `{varname}` is not None (Got `{value}`)")
             return None
@@ -306,12 +277,9 @@ class Command:
 
     @staticmethod
     def _get_options(annotation: Type[Any]) -> list[Any]:
-        if issubclass(type(annotation), _OneTypeParamBase):
-            annotation: _OneTypeParamBase
-            return Command._get_options(annotation.type_param)
-        elif issubclass(type(annotation), _Type):
-            annotation: _Type
-            return []
+        if issubclass(type(annotation), _AnnotatedAlias):
+            annotation: Annotation
+            return Command._get_options(get_args(_AnnotatedAlias)[0])
         elif issubclass(type(annotation), _LiteralGenericAlias):
             annotation: _LiteralGenericAlias
             return list(get_args(annotation))
@@ -334,7 +302,7 @@ class Command:
             order.default = order.default if arg.default == arg.empty else arg.default
             if arg.annotation != arg.empty:
                 order.annotation = arg.annotation
-                order.options = Command._get_options(arg.annotation) or None
+                order.options = order.options if order.options else (Command._get_options(arg.annotation) or None)
             return {order.name: order}
         elif isinstance(order, SE):
             eles = {}
@@ -347,7 +315,6 @@ class ExecutedCommand:
         self.fh = fh
         self.name = name
         self.command_string = command_string
-
 
     def store_success(self):
         pass
