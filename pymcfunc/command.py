@@ -132,6 +132,7 @@ class Command:
         return decorator
 
     def __call__(self, *args, **kwargs) -> ExecutedCommand:
+        print(args, kwargs)
         for i, arg in enumerate(args):
             kwargs[self.arg_namelist[i]] = arg
 

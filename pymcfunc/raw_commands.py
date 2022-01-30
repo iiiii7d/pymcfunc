@@ -8,7 +8,7 @@ from uuid import UUID
 
 from pymcfunc.advancements import Advancement
 from pymcfunc.command import ExecutedCommand, Command, SE, AE, Range, NoSpace, Element, Player, Single, Regex, \
-    PlayerName
+    PlayerName, LE
 from pymcfunc.errors import FutureCommandWarning, DeprecatedCommandWarning, EducationEditionWarning
 from pymcfunc.nbt import Int
 from pymcfunc.selectors import BedrockSelector, JavaSelector
@@ -19,30 +19,9 @@ if TYPE_CHECKING:
 
 RawJson: TypeAlias = Union[dict, list]
 ResourceLocation: TypeAlias = str
-_JavaPNUTS: TypeAlias = Union[Annotated[str, PlayerName], UUID, Annotated[JavaSelector, Player]]
+_JavaPlayerTarget: TypeAlias = Union[Annotated[str, PlayerName], UUID, Annotated[JavaSelector, Player]]
+_JavaSingleTarget: TypeAlias = Union[Annotated[str, PlayerName], UUID, Annotated[JavaSelector, Single]]
 
-class _MissingType: pass
-Missing = _MissingType()
-
-def _get_default(func: Callable[..., Any], param: str) -> Any:
-    return inspect.signature(func).parameters[param].default
-_gd = _get_default
-
-def _get_type(func: Callable[..., Any], param: str) -> type:
-    # noinspection PyUnresolvedReferences
-    type_ = func.__annotations__[param]
-    if get_args(type_) != () and len(get_args(type_)) >= 2 and isinstance(get_args(type_)[1], type(None)): type_ = get_args(type_)[0]
-    return type_
-_gt = _get_type
-
-def _get_options(func: Callable[..., Any], param: str) -> Any:
-    # noinspection PyUnresolvedReferences
-    options = get_args(get_args(func.__annotations__[param])[0])
-    if len(options) == 0:
-        # noinspection PyUnresolvedReferences
-        options = get_args(func.__annotations__[param])
-    return options
-_go = _get_options
 
 class UniversalRawCommands:
     """
@@ -106,26 +85,47 @@ class BedrockRawCommands(UniversalRawCommands):
         if param_value == option and self.fh.p.version < BedrockVersion(version_introduced):
             warnings.warn(f"The `{option}` option of the `{param_name}` parameter was introduced in {version_introduced}, but your pack is for {self.fh.p.version}", category=FutureCommandWarning)
 
-    @version(introduced="0.16.0b1")
     @command([
         SE([AE("command")],
            [AE("page", True)])
     ])
+    @version(introduced="0.16.0b1")
     def help_(self,
               command: Annotated[str, NoSpace] | None = None,
               page: Annotated[int, Range(Int.min, Int.max)] | None = None) -> ExecutedCommand: pass
 
-    @education_edition
-    @version(introduced="0.16.0b1")
     @command([
         AE("target"),
         AE("ability", True),
         AE("value", True)
     ])
+    @education_edition
+    @version(introduced="0.16.0b1")
     def ability(self, target: Annotated[BedrockSelector, Player, Single],
                 ability: Literal["worldbuilder", "mayfly", "mute"] | None = None,
                 value: bool | None = None) -> ExecutedCommand: pass
 
+    @command([AE("lock", True)])
+    @version(introduced="1.2.0")
+    def alwaysday(self, lock: bool) -> ExecutedCommand: pass
+    daylock = alwaysday
+
+    @command([
+        AE("target"),
+        AE("intensity", True),
+        AE("seconds", True),
+        AE("shake_type", True)
+    ])
+    @version(introduced="1.16.100.57")
+    def camerashake_add(self, target: Annotated[BedrockSelector, Player]=BedrockSelector.s(), *,
+                        intensity: Annotated[float, Range(0, 4)] | None = None,
+                        seconds: float | None = None,
+                        shake_type: Literal["positional", "rotational"] | None = None) -> ExecutedCommand: pass
+
+    @command([AE("target")])
+    @version(introduced="1.16.210.54")
+    def camerashake_stop(self, target: Annotated[BedrockSelector, Player] = BedrockSelector.s()) -> ExecutedCommand:
+        pass
 
 class JavaRawCommands(UniversalRawCommands):
     """
@@ -134,16 +134,10 @@ class JavaRawCommands(UniversalRawCommands):
     .. warning::
        Do not instantiate JavaRawCommands directly; use a :py:class:`JavaFuncHandler` and access the commands via the ‘r’ attribute.
     """
-
-    @staticmethod
+    @staticmethod # TODO fix
     def command(order: list[Element], cmd_name: str | None = None, segment_name: str | None = None):
         def decorator(func: Callable[..., Any]):
-            @wraps(func)
-            def wrapper(self, *args, **kwargs):
-                return Command.command(self.fh, order, cmd_name, segment_name)(func)(*args, **kwargs)
-
-            return wrapper
-
+            return Command.command(None, order, cmd_name, segment_name)(func)
         return decorator
 
     @staticmethod
@@ -176,11 +170,10 @@ class JavaRawCommands(UniversalRawCommands):
                 f"The `{option}` option of the `{param_name}` parameter was deprecated in {version_deprecated}, but your pack is for {self.fh.p.version}",
                 category=FutureCommandWarning)
 
-    @version(introduced="12w17a")
     @command([AE("command", True)])
+    #@version(introduced="12w17a")
     def help_(self, command: str) -> ExecutedCommand: pass
 
-    @version(introduced="17w13a")
     @command([
         AE("targets"),
         SE([AE("mode", options=["everything"])],
@@ -190,12 +183,12 @@ class JavaRawCommands(UniversalRawCommands):
            [AE("mode", options=["from", "through", "until"]),
             AE("advancement")])
     ], cmd_name="advancement")
-    def advancement_grant(self, targets: _JavaPNUTS,
+    @version(introduced="17w13a")
+    def advancement_grant(self, targets: _JavaPlayerTarget,
                           mode: Literal["everything", "only", "from", "through", "until"],
                           advancement: Advancement | None = None,
                           criterion: str | None = None) -> ExecutedCommand: pass
 
-    @version(introduced="17w13a")
     @command([
         AE("targets"),
         SE([AE("mode", options=["everything"])],
@@ -205,7 +198,124 @@ class JavaRawCommands(UniversalRawCommands):
            [AE("mode", options=["from", "through", "until"]),
             AE("advancement")])
     ], cmd_name="advancement")
-    def advancement_revoke(self, targets: _JavaPNUTS,
+    @version(introduced="17w13a")
+    def advancement_revoke(self, targets: _JavaPlayerTarget,
                            mode: Literal["everything", "only", "from", "through", "until"],
                            advancement: Advancement | None = None,
                            criterion: str | None = None) -> ExecutedCommand: pass
+
+    @command([
+        AE("target"),
+        AE("attribute"),
+        LE("get"),
+        AE("scale", True)
+    ], segment_name="attribute")
+    @version(introduced="20w17a")
+    def attribute_get_total(self, target: _JavaSingleTarget,
+                            attribute: ResourceLocation,
+                            scale: float | None = None) -> ExecutedCommand: pass
+
+    @command([
+        AE("target"),
+        AE("attribute"),
+        LE("base"),
+        SE([AE("mode", options=["get"]),
+            AE("scale", True)],
+           [AE("mode", options=["set"]),
+            AE("value")])
+    ], segment_name="attribute")
+    @version(introduced="20w17a")
+    def attribute_base(self, target: _JavaSingleTarget,
+                       attribute: ResourceLocation,
+                       mode: Literal["get", "set"],
+                       scale: float | None = None,
+                       value: float | None = None) -> ExecutedCommand: pass
+
+    @command([
+        AE("target"),
+        AE("attribute"),
+        LE("modifier"),
+        SE([AE("mode", options=["add"]),
+            AE("uuid"),
+            AE("name"),
+            AE("value"),
+            AE("add_mode")],
+           [AE("mode", options=["remove"]),
+            AE("uuid")],
+           [AE("mode", options=["value get"]),
+            AE("scale", True)])
+    ], segment_name="attribute")
+    @version(introduced="20w17a")
+    def attribute_modifier(self, target: _JavaSingleTarget,
+                           attribute: ResourceLocation,
+                           mode: Literal["add", "remove", "value get"], *,
+                           uuid: UUID | None = None,
+                           name: Annotated[str, Regex(r"^[\w.+-]*$")] | None = None,
+                           value: float | None = None,
+                           add_mode: Literal["add", "multiply", "multiply_base"] | None = None,
+                           scale: float | None = None) -> ExecutedCommand: pass
+
+    @command([
+        AE("targets"),
+        AE("message", True)
+    ])
+    @version(introduced="a1.0.16")
+    def ban(self, targets: Annotated[str, PlayerName] | Annotated[JavaSelector, Player],
+            message: str = "Banned by an operator.") -> ExecutedCommand: pass
+
+    @command([
+        AE("targets"),
+        AE("message", True)
+    ], cmd_name="ban-ip")
+    @version(introduced="a1.0.16")
+    def ban_ip(self, targets: Annotated[str, Regex(r"^[\w.+-]*$")] | Annotated[JavaSelector, Player],
+               message: str = "Banned by an operator.") -> ExecutedCommand: pass
+
+    @command([AE("view", True)])
+    @version(introduced="a1.0.16")
+    def banlist(self, view: Literal["ips", "players"] | None = None) -> ExecutedCommand: pass
+
+    @command([
+        AE("id_"),
+        AE("name")
+    ])
+    @version(introduced="18w05a")
+    def bossbar_add(self, id_: ResourceLocation, name: RawJson) -> ExecutedCommand: pass
+
+    @command([
+        AE("id_"),
+        AE("view")
+    ])
+    @version(introduced="18w05a")
+    def bossbar_get(self, id_: ResourceLocation,
+                    view: Literal["max", "players", "value", "visible"]) -> ExecutedCommand: pass
+
+    @command([])
+    @version(introduced="18w05a")
+    def bossbar_list(self, id_: ResourceLocation) -> ExecutedCommand: pass
+
+    @command([
+        AE("id_")
+    ])
+    @version(introduced="18w05a")
+    def bossbar_remove(self, id_: ResourceLocation) -> ExecutedCommand: pass
+
+    @command([
+        AE("id_"),
+        SE([LE("colour"), AE("colour")],
+           [LE("max_"), AE("max_")],
+           [LE("name"), AE("name"),
+           [LE("players"), AE("players", True)],
+           [LE("style"), AE("style")],
+           [LE("value"), AE("value")],
+           [LE("visible"), AE("visible")]])
+    ])
+    @version(introduced="18w05a")
+    def bossbar_set(self, id_: ResourceLocation, *,
+                    colour: Literal["blue", "green", "pink", "purple", "red", "white", "yellow"] | None = None,
+                    max_: Annotated[int, Range(1, Int.max)] | None = None,
+                    name: str | RawJson | None = None,
+                    players: _JavaPlayerTarget | None = None,
+                    style: Literal["notched_6", "notched_10", "notched_12", "notched_20", "progress"] | None = None,
+                    value: Annotated[int, Range(0, Int.max)] | None = None,
+                    visible: bool | None = None) -> ExecutedCommand: pass

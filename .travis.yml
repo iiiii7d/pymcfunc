@@ -10,8 +10,8 @@ python:
 install:
   - pip install codecov
 script:
-  - pytest test_old.py
-  - coverage run test_old.py
+  - pytest test.py
+  - coverage run test.py
 after_success:
   - codecov
 branches:
