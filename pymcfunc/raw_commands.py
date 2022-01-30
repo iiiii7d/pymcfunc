@@ -1,14 +1,13 @@
 from __future__ import annotations
 
-import inspect
 import warnings
 from functools import wraps
-from typing import Optional, Any, Callable, Tuple, get_args, TYPE_CHECKING, Union, TypeAlias, Annotated, Literal
+from typing import Optional, Any, Callable, Tuple, TYPE_CHECKING, Union, TypeAlias, Annotated, Literal
 from uuid import UUID
 
 from pymcfunc.advancements import Advancement
 from pymcfunc.command import ExecutedCommand, Command, SE, AE, Range, NoSpace, Element, Player, Single, Regex, \
-    PlayerName, LE
+    PlayerName, LE, _JavaPlayerTarget, _JavaSingleTarget, ResourceLocation, RawJson
 from pymcfunc.errors import FutureCommandWarning, DeprecatedCommandWarning, EducationEditionWarning
 from pymcfunc.nbt import Int
 from pymcfunc.selectors import BedrockSelector, JavaSelector
@@ -16,11 +15,6 @@ from pymcfunc.version import JavaVersion, BedrockVersion
 
 if TYPE_CHECKING:
     from pymcfunc.func_handler import UniversalFuncHandler
-
-RawJson: TypeAlias = Union[dict, list]
-ResourceLocation: TypeAlias = str
-_JavaPlayerTarget: TypeAlias = Union[Annotated[str, PlayerName], UUID, Annotated[JavaSelector, Player]]
-_JavaSingleTarget: TypeAlias = Union[Annotated[str, PlayerName], UUID, Annotated[JavaSelector, Single]]
 
 
 class UniversalRawCommands:
@@ -137,8 +131,15 @@ class JavaRawCommands(UniversalRawCommands):
     @staticmethod # TODO fix
     def command(order: list[Element], cmd_name: str | None = None, segment_name: str | None = None):
         def decorator(func: Callable[..., Any]):
-            return Command.command(None, order, cmd_name, segment_name)(func)
+            func.cmd_info = (order, cmd_name, segment_name)
+            return func
         return decorator
+
+    def __getattribute__(self, item: str):
+        res = super().__getattribute__(item)
+        if 'cmd_info' in dir(res):
+            return Command.command(self.fh, *res.cmd_info)(res)
+        return res
 
     @staticmethod
     def version(introduced: Optional[str]=None, deprecated: Optional[str]=None, temp_removed: Optional[Tuple[str, str]]=None):
@@ -304,11 +305,11 @@ class JavaRawCommands(UniversalRawCommands):
         AE("id_"),
         SE([LE("colour"), AE("colour")],
            [LE("max_"), AE("max_")],
-           [LE("name"), AE("name"),
+           [LE("name"), AE("name")],
            [LE("players"), AE("players", True)],
            [LE("style"), AE("style")],
            [LE("value"), AE("value")],
-           [LE("visible"), AE("visible")]])
+           [LE("visible"), AE("visible")])
     ])
     @version(introduced="18w05a")
     def bossbar_set(self, id_: ResourceLocation, *,

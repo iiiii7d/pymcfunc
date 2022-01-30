@@ -5,14 +5,18 @@ import re
 from types import UnionType, NoneType
 # noinspection PyUnresolvedReferences
 from typing import Callable, Any, Union, Type, Literal, Optional, _UnionGenericAlias, TypeVar, _LiteralGenericAlias, \
-    get_args, Pattern, TYPE_CHECKING, Generic, _AnnotatedAlias
+    get_args, Pattern, TYPE_CHECKING, Generic, _AnnotatedAlias, TypeAlias, Annotated
+from uuid import UUID
 
 from pymcfunc.errors import MultipleBranchesSatisfiedError, MissingError, MissingArgumentError
 
 if TYPE_CHECKING: from pymcfunc.func_handler import UniversalFuncHandler
 if TYPE_CHECKING: from pymcfunc.raw_commands import UniversalRawCommands
-from pymcfunc.selectors import UniversalSelector
+from pymcfunc.selectors import UniversalSelector, JavaSelector
 
+# for eval
+# noinspection PyUnresolvedReferences
+from pymcfunc.advancements import Advancement
 
 class Element: pass
 
@@ -79,7 +83,7 @@ class Regex(Annotation):
     def check(self, instance: str, varname: str):
         if re.search(self.regex, instance) is None:
             raise ValueError(f"Value for argument `{varname}` does not match pattern `{self.regex}` (Got `{instance}`)")
-PlayerName = Regex("^\w*$")
+PlayerName = Regex(r"^\w*$")
 
 class Range(Annotation):
     def __init__(self, min_: int | float, max_: int | float):
@@ -99,6 +103,11 @@ class NoSpace(Annotation):
     def check(value: str, varname: str):
         if " " in value:
             raise ValueError(f"Value for argument `{varname}` has spaces (Got `{value}`)")
+
+RawJson: TypeAlias = Union[dict, list]
+ResourceLocation: TypeAlias = str
+_JavaPlayerTarget: TypeAlias = Union[Annotated[str, PlayerName], UUID, Annotated[JavaSelector, Player]]
+_JavaSingleTarget: TypeAlias = Union[Annotated[str, PlayerName], UUID, Annotated[JavaSelector, Single]]
 
 
 class Command:
@@ -132,7 +141,6 @@ class Command:
         return decorator
 
     def __call__(self, *args, **kwargs) -> ExecutedCommand:
-        print(args, kwargs)
         for i, arg in enumerate(args):
             kwargs[self.arg_namelist[i]] = arg
 
@@ -140,8 +148,8 @@ class Command:
         self.fh.commands.append(cmd)
         return cmd
 
-    def syntax(self) -> str:
-        syntax = []
+    def syntax(self, root: bool = True) -> str:
+        syntax = [self.segment_name] if root else []
         for element in self.order:
             if isinstance(element, LE):
                 syntax.append(element.content)
@@ -161,12 +169,12 @@ class Command:
                     param_syntax = "[" + param_syntax + "]"
                 syntax.append(param_syntax)
             elif isinstance(element, SE):
-                syntax.append("{" + "/".join(Command.command(b, self.name)(self.func).syntax() for b in element.branches) + "}")
+                syntax.append("{" + "/".join(Command.command(self.fh, b, self.name)(self.func).syntax(root=False) for b in element.branches) + "}")
                 if element.optional: syntax[-1] = "[" + syntax[-1] + "]"
         return " ".join(syntax)
 
-    def _process_arglist(self, args: dict[str, Any]):
-        command = [self.segment_name]
+    def _process_arglist(self, args: dict[str, Any], root: bool = True):
+        command = [self.segment_name] if root else []
         defaults_queue = []
         prev_element_name = ""
         prev_default_element_name = ""
@@ -183,12 +191,16 @@ class Command:
                 element = self.eles[element.name]
                 element: AE
                 value = args[element.name] if element.name in args else element.default
-
-                if not element.optional and value is None:
+                value = Command._check_and_process_arg(eval(inspect.signature(self.func).parameters[element.name].annotation),
+                                                       value, element.name)
+                if not element.optional and value == element.default:
                     raise MissingArgumentError(element.name)
+
                 if isinstance(value, str) and value == "":
                     raise ValueError(f"Parameter {element.name} is an empty string")
-
+                if element.options is not None and value not in element.options:
+                    raise ValueError(
+                        f"Value for argument `{element.name}` not in {', '.join(element.options)} (Got `{value}`)`")
                 if isinstance(value, bool): value = "true" if value else "false"
                 if element.default == value:
                     if len(defaults_queue) > 0 and defaults_queue[-1] is None:
@@ -202,10 +214,10 @@ class Command:
             elif isinstance(element, SE):
                 exceptions = []
                 possible_branches = []
-                to_subcmd = lambda b: Command.command(b, self.name)(self.func)
+                to_subcmd = lambda b: Command.command(self.fh, b, self.name)(self.func)
                 for branch in element.branches:
                     try:
-                        branch_output = to_subcmd(branch)._process_arglist(args)
+                        branch_output = to_subcmd(branch)._process_arglist(args, root=False)
                         possible_branches.append((branch, branch_output))
                         # prev_element_name = "parameter "+branch.series[-1].name if isinstance(branch.series[-1], _Parameter) else "`"+str(branch.series[-1])+"`"
                         break
@@ -214,11 +226,11 @@ class Command:
                 else:
                     if not element.optional:
                         exceptions_string = '\n'.join(
-                            to_subcmd(b).syntax() + ": " + str(e) for b, e in zip(element.branches, exceptions))
+                            to_subcmd(b).syntax(root=False) + ": " + str(e) for b, e in zip(element.branches, exceptions))
                         raise ValueError(
                             f"No branches valid after {prev_element_name}\n\nSyntax:\n{self.syntax()}\n\n" +
                             f"Individual errors from each branch:\n{exceptions_string}")
-                possible_branches = list(filter(lambda b, o: o != [], possible_branches))
+                possible_branches = list(filter(lambda b: b[0] != [], possible_branches))
                 satisfied_params = []
                 for branch, _ in possible_branches:
                     satisfied_branch_params = []
@@ -236,9 +248,9 @@ class Command:
                         f"Multiple branches were satisfied. It is unclear which branch is intended.\n\n{satisfied_params_string}")
                 if len(possible_branches) == 1:
                     command.extend(defaults_queue)
-                    command.append(possible_branches[1])
-                    prev_element_name = satisfied_params[0][-1]
-
+                    command.append(possible_branches[0][1])
+                    try: prev_element_name = satisfied_params[0][-1]
+                    except Exception: pass
         return " ".join(command)
 
     _T = TypeVar("_T")
@@ -256,12 +268,12 @@ class Command:
         elif issubclass(type(annotation), _LiteralGenericAlias):
             annotation: _LiteralGenericAlias
             if value not in get_args(annotation):
-                raise ValueError(f"Value for argument `{varname} not in {', '.join(get_args(annotation))} (Got `{value}`)`")
+                raise ValueError(f"Value for argument `{varname}` not in {', '.join(get_args(annotation))} (Got `{value}`)`")
             return value
         elif issubclass(type(annotation), (_UnionGenericAlias, UnionType)):
             annotation: _UnionGenericAlias
             exceptions = []
-            for anno in get_args(annotations):
+            for anno in get_args(annotation):
                 try:
                     return Command._check_and_process_arg(anno, value, varname)
                 except Exception as e:
@@ -272,8 +284,8 @@ class Command:
             if value is not None: raise ValueError(f"Value for argument `{varname}` is not None (Got `{value}`)")
             return None
         else:
-            if not issubclass(type(value), type(annotation)):
-                raise ValueError(f"Value for argument `{varname}` is not of type `{type(annotation).__name__}` (Got `{value}`)")
+            if not issubclass(type(value), annotation):
+                raise ValueError(f"Value for argument `{varname}` is not of type `{annotation}` (Got `{value}`)")
             return value
 
     @staticmethod
