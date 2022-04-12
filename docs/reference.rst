@@ -93,7 +93,7 @@ Pack
          p = pmf.Pack()
          
          @p.function
-         def func(f: pmf.JavaFuncHandler):
+         def func(f: pmf.JavaFunctionHandler):
              f.r.say('a')
              # youf commands here...
 
@@ -313,14 +313,14 @@ Function Handlers
 
 .. py:currentmodule:: pymcfunc.fh
 
-.. py:class:: UniversalFuncHandler
+.. py:class:: BaseFunctionHandler
 
-   The function handler that is inherited by both :py:class:`JavaFuncHandler` and :py:class:`BedrockFuncHandler`.
+   The function handler that is inherited by both :py:class:`JavaFunctionHandler` and :py:class:`BedrockFunctionHandler`.
 
    This includes commands and features that are the same for both Java and Bedrock edition.
 
    .. warning::
-      It is highly recommended to use either :py:class:`BedrockFuncHandler` or :py:class:`JavaFuncHandler` for extended support of commands for your edition.
+      It is highly recommended to use either :py:class:`BedrockFunctionHandler` or :py:class:`JavaFunctionHandler` for extended support of commands for your edition.
 
    .. versionadded:: 0.0
 
@@ -344,9 +344,9 @@ Function Handlers
       .. versionadded:: 0.1
 
    .. py:attribute:: r
-      :type: UniversalRawCommands
+      :type: BaseRawCommands
 
-      A UniversalRawCommands instance.
+      A BaseRawCommands instance.
 
       .. versionadded:: 0.1
 
@@ -364,7 +364,7 @@ Function Handlers
 
       :param str comment: The comment.
 
-.. py:class:: BedrockFuncHandler(UniversalFuncHandler)
+.. py:class:: BedrockFunctionHandler(BaseFunctionHandler)
 
    The Beckrock Edition function handler.
 
@@ -393,7 +393,7 @@ Function Handlers
       :returns: The variable object
       :rtype: BedrockVariable
 
-.. py:class:: JavaFuncHandler(UniversalFuncHandler)
+.. py:class:: JavaFunctionHandler(BaseFunctionHandler)
 
    The Java Edition function handler.
 
@@ -439,17 +439,17 @@ Raw commands
 
 .. py:currentmodule:: pymcfunc.rawcommands
 
-.. py:class:: UniversalRawCommands
+.. py:class:: BaseRawCommands
 
    A container for raw Minecraft commands that are the same for both Java and Bedrock.
 
    .. versionadded:: 0.1
 
    .. warning::
-      Do not instantiate UniversalRawCommands directly; use a FuncHandler and access the commands via the 'r' attribute.
+      Do not instantiate BaseRawCommands directly; use a FuncHandler and access the commands via the 'r' attribute.
 
    .. py:attribute:: fh
-      :type: UniversalFuncHandler
+      :type: BaseFunctionHandler
 
       References back to the function handler that it is in.
 
@@ -741,7 +741,7 @@ Raw commands
       :returns: The command
       :rtype: str
 
-.. py:class:: BedrockRawCommands(UniversalRawCommands)
+.. py:class:: BedrockRawCommands(BaseRawCommands)
 
    A container for raw Minecraft commands that are specially for Bedrock Edition.
 
@@ -751,7 +751,7 @@ Raw commands
       Do not instantiate BedrockRawCommands directly; use a FuncHandler and access the commands via the 'r' attribute.
 
    .. py:attribute:: fh
-      :type: BedrockFuncHandler
+      :type: BedrockFunctionHandler
 
       References back to the function handler that it is in.
 
@@ -1100,7 +1100,7 @@ Raw commands
 
    .. py:method:: allowlist(mode: str, target: str=None)
 
-      Alias of :py:func:`UniversalRawCommands.whitelist`.
+      Alias of :py:func:`BaseRawCommands.whitelist`.
 
       .. versionadded:: 0.1
 
@@ -1151,7 +1151,7 @@ Raw commands
       :returns: The command
       :rtype: str
 
-   .. py:method:: execute(target: str, pos: str, run: Callable[[BedrockFuncHandler], Union[Union[list, tuple], None]], detectPos: str=None, block: str=None, data: int=None)
+   .. py:method:: execute(target: str, pos: str, run: Callable[[BedrockFunctionHandler], Union[Union[list, tuple], None]], detectPos: str=None, block: str=None, data: int=None)
 
       Adds an ``execute`` command.
 
@@ -1175,7 +1175,7 @@ Raw commands
          p = pmf.Pack('b')
     
          @p.function
-         def func(f: pmf.BedrockFuncHandler):
+         def func(f: pmf.BedrockFunctionHandler):
              f.r.execute("@e[type=sheep]", "~ ~ ~", 
                  lambda sf: sf.r.say("baah"))
 
@@ -1185,7 +1185,7 @@ Raw commands
                      sf.r.tp(destxyz="~ ~5 ~")
                  ])
 
-             def chargeCreepers(sf: pmf.BedrockFuncHandler):
+             def chargeCreepers(sf: pmf.BedrockFunctionHandler):
                  sf.r.summon("lightning_bolt")
              f.r.execute("@e[type=creeper]", "~ ~ ~", chargeCreepers)
 
@@ -1891,7 +1891,7 @@ Raw commands
       :returns: The command
       :rtype: str
 
-.. py:class:: JavaRawCommands(UniversalRawCommands)
+.. py:class:: JavaRawCommands(BaseRawCommands)
 
    A container for raw Minecraft commands that are specially for Java Edition.
 
@@ -1901,7 +1901,7 @@ Raw commands
       Do not instantiate JavaRawCommands directly; use a FuncHandler and access the commands via the 'r' attribute.
 
    .. py:attribute:: fh
-      :type: JavaFuncHandler
+      :type: JavaFunctionHandler
 
       References back to the function handler that it is in.
 
@@ -2382,7 +2382,7 @@ Raw commands
          p = pmf.Pack()
     
          @p.function
-         def func(f: pmf.JavaFuncHandler):
+         def func(f: pmf.JavaFunctionHandler):
              f.r.execute(
                  as = "@e[type=sheep]",
                  run = lambda sf: say.r.say("baah")
@@ -2395,7 +2395,7 @@ Raw commands
                      sf.r.tp(destxyz="~ ~5 ~")
                  ])
 
-             def chargeCreepers(sf: pmf.JavaFuncHandler):
+             def chargeCreepers(sf: pmf.JavaFunctionHandler):
                  sf.r.summon("lightning_bolt")
              f.r.execute(
                  as = "@e[type=sheep]",
@@ -2865,7 +2865,7 @@ Raw commands
       .. versionadded:: 0.1
 
       .. versionchanged:: 0.2
-         Shifted from :py:class:`UniversalRawCommands` to :py:class:`JavaRawCommands`
+         Shifted from :py:class:`BaseRawCommands` to :py:class:`JavaRawCommands`
 
       **Syntax:** *seed*
 
@@ -3080,7 +3080,7 @@ Variables
       * **a %= b** - Sets this variable to the remainder of a / b
 
    .. py:attribute:: fh
-      :type: UniversalFuncHandler
+      :type: BaseFunctionHandler
 
       References back to the function handler that it is in.
 
@@ -3203,7 +3203,7 @@ Variables
          )
 
    .. py:attribute:: fh
-      :type: UniversalFuncHandler
+      :type: BaseFunctionHandler
 
       References back to the function handler that it is in.
 

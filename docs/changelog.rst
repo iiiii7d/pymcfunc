@@ -17,7 +17,7 @@ Changelog
   * All booleans should be lowercase now
   * Added raw text translators (``pymcfunc.rt.java()`` and ``pymcfunc.rt.bedrock()``)
   * Added ``pymcfunc.sel.cuboid()``
-  * Added ``pymcfunc.UniversalFuncHandler.clear()`` and ``pymcfunc.UniversalFuncHandler.comment()``
+  * Added ``pymcfunc.BaseFunctionHandler.clear()`` and ``pymcfunc.BaseFunctionHandler.comment()``
   * Added variables for both editions
   * Added tag decorators for Java
   * Added pack building for Java
@@ -32,7 +32,7 @@ Changelog
     /mobevent, /music, /permissions, /playanimation, /querytarget, /ride, /save, /setmaxplayers, /structure, /testfor,
     /testforblock, /testforblocks, /tickingarea, /toggledownfall, /worldbuilder in BedrockRawCommands
   * basically added all the other commands (except for Edu Edition commands)
-  * moved /seed from UniversalRawCommands to JavaRawCommands
+  * moved /seed from BaseRawCommands to JavaRawCommands
 
 * **v0.1 (28/5/21)**
 

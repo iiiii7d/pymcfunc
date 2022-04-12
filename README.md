@@ -42,12 +42,12 @@ import pymcfunc_old as pmf
 p = pmf.Pack("pack name")
 
 @p.function
-def diamond(f: pmf.JavaFuncHandler):
+def diamond(f: pmf.JavaFunctionHandler):
     f.r.tell("@s", "Enjoy your free diamonds! :D")
     f.r.give("@s", "diamond", 64)
 
 @p.function
-def make_sheep_jump(f: pmf.JavaFuncHandler):
+def make_sheep_jump(f: pmf.JavaFunctionHandler):
     f.r.execute(
       as_="@e[type=sheep]",
       run=lambda sf: [
@@ -57,7 +57,7 @@ def make_sheep_jump(f: pmf.JavaFuncHandler):
     )
 
 @p.function
-def addition(f: pmf.JavaFuncHandler):
+def addition(f: pmf.JavaFunctionHandler):
     val1 = f.v('val1', '@s')
     val1.set(10)
     val2 = f.v('val2', '@s')
@@ -67,7 +67,7 @@ def addition(f: pmf.JavaFuncHandler):
 
 @p.function
 @p.t.repeat_every(6000)
-def five_min_alert(f: pmf.JavaFuncHandler):
+def five_min_alert(f: pmf.JavaFunctionHandler):
     f.r.tellraw('@a', pmf.rt.java("§c§l§w[This is 6000 ticks]5 minutes§xw have passed!"))
 
 print(p.funcs)

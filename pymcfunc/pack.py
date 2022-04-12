@@ -2,7 +2,7 @@ from functools import wraps
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from pymcfunc import selectors
-from pymcfunc.func_handler import JavaFuncHandler
+from pymcfunc.func_handler import JavaFunctionHandler
 from pymcfunc.version import JavaVersion
 
 
@@ -38,8 +38,8 @@ class JavaPack:
         :param name: The name of the Minecraft function, if it isn't the name of the Python function.
         :type name: [type] | None
         """
-        def decorator(func: Callable[[JavaFuncHandler], Any]):
-            m = JavaFuncHandler(self)
+        def decorator(func: Callable[[JavaFunctionHandler], Any]):
+            m = JavaFunctionHandler(self)
             func(m)
             fname = func.__name__ if name is None else name
             self.funcs.update({fname: str(m)})

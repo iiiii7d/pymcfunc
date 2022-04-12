@@ -1,12 +1,123 @@
 from math import inf
 import json
-from typing import Sequence, Dict
+from typing import Sequence, Dict, Literal
 import re
 
 import pymcfunc.internal as internal
 import pymcfunc.errors as errors
 
-class UniversalSelector:
+class BaseSelector:
+    def __init__(self, var: Literal['p', 'r', 'a', 'e', 's'], **arguments: str):
+        internal.options(var, ['p', 'r', 'a', 'e', 's'])
+        self.var = var
+        self.arguments = arguments # TODO proper arg type checking
+
+        def _immutable_lock(*_):
+            raise AttributeError(f"{type(self).__name__} is immutable")
+        self.__setattr__ = _immutable_lock
+
+    @property
+    def singleonly(self) -> bool:
+        return self.var in ['p', 'r'] or self.var == 'e' and self.arguments['limit'] == 1
+
+    @property
+    def playeronly(self) -> bool:
+        return self.var in ['p', 'r', 'a']
+
+    @classmethod
+    def nearest_player(cls, **kwargs):
+        """Alias of Selector('p', **kwargs)."""
+        return cls('p', **kwargs)
+    p = nearest_player
+
+    @classmethod
+    def random_player(cls, **kwargs):
+        """Alias of Selector('r', **kwargs)."""
+        return cls('r', **kwargs)
+    r = random_player
+
+    @classmethod
+    def all_players(cls, **kwargs):
+        """Alias of Selector('a', **kwargs)."""
+        return cls('a', **kwargs)
+    a = all_players
+
+    @classmethod
+    def all_entities(cls, **kwargs):
+        """Alias of Selector('e', **kwargs)."""
+        return cls('e', **kwargs)
+    e = all_entities
+
+    @classmethod
+    def executor(cls, **kwargs):
+        """Alias of Selector('s', **kwargs)."""
+        return cls('s', **kwargs)
+    s = executor
+
+    def __str__(self) -> str:
+        args = []
+        BEDROCK = ["x", "y", "z", "rmax", "rmin", "dx", "dy", "dz", "scores", "tag",
+                   "c", "lmax", "lmin", "m", "name", "rxmax", "rxmin", "rymax", "rymin", "type", "family",
+                   "l", "r", "rx", "ry"]
+        JAVA = ["x", "y", "z", "distance", "dx", "dy", "dz", "scores", "tag",
+                "team", "limit", "sort", "level", "gamemode", "name", "x_rotation", "y_rotation",
+                "type", "nbt", "advancements", "predicate"]
+        CAN_REPEAT = ["type", "family", "tag", "nbt", "advancements", "predicate"]
+        OPTIONS_JAVA = {
+            "sort": ["nearest", "furthest", "random", "arbitrary"],
+            "gamemode": ["spectator", "adventure", "creative", "survival"]
+        }
+        OPTIONS_BEDROCK = {
+            "gamemode": ["0", "1", "2", "3"]
+        }
+        ALIASES = {
+            "lmax": "l",
+            "lmin": "lm",
+            "rmax": "r",
+            "rmin": "rm",
+            "rxmax": "rx",
+            "rxmin": "rxm",
+            "rymax": "ry",
+            "rymin": "rym"
+        }
+        EXPAND = {
+            "l": ("l", "lm"),
+            "r": ("r", "rm"),
+            "rx": ("rx", "rxm"),
+            "ry": ("ry", "rym")
+        }
+
+        for k, v in self.arguments.items():
+            keylist = BEDROCK if type(self) == BedrockSelector else JAVA
+            optionslist = OPTIONS_BEDROCK if type(self) == BedrockSelector else OPTIONS_JAVA
+            if k not in keylist:
+                raise KeyError(f"Invalid target selector argument '{k}'")
+            if k in optionslist.keys():
+                if not str(v) in optionslist[k]:
+                    raise errors.OptionError(optionslist[k], v)
+            if k in ALIASES and type(self) == BedrockSelector:
+                args.append(f"{ALIASES[k]}={v}")
+            elif k in EXPAND and type(self) == BedrockSelector:
+                for i in EXPAND[k]:
+                    v = json.dumps(v) if isinstance(v, dict) else v
+                    args.append(f"{i}={v}")
+            elif k in CAN_REPEAT and isinstance(v, (tuple, list, set)):
+                for i in v:
+                    i = json.dumps(i) if isinstance(i, dict) else i
+                    args.append(f"{k}={i}")
+            else:
+                v = json.dumps(v) if isinstance(v, dict) else v
+                args.append(f"{k}={v}")
+        result = "[" + ", ".join(args) + "]"
+        if result == "[]": result = ""
+        return result
+
+
+class JavaSelector(BaseSelector): pass
+
+class BedrockSelector(BaseSelector): pass
+'''
+class BaseSelector:
     """The universal selector class.
        Every function has a **kwargs, which is used for selector arguments. The list of selector arguemnts are in the respective specialised classes.
        If an argument is repeatable, you can express multiple values of the same argument in lists, sets, or tuples.
@@ -109,14 +220,14 @@ class UniversalSelector:
         return result
 
 
-class BedrockSelector(UniversalSelector):
+class BedrockSelector(BaseSelector):
     """The Bedrock Edition selector class.
     More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.BedrockSelectors"""
     def __init__(self):
         pass
 
 
-class JavaSelector(UniversalSelector):
+class JavaSelector(BaseSelector):
     """The Java Edition selector class.
     More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.JavaSelectors"""
     def __init__(self):
@@ -154,3 +265,4 @@ def cuboid(pos1: Sequence[int], pos2: Sequence[int], dims: str='xyz') -> Dict[st
         out[dim] = minv
         out['d'+dim] = d
     return out
+'''

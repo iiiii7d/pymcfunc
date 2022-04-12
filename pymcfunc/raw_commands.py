@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import warnings
 from functools import wraps
-from typing import Optional, Any, Callable, Tuple, TYPE_CHECKING, Union, TypeAlias, Annotated, Literal
+from typing import Optional, Any, Callable, Tuple, TYPE_CHECKING, Annotated, Literal
 from uuid import UUID
 
 from pymcfunc.advancements import Advancement
@@ -14,27 +14,27 @@ from pymcfunc.selectors import BedrockSelector, JavaSelector
 from pymcfunc.version import JavaVersion, BedrockVersion
 
 if TYPE_CHECKING:
-    from pymcfunc.func_handler import UniversalFuncHandler
+    from pymcfunc.func_handler import BaseFunctionHandler
 
 
-class UniversalRawCommands:
+class BaseRawCommands:
     """
     A container for raw Minecraft commands that are the same for both Java and Bedrock.
 
     .. warning::
-       Do not instantiate UniversalRawCommands directly; use a FuncHandler and access the commands via the ‘r’ attribute.
+       Do not instantiate BaseRawCommands directly; use a FuncHandler and access the commands via the ‘r’ attribute.
     """
 
-    def __init__(self, fh: UniversalFuncHandler):
+    def __init__(self, fh: BaseFunctionHandler):
         self.fh = fh
 
 
-class BedrockRawCommands(UniversalRawCommands):
+class BedrockRawCommands(BaseRawCommands):
     """
     A container for raw Minecraft commands that are specially for Bedrock Edition.
 
     .. warning::
-       Do not instantiate BedrockRawCommands directly; use a :py:class:`BedrockFuncHandler` and access the commands via the ‘r’ attribute.
+       Do not instantiate BedrockRawCommands directly; use a :py:class:`BedrockFunctionHandler` and access the commands via the ‘r’ attribute.
     """
 
     @staticmethod
@@ -121,18 +121,22 @@ class BedrockRawCommands(UniversalRawCommands):
     def camerashake_stop(self, target: Annotated[BedrockSelector, Player] = BedrockSelector.s()) -> ExecutedCommand:
         pass
 
-class JavaRawCommands(UniversalRawCommands):
+class JavaRawCommands(BaseRawCommands):
     """
     A container for raw Minecraft commands that are specially for Java Edition.
 
     .. warning::
-       Do not instantiate JavaRawCommands directly; use a :py:class:`JavaFuncHandler` and access the commands via the ‘r’ attribute.
+       Do not instantiate JavaRawCommands directly; use a :py:class:`JavaFunctionHandler` and access the commands via the ‘r’ attribute.
     """
-    @staticmethod # TODO fix
+    @staticmethod
     def command(order: list[Element], cmd_name: str | None = None, segment_name: str | None = None):
         def decorator(func: Callable[..., Any]):
-            func.cmd_info = (order, cmd_name, segment_name)
-            return func
+            @wraps(func)
+            def wrapper(self, *args, **kwargs):
+                return Command.command(self.fh, order, cmd_name, segment_name)(func)(*args, **kwargs)
+
+            return wrapper
+
         return decorator
 
     def __getattribute__(self, item: str):

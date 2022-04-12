@@ -6,7 +6,7 @@ from typing import Any, List, Literal, Optional, Union
 
 from pymcfunc.errors import OptionError, SpaceError, MissingArgumentError, MultipleBranchesSatisfiedError, MissingError, \
     RangeError
-from pymcfunc.selectors import UniversalSelector
+from pymcfunc.selectors import BaseSelector
 
 
 class _Parameter:
@@ -157,9 +157,9 @@ class CommandBuilder:
                     raise OptionError(element.options, value)
                 if not element.spaces and isinstance(value, str) and " " in value:
                     raise SpaceError(element.name, value)
-                if issubclass(type(value), UniversalSelector) and 'singleonly' in element.attrs and element.attrs['singleonly'] and not value.singleonly:
+                if issubclass(type(value), BaseSelector) and 'singleonly' in element.attrs and element.attrs['singleonly'] and not value.singleonly:
                     raise ValueError(f"Parameter {element.name} allows target selector for single entities/players (Got `{value}`)")
-                if issubclass(type(value), UniversalSelector) and 'playeronly' in element.attrs and element.attrs['playeronly'] and not value.playeronly:
+                if issubclass(type(value), BaseSelector) and 'playeronly' in element.attrs and element.attrs['playeronly'] and not value.playeronly:
                     raise ValueError(f"Parameter {element.name} allows players target selectors for (Got `{value}`)")
                 if isinstance(value, (int, float)) and 'range' in element.attrs and not element.attrs['range'](value):
                     try: range_string = re.search(r"lambda [^:]*:(.*)\n", inspect.getsource(element.attrs['range'])).group(1).strip()

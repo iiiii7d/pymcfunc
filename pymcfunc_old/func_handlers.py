@@ -1,4 +1,4 @@
-from pymcfunc.selectors import UniversalSelectors, JavaSelectors, BedrockSelectors
+from pymcfunc_old.selectors import UniversalSelectors, JavaSelectors, BedrockSelectors
 from pymcfunc_old.variables import JavaVariable, BedrockVariable
 import pymcfunc_old.entities as entities
 from pymcfunc_old.entities import Entity

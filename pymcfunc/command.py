@@ -10,9 +10,9 @@ from uuid import UUID
 
 from pymcfunc.errors import MultipleBranchesSatisfiedError, MissingError, MissingArgumentError
 
-if TYPE_CHECKING: from pymcfunc.func_handler import UniversalFuncHandler
-if TYPE_CHECKING: from pymcfunc.raw_commands import UniversalRawCommands
-from pymcfunc.selectors import UniversalSelector, JavaSelector
+if TYPE_CHECKING: from pymcfunc.func_handler import BaseFunctionHandler
+if TYPE_CHECKING: from pymcfunc.raw_commands import BaseRawCommands
+from pymcfunc.selectors import BaseSelector, JavaSelector
 
 # for eval
 # noinspection PyUnresolvedReferences
@@ -66,13 +66,13 @@ class Annotation:
 
 class Single(Annotation):
     @staticmethod
-    def check(instance: UniversalSelector, varname: str):
+    def check(instance: BaseSelector, varname: str):
         if not instance.singleonly:
             raise ValueError(f"Value for argument `{varname}` selects multiple entities (Got `{instance}`)")
 
 class Player(Annotation):
     @staticmethod
-    def check(instance: UniversalSelector, varname: str):
+    def check(instance: BaseSelector, varname: str):
         if not instance.playeronly:
             raise ValueError(f"Value for argument `{varname}` selects entities too (Got `{instance}`)")
 
@@ -112,18 +112,18 @@ _JavaSingleTarget: TypeAlias = Union[Annotated[str, PlayerName], UUID, Annotated
 
 class Command:
     order: list[Element]
-    fh: UniversalFuncHandler
+    fh: BaseFunctionHandler
     arg_namelist: list[str]
     eles: dict[str, AE]
     name: str
     segment_name: str
-    func: Callable[[UniversalRawCommands, ...], ExecutedCommand]
+    func: Callable[[BaseRawCommands, ...], ExecutedCommand]
     @classmethod
-    def command(cls, fh: UniversalFuncHandler,
+    def command(cls, fh: BaseFunctionHandler,
                 order: list[Element],
                 cmd_name: str | None = None,
                 segment_name: str | None = None):
-        def decorator(func: Callable[[UniversalRawCommands, ...], ExecutedCommand]):
+        def decorator(func: Callable[[BaseRawCommands, ...], ExecutedCommand]):
             cmd = cls()
             cmd.order = order
             cmd.fh = fh
@@ -324,7 +324,7 @@ class Command:
             return eles
 
 class ExecutedCommand:
-    def __init__(self, fh: UniversalFuncHandler, name: str, command_string: str):
+    def __init__(self, fh: BaseFunctionHandler, name: str, command_string: str):
         self.fh = fh
         self.name = name
         self.command_string = command_string

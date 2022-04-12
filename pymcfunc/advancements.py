@@ -26,7 +26,7 @@ class Advancement:
 
     def namespaced(self) -> str: return self.namespace+":"+self.name
 
-    def on_advancement_get(self, func: Callable[[func_handler.JavaFuncHandler, ...], Any]):
+    def on_advancement_get(self, func: Callable[[func_handler.JavaFunctionHandler, ...], Any]):
         """The function with the tag will be called when the achievement is gotten.
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.advancements.Advancement.on_reward"""
         @wraps(func)

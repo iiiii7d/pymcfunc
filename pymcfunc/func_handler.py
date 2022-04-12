@@ -1,28 +1,28 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, List
-from pymcfunc.selectors import UniversalSelector, JavaSelector, BedrockSelector
+from pymcfunc.selectors import BaseSelector, JavaSelector, BedrockSelector
 from pymcfunc.variables import JavaVariable, BedrockVariable
 import pymcfunc.entities as entities
 from pymcfunc.entities import Entity
-from pymcfunc.raw_commands import UniversalRawCommands, JavaRawCommands, BedrockRawCommands, ExecutedCommand
+from pymcfunc.raw_commands import BaseRawCommands, JavaRawCommands, BedrockRawCommands, ExecutedCommand
 
 if TYPE_CHECKING:
     from pymcfunc.pack import JavaPack
 
-class UniversalFuncHandler:
+class BaseFunctionHandler:
     """
-    The function handler that is inherited by both :py:class:`JavaFuncHandler` and :py:class:`BedrockFuncHandler`.
+    The function handler that is inherited by both :py:class:`JavaFunctionHandler` and :py:class:`BedrockFunctionHandler`.
 
     This includes commands and features that are the same for both Java and Bedrock edition.
 
     .. warning::
-       Use either :py:class:`BedrockFuncHandler` or :py:class:`JavaFuncHandler` for extended support of commands for your edition.
+       Use either :py:class:`BedrockFunctionHandler` or :py:class:`JavaFunctionHandler` for extended support of commands for your edition.
     """
-    sel = UniversalSelector()
+    sel = BaseSelector()
 
     def __init__(self, p):
         self.commands: List[ExecutedCommand] = []
-        self.r = UniversalRawCommands(self)
+        self.r = BaseRawCommands(self)
         self.p = p
 
     def __str__(self):
@@ -44,7 +44,7 @@ class UniversalFuncHandler:
         """
         self.commands.append('# '+comment.strip())
 
-class BedrockFuncHandler(UniversalFuncHandler):
+class BedrockFunctionHandler(BaseFunctionHandler):
     """The Beckrock Edition function handler."""
     sel = BedrockSelector()
 
@@ -63,7 +63,7 @@ class BedrockFuncHandler(UniversalFuncHandler):
         """
         return BedrockVariable(self, name, target)
 
-class JavaFuncHandler(UniversalFuncHandler):
+class JavaFunctionHandler(BaseFunctionHandler):
     """The Java Edition function handler."""
     sel = JavaSelector()
 
