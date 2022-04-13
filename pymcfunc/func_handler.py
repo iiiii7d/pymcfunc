@@ -1,5 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, List
+
+from pymcfunc.internal import base_class
 from pymcfunc.selectors import BaseSelector, JavaSelector, BedrockSelector
 from pymcfunc.variables import JavaVariable, BedrockVariable
 import pymcfunc.entities as entities
@@ -9,6 +11,7 @@ from pymcfunc.raw_commands import BaseRawCommands, JavaRawCommands, BedrockRawCo
 if TYPE_CHECKING:
     from pymcfunc.pack import JavaPack
 
+@base_class
 class BaseFunctionHandler:
     """
     The function handler that is inherited by both :py:class:`JavaFunctionHandler` and :py:class:`BedrockFunctionHandler`.

@@ -1,3 +1,4 @@
+import functools
 from typing import Tuple, Any, Sequence
 import pymcfunc.errors as errors
 
@@ -94,3 +95,23 @@ def check_range(r: dict):
         for k, v in r:
             if k not in ['min', 'max']:
                 raise KeyError(f"Invalid key: {k}; only 'min' and 'max' allowed")
+
+def immutable(cls):
+    @functools.wraps(cls, updated=())
+    class Immutable(cls):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+
+            def _immutable_lock(*_):
+                raise AttributeError(f"{type(self).__name__} is immutable")
+            self.__setattr__ = _immutable_lock
+    return Immutable
+
+def base_class(cls):
+    @functools.wraps(cls, updated=())
+    class BaseClass(cls):
+        def __init__(self, *args, **kwargs):
+            if type(self) == BaseClass:
+                raise TypeError("Base classes are not allowed to be instantiated. Use the Java or Bedrock classes instead.")
+
+            super().__init__(*args, **kwargs)

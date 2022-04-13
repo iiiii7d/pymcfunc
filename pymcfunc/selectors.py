@@ -1,20 +1,33 @@
+from __future__ import annotations
+
 from math import inf
 import json
-from typing import Sequence, Dict, Literal
+from typing import Sequence, Dict, Literal, Any
 import re
 
 import pymcfunc.internal as internal
 import pymcfunc.errors as errors
+from pymcfunc.coord import _FloatIntCoord, Coord
 
+@internal.base_class
+@internal.immutable
 class BaseSelector:
-    def __init__(self, var: Literal['p', 'r', 'a', 'e', 's'], **arguments: str):
-        internal.options(var, ['p', 'r', 'a', 'e', 's'])
+    def __init__(self, var: Literal['p', 'r', 'a', 'e', 's'], **arguments: Any):
+        internal.options(var, ['p', 'r', 'a', 'e', 's']) # TODO 'c' and 'v' for edu edition, 'initiator' for bedrock
         self.var = var
         self.arguments = arguments # TODO proper arg type checking
 
         def _immutable_lock(*_):
             raise AttributeError(f"{type(self).__name__} is immutable")
         self.__setattr__ = _immutable_lock
+
+    """class Arguments:
+        def __init__(self, *,
+                     x: _FloatIntCoord | None = None,
+                     y: _FloatIntCoord | None = None,
+                     z: _FloatIntCoord | None = None,
+                     coords: Coord | None = None,
+                     dx):"""
 
     @property
     def singleonly(self) -> bool:

@@ -5,10 +5,13 @@ from typing import Union
 
 from typing_extensions import TypeAlias, Self
 
+from pymcfunc.internal import immutable
+
 _FloatCoord: TypeAlias = Union[float, str]
 _IntCoord: TypeAlias = Union[int, str]
 _FloatIntCoord: TypeAlias = Union[Union[int, float], str]
 
+@immutable
 class Coord:
     x: _FloatCoord
     y: _FloatCoord
@@ -30,10 +33,6 @@ class Coord:
         self.x = x
         self.y = y
         self.z = z
-
-        def _immutable_lock(*_):
-            raise AttributeError(f"{type(self).__name__} is immutable")
-        self.__setattr__ = _immutable_lock
 
     def __str__(self):
         return f"{self.x} {self.y} {self.z}"
@@ -74,6 +73,7 @@ class BlockCoord(Coord):
     def __new__(cls, x: _IntCoord, y: _IntCoord, z: _IntCoord):
         return object.__new__(cls)
 
+@immutable
 class ChunkCoord:
     x: _IntCoord
     z: _IntCoord
@@ -88,10 +88,6 @@ class ChunkCoord:
                 raise TypeError(f"Coordinate {name} must be an int (Got {c})")
         self.x = x
         self.z = z
-
-        def _immutable_lock(*_):
-            raise AttributeError(f"{type(self).__name__} is immutable")
-        self.__setattr__ = _immutable_lock
 
     def __str__(self):
         return f"{self.x} {self.z}"

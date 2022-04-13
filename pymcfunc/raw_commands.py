@@ -9,6 +9,7 @@ from pymcfunc.advancements import Advancement
 from pymcfunc.command import ExecutedCommand, Command, SE, AE, Range, NoSpace, Element, Player, Single, Regex, \
     PlayerName, LE, _JavaPlayerTarget, _JavaSingleTarget, ResourceLocation, RawJson
 from pymcfunc.errors import FutureCommandWarning, DeprecatedCommandWarning, EducationEditionWarning
+from pymcfunc.internal import base_class
 from pymcfunc.nbt import Int
 from pymcfunc.selectors import BedrockSelector, JavaSelector
 from pymcfunc.version import JavaVersion, BedrockVersion
@@ -17,6 +18,7 @@ if TYPE_CHECKING:
     from pymcfunc.func_handler import BaseFunctionHandler
 
 
+@base_class
 class BaseRawCommands:
     """
     A container for raw Minecraft commands that are the same for both Java and Bedrock.
