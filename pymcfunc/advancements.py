@@ -5,8 +5,8 @@ from functools import wraps
 from typing import TypeAlias, Union, Literal, Callable, Any
 
 from pymcfunc import func_handler
-from pymcfunc.json_format import ItemJson, EntityJson, DamageJson, DamageTypeJson, LocationJson, IntRange, FloatRange, \
-    DoubleRange
+from pymcfunc.json_format import ItemJson, EntityJson, DamageJson, DamageTypeJson, LocationJson, IntRangeJson, FloatRangeJson, \
+    DoubleRangeJson
 from pymcfunc.nbt import Compound, NBT
 
 RawJson: TypeAlias = Union[dict, list]
@@ -164,7 +164,7 @@ class Criterion:
     @classmethod
     @_trigger
     def construct_beacon(cls, name: str, *,
-                         level: int | IntRange | None = None,
+                         level: int | IntRangeJson | None = None,
                          player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
 
     @classmethod
@@ -183,7 +183,7 @@ class Criterion:
     @classmethod
     @_trigger
     def effects_changed(cls, name: str, *,
-                        effects: dict[str, dict[Literal["amplifier", "duration"], int | IntRange]] | None = None,
+                        effects: dict[str, dict[Literal["amplifier", "duration"], int | IntRangeJson]] | None = None,
                         source: EntityJson | list[Predicate] | None = None,
                         player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
 
@@ -191,7 +191,7 @@ class Criterion:
     @_trigger
     def enchanted_item(cls, name: str, *,
                        item: ItemJson | None = None,
-                       levels: int | IntRange | None = None,
+                       levels: int | IntRangeJson | None = None,
                        player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
 
     @classmethod
@@ -242,14 +242,14 @@ class Criterion:
     @_trigger
     def inventory_changed(cls, name: str, *,
                           items: list[ItemJson] | None = None,
-                          slots: dict[Literal["empty", "full", "occupied"], int | IntRange] | None = None,
+                          slots: dict[Literal["empty", "full", "occupied"], int | IntRangeJson] | None = None,
                           player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
 
     @classmethod
     @_trigger
     def item_durability_changed(cls, name: str, *,
-                                delta: int | IntRange | None = None,
-                                durability: int | IntRange | None = None,
+                                delta: int | IntRangeJson | None = None,
+                                durability: int | IntRangeJson | None = None,
                                 item: ItemJson | None = None,
                                 player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
 
@@ -263,15 +263,15 @@ class Criterion:
     @classmethod
     @_trigger
     def killed_by_crossbow(cls, name: str, *,
-                           unique_entity_types: int | IntRange | None = None,
+                           unique_entity_types: int | IntRangeJson | None = None,
                            victims: EntityJson | list[EntityJson | list[Predicate]] | None = None,
                            player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
 
     @classmethod
     @_trigger
     def levitation(cls, name: str, *,
-                   distance: dict[Literal["absolute", "horizontal", "x", "y", "z"], IntRange] | None = None,
-                   duration: int | IntRange | None = None,
+                   distance: dict[Literal["absolute", "horizontal", "x", "y", "z"], IntRangeJson] | None = None,
+                   duration: int | IntRangeJson | None = None,
                    player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
 
     @classmethod
@@ -292,7 +292,7 @@ class Criterion:
     def nether_travel(cls, name: str, *,
                       entered: LocationJson | None = None,
                       exited: LocationJson | None = None,
-                      distance: dict[Literal["absolute", "horizontal", "x", "y", "z"], FloatRange] | None = None,
+                      distance: dict[Literal["absolute", "horizontal", "x", "y", "z"], FloatRangeJson] | None = None,
                       player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
 
     @classmethod
@@ -395,7 +395,7 @@ class Criterion:
     @classmethod
     @_trigger
     def used_ender_eye(cls, name: str, *,
-                       distance: DoubleRange | None = None,
+                       distance: DoubleRangeJson | None = None,
                        player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
 
     @classmethod

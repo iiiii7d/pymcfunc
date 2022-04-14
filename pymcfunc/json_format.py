@@ -5,16 +5,16 @@ from typing import Literal
 from pymcfunc.nbt import Float, Int, Double, NBT, Compound
 
 
-class Range:
+class RangeJson:
     def __new__(cls, min_: int | str, max_: int | str):
-        if cls != Range: return super().__new__(cls)
+        if cls != RangeJson: return super().__new__(cls)
         if isinstance(min_, int) and Int.min <= min_ <= Int.max and \
            isinstance(max_, int) and Int.min <= max_ <= Int.max:
-            return IntRange.__new__(IntRange, min_, max_)
+            return IntRangeJson.__new__(IntRangeJson, min_, max_)
         if Float.min <= min_ <= Float.max and Float.min <= max_ <= Float.max:
-            return FloatRange.__new__(FloatRange, min_, max_)
+            return FloatRangeJson.__new__(FloatRangeJson, min_, max_)
         if Double.min <= min_ <= Double.max and Double.min <= max_ <= Double.max:
-            return DoubleRange.__new__(DoubleRange, min_, max_)
+            return DoubleRangeJson.__new__(DoubleRangeJson, min_, max_)
 
     def __init__(self, min_: int | str, max_: int | str):
         self.min: int | str = min_
@@ -23,16 +23,16 @@ class Range:
     def json(self) -> dict:
         return {'min': self.min, 'max': self.max}
 
-class FloatRange(Range): pass
-class IntRange(Range): pass
-class DoubleRange(Range): pass
+class FloatRangeJson(RangeJson): pass
+class IntRangeJson(RangeJson): pass
+class DoubleRangeJson(RangeJson): pass
 
 class DamageJson:
     def __init__(self, **kwargs):
         self.blocked: bool | None = None
-        self.dealt: float | DoubleRange | None = None
+        self.dealt: float | DoubleRangeJson | None = None
         self.source_entity: EntityJson | None = None
-        self.taken: float | DoubleRange | None = None
+        self.taken: float | DoubleRangeJson | None = None
         self.type: DamageTypeJson | None = None
 
         for k, v in kwargs.items(): setattr(self, k, v)
@@ -75,7 +75,7 @@ class DamageTypeJson:
 
 class EntityJson:
     def __init__(self, **kwargs):
-        self.distance: dict[Literal["absolute", "horizontal", "x", "y", "z"], FloatRange] | None = None
+        self.distance: dict[Literal["absolute", "horizontal", "x", "y", "z"], FloatRangeJson] | None = None
         self.effects: list[EntityJson.Effect] | None = None
         self.equipment: dict[Literal["mainhand", "offhand", "head", "chest", "legs", "feet"], ItemJson] | None = None
         self.flags: dict[Literal["is_on_fire", "is_sneaking", "is_sprinting", "is_swimming", "is_baby"], bool] | None = None
@@ -97,8 +97,8 @@ class EntityJson:
         def __init__(self, name: str, **kwargs):
             self.name: str = name
             self.ambient: bool | None = None
-            self.amplifier: int | IntRange | None = None
-            self.duration: int | IntRange | None = None
+            self.amplifier: int | IntRangeJson | None = None
+            self.duration: int | IntRangeJson | None = None
             self.visible: bool | None = None
 
             for k, v in kwargs.items(): setattr(self, k, v)
@@ -117,7 +117,7 @@ class EntityJson:
             self.looking_at: EntityJson | None = None
             self.advancements: dict[str, bool | dict[str, bool]] | None = None
             self.gamemode: Literal["survival", "adventure", "creative", "spectator"] | None = None
-            self.level: int | IntRange | None = None
+            self.level: int | IntRangeJson | None = None
             self.recipes: dict[str, bool] | None = None
             self.stats: list[EntityJson.Player.Statistic] | None = None
 
@@ -129,7 +129,7 @@ class EntityJson:
                                    "minecraft:mined", "minecraft:killed", "minecraft:picked_up", "minecraft:dropped",
                                    "minecraft:killed_by"] | None = None
                 self.stat: str | None = None
-                self.value: int | IntRange | None = None
+                self.value: int | IntRangeJson | None = None
 
                 for k, v in kwargs.items(): setattr(self, k, v)
 
@@ -203,8 +203,8 @@ class LocationJson:
         self.dimension: str | None = None
         self.feature: str | None = None
         self.fluid: LocationJson.Fluid | None = None
-        self.light: int | IntRange | None = None
-        self.position: dict[Literal["x", "y", "z"], float | DoubleRange] | None = None
+        self.light: int | IntRangeJson | None = None
+        self.position: dict[Literal["x", "y", "z"], float | DoubleRangeJson] | None = None
         self.smokey: bool | None = None
 
         for k, v in kwargs.items(): setattr(self, k, v)
@@ -214,7 +214,7 @@ class LocationJson:
             self.blocks: list[str] | None = None
             self.tag: str | None = None
             self.nbt: Compound | None = None
-            self.state: dict[str, str | int | bool | IntRange] | None = None
+            self.state: dict[str, str | int | bool | IntRangeJson] | None = None
 
             for k, v in kwargs.items(): setattr(self, k, v)
 
@@ -236,7 +236,7 @@ class LocationJson:
     class Fluid:
         def __init__(self, **kwargs):
             self.fluid: str | None = None
-            self.state: dict[str, str | int | bool | IntRange] | None = None
+            self.state: dict[str, str | int | bool | IntRangeJson] | None = None
 
             for k, v in kwargs.items(): setattr(self, k, v)
 
@@ -268,8 +268,8 @@ class LocationJson:
 
 class ItemJson:
     def __init__(self, **kwargs):
-        self.count: int | IntRange | None = None
-        self.durability: int | IntRange | None = None
+        self.count: int | IntRangeJson | None = None
+        self.durability: int | IntRangeJson | None = None
         self.enchantments: list[ItemJson.Enchantment] | None = None
         self.stored_enchantments: list[ItemJson.Enchantment] | None = None
         self.items: list[str] | None = None
@@ -282,7 +282,7 @@ class ItemJson:
     class Enchantment:
         def __init__(self, **kwargs):
             self.enchantment: str | None = None
-            self.levels: int | IntRange | None = None
+            self.levels: int | IntRangeJson | None = None
 
             for k, v in kwargs.items(): setattr(self, k, v)
 

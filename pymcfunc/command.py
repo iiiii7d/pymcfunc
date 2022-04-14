@@ -12,7 +12,7 @@ from pymcfunc.errors import MultipleBranchesSatisfiedError, MissingError, Missin
 
 if TYPE_CHECKING: from pymcfunc.func_handler import BaseFunctionHandler
 if TYPE_CHECKING: from pymcfunc.raw_commands import BaseRawCommands
-from pymcfunc.selectors import BaseSelector, JavaSelector
+from pymcfunc.selectors import BaseSelector, JavaSelector, BedrockSelector
 
 # for eval
 # noinspection PyUnresolvedReferences
@@ -49,9 +49,9 @@ AE = ArgumentE
 class SwitchE(Element):
     branches: tuple[list[Element], ...]
     optional: bool
-    def __init__(self, *branches: list[Element]):
+    def __init__(self, *branches: list[Element], optional: bool = False):
         self.branches = branches
-        self.optional = False
+        self.optional = optional
     def __class_getitem__(cls, *branches: list[Element]):
         ae = cls(*branches)
         ae.optional = True
@@ -108,7 +108,10 @@ RawJson: TypeAlias = Union[dict, list]
 ResourceLocation: TypeAlias = str
 _JavaPlayerTarget: TypeAlias = Union[Annotated[str, PlayerName], UUID, Annotated[JavaSelector, Player]]
 _JavaSingleTarget: TypeAlias = Union[Annotated[str, PlayerName], UUID, Annotated[JavaSelector, Single]]
-
+_BedrockPlayerTarget: TypeAlias = Union[Annotated[str, PlayerName], Annotated[BedrockSelector, Player]]
+_BedrockSingleTarget: TypeAlias = Union[Annotated[str, PlayerName], Annotated[BedrockSelector, Player]]
+_BedrockTarget: TypeAlias = Union[Annotated[str, PlayerName], BedrockSelector]
+_BedrockSinglePlayerTarget: TypeAlias = Union[Annotated[str, PlayerName], Annotated[BedrockSelector, Single, Player]]
 
 class Command:
     order: list[Element]

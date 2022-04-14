@@ -6,11 +6,13 @@ from typing import Optional, Any, Callable, Tuple, TYPE_CHECKING, Annotated, Lit
 from uuid import UUID
 
 from pymcfunc.advancements import Advancement
-from pymcfunc.command import ExecutedCommand, Command, SE, AE, Range, NoSpace, Element, Player, Single, Regex, \
-    PlayerName, LE, _JavaPlayerTarget, _JavaSingleTarget, ResourceLocation, RawJson
+from pymcfunc.command import ExecutedCommand, Command, SE, AE, Range, NoSpace, Element, Player, Regex, \
+    PlayerName, LE, _JavaPlayerTarget, _JavaSingleTarget, ResourceLocation, RawJson, _BedrockSinglePlayerTarget, \
+    _BedrockPlayerTarget, _BedrockTarget, _BedrockSingleTarget, Quoted
+from pymcfunc.coord import BlockCoord
 from pymcfunc.errors import FutureCommandWarning, DeprecatedCommandWarning, EducationEditionWarning
 from pymcfunc.internal import base_class
-from pymcfunc.nbt import Int
+from pymcfunc.nbt import Int, Path, Compound, NBT
 from pymcfunc.selectors import BedrockSelector, JavaSelector
 from pymcfunc.version import JavaVersion, BedrockVersion
 
@@ -97,7 +99,7 @@ class BedrockRawCommands(BaseRawCommands):
     ])
     @education_edition
     @version(introduced="0.16.0b1")
-    def ability(self, target: Annotated[BedrockSelector, Player, Single],
+    def ability(self, target: _BedrockSinglePlayerTarget,
                 ability: Literal["worldbuilder", "mayfly", "mute"] | None = None,
                 value: bool | None = None) -> ExecutedCommand: pass
 
@@ -113,15 +115,80 @@ class BedrockRawCommands(BaseRawCommands):
         AE("shake_type", True)
     ])
     @version(introduced="1.16.100.57")
-    def camerashake_add(self, target: Annotated[BedrockSelector, Player]=BedrockSelector.s(), *,
+    def camerashake_add(self, target: _BedrockPlayerTarget = BedrockSelector.s(), *,
                         intensity: Annotated[float, Range(0, 4)] | None = None,
                         seconds: float | None = None,
                         shake_type: Literal["positional", "rotational"] | None = None) -> ExecutedCommand: pass
 
     @command([AE("target")])
     @version(introduced="1.16.210.54")
-    def camerashake_stop(self, target: Annotated[BedrockSelector, Player] = BedrockSelector.s()) -> ExecutedCommand:
+    def camerashake_stop(self, target: _BedrockPlayerTarget = BedrockSelector.s()) -> ExecutedCommand:
         pass
+
+    @command([AE("value")],
+             segment_name="changesetting allow-cheats")
+    def changesetting_allow_cheats(self, value: bool) -> ExecutedCommand: pass
+
+    @command([AE("value")])
+    def changesetting_difficulty(self, value: Literal['peaceful', 'easy', 'normal', 'hard',
+                                                      'p', 'e', 'n', 'h', 0, 1, 2, 3]) -> ExecutedCommand: pass
+
+    @command([AE("targets", True),
+              AE("item", True),
+              AE("max_count", True)])
+    @version(introduced="1.0.5.0")
+    def clear(self, targets: _BedrockPlayerTarget = BedrockSelector.s(),
+              item: str | None = None,
+              max_count: Annotated[int, Range(-1, Int.max)] = -1) -> ExecutedCommand: pass
+
+    @command([AE("player", True)])
+    @version(introduced="1.16.100.57")
+    def clearspawnpoint(self, player: _BedrockPlayerTarget = BedrockSelector.s()) -> ExecutedCommand: pass
+
+    @command([AE("begin"),
+              AE("end"),
+              AE("destination"),
+              SE([AE("mask_mode", True, options=['replace', 'masked']),
+                  AE("clone_mode", True, options=['force', 'move', 'normal'])],
+                 [AE("mask_mode", options=['filtered']),
+                  AE("clone_mode", options=['force', 'move', 'normal']),
+                  AE("tile_name"),
+                  SE([AE("tile_data")], [AE("block_states")])
+                  ])
+              ])
+    @version(introduced="0.16.0b1")
+    def clone(self, begin: BlockCoord,
+              end: BlockCoord,
+              destination: BlockCoord, *,
+              mask_mode: Literal['replace', 'masked', 'filtered'] = 'replace',
+              clone_mode: Literal['force', 'move', 'normal'] = 'normal',
+              tile_name: str | None = None,
+              tile_data: Annotated[int, Range(-1, 65535)] | None = None,
+              block_states: dict | None = None) -> ExecutedCommand: pass # TODO special handling for BlockStates syntax
+
+    @command([AE("server_uri")])
+    @version(introduced="v0.16.0b1")
+    def wsserver(self, server_uri: str) -> ExecutedCommand: pass
+    connect = wsserver
+
+    @command([])
+    @version(introduced="v0.16.0b1")
+    def wsserver_out(self) -> ExecutedCommand: pass
+    connect_out = wsserver_out
+
+    @command([AE("target"),
+              AE("amount"),
+              AE("cause", True),
+              SE([LE("entity"),
+                  AE("damager")],
+                 optional=True)])
+    @version(introduced="1.18.10.26")
+    def damage(self, target: _BedrockTarget,
+               amount: Annotated[int, Range(Int.min, Int.max)],
+               cause: Literal['all', 'anvil', 'block-explosion', 'charging', 'contact', 'drowning', 'enemy-attack',
+                              'enemy-explosion', 'fall', 'falling-block', 'fire', 'fire-tick'],
+               damager: _BedrockSingleTarget) -> ExecutedCommand: pass
+
 
 class JavaRawCommands(BaseRawCommands):
     """
@@ -326,3 +393,114 @@ class JavaRawCommands(BaseRawCommands):
                     style: Literal["notched_6", "notched_10", "notched_12", "notched_20", "progress"] | None = None,
                     value: Annotated[int, Range(0, Int.max)] | None = None,
                     visible: bool | None = None) -> ExecutedCommand: pass
+
+    @command([AE("player", True),
+              AE("item_name", True),
+              AE("data", True),
+              AE("max_count", True)])
+    @version(introduced="17w45a") # TODO old format
+    def clear(self, player: _JavaPlayerTarget = JavaSelector.s(),
+              item_name: str | None = None,
+              data: Annotated[int, Range(-1, Int.max)] = -1,
+              max_count: Annotated[int, Range(0, Int.max)] = -1) -> ExecutedCommand: pass
+
+    @command([AE("begin"),
+              AE("end"),
+              AE("destination"),
+              SE([AE("mask_mode", True, options=["replace", "masked"]),
+                  AE("clone_mode", True, options=["force", "move", "normal"])],
+                 [AE("mask_mode", options=["filtered"]),
+                  AE("filter_"),
+                  AE("clone_mode", True, options=["force", "move", "normal"])
+                  ])
+              ])
+    @version(introduced="14w03a")
+    def clone(self, begin: BlockCoord,
+              end: BlockCoord,
+              destination: BlockCoord, *,
+              mask_mode: Literal["replace", "masked", "filtered"] = "replace",
+              clone_mode: Literal["force", "move", "normal"] = "normal",
+              filter_: str | None = None) -> ExecutedCommand: pass
+
+    @command([SE([LE("block"), AE("block")],
+                 [LE("entity"), AE("entity")],
+                 [LE("storage"), AE("storage")]),
+              AE("path", True),
+              AE("scale", True)])
+    @version(introduced="17w45b")
+    def data_get(self, *,
+                 block: BlockCoord | None = None,
+                 entity: _JavaSingleTarget | None = None,
+                 storage: ResourceLocation | None = None,
+                 path: Path | None = None,
+                 scale: float | None = None) -> ExecutedCommand: pass
+
+    @command([SE([LE("block"), AE("block")],
+                 [LE("entity"), AE("entity")],
+                 [LE("storage"), AE("storage")]),
+              AE("nbt")])
+    @version(introduced="17w45b")
+    def data_merge(self, *,
+                   block: BlockCoord | None = None,
+                   entity: _JavaSingleTarget | None = None,
+                   storage: ResourceLocation | None = None,
+                   nbt: Compound) -> ExecutedCommand: pass
+
+    @command([SE([LE("block"), AE("target_block")],
+                 [LE("entity"), AE("target_entity")],
+                 [LE("storage"), AE("target_storage")]),
+              AE("target_path", True),
+              SE([AE("mode", options=['append', 'merge', 'prepend', 'set'])],
+                 [AE("mode", options=['insert']),
+                  AE("index")
+                  ]),
+              SE([LE("from"),
+                  SE([LE("block"), AE("source_block")],
+                     [LE("entity"), AE("source_entity")],
+                     [LE("storage"), AE("source_storage")]),
+                  AE("source_path", True)],
+                 [LE("value"), AE("value")])
+              ])
+    @version(introduced="18w43a")
+    def data_modify(self, *,
+                    target_block: BlockCoord | None = None,
+                    target_entity: _JavaSingleTarget | None = None,
+                    target_storage: ResourceLocation | None = None,
+                    target_path: Path,
+                    mode: Literal['append', 'insert', 'merge', 'prepend', 'set'],
+                    index: Annotated[int, Range(Int.min, Int.max)] | None = None,
+                    source_block: BlockCoord | None = None,
+                    source_entity: _JavaSingleTarget | None = None,
+                    source_storage: ResourceLocation | None = None,
+                    source_path: Path | None = None,
+                    value: NBT) -> ExecutedCommand: pass
+
+    @command([SE([LE("block"), AE("block")],
+                 [LE("entity"), AE("entity")],
+                 [LE("storage"), AE("storage")]),
+              AE("path")])
+    @version(introduced="17w45b")
+    def data_remove(self, *,
+                    block: BlockCoord | None = None,
+                    entity: _JavaSingleTarget | None = None,
+                    storage: ResourceLocation | None = None,
+                    path: ResourceLocation) -> ExecutedCommand: pass
+
+    @command([AE("name")])
+    @version(introduced="17w46a")
+    def datapack_disable(self, name: Annotated[str, Quoted, Regex(r"^[\w.+-]*$")]) -> ExecutedCommand: pass
+
+    @command([AE("name"),
+              SE([AE("priority", options=['first', 'last'])],
+                 [AE("priority", options=['before', 'after']),
+                  AE("existing")],
+                 optional=True)])
+    @version(introduced="17w46a")
+    def datapack_enable(self, name: Annotated[str, Quoted, Regex(r"^[\w.+-]*$")],
+                        priority: Literal['first', 'last', 'before', 'after'] | None = None,
+                        existing: Annotated[str, Quoted, Regex(r"^[\w.+-]*$")] | None = None) -> ExecutedCommand: pass
+
+    @command([AE("view", True, options=['available', 'enabled'])])
+    @version(introduced="17w46a")
+    def datapack_list(self, view: Literal['available', 'enabled'] | None = None) -> ExecutedCommand: pass
+
