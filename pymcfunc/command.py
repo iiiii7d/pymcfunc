@@ -113,8 +113,10 @@ _BedrockPlayerTarget: TypeAlias = Union[Annotated[str, PlayerName], Annotated[Be
 _BedrockSingleTarget: TypeAlias = Union[Annotated[str, PlayerName], Annotated[BedrockSelector, Player]]
 _BedrockTarget: TypeAlias = Union[Annotated[str, PlayerName], BedrockSelector]
 _BedrockSinglePlayerTarget: TypeAlias = Union[Annotated[str, PlayerName], Annotated[BedrockSelector, Single, Player]]
-_objective_regex = r"^[\w.+-]*$"
-_ObjectiveName: TypeAlias = Annotated[str, Regex(_objective_regex)]
+_java_objective_regex = r"^[\w.+-]*$"
+_bedrock_objective_regex = r"^[-:.\w]+$"
+_JavaObjectiveName: TypeAlias = Annotated[str, Regex(_java_objective_regex)]
+_BedrockObjectiveName: TypeAlias = Annotated[str, Regex(_bedrock_objective_regex), Quoted]
 
 class Command:
     order: list[Element]

@@ -9,7 +9,8 @@ from uuid import UUID
 from pymcfunc.advancements import Advancement
 from pymcfunc.command import ExecutedCommand, Command, SE, AE, Range, NoSpace, Element, Player, Regex, \
     PlayerName, LE, _JavaPlayerTarget, _JavaSingleTarget, ResourceLocation, RawJson, _BedrockSinglePlayerTarget, \
-    _BedrockPlayerTarget, _BedrockTarget, _BedrockSingleTarget, Quoted, _ObjectiveName, _JavaTarget
+    _BedrockPlayerTarget, _BedrockTarget, _BedrockSingleTarget, Quoted, _JavaObjectiveName, _JavaTarget, \
+    _BedrockObjectiveName
 from pymcfunc.coord import BlockCoord, Coord, Rotation, ChunkCoord
 from pymcfunc.errors import FutureCommandWarning, DeprecatedCommandWarning, EducationEditionWarning
 from pymcfunc.internal import base_class
@@ -566,6 +567,78 @@ class BedrockRawCommands(BaseRawCommands):
                                     tickingarea_name: Annotated[str, Quoted] | None = None,
                                     function: str) -> ExecutedCommand: pass # TODO Function class
 
+    @_command([])
+    @_version(introduced="1.7.0.2")
+    def scoreboard_objectives_list(self) -> ExecutedCommand: pass
+
+    @_command([AE("objective"), LE("dummy"), AE("display_name")])
+    @_version(introduced="1.7.0.2")
+    def scoreboard_objectives_add(self, objective: _BedrockObjectiveName,
+                                  display_name: _BedrockObjectiveName | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("objective")])
+    @_version(introduced="1.7.0.2")
+    def scoreboard_objectives_remove(self, objective: _BedrockObjectiveName) -> ExecutedCommand: pass
+
+    @_command([SE([AE("slot", options=['list', 'sidebar']),
+                   AE("objective", True),
+                   AE("sort_order", True)],
+                  [AE("slot", options=['belowname']),
+                   AE("objective", True)])
+               ])
+    @_version(introduced="1.7.0.2")
+    def scoreboard_objective_setdisplay(self, slot: Literal['list', 'sidebar', 'belowname'],
+                                        objective: _BedrockObjectiveName | None = None,
+                                        sort_order: Literal['ascending', 'descending'] | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("target", True)])
+    @_version(introduced="1.7.0.2")
+    def scoreboard_players_list(self, target: _BedrockTarget | Literal['*'] | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("target"), AE("objective"), AE("count")])
+    @_version(introduced="1.7.0.2")
+    def scoreboard_players_set(self, target: _BedrockTarget | Literal['*'],
+                               objective: _BedrockObjectiveName,
+                               count: int) -> ExecutedCommand: pass
+
+    @_command([AE("targets"), AE("objective"), AE("score")])
+    @_version(introduced="1.7.0.2")
+    def scoreboard_players_add(self, targets: _BedrockTarget | Literal['*'],
+                               objective: _BedrockObjectiveName,
+                               score: int) -> ExecutedCommand: pass
+
+    @_command([AE("targets"), AE("objective"), AE("score")])
+    @_version(introduced="1.7.0.2")
+    def scoreboard_players_remove(self, targets: _BedrockTarget | Literal['*'],
+                                  objective: _BedrockObjectiveName,
+                                  score: int) -> ExecutedCommand: pass
+
+    @_command([AE("targets"), AE("objective"), AE("min_"), AE("max_")])
+    @_version(introduced="1.7.0.2")
+    def scoreboard_players_random(self, targets: _BedrockTarget | Literal['*'],
+                                  objective: _BedrockObjectiveName,
+                                  min_: int, max_: int) -> ExecutedCommand: pass
+
+    @_command([AE("targets"), AE("objective", True)])
+    @_version(introduced="1.7.0.2")
+    def scoreboard_players_reset(self, targets: _BedrockTarget | Literal['*'],
+                                 objective: _BedrockObjectiveName | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("targets"), AE("objective"), AE("min_"), AE("max_", True)])
+    @_version(introduced="1.7.0.2")
+    def scoreboard_players_test(self, targets: _BedrockTarget | Literal['*'],
+                                objective: _BedrockObjectiveName,
+                                min_: int | Literal['*'],
+                                max_: int | Literal['*'] | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("targets"), AE("target_objective"), AE("operation"), AE("source"), AE("source_objective")])
+    @_version(introduced="1.7.0.2")
+    def scoreboard_players_operation(self, targets: _BedrockTarget | Literal['*'],
+                                     target_objective: _BedrockObjectiveName,
+                                     operation: Literal['=', '+=', '-=', '*=', '/=', '%=', '><', '<', '>'],
+                                     source: _BedrockTarget | Literal['*'],
+                                     source_object: _BedrockObjectiveName) -> ExecutedCommand: pass
+
 class JavaRawCommands(BaseRawCommands):
     """
     A container for raw Minecraft commands that are specially for Java Edition.
@@ -665,7 +738,7 @@ class JavaRawCommands(BaseRawCommands):
                            attribute: ResourceLocation,
                            mode: Literal["add", "remove", "value get"], *,
                            uuid: UUID | None = None,
-                           name: _ObjectiveName | None = None,
+                           name: _JavaObjectiveName | None = None,
                            value: float | None = None,
                            add_mode: Literal["add", "multiply", "multiply_base"] | None = None,
                            scale: float | None = None) -> ExecutedCommand: pass
@@ -683,7 +756,7 @@ class JavaRawCommands(BaseRawCommands):
         AE("message", True)
     ], cmd_name="ban-ip")
     @_version(introduced="a1.0.16")
-    def ban_ip(self, targets: _ObjectiveName | Annotated[JavaSelector, Player],
+    def ban_ip(self, targets: _JavaObjectiveName | Annotated[JavaSelector, Player],
                message: str = "Banned by an operator.") -> ExecutedCommand: pass
 
     @_command([AE("view", True)])
@@ -1072,10 +1145,10 @@ class JavaRawCommands(BaseRawCommands):
                           AE("range_")])])
         def if_score(self, *,
                      target: _JavaTarget | Literal['*'],
-                     target_objective: _ObjectiveName,
+                     target_objective: _JavaObjectiveName,
                      comparator: Literal["<", "<=", "=", ">=", ">", "matches"],
                      source: _JavaTarget | Literal['*'] = None,
-                     source_objective: _ObjectiveName | None = None,
+                     source_objective: _JavaObjectiveName | None = None,
                      range_: FloatRange | None = None) -> Self: pass
 
         @_check_run
@@ -1088,10 +1161,10 @@ class JavaRawCommands(BaseRawCommands):
                           AE("range_")])])
         def unless_score(self, *,
                          target: _JavaTarget | Literal['*'],
-                         target_objective: _ObjectiveName,
+                         target_objective: _JavaObjectiveName,
                          comparator: Literal["<", "<=", "=", ">=", ">", "matches"],
                          source: _JavaTarget | Literal['*'] = None,
-                         source_objective: _ObjectiveName | None = None,
+                         source_objective: _JavaObjectiveName | None = None,
                          range_: FloatRange | None = None) -> Self: pass
 
         @_check_run
@@ -1145,12 +1218,12 @@ class JavaRawCommands(BaseRawCommands):
         @_check_run
         @_subcommand([AE("targets"), AE("objective")])
         def store_result_score(self, targets: _JavaTarget | Literal['*'],
-                               objective: _ObjectiveName) -> Self: pass
+                               objective: _JavaObjectiveName) -> Self: pass
 
         @_check_run
         @_subcommand([AE("targets"), AE("objective")])
         def store_success_score(self, targets: _JavaTarget | Literal['*'],
-                                objective: _ObjectiveName) -> Self: pass
+                                objective: _JavaObjectiveName) -> Self: pass
 
         @_check_run
         @_subcommand([AE("target"),
@@ -1363,7 +1436,7 @@ class JavaRawCommands(BaseRawCommands):
 
     @_command([AE("target")], cmd_name="pardon-ip")
     @_version(introduced="1.0.16")
-    def pardon_ip(self, target: _ObjectiveName) -> ExecutedCommand: pass
+    def pardon_ip(self, target: _JavaObjectiveName) -> ExecutedCommand: pass
 
     @_command([AE("name"),
                AE("pos", True),
@@ -1457,35 +1530,75 @@ class JavaRawCommands(BaseRawCommands):
     def schedule_clear(self, function: ResourceLocation) -> ExecutedCommand: pass
 
     @_command([])
-    @_version(introduced="")
+    @_version(introduced="13w04a")
     def scoreboard_objectives_list(self) -> ExecutedCommand: pass
 
     @_command([AE("objective"), AE("criteria"), AE("display_name")])
-    @_version(introduced="")
-    def scoreboard_objectives_add(self, objective: _ObjectiveName,
+    @_version(introduced="13w04a")
+    def scoreboard_objectives_add(self, objective: _JavaObjectiveName,
                                   criteria: str,
                                   display_name: RawJson | None = None) -> ExecutedCommand: pass
 
     @_command([AE("objective")])
-    @_version(introduced="")
-    def scoreboard_objectives_remove(self, objective: _ObjectiveName) -> ExecutedCommand: pass
+    @_version(introduced="13w04a")
+    def scoreboard_objectives_remove(self, objective: _JavaObjectiveName) -> ExecutedCommand: pass
 
     @_command([AE("slot"), AE("objective", True)])
-    @_version(introduced="")
+    @_version(introduced="13w04a")
     def scoreboard_objective_setdisplay(self, slot: Literal['list', 'sidebar', 'belowname'],
-                                        objective: _ObjectiveName | None = None) -> ExecutedCommand: pass
+                                        objective: _JavaObjectiveName | None = None) -> ExecutedCommand: pass
 
     @_command([AE("objective"),
                SE([LE("displayname"), AE("display_name")],
                   [LE("rendertype"), AE("render_type")])
                ])
-    @_version(introduced="")
-    def scoreboard_objectives_modify(self, objective: _ObjectiveName,
+    @_version(introduced="1.13pre7")
+    def scoreboard_objectives_modify(self, objective: _JavaObjectiveName,
                                      display_name: RawJson | None = None,
                                      render_type: Literal['hearts', 'integer'] | None = None) -> ExecutedCommand: pass
 
     @_command([AE("target", True)])
-    @_version(introduced="")
+    @_version(introduced="13w04a")
     def scoreboard_players_list(self, target: _JavaTarget | None = None) -> ExecutedCommand: pass
 
-    # TODO more
+    @_command([AE("target"), AE("objective")])
+    @_version(introduced="13w04a")
+    def scoreboard_players_get(self, target: _JavaSingleTarget,
+                               objective: _JavaObjectiveName) -> ExecutedCommand: pass
+
+    @_command([AE("target"), AE("objective"), AE("score")])
+    @_version(introduced="13w04a")
+    def scoreboard_players_set(self, target: _JavaTarget | Literal['*'],
+                               objective: _JavaObjectiveName,
+                               score: int) -> ExecutedCommand: pass
+
+    @_command([AE("targets"), AE("objective"), AE("score")])
+    @_version(introduced="13w04a")
+    def scoreboard_players_add(self, targets: _JavaTarget | Literal['*'],
+                               objective: _JavaObjectiveName,
+                               score: Annotated[int, Range(0, Int.max)]) -> ExecutedCommand: pass
+
+    @_command([AE("targets"), AE("objective"), AE("score")])
+    @_version(introduced="13w04a")
+    def scoreboard_players_remove(self, targets: _JavaTarget | Literal['*'],
+                                  objective: _JavaObjectiveName,
+                                  score: Annotated[int, Range(0, Int.max)]) -> ExecutedCommand: pass
+
+    @_command([AE("targets"), AE("objective", True)])
+    @_version(introduced="13w04a")
+    def scoreboard_players_reset(self, targets: _JavaTarget | Literal['*'],
+                                 objective: _JavaObjectiveName | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("targets"), AE("objective")])
+    @_version(introduced="")
+    def scoreboard_players_enable(self, targets: _JavaTarget | Literal['*'],
+                                  objective: _JavaObjectiveName) -> ExecutedCommand: pass
+
+    @_command([AE("targets"), AE("target_objective"), AE("operation"), AE("source"), AE("source_objective")])
+    @_version(introduced="13w04a")
+    def scoreboard_players_operation(self, targets: _JavaTarget | Literal['*'],
+                                     target_objective: _JavaObjectiveName,
+                                     operation: Literal['=', '+=', '-=', '*=', '/=', '%=', '><', '<', '>'],
+                                     source: _JavaTarget | Literal['*'],
+                                     source_objective: _JavaObjectiveName) -> ExecutedCommand: pass
+
