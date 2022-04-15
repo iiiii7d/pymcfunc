@@ -11,7 +11,7 @@ from uuid import UUID
 from pymcfunc.errors import MultipleBranchesSatisfiedError, MissingError, MissingArgumentError
 
 if TYPE_CHECKING: from pymcfunc.func_handler import BaseFunctionHandler
-if TYPE_CHECKING: from pymcfunc.raw_commands import BaseRawCommands
+if TYPE_CHECKING: from pymcfunc.raw_commands import BaseRawCommands, JavaRawCommands
 from pymcfunc.selectors import BaseSelector, JavaSelector, BedrockSelector
 
 # for eval
@@ -132,7 +132,7 @@ class Command:
             cmd.fh = fh
             cmd.func = func
             cmd.name = cmd_name or func.__name__.split("_")[0]
-            cmd.segment_name = segment_name or func.__name__.replace("_", " ")
+            cmd.segment_name = segment_name or func.__name__.replace("_", " ").strip()
             cmd.arg_namelist = []
             for name, arg in inspect.signature(func).parameters.items():
                 if name == "self": pass
@@ -147,8 +147,13 @@ class Command:
         for i, arg in enumerate(args):
             kwargs[self.arg_namelist[i]] = arg
 
-        cmd = ExecutedCommand(self.fh, self.name, self._process_arglist(kwargs))
-        self.fh.commands.append(cmd)
+        cmd_string, subcmd_obj = self._process_arglist(kwargs)
+        cmd = ExecutedCommand(self.fh, self.name, cmd_string)
+        if subcmd_obj:
+            subcmd_obj.name = self.name
+            subcmd_obj.cmd_string = cmd_string
+        else:
+            self.fh.commands.append(cmd)
         return cmd
 
     def syntax(self, root: bool = True) -> str:
@@ -176,8 +181,9 @@ class Command:
                 if element.optional: syntax[-1] = "[" + syntax[-1] + "]"
         return " ".join(syntax)
 
-    def _process_arglist(self, args: dict[str, Any], root: bool = True):
+    def _process_arglist(self, args: dict[str, Any], root: bool = True) -> tuple[str, ExecutedCommand | None]:
         command = [self.segment_name] if root else []
+        subcmd_obj = None
         defaults_queue = []
         prev_element_name = ""
         prev_default_element_name = ""
@@ -205,6 +211,15 @@ class Command:
                     raise ValueError(
                         f"Value for argument `{element.name}` not in {', '.join(element.options)} (Got `{value}`)`")
                 if isinstance(value, bool): value = "true" if value else "false"
+
+                if isinstance(value, ExecutedCommand):
+                    subcmd_obj = value
+                    value = value.command_string
+
+                if 'ExecuteSubcommandHandler' in type(value).__name__:
+                    subcmd_obj = value.prev_obj
+                    value = value.command_string
+
                 if element.default == value:
                     if len(defaults_queue) > 0 and defaults_queue[-1] is None:
                         raise MissingError(prev_default_element_name, element.name)
@@ -251,10 +266,10 @@ class Command:
                         f"Multiple branches were satisfied. It is unclear which branch is intended.\n\n{satisfied_params_string}")
                 if len(possible_branches) == 1:
                     command.extend(defaults_queue)
-                    command.append(possible_branches[0][1])
+                    command.append(possible_branches[0][1][0])
                     try: prev_element_name = satisfied_params[0][-1]
                     except Exception: pass
-        return " ".join(command)
+        return " ".join(command), subcmd_obj
 
     _T = TypeVar("_T")
     @staticmethod

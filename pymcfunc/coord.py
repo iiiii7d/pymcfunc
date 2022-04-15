@@ -5,6 +5,7 @@ from typing import Union
 
 from typing_extensions import TypeAlias, Self
 
+from pymcfunc.errors import RangeError
 from pymcfunc.internal import immutable
 
 _FloatCoord: TypeAlias = Union[float, str]
@@ -98,3 +99,18 @@ class ChunkCoord:
     @classmethod
     def at_executor(cls) -> Self:
         return cls("~", "~")
+
+@immutable
+class Rotation:
+    yaw: _FloatCoord
+    pitch: _FloatCoord
+    def __init__(self, yaw: _FloatCoord, pitch: _FloatCoord):
+        for name, c in [('yaw', yaw), ('pitch', pitch)]:
+            if re.search(r"^~?(-?\d*(?:\.\d+)?)$", str(c)) is None:
+                raise ValueError(f"Coordinate {name} invalid (Got {c})")
+            if name == 'yaw' and not (-180 <= float(c.removeprefix("~")) <= 180):
+                raise RangeError(f"Yaw must be -180 <= yaw <= 180")
+            if name == 'pitch' and not (-90 <= float(c.removeprefix("~")) <= 90):
+                raise RangeError(f"Pitch must be -90 <= pitch <= 90")
+        self.yaw = yaw
+        self.pitch = pitch
