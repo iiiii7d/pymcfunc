@@ -109,6 +109,7 @@ ResourceLocation: TypeAlias = str
 _JavaTarget: TypeAlias = Union[JavaSelector, Annotated[str, PlayerName], UUID]
 _JavaPlayerTarget: TypeAlias = Union[Annotated[str, PlayerName], UUID, Annotated[JavaSelector, Player]]
 _JavaSingleTarget: TypeAlias = Union[Annotated[str, PlayerName], UUID, Annotated[JavaSelector, Single]]
+_JavaSinglePlayerTarget: TypeAlias = Union[Annotated[str, PlayerName], UUID, Annotated[JavaSelector, Single, Player]]
 _BedrockPlayerTarget: TypeAlias = Union[Annotated[str, PlayerName], Annotated[BedrockSelector, Player]]
 _BedrockSingleTarget: TypeAlias = Union[Annotated[str, PlayerName], Annotated[BedrockSelector, Player]]
 _BedrockTarget: TypeAlias = Union[Annotated[str, PlayerName], BedrockSelector]

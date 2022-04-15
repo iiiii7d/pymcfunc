@@ -13,6 +13,9 @@ _IntCoord: TypeAlias = Union[int, str]
 _FloatIntCoord: TypeAlias = Union[Union[int, float], str]
 
 @immutable
+class Coord2d: pass
+
+@immutable
 class Coord:
     x: _FloatCoord
     y: _FloatCoord
