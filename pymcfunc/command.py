@@ -106,12 +106,15 @@ class NoSpace(Annotation):
 
 RawJson: TypeAlias = Union[dict, list]
 ResourceLocation: TypeAlias = str
+_JavaTarget: TypeAlias = Union[JavaSelector, Annotated[str, PlayerName], UUID]
 _JavaPlayerTarget: TypeAlias = Union[Annotated[str, PlayerName], UUID, Annotated[JavaSelector, Player]]
 _JavaSingleTarget: TypeAlias = Union[Annotated[str, PlayerName], UUID, Annotated[JavaSelector, Single]]
 _BedrockPlayerTarget: TypeAlias = Union[Annotated[str, PlayerName], Annotated[BedrockSelector, Player]]
 _BedrockSingleTarget: TypeAlias = Union[Annotated[str, PlayerName], Annotated[BedrockSelector, Player]]
 _BedrockTarget: TypeAlias = Union[Annotated[str, PlayerName], BedrockSelector]
 _BedrockSinglePlayerTarget: TypeAlias = Union[Annotated[str, PlayerName], Annotated[BedrockSelector, Single, Player]]
+_objective_regex = r"^[\w.+-]*$"
+_ObjectiveName: TypeAlias = Annotated[str, Regex(_objective_regex)]
 
 class Command:
     order: list[Element]

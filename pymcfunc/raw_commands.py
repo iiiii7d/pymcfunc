@@ -9,7 +9,7 @@ from uuid import UUID
 from pymcfunc.advancements import Advancement
 from pymcfunc.command import ExecutedCommand, Command, SE, AE, Range, NoSpace, Element, Player, Regex, \
     PlayerName, LE, _JavaPlayerTarget, _JavaSingleTarget, ResourceLocation, RawJson, _BedrockSinglePlayerTarget, \
-    _BedrockPlayerTarget, _BedrockTarget, _BedrockSingleTarget, Quoted
+    _BedrockPlayerTarget, _BedrockTarget, _BedrockSingleTarget, Quoted, _ObjectiveName, _JavaTarget
 from pymcfunc.coord import BlockCoord, Coord, Rotation, ChunkCoord
 from pymcfunc.errors import FutureCommandWarning, DeprecatedCommandWarning, EducationEditionWarning
 from pymcfunc.internal import base_class
@@ -91,7 +91,7 @@ class BedrockRawCommands(BaseRawCommands):
     @staticmethod
     def _version(introduced: Optional[str]=None, deprecated: Optional[str]=None, temp_removed: Optional[Tuple[str, str]]=None):
         return _base_version(BedrockVersion, introduced, deprecated, temp_removed)
-    
+
     @_command([
         SE([AE("cmd")],
            [AE("page", True)])
@@ -317,6 +317,255 @@ class BedrockRawCommands(BaseRawCommands):
     @_version(introduced="a1.0.5.0")
     def gamerule(self, rule: Annotated[str, NoSpace], value: int | bool | None = None) -> ExecutedCommand: pass
 
+    @_command([SE([AE("mode", options=['runthis', 'pos', 'runthese'])],
+                  [AE("mode", options=['run']),
+                   AE("test_name"),
+                   AE("rotation_steps", True)],
+                  [AE("mode", options=['runset']),
+                   AE("tag", True),
+                   AE("rotation_steps", True)],
+                  [AE("mode", options=['create']),
+                   AE("test_name"),
+                   AE("width"),
+                   AE("height"),
+                   AE("depth")],
+                  [AE("mode", options=['clearall']),
+                   AE("radius", True)])
+               ])
+    @_version(introduced="1.16.210.60")
+    def gametest(self, mode: Literal['runthis', 'pos', 'runthese', 'run', 'runset', 'create', 'clearall'], *,
+                 test_name: Annotated[str, NoSpace] | None = None,
+                 rotation_steps: int | None = None,
+                 tag: Annotated[str, NoSpace] | None = None,
+                 radius: int | None = None,
+                 width: int | None = None,
+                 height: int | None = None,
+                 depth: int | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("player"),
+               AE("item"),
+               AE("amount", True),
+               AE("data", True),
+               AE("components", True)])
+    @_version(introduced="0.16.0b1")
+    def give(self, player: _BedrockPlayerTarget,
+             item: str,
+             amount: Annotated[int, Range(1, 32767)] = 1,
+             data: Annotated[int, Range(0, 32767)] = 0,
+             components: dict | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("value", True)])
+    @_education_edition
+    @_version(introduced="1.2.0.2")
+    def immutableworld(self, value: bool | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("targets"), AE("reason")])
+    @_version(introduced="1.16.0.57")
+    def kick(self, targets: _BedrockPlayerTarget,
+             reason: str = "Kicked by an operator") -> ExecutedCommand: pass
+
+    @_command([AE("targets", True)])
+    @_version(introduced="0.16.0b1")
+    def kill(self, targets: _BedrockTarget = BedrockSelector.s()) -> ExecutedCommand: pass
+
+    @_command([])
+    @_version(introduced="1.0.16_02")
+    def list(self) -> ExecutedCommand: pass
+
+    @_command([AE("structure")])
+    @_version(introduced="a0.17.0.1", temp_removed=("a0.17.0.2", "a1.0.0.0"))
+    def locate(self, structure: Annotated[str, NoSpace]) -> ExecutedCommand: pass
+
+    @_command([SE([LE("give"), AE("give_player")],
+                  [LE("spawn"), AE("spawn_position")]),
+               SE([LE("kill"), AE("kill_entity")],
+                  [LE("loot"), AE("loot_table")]),
+               AE("tool", True)])
+    @_version(introduced="1.18.0.21", temp_removed=("1.18.0.22", "1.18.10.21"))
+    def loot(self, *,
+             give_player: _BedrockSinglePlayerTarget | None = None,
+             spawn_position: Coord | None = None,
+             kill_entity: _BedrockSingleTarget | None = None,
+             loot_table: ResourceLocation | None = None, # TODO LootTable
+             tool: str | Literal['mainhand', 'offhand'] | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("message")])
+    @_version(introduced="a1.0.5.0")
+    def me(self, message: str) -> ExecutedCommand: pass
+
+    @_command([AE("event"), AE("value", True)])
+    @_version(introduced="b1.11.0.3")
+    def mobevent(self, event: Literal['minecraft:pillager_patrols_event',
+                                      'minecraft:wandering_trader_event',
+                                      'events_enabled'],
+                 value: bool | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("targets"), AE("message")])
+    @_version(introduced="0.16.0b1")
+    def msg(self, targets: _BedrockPlayerTarget, message: str) -> ExecutedCommand: pass
+    w = tell = msg
+
+    @_command([SE([AE("action", options=['play', 'queue']),
+                   AE("track_name"),
+                   AE("volume", True),
+                   AE("fade_seconds", True),
+                   AE("repeat_mode", True)],
+                  [AE("action", options=['stop']),
+                   AE("fade_seconds", True)],
+                  [AE("action", options=['volume']),
+                   AE("volume")])
+               ])
+    @_version(introduced="1.16.100.58")
+    def music(self, action: Literal['play', 'queue', 'stop', 'volume'], *,
+              track_name: Annotated[str, Quoted] | None = None,
+              volume: Annotated[float, Range(0, 1)] | None = None,
+              fade_seconds: Annotated[float, Range(0, 10)] | None = None,
+              repeat_mode: Literal['loop', 'play_once'] = 'play_once') -> ExecutedCommand: pass
+
+    @_command([AE("player")])
+    @_version(introduced="0.16.0b1")
+    def op(self, player: _BedrockPlayerTarget) -> ExecutedCommand: pass
+    
+    @_command([AE("action")])
+    def ops(self, action: Literal['list', 'reload']) -> ExecutedCommand: pass
+    permission = ops
+
+    @_command([AE("effect"), AE("position")])
+    @_version(introduced="a1.0.5.0", temp_removed=("a1.0.5.3", "b1.8.0.8"))
+    def particle(self, effect: Annotated[str, Quoted], position: Coord) -> ExecutedCommand: pass
+
+    @_command([AE("entity"),
+               AE("animation"),
+               AE("next_state", True),
+               AE("blend_out_time", True),
+               AE("stop_expression", True),
+               AE("controller", True)])
+    @_version(introduced="1.16.100.52")
+    def playanimation(self, entity: Annotated[str, PlayerName] | BedrockSelector,
+                      animation: Annotated[str, Quoted, Regex(r".*(?<!\.v1\.0)$")],
+                      next_state: Annotated[str, Quoted, Regex(r".*(?<!\.v1\.0)$")] | None = None,
+                      blend_out_time: float = None,
+                      stop_expression: Annotated[str, Quoted] | None = None, # TODO MoLang
+                      controller: Annotated[str, Quoted] | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("sound"),
+               AE("player", True),
+               AE("position", True),
+               AE("volume", True),
+               AE("pitch", True),
+               AE("minimum_volume", True)])
+    @_version(introduced="a1.0.5.0")
+    def playsound(self, sound: Annotated[str, Quoted],
+                  player: _BedrockPlayerTarget | None = None,
+                  position: Coord | None = None,
+                  volume: float = 1.0,
+                  pitch: float = 1.0,
+                  minimum_volume: float = 0.0) -> ExecutedCommand: pass
+
+    @_command([])
+    @_version(introduced="b1.8.0.8")
+    def reload(self) -> ExecutedCommand: pass
+
+    @_command([AE("target")])
+    @_education_edition
+    def remove(self, target: BedrockSelector) -> ExecutedCommand: pass
+
+    @_command([SE([LE("block"),
+                   AE("block"),
+                   LE("slot.container"),
+                   AE("slot_id")],
+                  [LE("entity"),
+                   AE("entity"),
+                   AE("slot_type"),
+                   AE("slot_id")]),
+               AE("replace_mode", True),
+               AE("item_name"),
+               AE("amount", True),
+               AE("data", True),
+               AE("components", True)])
+    @_version(introduced="a1.0.5.0")
+    def replaceitem(self, block: Coord,
+                    entity: _BedrockTarget, *,
+                    slot_type: Annotated[str, NoSpace] | None = None,
+                    slot_id: Annotated[int, Range(Int.min, Int.max)],
+                    replace_mode: Literal['destroy', 'keep'] | None = None,
+                    item_name: str,
+                    amount: Annotated[int, Range(1, 64)] = 1,
+                    data: Annotated[int, Range(Int.min, Int.max)] = 0,
+                    components: dict) -> ExecutedCommand: pass
+    
+    @_command([AE("riders"),
+               LE("start_riding"),
+               AE("ride"),
+               AE("teleport_rules", True),
+               AE("fill_type", True)],
+              segment_name="ride")
+    @_version(introduced="1.16.100.52")
+    def ride_start_riding(self, riders: _BedrockTarget,
+                          ride: _BedrockSingleTarget,
+                          teleport_rules: Literal['teleport_ride', 'teleport_rider'] = 'teleport_rider',
+                          fill_type: Literal['if_group_fits', 'until_full'] = 'until_full') -> ExecutedCommand: pass
+
+    @_command([AE("riders"),
+               LE("stop_riding")],
+              segment_name="ride")
+    @_version(introduced="1.16.100.52")
+    def ride_stop_riding(self, riders: _BedrockTarget) -> ExecutedCommand: pass
+
+    @_command([AE("rides"),
+               LE("evict_riders")],
+              segment_name="ride")
+    @_version(introduced="1.16.100.52")
+    def ride_evict_riders(self, rides: _BedrockTarget) -> ExecutedCommand: pass
+
+    @_command([AE("rides"),
+               LE("summon_rider"),
+               AE("entity_type"),
+               AE("spawn_event", True),
+               AE("name_tag", True)],
+              segment_name="ride")
+    @_version(introduced="1.16.100.52")
+    def ride_summon_rider(self, rides: _BedrockTarget,
+                          entity_type: str,
+                          spawn_event: Annotated[str, Quoted] | None = None, # TODO spawn event
+                          name_tag: Annotated[str, Quoted] | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("riders"),
+               LE("summon_ride"),
+               AE("entity_type"),
+               AE("ride_rules", True),
+               AE("spawn_event", True),
+               AE("name_tag", True)
+               ])
+    @_version(introduced="1.16.100.52")
+    def ride_summon_ride(self, riders: _BedrockTarget,
+                         entity_type: str,
+                         ride_rules: Literal['skip_riders', 'no_ride_change', 'reassign_rides'] = 'reassign_rides',
+                         spawn_event: Annotated[str, Quoted] | None = None,  # TODO spawn event
+                         name_tag: Annotated[str, Quoted] | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("action")])
+    @_version(introduced="1.6.1")
+    def save(self, action: Literal['hold', 'query', 'resume']) -> ExecutedCommand: pass
+
+    @_command([AE("message")])
+    @_version(introduced="0.16.0b1")
+    def say(self, message: str) -> ExecutedCommand: pass
+
+    @_command([SE([AE("cuboid_from"), AE("cuboid_to")],
+                  [LE("circle"), AE("circle_center"), AE("circle_radius")],
+                  [LE("tickingarea"), AE("tickingarea_name")]),
+               AE("function")],
+              segment_name="schedule on_area_loaded add")
+    @_version(introduced="1.16.100.59")
+    def schedule_on_area_loaded_add(self, *,
+                                    cuboid_from: Coord | None = None,
+                                    cuboid_to: Coord | None = None,
+                                    circle_center: Coord | None = None,
+                                    circle_radius: Annotated[int, Range(0, Int.max)] | None = None,
+                                    tickingarea_name: Annotated[str, Quoted] | None = None,
+                                    function: str) -> ExecutedCommand: pass # TODO Function class
+
 class JavaRawCommands(BaseRawCommands):
     """
     A container for raw Minecraft commands that are specially for Java Edition.
@@ -416,7 +665,7 @@ class JavaRawCommands(BaseRawCommands):
                            attribute: ResourceLocation,
                            mode: Literal["add", "remove", "value get"], *,
                            uuid: UUID | None = None,
-                           name: Annotated[str, Regex(r"^[\w.+-]*$")] | None = None,
+                           name: _ObjectiveName | None = None,
                            value: float | None = None,
                            add_mode: Literal["add", "multiply", "multiply_base"] | None = None,
                            scale: float | None = None) -> ExecutedCommand: pass
@@ -434,7 +683,7 @@ class JavaRawCommands(BaseRawCommands):
         AE("message", True)
     ], cmd_name="ban-ip")
     @_version(introduced="a1.0.16")
-    def ban_ip(self, targets: Annotated[str, Regex(r"^[\w.+-]*$")] | Annotated[JavaSelector, Player],
+    def ban_ip(self, targets: _ObjectiveName | Annotated[JavaSelector, Player],
                message: str = "Banned by an operator.") -> ExecutedCommand: pass
 
     @_command([AE("view", True)])
@@ -618,7 +867,7 @@ class JavaRawCommands(BaseRawCommands):
     @_command([AE("targets", True),
               AE("effect", True)])
     @_version(introduced="1.6.1pre")
-    def effect_clear(self, targets: JavaSelector | Annotated[str, PlayerName] | UUID | None = None,
+    def effect_clear(self, targets: _JavaTarget | None = None,
                      effect: str | None = None) -> ExecutedCommand: pass
 
     @_command([AE("targets"),
@@ -627,7 +876,7 @@ class JavaRawCommands(BaseRawCommands):
               AE("amplifier", True),
               AE("hide_particles", True)])
     @_version(introduced="13w09b")
-    def effect_clear(self, targets: JavaSelector | Annotated[str, PlayerName] | UUID,
+    def effect_clear(self, targets: _JavaTarget,
                      effect: str,
                      seconds: Annotated[int, Range(0, 1000000)] | None = None,
                      amplifier: Annotated[int, Range(0, 255)] = 0,
@@ -719,11 +968,11 @@ class JavaRawCommands(BaseRawCommands):
 
         @_check_run
         @_subcommand([AE("targets")])
-        def as_(self, targets: JavaSelector | Annotated[str, PlayerName] | UUID) -> Self: pass
+        def as_(self, targets: _JavaTarget) -> Self: pass
 
         @_check_run
         @_subcommand([AE("targets")])
-        def at(self, targets: JavaSelector | Annotated[str, PlayerName] | UUID) -> Self: pass
+        def at(self, targets: _JavaTarget) -> Self: pass
 
         @_check_run
         @_subcommand([AE("pos")], segment_name="facing")
@@ -731,7 +980,7 @@ class JavaRawCommands(BaseRawCommands):
 
         @_check_run
         @_subcommand([AE("targets"), AE("anchor")])
-        def facing_entity(self, targets: JavaSelector | Annotated[str, PlayerName] | UUID,
+        def facing_entity(self, targets: _JavaTarget,
                           anchor: Literal['eyes', 'feet']) -> Self: pass
 
         @_check_run
@@ -744,7 +993,7 @@ class JavaRawCommands(BaseRawCommands):
 
         @_check_run
         @_subcommand([AE("targets")], segment_name="positioned as")
-        def positioned_entity(self, targets: JavaSelector | Annotated[str, PlayerName] | UUID) -> Self: pass
+        def positioned_entity(self, targets: _JavaTarget) -> Self: pass
 
         @_check_run
         @_subcommand([AE("rotation")])
@@ -752,7 +1001,7 @@ class JavaRawCommands(BaseRawCommands):
 
         @_check_run
         @_subcommand([AE("targets")])
-        def rotated_as(self, targets: JavaSelector | Annotated[str, PlayerName] | UUID) -> Self: pass
+        def rotated_as(self, targets: _JavaTarget) -> Self: pass
 
         @_check_run
         @_subcommand([AE("pos"), AE("block")])
@@ -799,11 +1048,11 @@ class JavaRawCommands(BaseRawCommands):
                         path: Path) -> Self: pass
         @_check_run
         @_subcommand([AE("targets")])
-        def if_entity(self, targets: JavaSelector | Annotated[str, PlayerName] | UUID): pass
+        def if_entity(self, targets: _JavaTarget): pass
 
         @_check_run
         @_subcommand([AE("targets")])
-        def unless_entity(self, targets: JavaSelector | Annotated[str, PlayerName] | UUID): pass
+        def unless_entity(self, targets: _JavaTarget): pass
 
         @_check_run
         @_subcommand([AE("predicate")])
@@ -822,11 +1071,11 @@ class JavaRawCommands(BaseRawCommands):
                          [AE("comparator", options=["matches"]),
                           AE("range_")])])
         def if_score(self, *,
-                     target: JavaSelector | Annotated[str, PlayerName] | UUID | Literal['*'],
-                     target_objective: Annotated[str, Regex(r"^[\w.+-]*$")],
+                     target: _JavaTarget | Literal['*'],
+                     target_objective: _ObjectiveName,
                      comparator: Literal["<", "<=", "=", ">=", ">", "matches"],
-                     source: JavaSelector | Annotated[str, PlayerName] | UUID | Literal['*'] = None,
-                     source_objective: Annotated[str, Regex(r"^[\w.+-]*$")] | None = None,
+                     source: _JavaTarget | Literal['*'] = None,
+                     source_objective: _ObjectiveName | None = None,
                      range_: FloatRange | None = None) -> Self: pass
 
         @_check_run
@@ -838,11 +1087,11 @@ class JavaRawCommands(BaseRawCommands):
                          [AE("comparator", options=["matches"]),
                           AE("range_")])])
         def unless_score(self, *,
-                         target: JavaSelector | Annotated[str, PlayerName] | UUID | Literal['*'],
-                         target_objective: Annotated[str, Regex(r"^[\w.+-]*$")],
+                         target: _JavaTarget | Literal['*'],
+                         target_objective: _ObjectiveName,
                          comparator: Literal["<", "<=", "=", ">=", ">", "matches"],
-                         source: JavaSelector | Annotated[str, PlayerName] | UUID | Literal['*'] = None,
-                         source_objective: Annotated[str, Regex(r"^[\w.+-]*$")] | None = None,
+                         source: _JavaTarget | Literal['*'] = None,
+                         source_objective: _ObjectiveName | None = None,
                          range_: FloatRange | None = None) -> Self: pass
 
         @_check_run
@@ -878,7 +1127,7 @@ class JavaRawCommands(BaseRawCommands):
                       AE("path"),
                       AE("type_"),
                       AE("scale")])
-        def store_result_entity(self, target: JavaSelector | Annotated[str, PlayerName] | UUID,
+        def store_result_entity(self, target: _JavaTarget,
                                 path: Path,
                                 type_: Literal["byte", "short", "int", "long", "float", "double"],
                                 scale: float) -> Self: pass
@@ -888,20 +1137,20 @@ class JavaRawCommands(BaseRawCommands):
                       AE("path"),
                       AE("type_"),
                       AE("scale")])
-        def store_success_entity(self, target: JavaSelector | Annotated[str, PlayerName] | UUID,
+        def store_success_entity(self, target: _JavaTarget,
                                  path: Path,
                                  type_: Literal["byte", "short", "int", "long", "float", "double"],
                                  scale: float) -> Self: pass
 
         @_check_run
         @_subcommand([AE("targets"), AE("objective")])
-        def store_result_score(self, targets: JavaSelector | Annotated[str, PlayerName] | UUID | Literal['*'],
-                               objective: Annotated[str, Regex(r"^[\w.+-]*$")]) -> Self: pass
+        def store_result_score(self, targets: _JavaTarget | Literal['*'],
+                               objective: _ObjectiveName) -> Self: pass
 
         @_check_run
         @_subcommand([AE("targets"), AE("objective")])
-        def store_success_score(self, targets: JavaSelector | Annotated[str, PlayerName] | UUID | Literal['*'],
-                                objective: Annotated[str, Regex(r"^[\w.+-]*$")]) -> Self: pass
+        def store_success_score(self, targets: _JavaTarget | Literal['*'],
+                                objective: _ObjectiveName) -> Self: pass
 
         @_check_run
         @_subcommand([AE("target"),
@@ -971,3 +1220,272 @@ class JavaRawCommands(BaseRawCommands):
     @_command([AE("rule"), AE("value", True)])
     @_version(introduced="12w32a")
     def gamerule(self, rule: Annotated[str, NoSpace], value: int | bool | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("target"), AE("item"), AE("count", True)])
+    @_version(introduced="a1.0.15")
+    def give(self, target: _JavaPlayerTarget,
+             item: str,
+             count: Annotated[int, Range(1, Int.max)] = 1) -> ExecutedCommand: pass
+
+    @_command([SE([LE("block"), AE("block")],
+                  [LE("entity"), AE("entity")]),
+               AE("slot"),
+               AE("modifier")])
+    @_version(introduced="20w46a")
+    def item_modify(self, *,
+                    block: BlockCoord | None = None,
+                    entity: _JavaTarget | None = None,
+                    slot: str,
+                    modifier: ResourceLocation) -> ExecutedCommand: pass
+
+    @_command([SE([LE("block"), AE("block")],
+                  [LE("entity"), AE("entity")]),
+               AE("slot"),
+               LE("with"),
+               AE("item"),
+               AE("count", True)],
+              segment_name="item replace")
+    @_version(introduced="20w46a")
+    def item_replace_with(self, *,
+                          block: BlockCoord | None = None,
+                          entity: _JavaTarget | None = None,
+                          slot: str,
+                          item: int,
+                          count: Annotated[int, Range(1, 64)]) -> ExecutedCommand: pass
+
+    @_command([SE([LE("block"), AE("block")],
+                  [LE("entity"), AE("entity")]),
+               AE("slot"),
+               LE("from"),
+               SE([LE("block"), AE("source_block")],
+                  [LE("entity"), AE("source_entity")]),
+               AE("source_slot"),
+               AE("modifier", True)],
+              segment_name="item replace")
+    @_version(introduced="20w46a")
+    def item_replace_with(self, *,
+                          block: BlockCoord | None = None,
+                          entity: _JavaTarget | None = None,
+                          slot: str,
+                          item: int,
+                          count: Annotated[int, Range(1, 64)],
+                          source_block: BlockCoord | None = None,
+                          source_entity: _JavaTarget | None = None,
+                          source_slot: str,
+                          modifier: ResourceLocation, ) -> ExecutedCommand: pass
+
+    @_command([AE("action")])
+    @_version(introduced="21w37a")
+    def jfr(self, action: Literal['start', 'stop']) -> ExecutedCommand: pass
+
+    @_command([AE("targets"), AE("reason")])
+    @_version(introduced="a1.0.16")
+    def kick(self, targets: _JavaPlayerTarget,
+             reason: str = "Kicked by an operator") -> ExecutedCommand: pass
+
+    @_command([AE("targets", True)])
+    @_version(introduced="0.16.0b1")
+    def kill(self, targets: Annotated[str, PlayerName] | JavaSelector = JavaSelector.s()) -> ExecutedCommand: pass
+
+    @_command([])
+    @_version(introduced="1.0.16_02")
+    def list(self) -> ExecutedCommand: pass
+
+    @_command([])
+    @_version(introduced="1.8.1pre1")
+    def list_uuids(self) -> ExecutedCommand: pass
+
+    @_command([AE("structure")])
+    @_version(introduced="16w39a")
+    def locate(self, structure: Annotated[str, NoSpace]) -> ExecutedCommand: pass
+
+    @_command([AE("biome")])
+    @_version(introduced="20w06a")
+    def locatebiome(self, biome: ResourceLocation) -> ExecutedCommand: pass
+
+    @_command([SE([LE("spawn"),
+                   AE("spawn_target_pos")],
+                  [LE("replace entity"),
+                   AE("replace_entities"),
+                   AE("replace_slot"),
+                   AE("replace_count", True)],
+                  [LE("replace block"),
+                   AE("replace_block_pos"),
+                   AE("replace_slot"),
+                   AE("replace_count", True)],
+                  [LE("give"),
+                   AE("give_players")],
+                  [LE("insert"),
+                   AE("insert_target_pos")]),
+               SE([LE("fish"),
+                   AE("fish_loot_table"),
+                   AE("fish_pos"),
+                   AE("fish_tool", True)],
+                  [LE("loot"),
+                   AE("loot_loot_table")],
+                  [LE("kill"),
+                   AE("kill_target")],
+                  [LE("mine"),
+                   AE("mine_pos"),
+                   AE("mine_tool", True)])])
+    @_version(introduced="18w45a") # TODO /drop
+    def loot(self, *,
+             spawn_target_pos: Coord | None = None,
+             replace_entities: _JavaTarget | None = None,
+             replace_block_pos: BlockCoord | None = None,
+             replace_slot: Annotated[str, NoSpace] | None = None,
+             replace_count: Annotated[int, Range(0, Int.max)] | None = None,
+             give_players: _JavaPlayerTarget | None = None,
+             insert_target_pos: BlockCoord | None = None,
+             fish_loot_table: ResourceLocation | None = None, # TODO LootTable
+             fish_pos: BlockCoord | None = None,
+             fish_tool: str | Literal['mainhand', 'offhand'] | None = None,
+             loot_loot_table: ResourceLocation | None = None, # TODO LootTable,
+             kill_target: _JavaSingleTarget | None = None,
+             mine_pos: BlockCoord | None = None,
+             mine_tool: str | Literal['mainhand', 'offhand'] | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("message")])
+    def me(self, message: str) -> ExecutedCommand: pass
+
+    @_command([AE("targets"), AE("message")])
+    @_version(introduced="1.0.16_02")
+    def msg(self, targets: _JavaPlayerTarget, message: str) -> ExecutedCommand: pass
+    w = tell = msg
+
+    @_command([AE("targets")])
+    @_version(introduced="1.0.16")
+    def op(self, targets: Annotated[str, PlayerName] | Annotated[JavaSelector, Player]) -> ExecutedCommand: pass
+
+    @_command([AE("targets")])
+    @_version(introduced="1.0.16")
+    def pardon(self, targets: Annotated[str, PlayerName] | Annotated[JavaSelector, Player]) -> ExecutedCommand: pass
+
+    @_command([AE("target")], cmd_name="pardon-ip")
+    @_version(introduced="1.0.16")
+    def pardon_ip(self, target: _ObjectiveName) -> ExecutedCommand: pass
+
+    @_command([AE("name"),
+               AE("pos", True),
+               SE([AE("delta"),
+                   AE("speed"),
+                   AE("count"),
+                   AE("display_mode", True),
+                   AE("viewers", True)],
+                  optional=True)
+               ])
+    @_version(introduced="14w04a")
+    def particle(self, name: str | ResourceLocation, # TODO Particle class
+                 pos: Coord | None = None,
+                 delta: Coord | None = None,
+                 speed: Annotated[float,
+                                  Range(0, 340_282_356_779_733_661_637_539_395_458_142_568_447.9)] | None = None,
+                 count: Annotated[int, Range(0, Int.max)] | None = None,
+                 display_mode: Literal['force', 'normal'] = 'normal',
+                 viewers: _JavaPlayerTarget | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("action")])
+    @_version(introduced="1.17pre1")
+    def perf(self, action: Literal['start', 'stop']) -> ExecutedCommand: pass
+
+    @_command([AE("feature"), AE("pos")])
+    @_version(introduced="22w03a")
+    def placefeature(self, feature: ResourceLocation, pos: BlockCoord) -> ExecutedCommand: pass
+
+    @_command([AE("sound"),
+               AE("source"),
+               AE("targets"),
+               AE("position", True),
+               AE("volume", True),
+               AE("pitch", True),
+               AE("minimum_volume", True)])
+    @_version(introduced="1.6.1pre")
+    def playsound(self, sound: ResourceLocation,
+                  source: Literal['master', 'music', 'record', 'weather', 'block',
+                                  'hostile', 'neutral', 'player', 'ambient', 'voice'],
+                  targets: _JavaPlayerTarget | None = None,
+                  position: Coord | None = None,
+                  volume: float = 1.0,
+                  pitch: float = 1.0,
+                  minimum_volume: float = 0.0) -> ExecutedCommand: pass
+
+    @_command([AE("port")])
+    @_version(introduced="12w24a")
+    def publish(self, port: Annotated[int, Range(0, 65536)] | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("action"),
+               AE("targets"),
+               AE("recipe")])
+    @_version(introduced="17w13a")
+    def recipe(self, action: Literal['give', 'take'],
+               targets: _JavaPlayerTarget,
+               recipe: ResourceLocation | Literal['*']) -> ExecutedCommand: pass # TODO Recipe class
+
+    @_command([])
+    @_version(introduced="17w18a")
+    def reload(self) -> ExecutedCommand: pass
+
+    @_command([], cmd_name="save-all", segment_name="save-all")
+    @_version(introduced="a1.0.16_01")
+    def save_all(self) -> ExecutedCommand: pass
+
+    @_command([], cmd_name="save-all", segment_name="save-all flush")
+    @_version(introduced="a1.0.16_01")
+    def save_all_flush(self) -> ExecutedCommand: pass
+
+    @_command([], cmd_name="save-off", segment_name="save-off")
+    @_version(introduced="a1.0.16_01")
+    def save_off(self) -> ExecutedCommand:
+        pass
+
+    @_command([], cmd_name="save-on", segment_name="save-on")
+    @_version(introduced="a1.0.16_01")
+    def save_on(self) -> ExecutedCommand: pass
+
+    @_command([AE("message")])
+    @_version(introduced="0.0.16a_01")
+    def say(self, message: str) -> ExecutedCommand: pass
+
+    @_command([AE("function"), AE("time"), AE("action", True)])
+    @_version(introduced="18w43a") # TODO old syntax? idk
+    def schedule_function(self, function: ResourceLocation, # TODO Function
+                          time: int | float | Annotated[str, Regex(r"^\d+(?:\.\d+)?[dst]?$")],
+                          action: Literal['append', 'replace'] = 'replace') -> ExecutedCommand: pass
+
+    @_command([AE("function")])
+    @_version(introduced="18w43a")
+    def schedule_clear(self, function: ResourceLocation) -> ExecutedCommand: pass
+
+    @_command([])
+    @_version(introduced="")
+    def scoreboard_objectives_list(self) -> ExecutedCommand: pass
+
+    @_command([AE("objective"), AE("criteria"), AE("display_name")])
+    @_version(introduced="")
+    def scoreboard_objectives_add(self, objective: _ObjectiveName,
+                                  criteria: str,
+                                  display_name: RawJson | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("objective")])
+    @_version(introduced="")
+    def scoreboard_objectives_remove(self, objective: _ObjectiveName) -> ExecutedCommand: pass
+
+    @_command([AE("slot"), AE("objective", True)])
+    @_version(introduced="")
+    def scoreboard_objective_setdisplay(self, slot: Literal['list', 'sidebar', 'belowname'],
+                                        objective: _ObjectiveName | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("objective"),
+               SE([LE("displayname"), AE("display_name")],
+                  [LE("rendertype"), AE("render_type")])
+               ])
+    @_version(introduced="")
+    def scoreboard_objectives_modify(self, objective: _ObjectiveName,
+                                     display_name: RawJson | None = None,
+                                     render_type: Literal['hearts', 'integer'] | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("target", True)])
+    @_version(introduced="")
+    def scoreboard_players_list(self, target: _JavaTarget | None = None) -> ExecutedCommand: pass
+
+    # TODO more
