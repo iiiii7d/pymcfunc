@@ -1753,7 +1753,7 @@ class JavaRawCommands(BaseRawCommands):
     @_version(introduced="17w13a")
     def recipe(self, action: Literal['give', 'take'],
                targets: _JavaPlayerTarget,
-               recipe: ResourceLocation | Literal['*']) -> ExecutedCommand: pass # TODO Recipe class
+               recipe: ResourceLocation | Literal['*']) -> ExecutedCommand: pass # TODO GroupedRecipe class
 
     @_command([])
     @_version(introduced="17w18a")

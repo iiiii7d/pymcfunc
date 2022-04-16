@@ -18,10 +18,12 @@ setup(
   download_url = f'https://github.com/iiiii7d/pymcfunc/archive/refs/tags/v{pymcfunc_old.__version__}.tar.gz',
   keywords = ['pymcfunc_old', 'minecraft', 'commands', 'function'],
   python_requires='>=3.6',
+  install_requires=[
+    'attrs'
+  ],
   #package_data={
   #  'pymcfunc_old': [''],
   #},
-  install_requires=[],
   classifiers=[
     'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',

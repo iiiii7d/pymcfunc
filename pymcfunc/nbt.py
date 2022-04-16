@@ -303,7 +303,8 @@ class NBTFormat(NBTRepresentable):
             else:
                 d[var] = self.NBT_FORMAT[var](getattr(self, var))
             # noinspection PyTypeHints
-            if not isinstance(d[var], String if isinstance(format_type, _LiteralGenericAlias) else self.NBT_FORMAT[var]):
+            if (not isinstance(d[var], String if isinstance(format_type, _LiteralGenericAlias) else self.NBT_FORMAT[var])) \
+                    or (issubclass(anno, NBTRepresentable) and not isinstance(d[var], Compound)):
                 raise TypeError(f"`{var}` is not of type {self.NBT_FORMAT[var]} (Got {getattr(self, var)})")
         return Compound(d)
 

@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import inspect
-from dataclasses import dataclass, field
 from typing import TypeAlias, Union, Literal, Callable, Any, TYPE_CHECKING, Type, Optional
+
+from attr import define, field
+
+from pymcfunc.recipes import Recipe
 
 if TYPE_CHECKING: from pymcfunc.functions import Function
 from pymcfunc.json_format import ItemJson, EntityJson, DamageJson, DamageTypeJson, LocationJson, IntRangeJson, FloatRangeJson, \
@@ -12,13 +15,13 @@ from pymcfunc.nbt import Compound, NBT, List, NBTFormat, String, NBTRepresentabl
 
 RawJson: TypeAlias = Union[dict, list]
 
-@dataclass(init=True)
+@define(init=True)
 class Advancement(NBTFormat):
     namespace: str
     name: str
     display: AdvancementDisplay | None = None
     parent: str | Advancement | None = None
-    criteria: list[Criterion] = field(default_factory=list)
+    criteria: list[Criterion] = field(factory=list)
     requirements: list[list[Criterion]] | None = None
     rewards: Rewards | None = None
 
@@ -43,7 +46,7 @@ class Advancement(NBTFormat):
         self.rewards.function = func
         return func
 
-@dataclass(init=True)
+@define(init=True)
 class Icon(NBTFormat):
     item: str = "air"
     nbt: Compound | None = None
@@ -55,7 +58,7 @@ class Icon(NBTFormat):
             'nbt': Compound,
         }
 
-@dataclass(init=True)
+@define(init=True)
 class AdvancementDisplay(NBTFormat):
     icon_: Icon = Icon("")
     title: str | RawJson = ""
@@ -79,10 +82,9 @@ class AdvancementDisplay(NBTFormat):
             'hidden': Boolean,
         }
 
-Recipe: TypeAlias = str # TODO Recipe and LootTable and Predicate class
-LootTable: TypeAlias = str
+LootTable: TypeAlias = str # TODO LootTable and Predicate classes
 Predicate: TypeAlias = str
-@dataclass(init=True)
+@define(init=True)
 class Rewards(NBTFormat):
     recipes: list[Recipe] | None = None
     loot: list[LootTable] | None = None

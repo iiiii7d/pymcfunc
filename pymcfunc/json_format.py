@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Literal, Type, Optional, Union
+
+from attr import define
 
 from pymcfunc.internal import immutable
 from pymcfunc.nbt import Float, Int, Double, NBT, Compound, NBTFormat, Boolean, NBTRepresentable, List, String, \
@@ -40,7 +41,7 @@ class DoubleRangeJson(RangeJson):
         'max': Double
     }
 
-@dataclass(init=True)
+@define(init=True)
 class DamageJson(NBTFormat):
     blocked: bool | None = None
     dealt: float | DoubleRangeJson | None = None
@@ -58,7 +59,7 @@ class DamageJson(NBTFormat):
             'type': Optional[DamageTypeJson]
         }
 
-@dataclass(init=True)
+@define(init=True)
 class DamageTypeJson(NBTFormat):
     bypasses_armor: bool | None = None
     bypasses_invulnerability: bool | None = None
@@ -124,7 +125,7 @@ class EntityJson(NBTFormat):
             'fishing_hook_in_open_water': Optional[Boolean]
         }
 
-    @dataclass(init=True)
+    @define(init=True)
     class Effect(NBTFormat):
         name: str
         ambient: bool | None = None
@@ -141,7 +142,7 @@ class EntityJson(NBTFormat):
                 'visible': Optional[Boolean]
             }
 
-    @dataclass(init=True)
+    @define(init=True)
     class Player(NBTFormat):
         looking_at: EntityJson | None = None
         advancements: dict[str, bool | dict[str, bool]] | None = None
@@ -161,7 +162,7 @@ class EntityJson(NBTFormat):
                 'stats': Optional[DictReprAsList[self.Statistic]]
             }
 
-        @dataclass(init=True)
+        @define(init=True)
         class Statistic:
             type: Literal["minecraft:custom", "minecraft:crafted", "minecraft:used", "minecraft:broken",
                           "minecraft:mined", "minecraft:killed", "minecraft:picked_up", "minecraft:dropped",
@@ -177,7 +178,7 @@ class EntityJson(NBTFormat):
                     'value': Optional[Union[IntRangeJson, Int]]
                 }
 
-    @dataclass(init=True)
+    @define(init=True)
     class LightningBolt(NBTFormat):
         blocks_set_on_fire: int | None = None
         entity_struck: EntityJson | None = None
@@ -190,7 +191,7 @@ class EntityJson(NBTFormat):
             }
 
 
-@dataclass(init=True)
+@define(init=True)
 class LocationJson(NBTFormat):
     biome: str | None = None
     block: Block | None = None
@@ -214,7 +215,7 @@ class LocationJson(NBTFormat):
             'smokey': Optional[Boolean]
         }
 
-    @dataclass(init=True)
+    @define(init=True)
     class Block(NBTFormat):
         blocks: list[str] | None = None
         tag: str | None = None
@@ -230,7 +231,7 @@ class LocationJson(NBTFormat):
                 'state': Optional[dict[str, Union[IntRangeJson, Int, Boolean, String]]]
             }
 
-    @dataclass(init=True)
+    @define(init=True)
     class Fluid(NBTFormat):
         fluid: str | None = None
         state: dict[str, str | int | bool | IntRangeJson] | None = None
@@ -242,7 +243,7 @@ class LocationJson(NBTFormat):
                 'state': Optional[dict[str, Union[IntRangeJson, Int, Boolean, String]]]
             }
 
-@dataclass(init=True)
+@define(init=True)
 class ItemJson(NBTFormat):
     count: int | IntRangeJson | None = None
     durability: int | IntRangeJson | None = None
@@ -266,7 +267,7 @@ class ItemJson(NBTFormat):
             'tag': Optional[String]
         }
 
-    @dataclass(init=True)
+    @define(init=True)
     class Enchantment(NBTFormat):
         enchantment: str | None = None
         levels: int | IntRangeJson | None = None
