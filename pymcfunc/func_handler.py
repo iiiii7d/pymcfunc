@@ -25,7 +25,7 @@ class BaseFunctionHandler:
 
     def __init__(self, p):
         self.commands: List[ExecutedCommand] = []
-        self.r = None
+        #self.r = None
         self.p = p
 
     def __str__(self):

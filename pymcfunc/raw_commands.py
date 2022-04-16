@@ -431,7 +431,7 @@ class BedrockRawCommands(BaseRawCommands):
     @_command([AE("player")])
     @_version(introduced="0.16.0b1")
     def op(self, player: _BedrockPlayerTarget) -> ExecutedCommand: pass
-    
+
     @_command([AE("action")])
     def ops(self, action: Literal['list', 'reload']) -> ExecutedCommand: pass
     permission = ops
@@ -499,7 +499,7 @@ class BedrockRawCommands(BaseRawCommands):
                     amount: Annotated[int, Range(1, 64)] = 1,
                     data: Annotated[int, Range(Int.min, Int.max)] = 0,
                     components: dict) -> ExecutedCommand: pass
-    
+
     @_command([AE("riders"),
                LE("start_riding"),
                AE("ride"),
@@ -882,7 +882,7 @@ class BedrockRawCommands(BaseRawCommands):
     @_command([])
     def worldbuilder(self) -> ExecutedCommand: pass
     wb = worldbuilder
-    
+
     @_command([AE("weather"), AE("duration", True)])
     @_version(introduced="0.16.0b1")
     def weather(self, weather: Literal['clear', 'rain', 'thunder'],
@@ -1229,7 +1229,7 @@ class JavaRawCommands(BaseRawCommands):
 
         def __init__(self):
             self.command_strings = []
-            self.prev_obj = None
+            self.subcmd_obj = None
 
         def __str__(self):
             return ' '.join(self.command_strings)
@@ -1258,8 +1258,8 @@ class JavaRawCommands(BaseRawCommands):
                     subcmd = cls()
                     subcmd.order = order
                     subcmd.func = func
-                    subcmd.name = cmd_name or func.__name__.split("_")[0]
-                    subcmd.segment_name = segment_name or func.__name__.replace("_", " ")
+                    subcmd.name = cmd_name or func.__name__.split("_")[0].strip()
+                    subcmd.segment_name = segment_name or func.__name__.replace("_", " ").strip()
                     subcmd.arg_namelist = []
                     subcmd.handler = handler
                     subcmd.subcmd_obj = None
@@ -1287,7 +1287,7 @@ class JavaRawCommands(BaseRawCommands):
                 @wraps(func)
                 def wrapper(self, *args, **kwargs):
                     JavaRawCommands.ExecuteSubcommandHandler\
-                        .Subcommand.subcommand(self, order, cmd_name, segment_name)(func)(*args, **kwargs)
+                        .Subcommand.subcommand(self, order, cmd_name, segment_name)(func)(self, *args, **kwargs)
                     return self
                 return wrapper
             return decorator
@@ -1510,7 +1510,7 @@ class JavaRawCommands(BaseRawCommands):
         @_subcommand([AE("command")])
         def run(self, command: ExecutedCommand) -> Self: pass
 
-    EC = ExecutedCommand
+    ESH = ExecuteSubcommandHandler
 
     @_command([AE("subcommands")])
     @_version(introduced="14w07a")

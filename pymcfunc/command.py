@@ -14,9 +14,6 @@ if TYPE_CHECKING: from pymcfunc.func_handler import BaseFunctionHandler
 if TYPE_CHECKING: from pymcfunc.raw_commands import BaseRawCommands, JavaRawCommands
 from pymcfunc.selectors import BaseSelector, JavaSelector, BedrockSelector
 
-# for eval
-# noinspection PyUnresolvedReferences
-from pymcfunc.advancements import Advancement
 
 class Element: pass
 
@@ -137,7 +134,7 @@ class Command:
             cmd.order = order
             cmd.fh = fh
             cmd.func = func
-            cmd.name = cmd_name or func.__name__.split("_")[0]
+            cmd.name = cmd_name or func.__name__.split("_")[0].strip()
             cmd.segment_name = segment_name or func.__name__.replace("_", " ").strip()
             cmd.arg_namelist = []
             for name, arg in inspect.signature(func).parameters.items():
@@ -151,13 +148,15 @@ class Command:
 
     def __call__(self, *args, **kwargs) -> ExecutedCommand:
         for i, arg in enumerate(args):
+            if self.arg_namelist[i] == 'self': i += 1
             kwargs[self.arg_namelist[i]] = arg
 
         cmd_string, subcmd_obj = self._process_arglist(kwargs)
+        print(cmd_string)
         cmd = ExecutedCommand(self.fh, self.name, cmd_string)
         if subcmd_obj:
             subcmd_obj.name = self.name
-            subcmd_obj.cmd_string = cmd_string
+            subcmd_obj.command_string = cmd_string
         else:
             self.fh.commands.append(cmd)
         return cmd
@@ -206,6 +205,14 @@ class Command:
                 element = self.eles[element.name]
                 element: AE
                 value = args[element.name] if element.name in args else element.default
+
+                # for eval
+                # noinspection PyUnresolvedReferences
+                from pymcfunc.advancements import Advancement
+                from pymcfunc.raw_commands import JavaRawCommands
+                # noinspection PyUnusedLocal
+                ExecuteSubcommandHandler = JavaRawCommands.ExecuteSubcommandHandler
+
                 value = Command._check_and_process_arg(eval(inspect.signature(self.func).parameters[element.name].annotation),
                                                        value, element.name)
                 if not element.optional and value == element.default:
@@ -223,8 +230,8 @@ class Command:
                     value = value.command_string
 
                 if 'ExecuteSubcommandHandler' in type(value).__name__:
-                    subcmd_obj = value.prev_obj
-                    value = value.command_string
+                    subcmd_obj = value.subcmd_obj
+                    value = ' '.join(value.command_strings)
 
                 if element.default == value:
                     if len(defaults_queue) > 0 and defaults_queue[-1] is None:
@@ -309,7 +316,7 @@ class Command:
             return None
         else:
             if not issubclass(type(value), annotation):
-                raise ValueError(f"Value for argument `{varname}` is not of type `{annotation}` (Got `{value}`)")
+                raise ValueError(f"Value for argument `{varname}` is not of type `{annotation.__name__}` (Got `{value}`)")
             return value
 
     @staticmethod
