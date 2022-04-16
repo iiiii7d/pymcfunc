@@ -3,8 +3,10 @@ from __future__ import annotations
 import inspect
 import warnings
 from functools import wraps
-from typing import Optional, Any, Callable, Tuple, TYPE_CHECKING, Annotated, Literal, Self, Type
+from typing import Optional, Any, Callable, Tuple, TYPE_CHECKING, Annotated, Literal, Type
 from uuid import UUID
+
+from typing_extensions import Self
 
 from pymcfunc.advancements import Advancement
 from pymcfunc.command import ExecutedCommand, Command, SE, AE, Range, NoSpace, Element, Player, Regex, \
@@ -833,7 +835,73 @@ class BedrockRawCommands(BaseRawCommands):
     def time(self, *,
              add: int | None = None,
              query: Literal['daytime', 'gametime', 'day'] | None = None,
-             set_: Literal['day', 'night', 'noon', 'midnight', 'sunrise', 'sunset'] | int | None = None) -> ExecutedCommand: pass
+             set_: Literal['day', 'night', 'noon', 'midnight', 'sunrise', 'sunset']
+             | int | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("targets"),
+               SE([AE("action", options=['clear', 'reset'])],
+                  [AE("action", options=['title', 'subtitle', 'actionbar']),
+                   AE("title")],
+                  [AE("action", options=['times']),
+                   AE("fade_in"),
+                   AE("stay"),
+                   AE("fade_out")])
+               ])
+    @_version(introduced="1.0.5.0")
+    def title(self, targets: _BedrockPlayerTarget,
+              action: Literal['clear', 'reset', 'title', 'subtitle', 'actionbar', 'times'],
+              title: str | None = None,
+              fade_in: int | None = None,
+              stay: int | None = None,
+              fade_out: int | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("targets"),
+               SE([AE("action", options=['clear', 'reset'])],
+                  [AE("action", options=['title', 'subtitle', 'actionbar']),
+                   AE("title")],
+                  [AE("action", options=['times']),
+                   AE("fade_in"),
+                   AE("stay"),
+                   AE("fade_out")])
+               ])
+    @_version(introduced="1.0.5.0")
+    def titleraw(self, targets: _BedrockPlayerTarget,
+                 action: Literal['clear', 'reset', 'title', 'subtitle', 'actionbar', 'times'],
+                 title: RawJson | None = None,
+                 fade_in: int | None = None,
+                 stay: int | None = None,
+                 fade_out: int | None = None) -> ExecutedCommand: pass
+
+    @_command([])
+    @_version(introduced="0.16.0b1")
+    def toggledownfall(self) -> ExecutedCommand: pass
+
+    @_command([])
+    def worldbuilder(self) -> ExecutedCommand: pass
+    wb = worldbuilder
+    
+    @_command([AE("weather"), AE("duration", True)])
+    @_version(introduced="0.16.0b1")
+    def weather(self, weather: Literal['clear', 'rain', 'thunder'],
+                duration: Annotated[int, Range(0, 1999999999)] = 300) -> ExecutedCommand: pass
+
+    @_command([])
+    @_version(introduced="0.16.0b1")
+    def weather_clear(self) -> ExecutedCommand: pass
+
+    @_command([SE([AE("action", options=['add', 'remove']),
+                   AE("targets")],
+                  [AE("action", options=['list', 'off', 'on', 'reload'])
+                   ])
+               ])
+    @_version(introduced="b1.3")
+    def allowlist(self, action: Literal['add', 'remove', 'list', 'off', 'on', 'reload'],
+                  targets: Annotated[str, Quoted] | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("amount"), AE("player")])
+    @_version(introduced="0.16.0b1")
+    def xp(self, amount: int | Annotated[str, Regex(r"^\d+L?$")],
+           player: _BedrockPlayerTarget) -> ExecutedCommand: pass
 
 class JavaRawCommands(BaseRawCommands):
     """
@@ -1945,4 +2013,102 @@ class JavaRawCommands(BaseRawCommands):
              add: int | float | Annotated[str, Regex(r"^\d+(?:\.\d+)?[dst]?$")] | None = None,
              query: Literal['daytime', 'gametime', 'day'] | None = None,
              set_: Literal['day', 'night', 'noon', 'midnight', 'sunrise', 'sunset'] |
-                   int | float | Annotated[str, Regex(r"^\d+(?:\.\d+)?[dst]?$")] | None = None) -> ExecutedCommand: pass
+             int | float | Annotated[str, Regex(r"^\d+(?:\.\d+)?[dst]?$")] | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("targets"),
+               SE([AE("action", options=['clear', 'reset'])],
+                  [AE("action", options=['title', 'subtitle', 'actionbar']),
+                   AE("title")],
+                  [AE("action", options=['times']),
+                   AE("fade_in"),
+                   AE("stay"),
+                   AE("fade_out")])
+               ])
+    @_version(introduced="14w20a")
+    def title(self, targets: _JavaPlayerTarget,
+              action: Literal['clear', 'reset', 'title', 'subtitle', 'actionbar', 'times'],
+              title: RawJson | None = None,
+              fade_in: int | None = None,
+              stay: int | None = None,
+              fade_out: int | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("objective"),
+               AE("action", True),
+               AE("value", True)])
+    @_version(introduced="14w06a")
+    def trigger(self, objective: _JavaObjectiveName,
+                action: Literal['add', 'set'] | None = None,
+                value: int | None = None) -> ExecutedCommand: pass
+
+    @_command([], cmd_name='warden_spawn_tracker', segment_name='warden_spawn_tracker clear')
+    @_version(introduced="1.19ddes1")
+    def warden_spawn_tracker_clear(self) -> ExecutedCommand: pass
+
+    @_command([AE("warning_level")], cmd_name='warden_spawn_tracker', segment_name='warden_spawn_tracker set')
+    @_version(introduced="1.19ddes1")
+    def warden_spawn_tracker_set(self, level: int) -> ExecutedCommand: pass
+
+    @_command([AE("weather"), AE("duration", True)])
+    @_version(introduced="12w32a")
+    def weather(self, weather: Literal['clear', 'rain', 'thunder'],
+                duration: Annotated[int, Range(0, 1999999999)] = 300) -> ExecutedCommand: pass
+
+    @_command([SE([AE("action", options=['add', 'remove']),
+                   AE("targets")],
+                  [AE("action", options=['list', 'off', 'on', 'reload'])
+                  ])
+               ])
+    @_version(introduced="b1.3")
+    def whitelist(self, action: Literal['add', 'remove', 'list', 'off', 'on', 'reload'],
+                  targets: _JavaPlayerTarget | None = None) -> ExecutedCommand: pass
+
+    @_command([SE([LE("add"),
+                   AE("add_distance"),
+                   AE("add_time", True)],
+                  [LE("center"),
+                   AE("center_pos")],
+                  [LE("damage amount"),
+                   AE("damage_per_block")],
+                  [LE("damage buffer"),
+                   AE("damage_buffer_distance")],
+                  [LE("get")],
+                  [LE("set"),
+                   AE("set_distance"),
+                   AE("set_time", True)],
+                  [LE("warning distance"),
+                   AE("warning_distance")],
+                  [LE("warning time"),
+                   AE("warning_time")])
+               ])
+    @_version(introduced="14w17a")
+    def worldborder(self, *,
+                    add_distance: float | None = None,
+                    add_time: Annotated[int, Range(0, Int.max)] | None = None,
+                    center_pos: Coord2d | None = None,
+                    damage_per_block: Annotated[float, Range(0, Float.max)] | None = None,
+                    damage_buffer_distance: float | None = None,
+                    set_distance: float | None = None,
+                    set_time: Annotated[int, Range(0, Int.max)] | None = None,
+                    warning_distance: Annotated[int, Range(0, Int.max)] | None = None,
+                    warning_time: Annotated[int, Range(0, Int.max)] | None = None) -> ExecutedCommand: pass
+
+    @_command([AE("targets"), AE("amount"), AE("unit", True)])
+    @_version(introduced="b1.9pre5")
+    def xp_add(self, targets: _JavaPlayerTarget,
+               amount: int,
+               unit: Literal['levels', 'points'] | None = None) -> ExecutedCommand: pass
+    experience_add = xp_add
+
+    @_command([AE("targets"), AE("amount"), AE("unit", True)])
+    @_version(introduced="b1.9pre5")
+    def xp_set(self, targets: _JavaPlayerTarget,
+               amount: Annotated[int, Range(0, Int.max)],
+               unit: Literal['levels', 'points'] | None = None) -> ExecutedCommand: pass
+    experience_set = xp_set
+
+    @_command([AE("targets"), AE("unit")])
+    @_version(introduced="b1.5pre5")
+    def xp_query(self, targets: _JavaPlayerTarget,
+                 unit: Literal['levels', 'points']) -> ExecutedCommand: pass
+    experience_query = xp_query
+

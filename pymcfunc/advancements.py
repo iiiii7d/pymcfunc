@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import inspect
 from functools import wraps
-from typing import TypeAlias, Union, Literal, Callable, Any
+from typing import TypeAlias, Union, Literal, Callable, Any, TYPE_CHECKING
 
-from pymcfunc import func_handler
+if TYPE_CHECKING: from pymcfunc import func_handler
 from pymcfunc.json_format import ItemJson, EntityJson, DamageJson, DamageTypeJson, LocationJson, IntRangeJson, FloatRangeJson, \
     DoubleRangeJson
 from pymcfunc.nbt import Compound, NBT

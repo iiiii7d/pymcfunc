@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Literal, Any, TypedDict, Annotated, Union
+from typing import Literal, Any, TypedDict, Annotated, Union, TYPE_CHECKING
 
 import pymcfunc.internal as internal
-from pymcfunc.command import ResourceLocation
+if TYPE_CHECKING: from pymcfunc.command import ResourceLocation
 from pymcfunc.coord import _FloatIntCoord, Coord
 from pymcfunc.nbt import Compound, Int
 from pymcfunc.range import FloatRange

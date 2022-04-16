@@ -21,11 +21,11 @@ class BaseFunctionHandler:
     .. warning::
        Use either :py:class:`BedrockFunctionHandler` or :py:class:`JavaFunctionHandler` for extended support of commands for your edition.
     """
-    sel = BaseSelector()
+    sel = BaseSelector
 
     def __init__(self, p):
         self.commands: List[ExecutedCommand] = []
-        self.r = BaseRawCommands(self)
+        self.r = None
         self.p = p
 
     def __str__(self):
@@ -49,7 +49,7 @@ class BaseFunctionHandler:
 
 class BedrockFunctionHandler(BaseFunctionHandler):
     """The Beckrock Edition function handler."""
-    sel = BedrockSelector()
+    sel = BedrockSelector
 
     def __init__(self, p):
         super().__init__(p)
@@ -68,7 +68,7 @@ class BedrockFunctionHandler(BaseFunctionHandler):
 
 class JavaFunctionHandler(BaseFunctionHandler):
     """The Java Edition function handler."""
-    sel = JavaSelector()
+    sel = JavaSelector
 
     def __init__(self, p: JavaPack):
         super().__init__(p)

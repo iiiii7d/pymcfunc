@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 
 @dataclass
 class FloatRange:
-    lower: int | float | Ellipsis
-    upper: int | float | Ellipsis
+    lower: int | float | ellipsis
+    upper: int | float | ellipsis
 
     def __str__(self):
         lower_str = "" if self.lower is ... else str(self.lower)

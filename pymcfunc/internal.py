@@ -115,3 +115,4 @@ def base_class(cls):
                 raise TypeError("Base classes are not allowed to be instantiated. Use the Java or Bedrock classes instead.")
 
             super().__init__(*args, **kwargs)
+    return BaseClass
