@@ -10,7 +10,7 @@ from uuid import UUID
 
 from pymcfunc.errors import MultipleBranchesSatisfiedError, MissingError, MissingArgumentError
 
-if TYPE_CHECKING: from pymcfunc.func_handler import BaseFunctionHandler
+if TYPE_CHECKING: from pymcfunc.functions import BaseFunctionHandler
 if TYPE_CHECKING: from pymcfunc.raw_commands import BaseRawCommands, JavaRawCommands
 from pymcfunc.selectors import BaseSelector, JavaSelector, BedrockSelector
 

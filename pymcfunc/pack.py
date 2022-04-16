@@ -1,12 +1,14 @@
-from functools import wraps
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from pymcfunc import selectors
-from pymcfunc.func_handler import JavaFunctionHandler
+from pymcfunc.functions import JavaFunctionHandler, Function
+from pymcfunc.internal import base_class
 from pymcfunc.version import JavaVersion
 
+@base_class
+class BasePack: pass
 
-class JavaPack:
+class JavaPack(BasePack):
     """Represents a Java Edition Datapack."""
 
     def __init__(self, name: str, version: Union[str, JavaVersion]):
@@ -18,7 +20,7 @@ class JavaPack:
         :type version: str | JavaVersion
         """
         self.name = name
-        self.funcs: Dict[str, str] = {}
+        self.funcs: list[Function] = []
         self.tags: Dict[str, Dict[str, List[str]]] = {'blocks': {}, 'entity_types': {}, 'fluids': {}, 'functions': {}, 'items': {}}
         self.minecraft_tags: Dict[str, List] = {'load': [], 'tick': []}
         self.advancements: dict = {}
@@ -26,7 +28,7 @@ class JavaPack:
         self.predicates: dict = {}
         self.recipes: dict = {}
         self.item_modifiers: dict = {}
-        self.sel = selectors.JavaSelector()
+        self.sel = selectors.JavaSelector
         self.version = JavaVersion(version) if isinstance(version, str) else version
 
     def function(self, name: Optional[str]=None):
@@ -42,5 +44,7 @@ class JavaPack:
             m = JavaFunctionHandler(self)
             func(m)
             fname = func.__name__ if name is None else name
-            self.funcs.update({fname: str(m)})
+            function = Function(self, m, "", fname)
+            self.funcs.append(function)
+            return function
         return decorator

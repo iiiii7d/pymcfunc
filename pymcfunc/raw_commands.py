@@ -22,7 +22,7 @@ from pymcfunc.selectors import BedrockSelector, JavaSelector
 from pymcfunc.version import JavaVersion, BedrockVersion
 
 if TYPE_CHECKING:
-    from pymcfunc.func_handler import BaseFunctionHandler
+    from pymcfunc.functions import BaseFunctionHandler
 
 def _command(order: list[Element], cmd_name: str | None = None, segment_name: str | None = None):
     def decorator(func: Callable[..., Any]):

@@ -1,15 +1,27 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING, List
 
-from pymcfunc.internal import base_class
-from pymcfunc.selectors import BaseSelector, JavaSelector, BedrockSelector
-from pymcfunc.variables import JavaVariable, BedrockVariable
 import pymcfunc.entities as entities
 from pymcfunc.entities import Entity
-from pymcfunc.raw_commands import BaseRawCommands, JavaRawCommands, BedrockRawCommands, ExecutedCommand
+from pymcfunc.internal import base_class
+from pymcfunc.raw_commands import JavaRawCommands, BedrockRawCommands, ExecutedCommand
+from pymcfunc.selectors import BaseSelector, JavaSelector, BedrockSelector
+from pymcfunc.variables import JavaVariable, BedrockVariable
 
 if TYPE_CHECKING:
-    from pymcfunc.pack import JavaPack
+    from pymcfunc.pack import JavaPack, BasePack
+
+class Function:
+    def __init__(self, p: BasePack, fh: BaseFunctionHandler, namespace: str, name: str):
+        self.p = p
+        self.fh = fh
+        self.namespace = namespace
+        self.name = name
+
+    @property
+    def namespaced(self) -> str: return f'{self.namespace}:{self.name}'
+    def __str__(self): return self.namespaced
 
 @base_class
 class BaseFunctionHandler:
@@ -45,7 +57,7 @@ class BaseFunctionHandler:
 
         :param str comment: The comment to add
         """
-        self.commands.append('# '+comment.strip())
+        self.commands.append(ExecutedCommand(self, '#', '# '+comment.strip()))
 
 class BedrockFunctionHandler(BaseFunctionHandler):
     """The Beckrock Edition function handler."""

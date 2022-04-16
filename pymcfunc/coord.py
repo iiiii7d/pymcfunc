@@ -13,7 +13,35 @@ _IntCoord: TypeAlias = Union[int, str]
 _FloatIntCoord: TypeAlias = Union[Union[int, float], str]
 
 @immutable
-class Coord2d: pass
+class Coord2d:
+    x: _FloatIntCoord
+    z: _FloatIntCoord
+
+    def __init__(self, x: _FloatIntCoord, z: _FloatIntCoord):
+        if any(str(c).startswith("^") for c in [x, z]) and not all(str(c).startswith("^") for c in [x, z]):
+            raise ValueError(f"Caret notation not used for all coordinates (Got {x} and {z})")
+        for name, c in [('x', x), ('z', z)]:
+            res = re.search(r"^[~^]?(-?\d*(?:\.\d+)?)$", str(c))
+            if res is None or len(str(res)) == 0:
+                raise ValueError(f"Coordinate {name} invalid (Got {c})")
+        self.x = x
+        self.z = z
+
+    def to_3d(self, y: _FloatIntCoord) -> Coord:
+        return Coord(self.x, y, self.z)
+
+    @classmethod
+    def at_executor(cls) -> Self:
+        return cls("~", "~")
+
+    def to_chunk_coord(self) -> ChunkCoord:
+        x = re.search(r"^[~^]?(-?\d*(?:\.\d+)?)$", str(self.x)).group(1)
+        z = re.search(r"^[~^]?(-?\d*(?:\.\d+)?)$", str(self.z)).group(1)
+        x = "" if x == "" else float(x) // 8
+        z = "" if z == "" else float(z) // 8
+        x = self.x[0] + str(x) if str(self.x)[0] in ("^", "~") else x
+        z = self.x[0] + str(z) if str(self.z)[0] in ("^", "~") else z
+        return ChunkCoord(x, z)
 
 @immutable
 class Coord:
@@ -65,9 +93,12 @@ class Coord:
         y = "" if y == "" else round(float(y))
         z = "" if z == "" else round(float(z))
         x = self.x[0] + str(x) if str(self.x)[0] in ("^", "~") else x
-        z = self.y[0] + str(y) if str(self.y)[0] in ("^", "~") else y
+        y = self.y[0] + str(y) if str(self.y)[0] in ("^", "~") else y
         z = self.x[0] + str(z) if str(self.z)[0] in ("^", "~") else z
         return BlockCoord(x, y, z)
+
+    def to_2d(self) -> Coord2d:
+        return Coord2d(self.x, self.z)
 
 class BlockCoord(Coord):
     x: _IntCoord

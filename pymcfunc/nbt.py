@@ -5,7 +5,11 @@ import json
 import re
 from abc import ABC
 from collections.abc import MutableSequence, Sequence
-from typing import Any
+# noinspection PyUnresolvedReferences
+from types import UnionType, GenericAlias
+# noinspection PyUnresolvedReferences
+from typing import Any, get_args, Type, TypeVar, Generic, _UnionGenericAlias, Union, get_origin, _LiteralGenericAlias, \
+    _GenericAlias
 
 from typing_extensions import Self
 
@@ -44,7 +48,7 @@ def _numerical(min_: str | float, max_: str | float, type_: type, suffix: str=""
             min = min_
             max = max_
 
-            def __init__(self, val: int):
+            def __init__(self, val: type_):
                 if not (min_ <= val <= max_):
                     raise ValueError(f"Value must be between {min_} and {max_}")
                 elif not isinstance(val, self.val_type):
@@ -125,8 +129,8 @@ class NBT:
     val_type: type
     def __new__(cls, val: val_type):
         if cls != NBT: return super().__new__(cls)
-        if isinstance(val, str): return String.__new__(String, val)
-        elif isinstance(val, bool): return Boolean.__new__(Boolean, val)
+        if isinstance(val, bool):
+            return Boolean.__new__(Boolean, val)
         elif isinstance(val, int):
             if Int.min <= val <= Int.max:
                 # noinspection PyArgumentList
@@ -142,6 +146,8 @@ class NBT:
             return List.__new__(List, val)
         elif isinstance(val, dict):
             return Compound.__new__(Compound, val)
+        elif isinstance(val, str) or hasattr(val, '__str__'):
+            return String.__new__(String, str(val))
         raise TypeError(f"Type {type(val).__name__} not supported as NBT value (Got {val})")
 
     def __init__(self, val: val_type):
@@ -180,8 +186,9 @@ class String(NBT, str):
     def __str__(self):
         return json.dumps(self._val)
 
-@_sequential(Any)
-class List(NBT): pass
+_T = TypeVar('_T')
+@_sequential(_T)
+class List(NBT, Generic[_T]): pass
 
 @_sequential(Byte, "B")
 class ByteArray(NBT): pass
@@ -206,7 +213,9 @@ class Compound(NBT, dict):
 
     # noinspection PyMissingConstructor
     def __init__(self, val: dict[str, Any]):
-        self._val = {str(k): NBT(v) for k, v in val.items()}
+        self._val = {str(k): (v if isinstance(v, NBT)
+                              else v.as_nbt() if isinstance(v, NBTRepresentable)
+                              else NBT(v)) for k, v in val.items()}
 
         def _immutable_lock2(self2, key: str, value: Any):
             value = NBT(value) if not issubclass(type(value), NBT) else value
@@ -243,10 +252,67 @@ class Compound(NBT, dict):
         return self._val.items()
 
     def __str__(self) -> str:
-        return "{"+",".join(k+":"+str(v) for k, v in self.items())+"}"
+        return "{"+",".join(k+": "+str(v) for k, v in self.items())+"}"
 
     def py(self) -> dict[str, Any]:
         return {k: v.py() for k, v in self._val}
 
-class Template(Compound):
-    pass
+class NBTRepresentable:
+    def as_nbt(self) -> NBT: pass
+
+_I = TypeVar('_I')
+class DictReprAsList(Generic[_I]): pass
+
+class NBTFormat(NBTRepresentable):
+    def as_nbt(self) -> Compound:
+        d = {}
+        for var, anno in type(self).__annotations__.items():
+            if var not in self.NBT_FORMAT: continue
+            if type(None) in get_args(anno) and getattr(self, var, None) is None: continue
+            if isinstance(anno, type) and issubclass(anno, NBTRepresentable):
+                d[var] = getattr(self, var).as_nbt()
+            elif isinstance(anno, type) and issubclass(anno, NBT):
+                d[var] = getattr(self, var)
+            else:
+                format_type = self.NBT_FORMAT[var]
+                if isinstance(format_type, _GenericAlias) and \
+                   isinstance(get_origin(format_type), DictReprAsList):
+                    d[var] = Compound({v.name: v.as_nbt() for v in getattr(self, var)})
+                if isinstance(format_type, _UnionGenericAlias):
+                    if type(None) in get_args(format_type) and getattr(self, var, None) is None: continue
+                    for format_subtype in get_args(format_type):
+                        try:
+                            d[var] = format_subtype(getattr(self, var))
+                            break
+                        except Exception: pass
+                    else:
+                        raise TypeError(f"`{var}` is not one of types {', '.join(str(a) for a in get_args(format_type))} (Got {getattr(self, var)})")
+                else:
+                    d[var] = self.NBT_FORMAT[var](getattr(self, var))
+            # noinspection PyTypeHints
+            if not isinstance(d[var], self.NBT_FORMAT[var]):
+                raise TypeError(f"`{var}` is not of type {self.NBT_FORMAT[var]} (Got {getattr(self, var)})")
+        return Compound(d)
+
+    NBT_FORMAT: dict[str, Type[NBTRepresentable, NBT]] | property = {}
+
+def make_nbt_representable(anno: type) -> Type[NBTRepresentable] | Union:
+    if isinstance(anno, (_UnionGenericAlias, UnionType)):
+        return Union[tuple(make_nbt_representable(i) for i in get_args(anno))]
+    elif issubclass(anno, (NBTRepresentable, NBT)):
+        return anno
+    elif issubclass(anno, float):
+        return Double
+    elif issubclass(anno, int):
+        return Int
+    elif issubclass(anno, bool):
+        return Boolean
+    elif isinstance(anno, GenericAlias):
+        if get_origin(anno) == list:
+            return List[make_nbt_representable(get_args(anno)[0])]
+        elif get_origin(anno) == dict:
+            return Compound
+    elif issubclass(anno, (str, _LiteralGenericAlias)) or hasattr(anno, "__str__"):
+        return String
+    else:
+        return anno
