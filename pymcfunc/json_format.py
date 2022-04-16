@@ -107,10 +107,10 @@ class EntityJson(NBTFormat):
     @property
     def NBT_FORMAT(self) -> dict[str, Type[NBTRepresentable, NBT]]:
         return {
-            'distance': Optional[dict[str, FloatRangeJson]], # TODO format for distance
+            'distance': Optional[dict[Literal["absolute", "horizontal", "x", "y", "z"], FloatRangeJson]], # TODO format for distance
             'effects': Optional[DictReprAsList[self.Effect]],
-            'equipment': Optional[dict[str, ItemJson]], #TODO same for below two
-            'flags': Optional[dict[str, Boolean]],
+            'equipment': Optional[dict[Literal["mainhand", "offhand", "head", "chest", "legs", "feet"], ItemJson]], #TODO same for below two
+            'flags': Optional[dict[Literal["is_on_fire", "is_sneaking", "is_sprinting", "is_swimming", "is_baby"], Boolean]],
             'lightning_bolt': Optional[self.LightningBolt],
             'location': Optional[LocationJson],
             'nbt': Optional[NBT],

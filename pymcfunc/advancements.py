@@ -71,7 +71,7 @@ class AdvancementDisplay(NBTFormat):
         return {
             'icon': Icon,
             'title': Union[String, List[Compound], Compound],
-            'frame': Optional[String],
+            'frame': Optional[Literal["challenge", "goal", "task"]],
             'background': Optional[String],
             'description': String,
             'show_toast': Boolean,
@@ -88,14 +88,6 @@ class Rewards(NBTFormat):
     loot: list[LootTable] | None = None
     experience: int | None = None
     function: Function | None = None
-
-    def json(self) -> dict:
-        return {
-            "recipes": self.recipes,
-            "loot": self.loot,
-            "experience": self.experience,
-            "function": self.function
-        }
 
     @property
     def NBT_FORMAT(self) -> dict[str, Type[NBTRepresentable, NBT]]:
