@@ -121,14 +121,14 @@ _BedrockObjectiveName: TypeAlias = Annotated[str, Regex(_bedrock_objective_regex
 
 class Command:
     order: list[Element]
-    fh: BaseFunctionHandler
+    fh: BaseFunctionHandler | None
     arg_namelist: list[str]
     eles: dict[str, AE]
     name: str
     segment_name: str
     func: Callable[[BaseRawCommands, ...], ExecutedCommand]
     @classmethod
-    def command(cls, fh: BaseFunctionHandler,
+    def command(cls, fh: BaseFunctionHandler | None,
                 order: list[Element],
                 cmd_name: str | None = None,
                 segment_name: str | None = None):

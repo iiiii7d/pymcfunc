@@ -26,10 +26,7 @@ if TYPE_CHECKING:
 
 def _command(order: list[Element], cmd_name: str | None = None, segment_name: str | None = None):
     def decorator(func: Callable[..., Any]):
-        @wraps(func)
-        def wrapper(self, *args, **kwargs):
-            return Command.command(self.fh, order, cmd_name, segment_name)(func)(*args, **kwargs)
-        return wrapper
+        return Command.command(None, order, cmd_name, segment_name)(func)
     return decorator
 
 def _base_version(platform: Type[JavaVersion, BedrockVersion], introduced: Optional[str]=None, deprecated: Optional[str]=None, temp_removed: Optional[Tuple[str, str]]=None):
@@ -72,6 +69,12 @@ class BaseRawCommands:
 
     def __init__(self, fh: BaseFunctionHandler):
         self.fh = fh
+
+    def __getattribute__(self, item: str):
+        attr = super().__getattribute__(item)
+        if isinstance(attr, Command):
+            attr.fh = self.fh
+        return attr
 
 
 class BedrockRawCommands(BaseRawCommands):
@@ -639,7 +642,7 @@ class BedrockRawCommands(BaseRawCommands):
                                      target_objective: _BedrockObjectiveName,
                                      operation: Literal['=', '+=', '-=', '*=', '/=', '%=', '><', '<', '>'],
                                      source: _BedrockTarget | Literal['*'],
-                                     source_object: _BedrockObjectiveName) -> ExecutedCommand: pass
+                                     source_objective: _BedrockObjectiveName) -> ExecutedCommand: pass
 
     @_command([AE("pos"),
                AE("block"),
@@ -676,7 +679,7 @@ class BedrockRawCommands(BaseRawCommands):
                       center: Coord2d,
                       spread_distance: Annotated[float, Range(0.0, Float.max)],
                       max_range: Annotated[float, Range(1.0, Float.max)],
-                      targets: _BedrockTarget) -> ExecutedCommand: pass
+                      victim: _BedrockTarget) -> ExecutedCommand: pass
 
     @_command([])
     def stop(self) -> ExecutedCommand: pass
@@ -915,12 +918,6 @@ class JavaRawCommands(BaseRawCommands):
     def _version(introduced: Optional[str] = None, deprecated: Optional[str] = None,
                  temp_removed: Optional[Tuple[str, str]] = None):
         return _base_version(JavaVersion, introduced, deprecated, temp_removed)
-
-    def __getattribute__(self, item: str):
-        res = super().__getattribute__(item)
-        if 'cmd_info' in dir(res):
-            return Command.command(self.fh, *res.cmd_info)(res)
-        return res
 
     @_command([AE("command", True)])
     #@_version(introduced="12w17a")
@@ -1993,8 +1990,9 @@ class JavaRawCommands(BaseRawCommands):
                  destination: _JavaSingleTarget | None = None,
                  location: Coord | None = None,
                  rotation: Rotation | None = None,
-                 facing: Coord | None = None,
-                 facing_entity: _JavaTarget | None = None) -> ExecutedCommand: pass
+                 facing_location: Coord | None = None,
+                 facing_entity: _JavaTarget | None = None,
+                 facing_anchor: Literal['eyes', 'feet'] | None = None) -> ExecutedCommand: pass
     tp = teleport
 
     @_command([AE("targets"), AE("message")])
@@ -2046,7 +2044,7 @@ class JavaRawCommands(BaseRawCommands):
 
     @_command([AE("warning_level")], cmd_name='warden_spawn_tracker', segment_name='warden_spawn_tracker set')
     @_version(introduced="1.19ddes1")
-    def warden_spawn_tracker_set(self, level: int) -> ExecutedCommand: pass
+    def warden_spawn_tracker_set(self, warning_level: int) -> ExecutedCommand: pass
 
     @_command([AE("weather"), AE("duration", True)])
     @_version(introduced="12w32a")
@@ -2055,8 +2053,7 @@ class JavaRawCommands(BaseRawCommands):
 
     @_command([SE([AE("action", options=['add', 'remove']),
                    AE("targets")],
-                  [AE("action", options=['list', 'off', 'on', 'reload'])
-                  ])
+                  [AE("action", options=['list', 'off', 'on', 'reload'])])
                ])
     @_version(introduced="b1.3")
     def whitelist(self, action: Literal['add', 'remove', 'list', 'off', 'on', 'reload'],
