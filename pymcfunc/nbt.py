@@ -267,6 +267,7 @@ class NBTFormat(NBTRepresentable):
     def as_nbt(self) -> Compound:
         d = {}
         for var, anno in type(self).__annotations__.items():
+            var = var.removesuffix("_")
             if var not in self.NBT_FORMAT: continue
             format_type = self.NBT_FORMAT[var]
             if type(None) in get_args(anno) and getattr(self, var, None) is None: continue
@@ -330,3 +331,5 @@ def make_nbt_representable(anno: type) -> Type[NBTRepresentable] | Union:
         return String
     else:
         return anno
+
+# TODO JsonFormat wrapper around NBTFormat

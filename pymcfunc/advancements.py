@@ -1,17 +1,17 @@
 from __future__ import annotations
 
-import inspect
-from typing import TypeAlias, Union, Literal, Callable, Any, TYPE_CHECKING, Type, Optional
+from typing import TypeAlias, Union, Literal, Any, TYPE_CHECKING, Type, Optional
 
 from attr import define, field
 
+from pymcfunc.internal import base_class
+from pymcfunc.loot_tables import LootTable
 from pymcfunc.recipes import Recipe
 
 if TYPE_CHECKING: from pymcfunc.functions import Function
 from pymcfunc.json_format import ItemJson, EntityJson, DamageJson, DamageTypeJson, LocationJson, IntRangeJson, FloatRangeJson, \
     DoubleRangeJson
-from pymcfunc.nbt import Compound, NBT, List, NBTFormat, String, NBTRepresentable, Boolean, Int, make_nbt_representable, \
-    DictReprAsList
+from pymcfunc.nbt import Compound, NBT, List, NBTFormat, String, NBTRepresentable, Boolean, Int, DictReprAsList
 
 RawJson: TypeAlias = Union[dict, list]
 
@@ -82,7 +82,6 @@ class AdvancementDisplay(NBTFormat):
             'hidden': Boolean,
         }
 
-LootTable: TypeAlias = str # TODO LootTable and Predicate classes
 Predicate: TypeAlias = str
 @define(init=True)
 class Rewards(NBTFormat):
@@ -100,348 +99,626 @@ class Rewards(NBTFormat):
             'function': Optional[String]
         }
 
+@define(init=True)
 class Criterion(NBTFormat):
-    def __init__(self, name: str):
-        self.name = name
-        self.trigger: str = ""
+    conditions: Trigger
 
-    @staticmethod
-    def _trigger(**nbt_fmt: Type[NBTRepresentable, NBT]) -> Callable:
-        def decorator(func: Callable[..., Criterion]) -> Callable:
-            def wrapper(_, name, *__, **kwargs) -> Criterion:
-                crit = Criterion(name)
-                crit.trigger = "minecraft:" + func.__name__
-                annos = {}
-                for arg, param in inspect.signature(func).parameters.items():
-                    if arg in ("self", "name"): continue
-                    crit.__annotations__[arg] = param
-                    annos[arg] = param
+    @property
+    def trigger(self) -> str: return self.conditions.type
 
-                    if arg in kwargs and kwargs[arg] != param.default:
-                        crit.__dict__[arg] = kwargs[arg]
+    NBT_FORMAT = {
+        'trigger': String
+    }
 
-                crit.NBT_FORMAT = property(lambda self: {
-                    **{k: make_nbt_representable(v) for k, v in annos},
-                    **{k: Optional[v] for k, v in nbt_fmt}})
+@define(init=True, frozen=True)
+@base_class
+class Trigger(NBTFormat):
+    type: str = field(init=False)
 
-                def _immutable_lock(self, *_):
-                    raise AttributeError(f"{type(self).__name__} is immutable")
-                crit.__setattr__ = _immutable_lock
-                return crit
-            return wrapper
-        return decorator
+@define(init=True, frozen=True)
+@base_class
+class PlayerTrigger(Trigger):
+    player: EntityJson | list[Predicate] | None = None
 
-    @classmethod
-    @_trigger()
-    def bee_nest_destroyed(cls, name: str, *,
-                           block: str | None = None,
-                           item: ItemJson | None = None,
-                           num_bees_inside: int | None = None,
-                           player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+    NBT_FORMAT = {
+        'player': Optional[Union[EntityJson, list[Predicate]]]
+    }
 
-    @classmethod
-    @_trigger()
-    def bred_animals(cls, name: str, *,
-                     child: EntityJson | list[Predicate] | None = None,
-                     parent: EntityJson | list[Predicate] | None = None,
-                     partner: EntityJson | list[Predicate] | None = None,
-                     player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+@define(init=True, frozen=True)
+class AllayDropItemOnBlockTrigger(PlayerTrigger):
+    type: str = "minecraft:allay_drop_item_on_block"
+    location: LocationJson | None = None
+    item: ItemJson | None = None
 
-    @classmethod
-    @_trigger()
-    def brewed_potion(cls, name: str, *,
-                      potion: str | None = None,
-                      player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'location': Optional[LocationJson],
+        'item': Optional[ItemJson]
+    }
 
-    @classmethod
-    @_trigger()
-    def changed_dimension(cls, name: str, *,
-                          from_: Literal["overworld", "the_nether", "the_end"] | None = None,
-                          to: Literal["overworld", "the_nether", "the_end"] | None = None,
-                          player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+@define(init=True, frozen=True)
+class AvoidVibrationTrigger(PlayerTrigger):
+    type: str = "minecraft:avoid_vibration"
 
-    @classmethod
-    @_trigger()
-    def channeled_lightning(cls, name: str, *,
-                            victims: list[EntityJson | list[Predicate]] | None = None,
-                            player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+@define(init=True, frozen=True)
+class BeeNestDestroyedTrigger(PlayerTrigger):
+    type: str = "minecraft:bee_nest_destroyed"
+    block: str | None = None
+    item: ItemJson | None = None
+    num_bees_inside: int | None = None
 
-    @classmethod
-    @_trigger()
-    def construct_beacon(cls, name: str, *,
-                         level: int | IntRangeJson | None = None,
-                         player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'block': Optional[String],
+        'item': Optional[ItemJson],
+        'num_bees_inside': Optional[Int]
+    }
 
-    @classmethod
-    @_trigger()
-    def consume_item(cls, name: str, *,
-                     item: ItemJson | None = None,
-                     player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+@define(init=True, frozen=True)
+class BredAnimalsTrigger(PlayerTrigger):
+    type: str = "minecraft:bred_animals"
+    child: EntityJson | list[Predicate] | None = None
+    parent: EntityJson | list[Predicate] | None = None
+    partner: EntityJson | list[Predicate] | None = None
 
-    @classmethod
-    @_trigger()
-    def cured_zombie_villager(cls, name: str, *,
-                              villager: EntityJson | list[Predicate] | None = None,
-                              zombie: EntityJson | list[Predicate] | None = None,
-                              player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'child': Optional[Union[EntityJson, list[Predicate]]],
+        'parent': Optional[Union[EntityJson, list[Predicate]]],
+        'partner': Optional[Union[EntityJson, list[Predicate]]]
+    }
 
-    @classmethod
-    @_trigger()
-    def effects_changed(cls, name: str, *,
-                        effects: dict[str, dict[Literal["amplifier", "duration"], int | IntRangeJson]] | None = None,
-                        source: EntityJson | list[Predicate] | None = None,
-                        player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+@define(init=True, frozen=True)
+class BrewedPotionTrigger(PlayerTrigger):
+    type: str = "minecraft:brewed_potion"
+    potion: str | None = None
 
-    @classmethod
-    @_trigger()
-    def enchanted_item(cls, name: str, *,
-                       item: ItemJson | None = None,
-                       levels: int | IntRangeJson | None = None,
-                       player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'potion': Optional[String]
+    }
 
-    @classmethod
-    @_trigger()
-    def enter_block(cls, name: str, *,
-                    block: str | None = None,
-                    state: dict[str, Any] | None = None,
-                    player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+@define(init=True, frozen=True)
+class ChangedDimensionTrigger(PlayerTrigger):
+    type: str = "minecraft:changed_dimension"
+    from_: Literal['overworld', 'the_nether', 'the_end'] | None = None
+    to: Literal['overworld', 'the_nether', 'the_end'] | None = None
 
-    @classmethod
-    @_trigger()
-    def entity_hurt_player(cls, name: str, *,
-                           damage: DamageJson | None = None,
-                           player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'from': Optional[String],
+        'to': Optional[String]
+    }
 
-    @classmethod
-    @_trigger()
-    def entity_killed_player(cls, name: str, *,
-                             entity: EntityJson | list[Predicate] | None = None,
-                             killing_blow: DamageTypeJson | None = None,
-                             player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+@define(init=True, frozen=True)
+class ChanelledLightningTrigger(PlayerTrigger):
+    type: str = "minecraft:chanelled_lightning"
+    victims: list[EntityJson | list[Predicate]] | None = None
 
-    @classmethod
-    @_trigger()
-    def filled_bucket(cls, name: str, *,
-                      item: ItemJson | None = None,
-                      player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'victims': Optional[List[Union[EntityJson, List[Predicate]]]]
+    }
 
-    @classmethod
-    @_trigger()
-    def fishing_rod_hooked(cls, name: str, *,
-                           entity: EntityJson | list[Predicate] | None = None,
-                           item: ItemJson | None = None,
-                           rod: ItemJson | None = None,
-                           player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+@define(init=True, frozen=True)
+class ConstructBeaconTrigger(PlayerTrigger):
+    type: str = "minecraft:construct_beacon"
+    level: int | IntRangeJson | None = None
 
-    @classmethod
-    @_trigger()
-    def hero_of_the_village(cls, name: str, *,
-                            location: LocationJson | None = None,
-                            player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'level': Optional[Union[IntRangeJson, Int]]
+    }
 
-    @classmethod
-    @_trigger()
-    def impossible(cls, name: str) -> Criterion: pass
+@define(init=True, frozen=True)
+class ConsumeItemTrigger(PlayerTrigger):
+    type: str = "minecraft:consume_item"
+    item: ItemJson | None = None
 
-    @classmethod
-    @_trigger()
-    def inventory_changed(cls, name: str, *,
-                          items: list[ItemJson] | None = None,
-                          slots: dict[Literal["empty", "full", "occupied"], int | IntRangeJson] | None = None,
-                          player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'item': Optional[ItemJson]
+    }
 
-    @classmethod
-    @_trigger()
-    def item_durability_changed(cls, name: str, *,
-                                delta: int | IntRangeJson | None = None,
-                                durability: int | IntRangeJson | None = None,
-                                item: ItemJson | None = None,
-                                player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+@define(init=True, frozen=True)
+class CuredZombieVillagerTrigger(PlayerTrigger):
+    type: str = "minecraft:cured_zombie_villager"
+    villager: EntityJson | list[Predicate] | None = None
+    zombie: EntityJson | list[Predicate] | None = None
 
-    @classmethod
-    @_trigger()
-    def item_used_on_block(cls, name: str, *,
-                           location: LocationJson | None = None,
-                           item: ItemJson | None = None,
-                           player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'villager': Optional[Union[EntityJson, list[Predicate]]],
+        'zombie': Optional[Union[EntityJson, list[Predicate]]]
+    }
 
-    @classmethod
-    @_trigger()
-    def killed_by_crossbow(cls, name: str, *,
-                           unique_entity_types: int | IntRangeJson | None = None,
-                           victims: EntityJson | list[EntityJson | list[Predicate]] | None = None,
-                           player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+@define(init=True, frozen=True)
+class EffectsChangedTrigger(PlayerTrigger):
+    type: str = "minecraft:effects_changed"
+    effect: list[Effect] | None = None
+    source: EntityJson | list[Predicate] | None = None
 
-    @classmethod
-    @_trigger()
-    def levitation(cls, name: str, *,
-                   distance: dict[Literal["absolute", "horizontal", "x", "y", "z"], IntRangeJson] | None = None,
-                   duration: int | IntRangeJson | None = None,
-                   player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+    @define(init=True)
+    class Effect(NBTFormat):
+        name: str
+        amplifier: int | IntRangeJson | None = None
+        duration: int | IntRangeJson | None = None
 
-    @classmethod
-    @_trigger()
-    def lightning_strike(cls, name: str, *,
-                         lightning: EntityJson | list[Predicate] | None = None,
-                         bystander: EntityJson | list[Predicate] | None = None,
-                         player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+        NBT_FORMAT = {
+            'amplifier': Optional[Union[IntRangeJson, Int]],
+            'duration': Optional[Union[IntRangeJson, Int]]
+        }
 
-    @classmethod
-    @_trigger()
-    def location(cls, name: str, *,
-                 location: LocationJson | None = None,
-                 player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'effect': Optional[DictReprAsList[Effect]],
+        'source': Optional[Union[EntityJson, list[Predicate]]]
+    }
 
-    @classmethod
-    @_trigger()
-    def nether_travel(cls, name: str, *,
-                      entered: LocationJson | None = None,
-                      exited: LocationJson | None = None,
-                      distance: dict[Literal["absolute", "horizontal", "x", "y", "z"], FloatRangeJson] | None = None,
-                      player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+@define(init=True, frozen=True)
+class EnchantedItemTrigger(PlayerTrigger):
+    type: str = "minecraft:enchanted_item"
+    item: ItemJson | None = None
+    levels: int | IntRangeJson | None = None
 
-    @classmethod
-    @_trigger()
-    def placed_block(cls, name: str, *,
-                     block: str | None = None,
-                     item: ItemJson | None = None,
-                     location: LocationJson | None = None,
-                     state: dict[str, Any] | None = None,
-                     player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'item': Optional[ItemJson],
+        'levels': Optional[Union[IntRangeJson, Int]]
+    }
 
-    @classmethod
-    @_trigger()
-    def player_generates_container_loot(cls, name: str, *,
-                                        loot_table: LootTable | None = None,
-                                        player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+@define(init=True, frozen=True)
+class EnterBlockTrigger(PlayerTrigger):
+    type: str = "minecraft:enter_block"
+    block: str | None = None
+    state: dict[str, Any] | None = None
 
-    @classmethod
-    @_trigger()
-    def player_hurt_entity(cls, name: str, *,
-                           damage: DamageJson | None = None,
-                           entity: EntityJson | list[Predicate] | None = None,
-                           player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'block': Optional[String],
+        'state': Optional[dict[str, Any]]
+    }
 
-    @classmethod
-    @_trigger()
-    def player_interacted_with_entity(cls, name: str, *,
-                                      item: ItemJson | None = None,
-                                      entity: EntityJson | list[Predicate] | None = None,
-                                      player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+@define(init=True, frozen=True)
+class EntityHurtPlayerTrigger(PlayerTrigger):
+    type: str = "minecraft:entity_hurt_player"
+    damage: DamageJson | None = None
 
-    @classmethod
-    @_trigger()
-    def player_killed_entity(cls, name: str, *,
-                             entity: EntityJson | list[Predicate] | None = None,
-                             killing_blow: DamageTypeJson | None = None,
-                             player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'damage': Optional[DamageJson]
+    }
 
-    @classmethod
-    @_trigger()
-    def recipe_unlocked(cls, name: str, *,
-                        recipe: Recipe | None = None,
-                        player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+@define(init=True, frozen=True)
+class EntityKilledPlayerTrigger(PlayerTrigger):
+    type: str = "minecraft:entity_killed_player"
+    entity: EntityJson | list[Predicate] | None = None
+    killing_blow: DamageJson | None = None
 
-    @classmethod
-    @_trigger()
-    def shot_crossbow(cls, name: str, *,
-                      item: ItemJson | None,
-                      player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'entity': Optional[Union[EntityJson, list[Predicate]]],
+        'killing_blow': Optional[DamageJson]
+    }
 
-    @classmethod
-    @_trigger()
-    def slept_in_bed(cls, name: str, *,
-                     location: LocationJson | None,
-                     player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+@define(init=True, frozen=True)
+class FallFromHeightTrigger(PlayerTrigger):
+    type: str = "minecraft:fall_from_height"
+    start_position: LocationJson | None = None
+    distance: dict[Literal['absolute', 'horizontal', 'x', 'y', 'z'], FloatRangeJson] | None = None
 
-    @classmethod
-    @_trigger()
-    def slide_down_block(cls, name: str, *,
-                         block: str,
-                         player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'start_position': Optional[LocationJson],
+        'distance': Optional[dict[Literal['absolute', 'horizontal', 'x', 'y', 'z'], FloatRangeJson]]
+    }
 
-    @classmethod
-    @_trigger()
-    def started_riding(cls, name: str, *,
-                       player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+@define(init=True, frozen=True)
+class FilledBucketTrigger(PlayerTrigger):
+    type: str = "minecraft:filled_bucket"
+    item: ItemJson | None = None
 
-    @classmethod
-    @_trigger()
-    def summoned_entity(cls, name: str, *,
-                        entity: EntityJson | list[Predicate] | None = None,
-                        player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'item': Optional[ItemJson]
+    }
 
-    @classmethod
-    @_trigger()
-    def tame_animal(cls, name: str, *,
-                    entity: EntityJson | list[Predicate] | None = None,
-                    player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+@define(init=True, frozen=True)
+class FishingRodHookedTrigger(PlayerTrigger):
+    type: str = "minecraft:fishing_rod_hooked"
+    entity: EntityJson | list[Predicate] | None = None
+    item: ItemJson | None = None
+    rod: ItemJson | None = None
 
-    @classmethod
-    @_trigger()
-    def target_hit(cls, name: str, *,
-                   signal_strength: int | None = None,
-                   projectile: int | None = None,
-                   shooter: EntityJson | list[Predicate] | None = None,
-                   player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'entity': Optional[Union[EntityJson, list[Predicate]]],
+        'item': Optional[ItemJson],
+        'rod': Optional[ItemJson]
+    }
 
-    @classmethod
-    @_trigger()
-    def thrown_item_picked_up_by_entity(cls, name: str, *,
-                                        item: ItemJson | None = None,
-                                        entity: EntityJson | list[Predicate] | None = None,
-                                        player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+@define(init=True, frozen=True)
+class HeroOfTheVillageTrigger(PlayerTrigger):
+    type: str = "minecraft:hero_of_the_village"
+    location: LocationJson | None = None
 
-    @classmethod
-    @_trigger()
-    def tick(cls, name: str, *,
-             player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'location': Optional[LocationJson]
+    }
 
-    @classmethod
-    @_trigger()
-    def used_ender_eye(cls, name: str, *,
-                       distance: DoubleRangeJson | None = None,
-                       player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+@define(init=True, frozen=True)
+class ImpossibleTrigger(Trigger):
+    type: str = "minecraft:impossible"
 
-    @classmethod
-    @_trigger()
-    def used_totem(cls, name: str, *,
-                   item: ItemJson | None = None,
-                   player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+@define(init=True, frozen=True)
+class InventoryChangedTrigger(PlayerTrigger):
+    type: str = "minecraft:inventory_changed"
+    items: list[ItemJson] | None = None
+    slots: dict[Literal['empty', 'full', 'occupied'], Union[Int, IntRangeJson]] | None = None
 
-    @classmethod
-    @_trigger()
-    def using_item(cls, name: str, *,
-                   item: ItemJson | None = None,
-                   player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'items': Optional[list[ItemJson]],
+        'slots': Optional[dict[Literal['empty', 'full', 'occupied'], Union[Int, IntRangeJson]]]
+    }
 
-    @classmethod
-    @_trigger()
-    def villager_trade(cls, name: str, *,
-                       item: ItemJson | None = None,
-                       villager: EntityJson | list[Predicate] | None = None,
-                       player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+@define(init=True, frozen=True)
+class ItemDurabilityChangedTrigger(PlayerTrigger):
+    type: str = "minecraft:item_durability_changed"
+    delta: int | IntRangeJson | None = None
+    durability: int | IntRangeJson | None = None
+    item: ItemJson | None = None
 
-    @classmethod
-    @_trigger()
-    def voluntary_exile(cls, name: str, *,
-                        location: LocationJson | None = None,
-                        player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'delta': Optional[Union[Int, IntRangeJson]],
+        'durability': Optional[Union[Int, IntRangeJson]],
+        'item': Optional[ItemJson]
+    }
 
-    # TODO Deprecation warnings for below three
+@define(init=True, frozen=True)
+class ItemUsedOnBlockTrigger(PlayerTrigger):
+    type: str = "minecraft:item_used_on_block"
+    location: LocationJson | None = None
+    item: ItemJson | None = None
 
-    @classmethod
-    @_trigger()
-    def arbitrary_player_tick(cls, name: str) -> Criterion: pass
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'location': Optional[LocationJson],
+        'item': Optional[ItemJson]
+    }
 
-    @classmethod
-    @_trigger()
-    def player_damaged(cls, name: str, *,
-                       damage: DamageJson | None = None) -> Criterion: pass
+@define(init=True, frozen=True)
+class KillMobNearSculkCatalystTrigger(PlayerTrigger):
+    type: str = "minecraft:kill_mob_near_sculk_catalyst"
+    entity: EntityJson | list[Predicate] | None = None
+    killing_blow: DamageTypeJson | None = None
 
-    @classmethod
-    @_trigger()
-    def safely_harvest_honey(cls, name: str, *,
-                             block: dict[Literal["block", "tag"], str],
-                             item: ItemJson | None,
-                             player: EntityJson | list[Predicate] | None = None) -> Criterion: pass
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'entity': Optional[Union[EntityJson, list[Predicate]]],
+        'killing_blow': Optional[DamageTypeJson]
+    }
+
+@define(init=True, frozen=True)
+class KilledByCrossbowTrigger(PlayerTrigger):
+    type: str = "minecraft:killed_by_crossbow"
+    unique_entity_types: int | IntRangeJson | None = None
+    victims: EntityJson | list[EntityJson | list[Predicate]] | None = None
+
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'unique_entity_types': Optional[Union[Int, IntRangeJson]],
+        'victims': Optional[Union[EntityJson, list[Union[EntityJson, list[Predicate]]]]]
+    }
+
+@define(init=True, frozen=True)
+class LevitationTrigger(PlayerTrigger):
+    type: str = "minecraft:levitation"
+    distance: dict[Literal['absolute', 'horizontal', 'x', 'y', 'z'], IntRangeJson] | None = None
+    duration: int | IntRangeJson | None = None
+
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'distance': Optional[dict[Literal['absolute', 'horizontal', 'x', 'y', 'z'], IntRangeJson]],
+        'duration': Optional[Union[int, IntRangeJson]]
+    }
+
+@define(init=True, frozen=True)
+class LightningStrikeTrigger(PlayerTrigger):
+    type: str = "minecraft:lightning_strike"
+    lightning: EntityJson | list[Predicate] | None = None
+    bystander: EntityJson | list[Predicate] | None = None
+
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'lightning': Optional[Union[EntityJson, list[Predicate]]],
+        'bystander': Optional[Union[EntityJson, list[Predicate]]]
+    }
+
+@define(init=True, frozen=True)
+class LocationTrigger(PlayerTrigger):
+    type: str = "minecraft:location"
+    location: LocationJson | None = None
+
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'location': Optional[LocationJson]
+    }
+
+@define(init=True, frozen=True)
+class NetherTravelTrigger(PlayerTrigger):
+    type: str = "minecraft:nether_travel"
+    start_position: LocationJson | None = None
+    distance: dict[Literal['absolute', 'horizontal', 'x', 'y', 'z'], FloatRangeJson] | None = None
+
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'start_position': Optional[LocationJson],
+        'distance': Optional[dict[Literal['absolute', 'horizontal', 'x', 'y', 'z'], FloatRangeJson]]
+    }
+
+@define(init=True, frozen=True)
+class PlacedBlockTrigger(PlayerTrigger):
+    type: str = "minecraft:placed_block"
+    block: str | None = None
+    item: ItemJson | None = None
+    location: LocationJson | None = None
+    state: dict[str, Any] | None = None
+
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'block': Optional[String],
+        'item': Optional[ItemJson],
+        'location': Optional[LocationJson],
+        'state': Optional[dict[str, Any]]
+    }
+
+@define(init=True, frozen=True)
+class PlayerGeneratesContainerLootTrigger(PlayerTrigger):
+    type: str = "minecraft:player_generates_container_loot"
+    loot_table: str | LootTable
+
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'loot_table': String
+    }
+
+@define(init=True, frozen=True)
+class PlayerHurtEntityTrigger(PlayerTrigger):
+    type: str = "minecraft:player_hurt_entity"
+    damage: DamageJson | None = None
+    entity: EntityJson | list[Predicate] | None = None
+
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'damage': Optional[DamageJson],
+        'entity': Optional[Union[EntityJson, list[Predicate]]]
+    }
+
+@define(init=True, frozen=True)
+class PlayerInteractedWithEntityTrigger(PlayerTrigger):
+    type: str = "minecraft:player_interacted_with_entity"
+    item: ItemJson | None = None
+    entity: EntityJson | list[Predicate] | None = None
+    
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'item': Optional[ItemJson],
+        'entity': Optional[Union[EntityJson, list[Predicate]]]
+    }
+    
+@define(init=True, frozen=True)
+class PlayerKilledEntityTrigger(PlayerTrigger):
+    type: str = "minecraft:player_killed_entity"
+    entity: EntityJson | list[Predicate] | None = None
+    killing_blow: DamageTypeJson | None = None
+    
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'entity': Optional[Union[EntityJson, list[Predicate]]],
+        'killing_blow': Optional[DamageTypeJson]
+    }
+    
+@define(init=True, frozen=True)
+class RecipeUnlockedTrigger(PlayerTrigger):
+    type: str = "minecraft:recipe_unlocked"
+    recipe: str | Recipe
+
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'recipe': String
+    }
+
+@define(init=True, frozen=True)
+class RideEntityInLavaTrigger(PlayerTrigger):
+    type: str = "minecraft:ride_entity_in_lava"
+    start_position: LocationJson | None = None
+    distance: dict[Literal['absolute', 'horizontal', 'x', 'y', 'z'], FloatRangeJson] | None = None
+
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'start_position': Optional[LocationJson],
+        'distance': Optional[dict[Literal['absolute', 'horizontal', 'x', 'y', 'z'], FloatRangeJson]]
+    }
+
+@define(init=True, frozen=True)
+class ShotCrossbowTrigger(PlayerTrigger):
+    type: str = "minecraft:shot_crossbow"
+    item: ItemJson | None = None
+
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'item': Optional[ItemJson]
+    }
+
+@define(init=True, frozen=True)
+class SleptInBedTrigger(PlayerTrigger):
+    type: str = "minecraft:slept_in_bed"
+    location: LocationJson | None = None
+
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'location': Optional[LocationJson]
+    }
+
+@define(init=True, frozen=True)
+class SlideDownBlockTrigger(PlayerTrigger):
+    type: str = "minecraft:slide_down_block"
+    block: str | None = None
+
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'block': Optional[String]
+    }
+
+@define(init=True, frozen=True)
+class StartedRidingTrigger(PlayerTrigger):
+    type: str = "minecraft:started_riding"
+
+@define(init=True, frozen=True)
+class SummonedEntityTrigger(PlayerTrigger):
+    type: str = "minecraft:summoned_entity"
+    entity: EntityJson | list[Predicate] | None = None
+
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'entity': Optional[Union[EntityJson, list[Predicate]]]
+    }
+
+@define(init=True, frozen=True)
+class TameAnimalTrigger(PlayerTrigger):
+    type: str = "minecraft:tame_animal"
+    entity: EntityJson | list[Predicate] | None = None
+
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'entity': Optional[Union[EntityJson, list[Predicate]]]
+    }
+
+@define(init=True, frozen=True)
+class TargetHitTrigger(PlayerTrigger):
+    type: str = "minecraft:target_hit"
+    signal_strength: int | None = None
+    projectile: str
+    shooter: EntityJson | list[Predicate] | None = None
+
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'signal_strength': Optional[Int],
+        'projectile': String,
+        'shooter': Optional[Union[EntityJson, list[Predicate]]]
+    }
+
+@define(init=True, frozen=True)
+class ThrownItemPickedUpByEntityTrigger(PlayerTrigger):
+    type: str = "minecraft:thrown_item_picked_up_by_entity"
+    item: ItemJson | None = None
+    entity: EntityJson | list[Predicate] | None = None
+
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'item': Optional[ItemJson],
+        'entity': Optional[Union[EntityJson, list[Predicate]]]
+    }
+
+@define(init=True, frozen=True)
+class ThrownItemPickedUpByPlayerTrigger(PlayerTrigger):
+    type: str = "minecraft:thrown_item_picked_up_by_player"
+    entity: EntityJson | list[Predicate] | None = None
+    item: ItemJson | None = None
+
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'entity': Optional[Union[EntityJson, list[Predicate]]],
+        'item': Optional[ItemJson]
+    }
+
+@define(init=True, frozen=True)
+class TickTrigger(Trigger):
+    type: str = "minecraft:tick"
+
+@define(init=True, frozen=True)
+class UsedEnderEyeTrigger(PlayerTrigger):
+    type: str = "minecraft:used_ender_eye"
+    distance: Int | DoubleRangeJson | None = None
+
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'distance': Optional[Union[Int, DoubleRangeJson]]
+    }
+
+@define(init=True, frozen=True)
+class UsedTotemTrigger(PlayerTrigger):
+    type: str = "minecraft:used_totem"
+    item: ItemJson | None = None
+
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'item': Optional[ItemJson]
+    }
+
+@define(init=True, frozen=True)
+class UsingItemTrigger(PlayerTrigger):
+    type: str = "minecraft:using_item"
+    item: ItemJson | None = None
+
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'item': Optional[ItemJson]
+    }
+
+@define(init=True, frozen=True)
+class VillagerTradeTrigger(PlayerTrigger):
+    type: str = "minecraft:villager_trade"
+    item: ItemJson | None = None
+    villager: EntityJson | list[Predicate] | None = None
+
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'item': Optional[ItemJson],
+        'villager': Optional[Union[EntityJson, list[Predicate]]]
+    }
+
+@define(init=True, frozen=True)
+class VoluntaryExileTrigger(PlayerTrigger):
+    type: str = "minecraft:voluntary_exile"
+    location: LocationJson | None = None
+
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'location': Optional[LocationJson]
+    }
+
+# TODO deprecation notices for below triggers
+
+@define(init=True, frozen=True)
+class ArbitraryPlayerTickTrigger(Trigger):
+    type: str = "minecraft:arbitrary_player_tick"
+
+@define(init=True, frozen=True)
+class ItemDeliveredToPlayerTrigger(PlayerTrigger):
+    type: str = "minecraft:item_delivered_to_player"
+
+@define(init=True, frozen=True)
+class PlayerDamagedTrigger(Trigger):
+    type: str = "minecraft:player_damaged"
+    damage: DamageJson | None = None
+
+    NBT_FORMAT = {
+        **Trigger.NBT_FORMAT,
+        'damage': Optional[DamageJson]
+    }
+
+@define(init=True, frozen=True)
+class SafelyHarvestHoneyTrigger(PlayerTrigger):
+    type: str = "minecraft:safely_harvest_honey"
+    block: dict[Literal['block', 'tag'], str] | None = None
+    item: ItemJson | None = None
+
+    NBT_FORMAT = {
+        **PlayerTrigger.NBT_FORMAT,
+        'block': Optional[dict[Literal['block', 'tag'], String]],
+        'item': Optional[ItemJson]
+    }

@@ -63,6 +63,48 @@ class LootTableEntry(NBTFormat):
     }
 
 @define(init=True)
+@base_class
+class ChildrenEntry(NBTFormat):
+    children: list[Entry]
+
+    NBT_FORMAT = {
+        **Entry.NBT_FORMAT,
+        "type": String,
+        "children": list[Entry]
+    }
+
+@define(init=True)
+class GroupEntry(ChildrenEntry):
+    type: str = "group"
+
+@define(init=True)
+class AlternativesEntry(ChildrenEntry):
+    type: str = "alternatives"
+
+@define(init=True)
+class SequenceEntry(ChildrenEntry):
+    type: str = "group"
+
+@define(init=True)
+class DynamicEntry(Entry):
+    type: str = "dynamic"
+    name: str
+
+    NBT_FORMAT = {
+        **ChildrenEntry.NBT_FORMAT,
+        "type": String,
+        "name": String,
+    }
+
+@define(init=True)
+class EmptyEntry(Entry):
+    type: str = "empty"
+
+    NBT_FORMAT = {
+        **Entry.NBT_FORMAT
+    }
+
+@define(init=True)
 class Pool(NBTFormat):
     conditions: list[Predicate]
     functions: list[ItemModifier]
@@ -77,6 +119,7 @@ class Pool(NBTFormat):
         "bonus_rolls": Union[Float, NumberProvider],
         "entries": List[String]
     }
+
 @define(init=True)
 @base_class
 class LootTable(NBTFormat):
