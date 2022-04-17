@@ -1,23 +1,23 @@
 from __future__ import annotations
 
-from typing import Union
+from typing import Union, Optional
 
-from attr import define, field
+from attr import define
 
 from pymcfunc.command import ResourceLocation
 from pymcfunc.internal import base_class
+from pymcfunc.item_modifiers import ItemModifier
 from pymcfunc.nbt import NBTFormat, List, String, Int, Float, Boolean
 from pymcfunc.number_providers import NumberProvider
+from pymcfunc.predicates import Predicate
 
-ItemModifier = str
-Predicate = str
 
 @define(init=True)
 @base_class
 class Entry(NBTFormat):
     conditions: list[Predicate]
     functions: list[ItemModifier]
-    type: str = field(init=False)
+    type = property(lambda self: "")
     weight: int
     quality: int
 
@@ -31,7 +31,7 @@ class Entry(NBTFormat):
 
 @define(init=True)
 class ItemEntry(Entry):
-    type: str = "item"
+    type = property(lambda self: "item")
     name: ResourceLocation
 
     NBT_FORMAT = {
@@ -41,7 +41,7 @@ class ItemEntry(Entry):
 
 @define(init=True)
 class TagEntry(Entry):
-    type: str = "tag"
+    type = property(lambda self: "tag")
     name: ResourceLocation
     expand: bool
 
@@ -53,7 +53,7 @@ class TagEntry(Entry):
 
 @define(init=True)
 class LootTableEntry(NBTFormat):
-    type: str = "loot_table"
+    type = property(lambda self: "loot_table")
     name: ResourceLocation | LootTable
 
     NBT_FORMAT = {
@@ -75,19 +75,19 @@ class ChildrenEntry(NBTFormat):
 
 @define(init=True)
 class GroupEntry(ChildrenEntry):
-    type: str = "group"
+    type = property(lambda self: "group")
 
 @define(init=True)
 class AlternativesEntry(ChildrenEntry):
-    type: str = "alternatives"
+    type = property(lambda self: "alternatives")
 
 @define(init=True)
 class SequenceEntry(ChildrenEntry):
-    type: str = "group"
+    type = property(lambda self: "group")
 
 @define(init=True)
 class DynamicEntry(Entry):
-    type: str = "dynamic"
+    type = property(lambda self: "dynamic")
     name: str
 
     NBT_FORMAT = {
@@ -98,7 +98,7 @@ class DynamicEntry(Entry):
 
 @define(init=True)
 class EmptyEntry(Entry):
-    type: str = "empty"
+    type = property(lambda self: "empty")
 
     NBT_FORMAT = {
         **Entry.NBT_FORMAT
@@ -123,12 +123,12 @@ class Pool(NBTFormat):
 @define(init=True)
 @base_class
 class LootTable(NBTFormat):
-    type: str = field(init=False)
     functions: list[ItemModifier]
     pools: list[Pool]
+    type: str | None = None
 
     NBT_FORMAT = {
-        "type": String,
+        "type": Optional[String],
         "functions": List[ItemModifier],
         "pools": List[Pool]
     }

@@ -27,7 +27,7 @@ class Entity:
                                   entity=self.target, value=1)
 
     def data_set_value(self, attr: str, val: Any):
-        """Sets an NBT data value.
+        """Sets an NBTTag data value.
         More info: https://pymcfunc.readthedocs.io/en/latest/reference.html#pymcfunc.ent.Entity.data_set_value"""
         self.fh.r.data_modify('set', 'value', attr,
                               entity=self.target, value=val)

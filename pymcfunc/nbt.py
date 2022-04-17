@@ -22,12 +22,12 @@ class Path:
         return "".join(self._components)
 
     def __getattr__(self, attr: str) -> Self:
-        str_attr = attr if re.search(r"^[a-zA-Z0-9]*$", attr) is not None else "\""+attr+"\""
+        str_attr = attr if re.search(r"^[a-zA-Z\d]*$", attr) is not None else "\""+attr+"\""
         self._components.append("."+str_attr)
         return self
 
-    def __getitem__(self, index: int | Ellipsis | NBT) -> Self:
-        str_index = str(int) if isinstance(index, (str, NBT)) else ""
+    def __getitem__(self, index: int | Ellipsis | NBTTag) -> Self:
+        str_index = str(int) if isinstance(index, (str, NBTTag)) else ""
         self._components.append("["+str(str_index)+"]")
         return self
 
@@ -53,11 +53,12 @@ def _numerical(min_: str | float, max_: str | float, type_: type, suffix: str=""
                     raise ValueError(f"Value must be between {min_} and {max_}")
                 elif not isinstance(val, self.val_type):
                     raise TypeError(f"Value must be a(n) {self.val_type.__name__} (Got {val})")
-                NBT.__init__(self, val)
+                NBTTag.__init__(self, val)
 
             def __str__(self):
                 return str(self._val) + suffix
-            
+
+            @property
             def py(self) -> val_type:
                 return self._val
         return NumericalNBT
@@ -73,7 +74,7 @@ def _sequential(type_: type, prefix: str=""):
             content_type: type
 
             # noinspection PyMissingConstructor
-            def __init__(self, val: Sequence[content_type], nbt_type: type=NBT):
+            def __init__(self, val: Sequence[content_type], nbt_type: type=NBTTag):
                 self.content_type = type_
                 val = [nbt_type(v) for v in val]
                 if len(val) >= 1:
@@ -100,7 +101,7 @@ def _sequential(type_: type, prefix: str=""):
                 return self._val[index]
 
             def __setitem__(self, index: int, val: content_type):
-                val = NBT(val) if not issubclass(type(val), NBT) else val
+                val = NBTTag(val) if not issubclass(type(val), NBTTag) else val
                 if not isinstance(val, self.content_type):
                     raise TypeError(f"value must be of type {self.content_type.__name__} (Got {val})")
                 self._val[index] = val
@@ -115,9 +116,10 @@ def _sequential(type_: type, prefix: str=""):
                 if not isinstance(val, self.content_type):
                     raise TypeError(f"value must be of type {self.content_type.__name__} (Got {val})")
                 self._val.insert(index, val)
-                
+
+            @property
             def py(self) -> list[content_type]:
-                return [i.py() for i in self._val]
+                return [i.py for i in self._val]
 
         return SequentialNBT
     return decorator
@@ -125,10 +127,15 @@ def _sequential(type_: type, prefix: str=""):
 def _immutable_lock(*_):
     raise AttributeError("Value is immutable")
 
+
 class NBT:
+    @property
+    def py(self) -> Any: return None
+
+class NBTTag(NBT):
     val_type: type
     def __new__(cls, val: val_type):
-        if cls != NBT: return super().__new__(cls)
+        if cls != NBTTag: return super().__new__(cls)
         if isinstance(val, bool):
             return Boolean.__new__(Boolean, val)
         elif isinstance(val, int):
@@ -148,7 +155,7 @@ class NBT:
             return Compound.__new__(Compound, val)
         elif isinstance(val, str) or hasattr(val, '__str__'):
             return String.__new__(String, str(val))
-        raise TypeError(f"Type {type(val).__name__} not supported as NBT value (Got {val})")
+        raise TypeError(f"Type {type(val).__name__} not supported as NBTTag value (Got {val})")
 
     def __init__(self, val: val_type):
         if not isinstance(val, self.val_type):
@@ -159,66 +166,68 @@ class NBT:
 
     def __repr__(self):
         return type(self).__name__+"("+str(self)+")"
-    
+
+    @property
     def py(self) -> val_type:
         return self._val
 
 @_numerical(-128, 127, int, "b")
-class Byte(NBT): pass
+class Byte(NBTTag): pass
 
 @_numerical(-32768, 32767, int, "s")
-class Short(NBT): pass
+class Short(NBTTag): pass
 
 @_numerical(-2_147_483_648, 2_147_483_647, int)
-class Int(NBT): pass
+class Int(NBTTag): pass
 
 @_numerical(-9_223_372_036_854_775_808, 9_223_372_036_854_775_807, int, "L")
-class Long(NBT): pass
+class Long(NBTTag): pass
 
 @_numerical(-3.4e38, 3.4e38, float, "f")
-class Float(NBT): pass
+class Float(NBTTag): pass
 
 @_numerical(-1.7e308, 1.7e308, float)
-class Double(NBT): pass
+class Double(NBTTag): pass
 
-class String(NBT, str):
+class String(NBTTag, str):
     val_type = str
     def __str__(self):
         return json.dumps(self._val)
 
 _T = TypeVar('_T')
 @_sequential(_T)
-class List(NBT, Generic[_T]): pass
+class List(NBTTag, Generic[_T]): pass
 
 @_sequential(Byte, "B")
-class ByteArray(NBT): pass
+class ByteArray(NBTTag): pass
 
 @_sequential(Int, "I")
-class IntArray(NBT): pass
+class IntArray(NBTTag): pass
 
 @_sequential(Long, "L")
-class LongArray(NBT): pass
+class LongArray(NBTTag): pass
 
-class Boolean(NBT):
+class Boolean(NBTTag):
     val_type = bool
     def __str__(self):
         return "true" if self._val else "false"
-    
+
+    @property
     def py(self) -> val_type:
         # noinspection PyTypeChecker
         return self._val
 
-class Compound(NBT, dict):
+class Compound(NBTTag, dict):
     val_type = dict
 
     # noinspection PyMissingConstructor
     def __init__(self, val: dict[str, Any]):
-        self._val = {str(k): (v if isinstance(v, NBT)
-                              else v.as_nbt() if isinstance(v, NBTRepresentable)
-                              else NBT(v)) for k, v in val.items()}
+        self._val = {str(k): (v if isinstance(v, NBTTag)
+                              else v.as_nbt() if isinstance(v, NBTFormat)
+                              else NBTTag(v)) for k, v in val.items()}
 
         def _immutable_lock2(self2, key: str, value: Any):
-            value = NBT(value) if not issubclass(type(value), NBT) else value
+            value = NBTTag(value) if not issubclass(type(value), NBTTag) else value
             if key == "_val": _immutable_lock()
             self2._val[key] = value
 
@@ -254,16 +263,32 @@ class Compound(NBT, dict):
     def __str__(self) -> str:
         return "{"+",".join(k+": "+str(v) for k, v in self.items())+"}"
 
+    @property
     def py(self) -> dict[str, Any]:
-        return {k: v.py() for k, v in self._val}
-
-class NBTRepresentable:
-    def as_nbt(self) -> NBT: pass
+        return {k: v.py for k, v in self._val}
 
 _I = TypeVar('_I')
 class DictReprAsList(Generic[_I]): pass
 
-class NBTFormat(NBTRepresentable):
+class NBTFormat(NBT):
+    @property
+    def py(self) -> dict:
+        d = {}
+        for var, anno in type(self).__annotations__.items():
+            if var not in self.NBT_FORMAT: continue
+            if anno == DictReprAsList:
+                d[var] = [v.as_json() for v in getattr(self, var)]
+            else:
+                if isinstance(getattr(self, var), NBT):
+                    d[var] = getattr(self, var).py
+                elif isinstance(getattr(self, var), list):
+                    d[var] = [v.py for v in getattr(self, var)]
+                elif isinstance(getattr(self, var), dict):
+                    d[var] = {k: v.py for k, v in getattr(self, var).items()}
+                else:
+                    d[var] = getattr(self, var)
+        return d
+    
     def as_nbt(self) -> Compound:
         d = {}
         for var, anno in type(self).__annotations__.items():
@@ -271,9 +296,9 @@ class NBTFormat(NBTRepresentable):
             if var not in self.NBT_FORMAT: continue
             format_type = self.NBT_FORMAT[var]
             if type(None) in get_args(anno) and getattr(self, var, None) is None: continue
-            if isinstance(anno, type) and issubclass(anno, NBTRepresentable):
+            if isinstance(anno, type) and issubclass(anno, NBT):
                 d[var] = getattr(self, var).as_nbt()
-            elif isinstance(anno, type) and issubclass(anno, NBT):
+            elif isinstance(anno, type) and issubclass(anno, NBTTag):
                 d[var] = getattr(self, var)
             elif isinstance(format_type, _LiteralGenericAlias):
                 if var not in get_args(format_type):
@@ -302,19 +327,20 @@ class NBTFormat(NBTRepresentable):
                 else:
                     raise TypeError(f"`{var}` is not one of types {', '.join(str(a) for a in get_args(format_type))} (Got {getattr(self, var)})")
             else:
+                # noinspection PyArgumentList
                 d[var] = self.NBT_FORMAT[var](getattr(self, var))
             # noinspection PyTypeHints
             if (not isinstance(d[var], String if isinstance(format_type, _LiteralGenericAlias) else self.NBT_FORMAT[var])) \
-                    or (issubclass(anno, NBTRepresentable) and not isinstance(d[var], Compound)):
+                    or (issubclass(anno, NBT) and not isinstance(d[var], Compound)):
                 raise TypeError(f"`{var}` is not of type {self.NBT_FORMAT[var]} (Got {getattr(self, var)})")
         return Compound(d)
 
-    NBT_FORMAT: dict[str, Type[NBTRepresentable, NBT]] | property = {}
+    NBT_FORMAT: dict[str, Type[NBT]] | property = {}
 
-def make_nbt_representable(anno: type) -> Type[NBTRepresentable] | Union:
+def make_nbt_representable(anno: type) -> Type[NBT] | Union:
     if isinstance(anno, (_UnionGenericAlias, UnionType)):
         return Union[tuple(make_nbt_representable(i) for i in get_args(anno))]
-    elif issubclass(anno, (NBTRepresentable, NBT)):
+    elif issubclass(anno, (NBT, NBTTag)):
         return anno
     elif issubclass(anno, float):
         return Double

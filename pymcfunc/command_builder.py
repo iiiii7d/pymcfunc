@@ -157,8 +157,10 @@ class CommandBuilder:
                     raise OptionError(element.options, value)
                 if not element.spaces and isinstance(value, str) and " " in value:
                     raise SpaceError(element.name, value)
+                # noinspection PyUnresolvedReferences
                 if issubclass(type(value), BaseSelector) and 'singleonly' in element.attrs and element.attrs['singleonly'] and not value.singleonly:
                     raise ValueError(f"Parameter {element.name} allows target selector for single entities/players (Got `{value}`)")
+                # noinspection PyUnresolvedReferences
                 if issubclass(type(value), BaseSelector) and 'playeronly' in element.attrs and element.attrs['playeronly'] and not value.playeronly:
                     raise ValueError(f"Parameter {element.name} allows players target selectors for (Got `{value}`)")
                 if isinstance(value, (int, float)) and 'range' in element.attrs and not element.attrs['range'](value):

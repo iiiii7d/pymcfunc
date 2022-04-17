@@ -1,7 +1,4 @@
-from textwrap import dedent
 from difflib import get_close_matches
-
-from pymcfunc.version import JavaVersion
 
 
 class SpaceError(Exception):

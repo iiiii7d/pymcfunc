@@ -1,17 +1,26 @@
-from typing import Any, Callable, Dict, List, Optional, Union
+from __future__ import annotations
+
+from typing import Any, Callable, Optional
 
 from pymcfunc import selectors
+from pymcfunc.advancements import Advancement
 from pymcfunc.functions import JavaFunctionHandler, Function
 from pymcfunc.internal import base_class
+from pymcfunc.loot_tables import LootTable
+from pymcfunc.predicates import Predicate
+from pymcfunc.recipes import Recipe
 from pymcfunc.version import JavaVersion
+from pymcfunc.item_modifiers import ItemModifier
+
 
 @base_class
 class BasePack: pass
 
+
 class JavaPack(BasePack):
     """Represents a Java Edition Datapack."""
 
-    def __init__(self, name: str, version: Union[str, JavaVersion]):
+    def __init__(self, name: str, version: str | JavaVersion):
         """
         Initialises the pack.
         
@@ -20,14 +29,14 @@ class JavaPack(BasePack):
         :type version: str | JavaVersion
         """
         self.name = name
-        self.funcs: list[Function] = []
-        self.tags: Dict[str, Dict[str, List[str]]] = {'blocks': {}, 'entity_types': {}, 'fluids': {}, 'functions': {}, 'items': {}}
-        self.minecraft_tags: Dict[str, List] = {'load': [], 'tick': []}
-        self.advancements: dict = {}
-        self.loot_tables: dict = {}
-        self.predicates: dict = {}
-        self.recipes: dict = {}
-        self.item_modifiers: dict = {}
+        self.functions: list[Function] = []
+        self.tags: dict[str, dict[str, list[str]]] = {'blocks': {}, 'entity_types': {}, 'fluids': {}, 'functions': {}, 'items': {}}
+        self.minecraft_tags: dict[str, list] = {'load': [], 'tick': []}
+        self.advancements: list[Advancement] = []
+        self.loot_tables: list[LootTable] = []
+        self.predicates: list[Predicate] = []
+        self.recipes: list[Recipe] = []
+        self.item_modifiers: list[ItemModifier] = []
         self.sel = selectors.JavaSelector
         self.version = JavaVersion(version) if isinstance(version, str) else version
 
@@ -48,3 +57,5 @@ class JavaPack(BasePack):
             self.funcs.append(function)
             return function
         return decorator
+
+    def build(self): pass

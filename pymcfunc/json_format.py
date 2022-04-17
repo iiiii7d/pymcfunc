@@ -5,8 +5,9 @@ from typing import Literal, Type, Optional, Union
 from attr import define
 
 from pymcfunc.internal import immutable
-from pymcfunc.nbt import Float, Int, Double, NBT, Compound, NBTFormat, Boolean, NBTRepresentable, List, String, \
+from pymcfunc.nbt import Float, Int, Double, NBTTag, Compound, NBTFormat, Boolean, NBT, List, String, \
     DictReprAsList
+from pymcfunc.number_providers import NumberProvider
 
 
 @immutable
@@ -40,6 +41,11 @@ class DoubleRangeJson(RangeJson):
         'min': Double,
         'max': Double
     }
+class NumberProviderRangeJson(RangeJson):
+    NBT_FORMAT = {
+        'min': NumberProvider,
+        'max': NumberProvider
+    }
 
 @define(init=True)
 class DamageJson(NBTFormat):
@@ -50,7 +56,7 @@ class DamageJson(NBTFormat):
     type: DamageTypeJson | None = None
 
     @property
-    def NBT_FORMAT(self) -> dict[str, Type[NBTRepresentable, NBT]]:
+    def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
         return {
             'blocked': Optional[Boolean],
             'dealt': Optional[Union[DoubleRangeJson, Double]],
@@ -73,7 +79,7 @@ class DamageTypeJson(NBTFormat):
     source_entity: EntityJson | None = None
 
     @property
-    def NBT_FORMAT(self) -> dict[str, Type[NBTRepresentable, NBT]]:
+    def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
         return {
             'bypasses_armor': Optional[Boolean],
             'bypasses_invulnerability': Optional[Boolean],
@@ -95,7 +101,7 @@ class EntityJson(NBTFormat):
     flags: dict[Literal["is_on_fire", "is_sneaking", "is_sprinting", "is_swimming", "is_baby"], bool] | None = None
     lightning_bolt: LightningBolt | None = None
     location: LocationJson | None = None
-    nbt: NBT | None = None
+    nbt: NBTTag | None = None
     passenger: EntityJson | None = None
     player: Player | None = None
     stepping_on: LocationJson | None = None
@@ -106,7 +112,7 @@ class EntityJson(NBTFormat):
     fishing_hook_in_open_water: bool | None = None
 
     @property
-    def NBT_FORMAT(self) -> dict[str, Type[NBTRepresentable, NBT]]:
+    def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
         return {
             'distance': Optional[dict[Literal["absolute", "horizontal", "x", "y", "z"], FloatRangeJson]], # TODO format for distance
             'effects': Optional[DictReprAsList[self.Effect]],
@@ -114,7 +120,7 @@ class EntityJson(NBTFormat):
             'flags': Optional[dict[Literal["is_on_fire", "is_sneaking", "is_sprinting", "is_swimming", "is_baby"], Boolean]],
             'lightning_bolt': Optional[self.LightningBolt],
             'location': Optional[LocationJson],
-            'nbt': Optional[NBT],
+            'nbt': Optional[NBTTag],
             'passenger': Optional[EntityJson],
             'player': Optional[self.Player],
             'stepping_on': Optional[LocationJson],
@@ -134,7 +140,7 @@ class EntityJson(NBTFormat):
         visible: bool | None = None
 
         @property
-        def NBT_FORMAT(self) -> dict[str, Type[NBTRepresentable, NBT]]:
+        def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
             return {
                 'ambient': Optional[Boolean],
                 'amplifier': Optional[Union[IntRangeJson, Int]],
@@ -152,7 +158,7 @@ class EntityJson(NBTFormat):
         stats: list[Statistic] | None = None
 
         @property
-        def NBT_FORMAT(self) -> dict[str, Type[NBTRepresentable, NBT]]:
+        def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
             return {
                 'looking_at': Optional[EntityJson],
                 'advancements': Optional[dict[str, Union[Boolean, dict[str, Boolean]]]],
@@ -171,7 +177,7 @@ class EntityJson(NBTFormat):
             value: int | IntRangeJson | None = None
 
             @property
-            def NBT_FORMAT(self) -> dict[str, Type[NBTRepresentable, NBT]]:
+            def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
                 return {
                     'type': Optional[String],
                     'stat': Optional[String],
@@ -184,7 +190,7 @@ class EntityJson(NBTFormat):
         entity_struck: EntityJson | None = None
 
         @property
-        def NBT_FORMAT(self) -> dict[str, Type[NBTRepresentable, NBT]]:
+        def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
             return {
                 'blocks_set_on_fire': Optional[Int],
                 'entity_struck': Optional[EntityJson]
@@ -203,7 +209,7 @@ class LocationJson(NBTFormat):
     smokey: bool | None = None
 
     @property
-    def NBT_FORMAT(self) -> dict[str, Type[NBTRepresentable, NBT]]:
+    def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
         return {
             'biome': Optional[String],
             'block': Optional[self.Block],
@@ -223,7 +229,7 @@ class LocationJson(NBTFormat):
         state: dict[str, str | int | bool | IntRangeJson] | None = None
 
         @property
-        def NBT_FORMAT(self) -> dict[str, Type[NBTRepresentable, NBT]]:
+        def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
             return {
                 'blocks': Optional[String],
                 'tag': Optional[String],
@@ -237,7 +243,7 @@ class LocationJson(NBTFormat):
         state: dict[str, str | int | bool | IntRangeJson] | None = None
 
         @property
-        def NBT_FORMAT(self) -> dict[str, Type[NBTRepresentable, NBT]]:
+        def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
             return {
                 'fluid': Optional[String],
                 'state': Optional[dict[str, Union[IntRangeJson, Int, Boolean, String]]]
@@ -255,7 +261,7 @@ class ItemJson(NBTFormat):
     tag: str | None = None
 
     @property
-    def NBT_FORMAT(self) -> dict[str, Type[NBTRepresentable, NBT]]:
+    def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
         return {
             'count': Optional[Union[IntRangeJson, Int]],
             'durability': Optional[Union[IntRangeJson, Int]],
@@ -273,7 +279,7 @@ class ItemJson(NBTFormat):
         levels: int | IntRangeJson | None = None
 
         @property
-        def NBT_FORMAT(self) -> dict[str, Type[NBTRepresentable, NBT]]:
+        def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
             return {
                 'enchantment': Optional[String],
                 'levels': Optional[Union[IntRangeJson, Int]]

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Optional, Union, Sequence, Literal
 
-from attr import define, field
+from attr import define
 
 from pymcfunc.internal import base_class, immutable
 from pymcfunc.nbt import NBTFormat, String, Double, Int, Compound, List, DictReprAsList
@@ -13,7 +13,7 @@ from pymcfunc.nbt import NBTFormat, String, Double, Int, Compound, List, DictRep
 class Recipe(NBTFormat):
     name: str
     namespace: str
-    type: str = field(init=False)
+    type = property(lambda self: "")
 
     @property
     def namespaced(self) -> str: return f'{self.namespace}:{self.name}'
@@ -61,11 +61,11 @@ class CookingRecipe(GroupedRecipe):
 
 @define(init=True)
 class BlastingRecipe(CookingRecipe):
-    type: str = 'blasting'
+    type = property(lambda self: "blasting")
 
 @define(init=True)
 class CampfireCookingRecipe(CookingRecipe):
-    type: str = 'campfire_cooking'
+    type = property(lambda self: "campfire_cooking")
 
 @define(init=True)
 @base_class
@@ -74,8 +74,8 @@ class CraftingRecipe(GroupedRecipe):
 
     @define(init=True)
     class Result(NBTFormat):
-        count: int = 1
         item: str
+        count: int = 1
 
         NBT_Format = {
             **GroupedRecipe.NBT_FORMAT,
@@ -124,7 +124,7 @@ class CraftingRecipe(GroupedRecipe):
 
 @define(init=True)
 class CraftingShapedRecipe(CraftingRecipe):
-    type: str = 'crafting_shaped'
+    type = property(lambda self: "crafting_shaped")
     _pattern: list[str]
     key: list[CraftingRecipe.Key | CraftingRecipe.KeyGroup]
 
@@ -151,7 +151,7 @@ class CraftingShapedRecipe(CraftingRecipe):
 
 @define(init=True)
 class CraftingShapelessRecipe(CraftingRecipe):
-    type: str = 'crafting_shapeless'
+    type = property(lambda self: "crafting_shapeless")
     ingredients: list[CraftingRecipe.Key | CraftingRecipe.KeyGroup]
 
     NBT_Format = {
@@ -171,7 +171,7 @@ class CraftingSpecialRecipe(Recipe):
 
 @define(init=True)
 class SmeltingRecipe(CookingRecipe):
-    type: str = 'smelting'
+    type = property(lambda self: "smelting")
 
 @define(init=True)
 class SmithingRecipe(GroupedRecipe):
@@ -205,7 +205,7 @@ class SmithingRecipe(GroupedRecipe):
 
 @define(init=True)
 class SmokingRecipe(CookingRecipe):
-    type: str = 'smoking'
+    type = property(lambda self: "smoking")
 
 
 @define(init=True)

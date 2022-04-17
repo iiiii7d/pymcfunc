@@ -16,7 +16,7 @@ from pymcfunc.command import ExecutedCommand, Command, SE, AE, Range, NoSpace, E
 from pymcfunc.coord import BlockCoord, Coord, Rotation, ChunkCoord, Coord2d
 from pymcfunc.errors import FutureCommandWarning, DeprecatedCommandWarning, EducationEditionWarning
 from pymcfunc.internal import base_class
-from pymcfunc.nbt import Int, Path, Compound, NBT, Float
+from pymcfunc.nbt import Int, Path, Compound, NBTTag, Float
 from pymcfunc.range import FloatRange
 from pymcfunc.selectors import BedrockSelector, JavaSelector
 from pymcfunc.version import JavaVersion, BedrockVersion
@@ -1148,7 +1148,7 @@ class JavaRawCommands(BaseRawCommands):
                     source_entity: _JavaSingleTarget | None = None,
                     source_storage: ResourceLocation | None = None,
                     source_path: Path | None = None,
-                    value: NBT) -> ExecutedCommand: pass
+                    value: NBTTag) -> ExecutedCommand: pass
 
     @_command([SE([LE("block"), AE("block")],
                   [LE("entity"), AE("entity")],

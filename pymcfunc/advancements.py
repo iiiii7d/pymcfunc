@@ -6,12 +6,13 @@ from attr import define, field
 
 from pymcfunc.internal import base_class
 from pymcfunc.loot_tables import LootTable
+from pymcfunc.predicates import Predicate
 from pymcfunc.recipes import Recipe
 
 if TYPE_CHECKING: from pymcfunc.functions import Function
 from pymcfunc.json_format import ItemJson, EntityJson, DamageJson, DamageTypeJson, LocationJson, IntRangeJson, FloatRangeJson, \
     DoubleRangeJson
-from pymcfunc.nbt import Compound, NBT, List, NBTFormat, String, NBTRepresentable, Boolean, Int, DictReprAsList
+from pymcfunc.nbt import Compound, List, NBTFormat, String, NBT, Boolean, Int, DictReprAsList
 
 RawJson: TypeAlias = Union[dict, list]
 
@@ -30,7 +31,7 @@ class Advancement(NBTFormat):
     def __str__(self): return self.namespaced
 
     @property
-    def NBT_FORMAT(self) -> dict[str, Type[NBTRepresentable, NBT]]:
+    def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
         return {
             'display': AdvancementDisplay,
             'parent': Optional[String],
@@ -52,7 +53,7 @@ class Icon(NBTFormat):
     nbt: Compound | None = None
 
     @property
-    def NBT_FORMAT(self) -> dict[str, Type[NBTRepresentable, NBT]]:
+    def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
         return {
             'item': String,
             'nbt': Compound,
@@ -70,7 +71,7 @@ class AdvancementDisplay(NBTFormat):
     hidden: bool = False
 
     @property
-    def NBT_FORMAT(self) -> dict[str, Type[NBTRepresentable, NBT]]:
+    def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
         return {
             'icon': Icon,
             'title': Union[String, List[Compound], Compound],
@@ -82,7 +83,6 @@ class AdvancementDisplay(NBTFormat):
             'hidden': Boolean,
         }
 
-Predicate: TypeAlias = str
 @define(init=True)
 class Rewards(NBTFormat):
     recipes: list[Recipe] | None = None
@@ -91,7 +91,7 @@ class Rewards(NBTFormat):
     function: Function | None = None
 
     @property
-    def NBT_FORMAT(self) -> dict[str, Type[NBTRepresentable, NBT]]:
+    def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
         return {
             'recipes': List[String],
             'loot': List[String],
@@ -113,7 +113,7 @@ class Criterion(NBTFormat):
 @define(init=True, frozen=True)
 @base_class
 class Trigger(NBTFormat):
-    type: str = field(init=False)
+    type = property(lambda self: "")
 
 @define(init=True, frozen=True)
 @base_class
@@ -126,7 +126,7 @@ class PlayerTrigger(Trigger):
 
 @define(init=True, frozen=True)
 class AllayDropItemOnBlockTrigger(PlayerTrigger):
-    type: str = "minecraft:allay_drop_item_on_block"
+    type = property(lambda self: "minecraft:allay_drop_item_on_block")
     location: LocationJson | None = None
     item: ItemJson | None = None
 
@@ -138,11 +138,11 @@ class AllayDropItemOnBlockTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class AvoidVibrationTrigger(PlayerTrigger):
-    type: str = "minecraft:avoid_vibration"
+    type = property(lambda self: "minecraft:avoid_vibration")
 
 @define(init=True, frozen=True)
 class BeeNestDestroyedTrigger(PlayerTrigger):
-    type: str = "minecraft:bee_nest_destroyed"
+    type = property(lambda self: "minecraft:bee_nest_destroyed")
     block: str | None = None
     item: ItemJson | None = None
     num_bees_inside: int | None = None
@@ -156,7 +156,7 @@ class BeeNestDestroyedTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class BredAnimalsTrigger(PlayerTrigger):
-    type: str = "minecraft:bred_animals"
+    type = property(lambda self: "minecraft:bred_animals")
     child: EntityJson | list[Predicate] | None = None
     parent: EntityJson | list[Predicate] | None = None
     partner: EntityJson | list[Predicate] | None = None
@@ -170,7 +170,7 @@ class BredAnimalsTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class BrewedPotionTrigger(PlayerTrigger):
-    type: str = "minecraft:brewed_potion"
+    type = property(lambda self: "minecraft:brewed_potion")
     potion: str | None = None
 
     NBT_FORMAT = {
@@ -180,7 +180,7 @@ class BrewedPotionTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class ChangedDimensionTrigger(PlayerTrigger):
-    type: str = "minecraft:changed_dimension"
+    type = property(lambda self: "minecraft:changed_dimension")
     from_: Literal['overworld', 'the_nether', 'the_end'] | None = None
     to: Literal['overworld', 'the_nether', 'the_end'] | None = None
 
@@ -192,7 +192,7 @@ class ChangedDimensionTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class ChanelledLightningTrigger(PlayerTrigger):
-    type: str = "minecraft:chanelled_lightning"
+    type = property(lambda self: "minecraft:chanelled_lightning")
     victims: list[EntityJson | list[Predicate]] | None = None
 
     NBT_FORMAT = {
@@ -202,7 +202,7 @@ class ChanelledLightningTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class ConstructBeaconTrigger(PlayerTrigger):
-    type: str = "minecraft:construct_beacon"
+    type = property(lambda self: "minecraft:construct_beacon")
     level: int | IntRangeJson | None = None
 
     NBT_FORMAT = {
@@ -212,7 +212,7 @@ class ConstructBeaconTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class ConsumeItemTrigger(PlayerTrigger):
-    type: str = "minecraft:consume_item"
+    type = property(lambda self: "minecraft:consume_item")
     item: ItemJson | None = None
 
     NBT_FORMAT = {
@@ -222,7 +222,7 @@ class ConsumeItemTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class CuredZombieVillagerTrigger(PlayerTrigger):
-    type: str = "minecraft:cured_zombie_villager"
+    type = property(lambda self: "minecraft:cured_zombie_villager")
     villager: EntityJson | list[Predicate] | None = None
     zombie: EntityJson | list[Predicate] | None = None
 
@@ -234,7 +234,7 @@ class CuredZombieVillagerTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class EffectsChangedTrigger(PlayerTrigger):
-    type: str = "minecraft:effects_changed"
+    type = property(lambda self: "minecraft:effects_changed")
     effect: list[Effect] | None = None
     source: EntityJson | list[Predicate] | None = None
 
@@ -257,7 +257,7 @@ class EffectsChangedTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class EnchantedItemTrigger(PlayerTrigger):
-    type: str = "minecraft:enchanted_item"
+    type = property(lambda self: "minecraft:enchanted_item")
     item: ItemJson | None = None
     levels: int | IntRangeJson | None = None
 
@@ -269,7 +269,7 @@ class EnchantedItemTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class EnterBlockTrigger(PlayerTrigger):
-    type: str = "minecraft:enter_block"
+    type = property(lambda self: "minecraft:enter_block")
     block: str | None = None
     state: dict[str, Any] | None = None
 
@@ -281,7 +281,7 @@ class EnterBlockTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class EntityHurtPlayerTrigger(PlayerTrigger):
-    type: str = "minecraft:entity_hurt_player"
+    type = property(lambda self: "minecraft:entity_hurt_player")
     damage: DamageJson | None = None
 
     NBT_FORMAT = {
@@ -291,7 +291,7 @@ class EntityHurtPlayerTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class EntityKilledPlayerTrigger(PlayerTrigger):
-    type: str = "minecraft:entity_killed_player"
+    type = property(lambda self: "minecraft:entity_killed_player")
     entity: EntityJson | list[Predicate] | None = None
     killing_blow: DamageJson | None = None
 
@@ -303,7 +303,7 @@ class EntityKilledPlayerTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class FallFromHeightTrigger(PlayerTrigger):
-    type: str = "minecraft:fall_from_height"
+    type = property(lambda self: "minecraft:fall_from_height")
     start_position: LocationJson | None = None
     distance: dict[Literal['absolute', 'horizontal', 'x', 'y', 'z'], FloatRangeJson] | None = None
 
@@ -315,7 +315,7 @@ class FallFromHeightTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class FilledBucketTrigger(PlayerTrigger):
-    type: str = "minecraft:filled_bucket"
+    type = property(lambda self: "minecraft:filled_bucket")
     item: ItemJson | None = None
 
     NBT_FORMAT = {
@@ -325,7 +325,7 @@ class FilledBucketTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class FishingRodHookedTrigger(PlayerTrigger):
-    type: str = "minecraft:fishing_rod_hooked"
+    type = property(lambda self: "minecraft:fishing_rod_hooked")
     entity: EntityJson | list[Predicate] | None = None
     item: ItemJson | None = None
     rod: ItemJson | None = None
@@ -339,7 +339,7 @@ class FishingRodHookedTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class HeroOfTheVillageTrigger(PlayerTrigger):
-    type: str = "minecraft:hero_of_the_village"
+    type = property(lambda self: "minecraft:hero_of_the_village")
     location: LocationJson | None = None
 
     NBT_FORMAT = {
@@ -349,11 +349,11 @@ class HeroOfTheVillageTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class ImpossibleTrigger(Trigger):
-    type: str = "minecraft:impossible"
+    type = property(lambda self: "minecraft:impossible")
 
 @define(init=True, frozen=True)
 class InventoryChangedTrigger(PlayerTrigger):
-    type: str = "minecraft:inventory_changed"
+    type = property(lambda self: "minecraft:inventory_changed")
     items: list[ItemJson] | None = None
     slots: dict[Literal['empty', 'full', 'occupied'], Union[Int, IntRangeJson]] | None = None
 
@@ -365,7 +365,7 @@ class InventoryChangedTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class ItemDurabilityChangedTrigger(PlayerTrigger):
-    type: str = "minecraft:item_durability_changed"
+    type = property(lambda self: "minecraft:item_durability_changed")
     delta: int | IntRangeJson | None = None
     durability: int | IntRangeJson | None = None
     item: ItemJson | None = None
@@ -379,7 +379,7 @@ class ItemDurabilityChangedTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class ItemUsedOnBlockTrigger(PlayerTrigger):
-    type: str = "minecraft:item_used_on_block"
+    type = property(lambda self: "minecraft:item_used_on_block")
     location: LocationJson | None = None
     item: ItemJson | None = None
 
@@ -391,7 +391,7 @@ class ItemUsedOnBlockTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class KillMobNearSculkCatalystTrigger(PlayerTrigger):
-    type: str = "minecraft:kill_mob_near_sculk_catalyst"
+    type = property(lambda self: "minecraft:kill_mob_near_sculk_catalyst")
     entity: EntityJson | list[Predicate] | None = None
     killing_blow: DamageTypeJson | None = None
 
@@ -403,7 +403,7 @@ class KillMobNearSculkCatalystTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class KilledByCrossbowTrigger(PlayerTrigger):
-    type: str = "minecraft:killed_by_crossbow"
+    type = property(lambda self: "minecraft:killed_by_crossbow")
     unique_entity_types: int | IntRangeJson | None = None
     victims: EntityJson | list[EntityJson | list[Predicate]] | None = None
 
@@ -415,7 +415,7 @@ class KilledByCrossbowTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class LevitationTrigger(PlayerTrigger):
-    type: str = "minecraft:levitation"
+    type = property(lambda self: "minecraft:levitation")
     distance: dict[Literal['absolute', 'horizontal', 'x', 'y', 'z'], IntRangeJson] | None = None
     duration: int | IntRangeJson | None = None
 
@@ -427,7 +427,7 @@ class LevitationTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class LightningStrikeTrigger(PlayerTrigger):
-    type: str = "minecraft:lightning_strike"
+    type = property(lambda self: "minecraft:lightning_strike")
     lightning: EntityJson | list[Predicate] | None = None
     bystander: EntityJson | list[Predicate] | None = None
 
@@ -439,7 +439,7 @@ class LightningStrikeTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class LocationTrigger(PlayerTrigger):
-    type: str = "minecraft:location"
+    type = property(lambda self: "minecraft:location")
     location: LocationJson | None = None
 
     NBT_FORMAT = {
@@ -449,7 +449,7 @@ class LocationTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class NetherTravelTrigger(PlayerTrigger):
-    type: str = "minecraft:nether_travel"
+    type = property(lambda self: "minecraft:nether_travel")
     start_position: LocationJson | None = None
     distance: dict[Literal['absolute', 'horizontal', 'x', 'y', 'z'], FloatRangeJson] | None = None
 
@@ -461,7 +461,7 @@ class NetherTravelTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class PlacedBlockTrigger(PlayerTrigger):
-    type: str = "minecraft:placed_block"
+    type = property(lambda self: "minecraft:placed_block")
     block: str | None = None
     item: ItemJson | None = None
     location: LocationJson | None = None
@@ -477,7 +477,7 @@ class PlacedBlockTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class PlayerGeneratesContainerLootTrigger(PlayerTrigger):
-    type: str = "minecraft:player_generates_container_loot"
+    type = property(lambda self: "minecraft:player_generates_container_loot")
     loot_table: str | LootTable
 
     NBT_FORMAT = {
@@ -487,7 +487,7 @@ class PlayerGeneratesContainerLootTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class PlayerHurtEntityTrigger(PlayerTrigger):
-    type: str = "minecraft:player_hurt_entity"
+    type = property(lambda self: "minecraft:player_hurt_entity")
     damage: DamageJson | None = None
     entity: EntityJson | list[Predicate] | None = None
 
@@ -499,7 +499,7 @@ class PlayerHurtEntityTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class PlayerInteractedWithEntityTrigger(PlayerTrigger):
-    type: str = "minecraft:player_interacted_with_entity"
+    type = property(lambda self: "minecraft:player_interacted_with_entity")
     item: ItemJson | None = None
     entity: EntityJson | list[Predicate] | None = None
     
@@ -511,7 +511,7 @@ class PlayerInteractedWithEntityTrigger(PlayerTrigger):
     
 @define(init=True, frozen=True)
 class PlayerKilledEntityTrigger(PlayerTrigger):
-    type: str = "minecraft:player_killed_entity"
+    type = property(lambda self: "minecraft:player_killed_entity")
     entity: EntityJson | list[Predicate] | None = None
     killing_blow: DamageTypeJson | None = None
     
@@ -523,7 +523,7 @@ class PlayerKilledEntityTrigger(PlayerTrigger):
     
 @define(init=True, frozen=True)
 class RecipeUnlockedTrigger(PlayerTrigger):
-    type: str = "minecraft:recipe_unlocked"
+    type = property(lambda self: "minecraft:recipe_unlocked")
     recipe: str | Recipe
 
     NBT_FORMAT = {
@@ -533,7 +533,7 @@ class RecipeUnlockedTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class RideEntityInLavaTrigger(PlayerTrigger):
-    type: str = "minecraft:ride_entity_in_lava"
+    type = property(lambda self: "minecraft:ride_entity_in_lava")
     start_position: LocationJson | None = None
     distance: dict[Literal['absolute', 'horizontal', 'x', 'y', 'z'], FloatRangeJson] | None = None
 
@@ -545,7 +545,7 @@ class RideEntityInLavaTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class ShotCrossbowTrigger(PlayerTrigger):
-    type: str = "minecraft:shot_crossbow"
+    type = property(lambda self: "minecraft:shot_crossbow")
     item: ItemJson | None = None
 
     NBT_FORMAT = {
@@ -555,7 +555,7 @@ class ShotCrossbowTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class SleptInBedTrigger(PlayerTrigger):
-    type: str = "minecraft:slept_in_bed"
+    type = property(lambda self: "minecraft:slept_in_bed")
     location: LocationJson | None = None
 
     NBT_FORMAT = {
@@ -565,7 +565,7 @@ class SleptInBedTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class SlideDownBlockTrigger(PlayerTrigger):
-    type: str = "minecraft:slide_down_block"
+    type = property(lambda self: "minecraft:slide_down_block")
     block: str | None = None
 
     NBT_FORMAT = {
@@ -575,11 +575,11 @@ class SlideDownBlockTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class StartedRidingTrigger(PlayerTrigger):
-    type: str = "minecraft:started_riding"
+    type = property(lambda self: "minecraft:started_riding")
 
 @define(init=True, frozen=True)
 class SummonedEntityTrigger(PlayerTrigger):
-    type: str = "minecraft:summoned_entity"
+    type = property(lambda self: "minecraft:summoned_entity")
     entity: EntityJson | list[Predicate] | None = None
 
     NBT_FORMAT = {
@@ -589,7 +589,7 @@ class SummonedEntityTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class TameAnimalTrigger(PlayerTrigger):
-    type: str = "minecraft:tame_animal"
+    type = property(lambda self: "minecraft:tame_animal")
     entity: EntityJson | list[Predicate] | None = None
 
     NBT_FORMAT = {
@@ -599,21 +599,21 @@ class TameAnimalTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class TargetHitTrigger(PlayerTrigger):
-    type: str = "minecraft:target_hit"
+    type = property(lambda self: "minecraft:target_hit")
     signal_strength: int | None = None
-    projectile: str
+    projectile: str | None = None
     shooter: EntityJson | list[Predicate] | None = None
 
     NBT_FORMAT = {
         **PlayerTrigger.NBT_FORMAT,
         'signal_strength': Optional[Int],
-        'projectile': String,
+        'projectile': Optional[String],
         'shooter': Optional[Union[EntityJson, list[Predicate]]]
     }
 
 @define(init=True, frozen=True)
 class ThrownItemPickedUpByEntityTrigger(PlayerTrigger):
-    type: str = "minecraft:thrown_item_picked_up_by_entity"
+    type = property(lambda self: "minecraft:thrown_item_picked_up_by_entity")
     item: ItemJson | None = None
     entity: EntityJson | list[Predicate] | None = None
 
@@ -625,7 +625,7 @@ class ThrownItemPickedUpByEntityTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class ThrownItemPickedUpByPlayerTrigger(PlayerTrigger):
-    type: str = "minecraft:thrown_item_picked_up_by_player"
+    type = property(lambda self: "minecraft:thrown_item_picked_up_by_player")
     entity: EntityJson | list[Predicate] | None = None
     item: ItemJson | None = None
 
@@ -637,11 +637,11 @@ class ThrownItemPickedUpByPlayerTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class TickTrigger(Trigger):
-    type: str = "minecraft:tick"
+    type = property(lambda self: "minecraft:tick")
 
 @define(init=True, frozen=True)
 class UsedEnderEyeTrigger(PlayerTrigger):
-    type: str = "minecraft:used_ender_eye"
+    type = property(lambda self: "minecraft:used_ender_eye")
     distance: Int | DoubleRangeJson | None = None
 
     NBT_FORMAT = {
@@ -651,7 +651,7 @@ class UsedEnderEyeTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class UsedTotemTrigger(PlayerTrigger):
-    type: str = "minecraft:used_totem"
+    type = property(lambda self: "minecraft:used_totem")
     item: ItemJson | None = None
 
     NBT_FORMAT = {
@@ -661,7 +661,7 @@ class UsedTotemTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class UsingItemTrigger(PlayerTrigger):
-    type: str = "minecraft:using_item"
+    type = property(lambda self: "minecraft:using_item")
     item: ItemJson | None = None
 
     NBT_FORMAT = {
@@ -671,7 +671,7 @@ class UsingItemTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class VillagerTradeTrigger(PlayerTrigger):
-    type: str = "minecraft:villager_trade"
+    type = property(lambda self: "minecraft:villager_trade")
     item: ItemJson | None = None
     villager: EntityJson | list[Predicate] | None = None
 
@@ -683,7 +683,7 @@ class VillagerTradeTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class VoluntaryExileTrigger(PlayerTrigger):
-    type: str = "minecraft:voluntary_exile"
+    type = property(lambda self: "minecraft:voluntary_exile")
     location: LocationJson | None = None
 
     NBT_FORMAT = {
@@ -695,15 +695,15 @@ class VoluntaryExileTrigger(PlayerTrigger):
 
 @define(init=True, frozen=True)
 class ArbitraryPlayerTickTrigger(Trigger):
-    type: str = "minecraft:arbitrary_player_tick"
+    type = property(lambda self: "minecraft:arbitrary_player_tick")
 
 @define(init=True, frozen=True)
 class ItemDeliveredToPlayerTrigger(PlayerTrigger):
-    type: str = "minecraft:item_delivered_to_player"
+    type = property(lambda self: "minecraft:item_delivered_to_player")
 
 @define(init=True, frozen=True)
 class PlayerDamagedTrigger(Trigger):
-    type: str = "minecraft:player_damaged"
+    type = property(lambda self: "minecraft:player_damaged")
     damage: DamageJson | None = None
 
     NBT_FORMAT = {
@@ -713,7 +713,7 @@ class PlayerDamagedTrigger(Trigger):
 
 @define(init=True, frozen=True)
 class SafelyHarvestHoneyTrigger(PlayerTrigger):
-    type: str = "minecraft:safely_harvest_honey"
+    type = property(lambda self: "minecraft:safely_harvest_honey")
     block: dict[Literal['block', 'tag'], str] | None = None
     item: ItemJson | None = None
 
