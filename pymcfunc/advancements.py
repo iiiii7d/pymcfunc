@@ -14,8 +14,6 @@ from pymcfunc.json_format import ItemJson, EntityJson, DamageJson, DamageTypeJso
     DoubleRangeJson
 from pymcfunc.nbt import Compound, List, NBTFormat, String, NBT, Boolean, Int, DictReprAsList
 
-RawJson: TypeAlias = Union[dict, list]
-
 @define(init=True)
 class Advancement(NBTFormat):
     namespace: str
@@ -62,10 +60,10 @@ class Icon(NBTFormat):
 @define(init=True)
 class AdvancementDisplay(NBTFormat):
     icon_: Icon = Icon("")
-    title: str | RawJson = ""
+    title: str | JavaRawJson = ""
     frame: Literal["challenge", "goal", "task"] | None = None
     background: str | None = None
-    description: str | RawJson = ""
+    description: str | JavaRawJson = ""
     show_toast: bool = True
     announce_to_chat: bool = True
     hidden: bool = False

@@ -101,7 +101,6 @@ class NoSpace(Annotation):
         if " " in value:
             raise ValueError(f"Value for argument `{varname}` has spaces (Got `{value}`)")
 
-RawJson: TypeAlias = Union[dict, list]
 ResourceLocation: TypeAlias = str
 _JavaTarget: TypeAlias = Union[JavaSelector, Annotated[str, PlayerName], UUID]
 _JavaPlayerTarget: TypeAlias = Union[Annotated[str, PlayerName], UUID, Annotated[JavaSelector, Player]]

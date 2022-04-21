@@ -10,7 +10,7 @@ from typing_extensions import Self
 
 from pymcfunc.advancements import Advancement
 from pymcfunc.command import ExecutedCommand, Command, SE, AE, Range, NoSpace, Element, Player, Regex, \
-    PlayerName, LE, _JavaPlayerTarget, _JavaSingleTarget, ResourceLocation, RawJson, _BedrockSinglePlayerTarget, \
+    PlayerName, LE, _JavaPlayerTarget, _JavaSingleTarget, ResourceLocation, _BedrockSinglePlayerTarget, \
     _BedrockPlayerTarget, _BedrockTarget, _BedrockSingleTarget, Quoted, _JavaObjectiveName, _JavaTarget, \
     _BedrockObjectiveName, _JavaSinglePlayerTarget
 from pymcfunc.coord import BlockCoord, Coord, Rotation, ChunkCoord, Coord2d
@@ -18,6 +18,7 @@ from pymcfunc.errors import FutureCommandWarning, DeprecatedCommandWarning, Educ
 from pymcfunc.internal import base_class
 from pymcfunc.nbt import Int, Path, Compound, NBTTag, Float
 from pymcfunc.range import FloatRange
+from pymcfunc.rawjson import JavaRawJson
 from pymcfunc.selectors import BedrockSelector, JavaSelector
 from pymcfunc.version import JavaVersion, BedrockVersion
 
@@ -781,7 +782,7 @@ class BedrockRawCommands(BaseRawCommands):
     @_command([AE("targets"), AE("message")])
     @_version(introduced="1.9.0.0")
     def tellraw(self, targets: _BedrockPlayerTarget,
-                message: RawJson) -> ExecutedCommand: pass
+                message: JavaRawJson) -> ExecutedCommand: pass
 
     @_command([AE("victim")])
     @_version(introduced="1.0.5.0")
@@ -870,7 +871,7 @@ class BedrockRawCommands(BaseRawCommands):
     @_version(introduced="1.0.5.0")
     def titleraw(self, targets: _BedrockPlayerTarget,
                  action: Literal['clear', 'reset', 'title', 'subtitle', 'actionbar', 'times'],
-                 title: RawJson | None = None,
+                 title: JavaRawJson | None = None,
                  fade_in: int | None = None,
                  stay: int | None = None,
                  fade_out: int | None = None) -> ExecutedCommand: pass
@@ -1029,7 +1030,7 @@ class JavaRawCommands(BaseRawCommands):
         AE("name")
     ])
     @_version(introduced="18w05a")
-    def bossbar_add(self, id_: ResourceLocation, name: RawJson) -> ExecutedCommand: pass
+    def bossbar_add(self, id_: ResourceLocation, name: JavaRawJson) -> ExecutedCommand: pass
 
     @_command([
         AE("id_"),
@@ -1063,7 +1064,7 @@ class JavaRawCommands(BaseRawCommands):
     def bossbar_set(self, id_: ResourceLocation, *,
                     colour: Literal["blue", "green", "pink", "purple", "red", "white", "yellow"] | None = None,
                     max_: Annotated[int, Range(1, Int.max)] | None = None,
-                    name: str | RawJson | None = None,
+                    name: str | JavaRawJson | None = None,
                     players: _JavaPlayerTarget | None = None,
                     style: Literal["notched_6", "notched_10", "notched_12", "notched_20", "progress"] | None = None,
                     value: Annotated[int, Range(0, Int.max)] | None = None,
@@ -1798,7 +1799,7 @@ class JavaRawCommands(BaseRawCommands):
     @_version(introduced="13w04a")
     def scoreboard_objectives_add(self, objective: _JavaObjectiveName,
                                   criteria: str,
-                                  display_name: RawJson | None = None) -> ExecutedCommand: pass
+                                  display_name: JavaRawJson | None = None) -> ExecutedCommand: pass
 
     @_command([AE("objective")])
     @_version(introduced="13w04a")
@@ -1815,7 +1816,7 @@ class JavaRawCommands(BaseRawCommands):
                ])
     @_version(introduced="1.13pre7")
     def scoreboard_objectives_modify(self, objective: _JavaObjectiveName,
-                                     display_name: RawJson | None = None,
+                                     display_name: JavaRawJson | None = None,
                                      render_type: Literal['hearts', 'integer'] | None = None) -> ExecutedCommand: pass
 
     @_command([AE("target", True)])
@@ -1957,11 +1958,11 @@ class JavaRawCommands(BaseRawCommands):
     @_version(introduced="17w45a")
     def team(self, action: Literal['list', 'add', 'remove', 'empty', 'join', 'leave', 'modify'],
              team: Annotated[str, Regex(r"^(?=.{1,16}$)[-+.\w]+$")] | None = None,
-             display_name: RawJson | None = None,
+             display_name: JavaRawJson | None = None,
              members: _JavaTarget | Literal['*'] | None = None,
              option: Literal['displayName', 'color', 'friendlyFire', 'seeFriendlyInvisibles', 'nameTagVisibility',
                              'deathMessageVisibility', 'collisionRule', 'prefix', 'suffix'] | None = None,
-             value: RawJson | Literal['never', 'hideForOwnTeam', 'hideForOtherTeams', 'always'] |
+             value: JavaRawJson | Literal['never', 'hideForOwnTeam', 'hideForOtherTeams', 'always'] |
              Literal['always', 'never', 'pushOtherTeams', 'pushOwnTeam'] | None = None) -> ExecutedCommand: pass
 
     @_command([AE("message")])
@@ -1998,7 +1999,7 @@ class JavaRawCommands(BaseRawCommands):
     @_command([AE("targets"), AE("message")])
     @_version(introduced="13w37a")
     def tellraw(self, targets: _JavaPlayerTarget,
-                message: RawJson) -> ExecutedCommand: pass
+                message: JavaRawJson) -> ExecutedCommand: pass
 
     @_command([SE([LE("add"),
                    AE("add")],
@@ -2025,7 +2026,7 @@ class JavaRawCommands(BaseRawCommands):
     @_version(introduced="14w20a")
     def title(self, targets: _JavaPlayerTarget,
               action: Literal['clear', 'reset', 'title', 'subtitle', 'actionbar', 'times'],
-              title: RawJson | None = None,
+              title: JavaRawJson | None = None,
               fade_in: int | None = None,
               stay: int | None = None,
               fade_out: int | None = None) -> ExecutedCommand: pass

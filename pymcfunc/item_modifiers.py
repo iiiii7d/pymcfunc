@@ -5,9 +5,11 @@ from uuid import UUID
 
 from attr import define, field
 
-from pymcfunc.command import ResourceLocation, RawJson
+from pymcfunc.command import ResourceLocation
 from pymcfunc.internal import base_class
 from pymcfunc.json_format import IntRangeJson, NumberProviderRangeJson
+from pymcfunc.rawjson import JavaRawJson
+
 if TYPE_CHECKING: from pymcfunc.loot_tables import Entry
 from pymcfunc.nbt import NBTFormat, List, String, Path, Int, Boolean, Float, Compound
 from pymcfunc.number_providers import NumberProvider
@@ -304,13 +306,13 @@ class SetLootTableItemModifier(ItemModifier):
 @define(init=True)
 class SetLoreItemModifier(ItemModifier):
     function = property(lambda self: "set_lore")
-    lore: list[str | RawJson]
+    lore: list[str | JavaRawJson]
     entity: Literal['this', 'killer', 'killer_player']
     replace: bool
 
     NBT_FORMAT = {
         **ItemModifier.NBT_FORMAT,
-        'lore': List[Union[String, RawJson]],
+        'lore': List[Union[String, JavaRawJson]],
         'entity': Literal['this', 'killer', 'killer_player'],
         'replace': Boolean
     }
@@ -318,12 +320,12 @@ class SetLoreItemModifier(ItemModifier):
 @define(init=True)
 class SetNameItemModifier(ItemModifier):
     function = property(lambda self: "set_name")
-    name: str | RawJson
+    name: str | JavaRawJson
     entity: Literal['this', 'killer', 'killer_player']
 
     NBT_FORMAT = {
         **ItemModifier.NBT_FORMAT,
-        'name': Union[String, RawJson],
+        'name': Union[String, JavaRawJson],
         'entity': Literal['this', 'killer', 'killer_player']
     }
 
