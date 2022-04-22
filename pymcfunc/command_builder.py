@@ -6,7 +6,7 @@ from typing import Any, List, Literal, Optional, Union
 
 from pymcfunc.errors import OptionError, SpaceError, MissingArgumentError, MultipleBranchesSatisfiedError, MissingError, \
     RangeError
-from pymcfunc.selectors import BaseSelector
+from pymcfunc.proxies.selectors import BaseSelector
 
 
 class _Parameter:

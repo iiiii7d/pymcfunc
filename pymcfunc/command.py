@@ -12,7 +12,7 @@ from pymcfunc.errors import MultipleBranchesSatisfiedError, MissingError, Missin
 
 if TYPE_CHECKING: from pymcfunc.functions import BaseFunctionHandler
 if TYPE_CHECKING: from pymcfunc.raw_commands import BaseRawCommands, JavaRawCommands
-from pymcfunc.selectors import BaseSelector, JavaSelector, BedrockSelector
+from pymcfunc.proxies.selectors import BaseSelector, JavaSelector, BedrockSelector
 
 
 class Element: pass

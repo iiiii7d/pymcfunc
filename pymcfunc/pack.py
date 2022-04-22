@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Callable, Optional
 
-from pymcfunc import selectors
+from pymcfunc.proxies import selectors
 from pymcfunc.data_formats.advancements import Advancement
 from pymcfunc.functions import JavaFunctionHandler, Function
 from pymcfunc.internal import base_class

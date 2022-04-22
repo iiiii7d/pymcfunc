@@ -9,7 +9,7 @@ import re
 import pymcfunc_old.errors as errors
 import pymcfunc_old.internal as internal
 from pymcfunc_old.func_handlers import JavaFuncHandler, BedrockFuncHandler, UniversalFuncHandler
-import pymcfunc.selectors as selectors
+import pymcfunc.proxies.selectors as selectors
 from pymcfunc_old.advancements import Advancement
 from pymcfunc_old.loot_tables import LootTable
 from pymcfunc_old.predicates import Predicate

@@ -19,7 +19,7 @@ from pymcfunc.internal import base_class
 from pymcfunc.data_formats.nbt import Int, Path, Compound, NBTTag, Float
 from pymcfunc.data_formats.range import FloatRange
 from pymcfunc.data_formats.raw_json import JavaRawJson
-from pymcfunc.selectors import BedrockSelector, JavaSelector
+from pymcfunc.proxies.selectors import BedrockSelector, JavaSelector
 from pymcfunc.version import JavaVersion, BedrockVersion
 
 if TYPE_CHECKING:

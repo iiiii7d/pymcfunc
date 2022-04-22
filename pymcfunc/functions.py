@@ -6,7 +6,7 @@ import pymcfunc.entities as entities
 from pymcfunc.entities import Entity
 from pymcfunc.internal import base_class
 from pymcfunc.raw_commands import JavaRawCommands, BedrockRawCommands, ExecutedCommand
-from pymcfunc.selectors import BaseSelector, JavaSelector, BedrockSelector
+from pymcfunc.proxies.selectors import BaseSelector, JavaSelector, BedrockSelector
 from pymcfunc.variables import JavaVariable, BedrockVariable
 
 if TYPE_CHECKING:

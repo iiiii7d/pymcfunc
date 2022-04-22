@@ -10,7 +10,7 @@ from pymcfunc.data_formats.base_formats import JsonFormat
 from pymcfunc.data_formats.coord import Coord
 from pymcfunc.internal import base_class
 from pymcfunc.data_formats.nbt import Path
-from pymcfunc.selectors import JavaSelector, BedrockSelector
+from pymcfunc.proxies.selectors import JavaSelector, BedrockSelector
 
 
 class JavaRawJson:
@@ -49,31 +49,58 @@ class JavaTextComponent(JavaRawJson, JsonFormat):
     def hoverEvent(self): return self.hover_event
 
     def format(self, *,
-               colour: Literal["black", "dark_blue", "dark_green", "dark_aqua", "dark_red", "dark_purple",
-                               "gold", "gray", "dark_gray", "blue", "green", "aqua", "red", "light_purple",
-                               "yellow", "white", "reset"] | None = None,
+               color: Literal["black", "dark_blue", "dark_green", "dark_aqua", "dark_red", "dark_purple",
+                              "gold", "gray", "dark_gray", "blue", "green", "aqua", "red", "light_purple",
+                              "yellow", "white", "reset"] | None = None,
                bold: bool | None = None,
                italic: bool | None = None,
                underlined: bool | None = None,
                strikethrough: bool | None = None,
                obfuscated: bool | None = None) -> Self:
-        if colour: self.color = colour
+        if color: self.color = color
         if bold: self.bold = bold
         if italic: self.italic = italic
         if underlined: self.underlined = underlined
         if strikethrough: self.strikethrough = strikethrough
         if obfuscated: self.obfuscated = obfuscated
         return self
-    def f(self, *,
-          c: Literal["black", "dark_blue", "dark_green", "dark_aqua", "dark_red", "dark_purple",
-                     "gold", "gray", "dark_gray", "blue", "green", "aqua", "red", "light_purple",
-                     "yellow", "white", "reset"] | None = None,
-          l: bool | None = None,
-          o: bool | None = None,
-          n: bool | None = None,
-          m: bool | None = None,
-          k: bool | None = None) -> Self:
-        return self.format(colour=c, bold=l, italic=o, underlined=n, strikethrough=m, obfuscated=k)
+
+    def f(self, formats: str) -> Self:
+        colour_map = {
+            '0': 'black',
+            '1': 'dark_blue',
+            '2': 'dark_green',
+            '3': 'dark_aqua',
+            '4': 'dark_red',
+            '5': 'dark_purple',
+            '6': 'gold',
+            '7': 'gray',
+            '8': 'dark_gray',
+            '9': 'blue',
+            'a': 'green',
+            'b': 'aqua',
+            'c': 'red',
+            'd': 'light_purple',
+            'e': 'yellow',
+            'f': 'white',
+        }
+        fmt = {}
+        for fmt_char in formats:
+            if fmt_char in colour_map:
+                fmt['color'] = colour_map[fmt_char]
+            elif fmt_char == 'l':
+                fmt['bold'] = True
+            elif fmt_char == 'o':
+                fmt['italic'] = True
+            elif fmt_char == 'n':
+                fmt['underlined'] = True
+            elif fmt_char == 'm':
+                fmt['strikethrough'] = True
+            elif fmt_char == 'k':
+                fmt['obfuscated'] = True
+            else:
+                raise ValueError(f'Unknown format character: {fmt_char}')
+        return self.format(**fmt)
 
     def insert(self, text: str) -> Self:
         self.insertion = text

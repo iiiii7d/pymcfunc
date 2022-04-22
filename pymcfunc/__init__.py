@@ -4,7 +4,7 @@ import pymcfunc.errors
 from pymcfunc.functions import Function, BaseFunctionHandler, JavaFunctionHandler, BedrockFunctionHandler
 from pymcfunc.pack import BasePack, JavaPack
 from pymcfunc.raw_commands import BaseRawCommands, JavaRawCommands, BedrockRawCommands
-from pymcfunc.selectors import BaseSelector, JavaSelector, BedrockSelector
+from pymcfunc.proxies.selectors import BaseSelector, JavaSelector, BedrockSelector
 from pymcfunc.version import JavaVersion, BedrockVersion
 
 from pymcfunc.data_formats import advancements as adv

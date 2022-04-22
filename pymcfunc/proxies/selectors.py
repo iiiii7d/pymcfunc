@@ -3,7 +3,10 @@ from __future__ import annotations
 from typing import Literal, Any, TypedDict, Annotated, Union, TYPE_CHECKING
 
 import pymcfunc.internal as internal
-if TYPE_CHECKING: from pymcfunc.command import ResourceLocation
+from pymcfunc import BaseFunctionHandler
+from pymcfunc.data_formats.advancements import Advancement
+
+if TYPE_CHECKING: from pymcfunc.command import ResourceLocation, ExecutedCommand
 from pymcfunc.data_formats.coord import _FloatIntCoord, Coord
 from pymcfunc.data_formats.nbt import Compound, Int
 from pymcfunc.data_formats.range import FloatRange
@@ -12,10 +15,13 @@ from pymcfunc.data_formats.range import FloatRange
 @internal.base_class
 @internal.immutable
 class BaseSelector:
-    def __init__(self, var: Literal['p', 'r', 'a', 'e', 's'], **arguments: Any):
+    def __init__(self, var: Literal['p', 'r', 'a', 'e', 's'],
+                 fh: BaseFunctionHandler | None = None,
+                 **arguments: Any):
         internal.options(var, ['p', 'r', 'a', 'e', 's']) # TODO 'c' and 'v' for edu edition, 'initiator' for bedrock
         self.var = var
         self.arguments = type(self).Arguments(**arguments)
+        self.fh = fh
 
     @property
     def singleonly(self) -> bool:
@@ -62,6 +68,14 @@ class BaseSelector:
         def __init__(self, **kwargs): pass
 
         def __str__(self): pass
+
+    @staticmethod
+    def _ensure_fh_set(func):
+        def wrapper(self, *args, **kwargs):
+            if self.fh is None:
+                raise ValueError(f"`{func.__name__}` requires a function handler to be set")
+            return func(self, *args, **kwargs)
+        return wrapper
 
 
 class JavaSelector(BaseSelector):
@@ -174,6 +188,15 @@ class JavaSelector(BaseSelector):
                              for k, v in self.advancements)
                 s.append(f"advancements={{{d}}}")
             return '['+','.join(s)+']'
+
+        @BaseSelector._ensure_fh_set
+        def grant_advancement(self,
+                              mode: Literal["everything", "only", "from", "through", "until"],
+                              advancement: Advancement | None = None,
+                              criterion: str | None = None) -> ExecutedCommand:
+            return self.fh.advancement_grant(self, mode, advancement, criterion)
+
+        # TODO more of this
 
 
 class BedrockSelector(BaseSelector):
