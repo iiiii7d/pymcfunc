@@ -2,14 +2,14 @@ from __future__ import annotations
 
 from typing import Optional, Union, Sequence, Literal
 
-from attr import define
+from attr import s
 
 from pymcfunc.data_formats.base_formats import JsonFormat
-from pymcfunc.internal import base_class, immutable
 from pymcfunc.data_formats.nbt import Compound, DictReprAsList
+from pymcfunc.internal import base_class, immutable
 
 
-@define(init=True)
+@s(kw_only=True, init=True)
 @base_class
 class Recipe(JsonFormat):
     name: str
@@ -23,7 +23,7 @@ class Recipe(JsonFormat):
         'type': str
     }
 
-@define(init=True)
+@s(kw_only=True, init=True)
 @base_class
 class GroupedRecipe(Recipe):
     group: str | None = None
@@ -33,7 +33,7 @@ class GroupedRecipe(Recipe):
         'group': Optional[str],
     }
 
-@define(init=True)
+@s(kw_only=True, init=True)
 @base_class
 class CookingRecipe(GroupedRecipe):
     ingredient: Ingredient | list[Ingredient]
@@ -41,7 +41,7 @@ class CookingRecipe(GroupedRecipe):
     experience: float
     cookingtime: int | None = None
 
-    @define(init=True)
+    @s(kw_only=True, init=True)
     class Ingredient(JsonFormat):
         item: str
         tag: str
@@ -60,20 +60,20 @@ class CookingRecipe(GroupedRecipe):
     }
 
 
-@define(init=True)
+@s(kw_only=True, init=True)
 class BlastingRecipe(CookingRecipe):
     type = property(lambda self: "blasting")
 
-@define(init=True)
+@s(kw_only=True, init=True)
 class CampfireCookingRecipe(CookingRecipe):
     type = property(lambda self: "campfire_cooking")
 
-@define(init=True)
+@s(kw_only=True, init=True)
 @base_class
 class CraftingRecipe(GroupedRecipe):
     result: Result
 
-    @define(init=True)
+    @s(kw_only=True, init=True)
     class Result(JsonFormat):
         item: str
         count: int = 1
@@ -123,7 +123,7 @@ class CraftingRecipe(GroupedRecipe):
         def as_json(self) -> list[dict]:
             return [a.as_json() for a in self.values]
 
-@define(init=True)
+@s(kw_only=True, init=True)
 class CraftingShapedRecipe(CraftingRecipe):
     type = property(lambda self: "crafting_shaped")
     _pattern: list[str]
@@ -150,7 +150,7 @@ class CraftingShapedRecipe(CraftingRecipe):
         'key': DictReprAsList[CraftingRecipe.Key | CraftingRecipe.KeyGroup]
     }
 
-@define(init=True)
+@s(kw_only=True, init=True)
 class CraftingShapelessRecipe(CraftingRecipe):
     type = property(lambda self: "crafting_shapeless")
     ingredients: list[CraftingRecipe.Key | CraftingRecipe.KeyGroup]
@@ -160,7 +160,7 @@ class CraftingShapelessRecipe(CraftingRecipe):
         'ingredients': list[Compound],
     }
 
-@define(init=True)
+@s(kw_only=True, init=True)
 class CraftingSpecialRecipe(Recipe):
     special_type: Literal['armordye', 'bannerduplicate', 'bookcloning', 'fireworks_rocket', 'fireworks_star',
                           'fireworks_star_fade', 'mapcloning', 'mapextending', 'repairitem', 'shielddecoration',
@@ -170,11 +170,11 @@ class CraftingSpecialRecipe(Recipe):
     def type(self) -> str: return "crafting_special_"+self.special_type
 
 
-@define(init=True)
+@s(kw_only=True, init=True)
 class SmeltingRecipe(CookingRecipe):
     type = property(lambda self: "smelting")
 
-@define(init=True)
+@s(kw_only=True, init=True)
 class SmithingRecipe(GroupedRecipe):
     base: Item
     addition: Item
@@ -204,12 +204,12 @@ class SmithingRecipe(GroupedRecipe):
         'result': Item,
     }
 
-@define(init=True)
+@s(kw_only=True, init=True)
 class SmokingRecipe(CookingRecipe):
     type = property(lambda self: "smoking")
 
 
-@define(init=True)
+@s(kw_only=True, init=True)
 class StonecuttingRecipe(CraftingRecipe):
     ingredient: CraftingRecipe.Key | list[CraftingRecipe.Key]
     result: str

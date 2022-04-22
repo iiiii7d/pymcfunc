@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import inspect
 import re
+from functools import wraps
 from types import UnionType, NoneType
 # noinspection PyUnresolvedReferences
 from typing import Callable, Any, Union, Type, Literal, Optional, _UnionGenericAlias, TypeVar, _LiteralGenericAlias, \
@@ -142,6 +143,7 @@ class Command:
                     cmd.arg_namelist.append(name)
 
                 cmd.eles = cls._process_order(order, func)
+            cmd.__call__ = wraps(func)(cmd.__call__)
             return cmd
         return decorator
 

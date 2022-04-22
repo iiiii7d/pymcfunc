@@ -1,17 +1,136 @@
 from __future__ import annotations
 
 # noinspection PyUnresolvedReferences
-from typing import _LiteralGenericAlias, Any, _UnionGenericAlias, get_args, get_origin, _GenericAlias, Type
+from typing import _LiteralGenericAlias, Any, _UnionGenericAlias, get_args, get_origin, _GenericAlias, Type, TypeVar, \
+    Generic
 
-from pymcfunc.data_formats.nbt import NBT, DictReprAsList, Compound, String
+from pymcfunc import JavaFunctionHandler, ExecutedCommand
+from pymcfunc.data_formats.coord import BlockCoord
+from pymcfunc.data_formats.nbt import NBT, DictReprAsList, Compound, String, Path
+from pymcfunc.data_formats.raw_json import JNBTValues, JavaTextComponent
+from pymcfunc.proxies.selectors import JavaSelector
 
+_T = TypeVar('_T')
+def pascal_case_ify(var: str):
+    var = var.removesuffix("_")
+    if var == 'uuid':
+        return 'UUID'
+    elif var != 'id':
+        return ''.join(x.title() for x in var.split('_'))
+    else:
+        return var
 
-class NBTFormat(NBT):
+class NBTFormatPath(Path, Generic[_T]):
+    def __init__(self, root: str | None,
+                 fh: JavaFunctionHandler | None = None,
+                 sel: JavaSelector | None = None,
+                 block_pos: BlockCoord | None = None,
+                 rl: str | None = None):
+        super().__init__(root)
+        self.fh = fh
+        self.sel = sel
+        self.block_pos = block_pos
+        self.rl = rl
+
+    @property
+    def _target(self):
+        return {'entity': self.sel} if self.sel \
+            else {'block': self.block_pos} if self.block_pos \
+            else {'storage': self.rl} if self.rl \
+            else {}
+
+    @property
+    def _target_with_prefix_target(self):
+        return {'target_entity': self.sel} if self.sel \
+            else {'target_block': self.block_pos} if self.block_pos \
+            else {'target_storage': self.rl} if self.rl \
+            else {}
+
+    @property
+    def _target_with_prefix_source(self):
+        return {'source_entity': self.sel} if self.sel \
+            else {'source_block': self.block_pos} if self.block_pos \
+            else {'source_storage': self.rl} if self.rl \
+            else {}
+
+    def raw_json(self, interpret: bool | None = None,
+                 separator: JavaTextComponent | None = None) -> JNBTValues:
+        return JNBTValues(nbt=self,
+                          entity=self.sel,
+                          interpret=interpret,
+                          separator=separator)
+
+    def get(self, scale: float | None = None) -> ExecutedCommand:
+        return self.fh.r.data_get(**self._target,
+                                  path=self.root,
+                                  scale=scale)
+
+    def append(self, *,
+               value: _T | None = None,
+               from_: NBTFormatPath | None = None) -> ExecutedCommand:
+        return self.fh.r.data_modify(**self._target_with_prefix_target,
+                                     target_path=self,
+                                     mode='append',
+                                     value=value,
+                                     **from_._target_with_prefix_source if from_ else {},
+                                     source_path=from_)
+
+    def insert(self, index: int, *,
+               value: _T | None = None,
+               from_: NBTFormatPath | None = None) -> ExecutedCommand:
+        return self.fh.r.data_modify(**self._target_with_prefix_target,
+                                     target_path=self,
+                                     mode='insert', index=index,
+                                     value=value,
+                                     **from_._target_with_prefix_source if from_ else {},
+                                     source_path=from_)
+
+    def merge(self, *,
+              value: _T | None = None,
+              from_: NBTFormatPath | None = None) -> ExecutedCommand:
+        return self.fh.r.data_modify(**self._target_with_prefix_target,
+                                     target_path=self,
+                                     mode='merge',
+                                     value=value,
+                                     **from_._target_with_prefix_source if from_ else {},
+                                     source_path=from_)
+
+    def prepend(self, *,
+                value: _T | None = None,
+                from_: NBTFormatPath | None = None) -> ExecutedCommand:
+        return self.fh.r.data_modify(**self._target_with_prefix_target,
+                                     target_path=self,
+                                     mode='prepend',
+                                     value=value,
+                                     **from_._target_with_prefix_source if from_ else {},
+                                     source_path=from_)
+
+    def set(self, *,
+            value: _T | None = None,
+            from_: NBTFormatPath | None = None) -> ExecutedCommand:
+        return self.fh.r.data_modify(**self._target_with_prefix_target,
+                                     target_path=self,
+                                     mode='set',
+                                     value=value,
+                                     **from_._target_with_prefix_source if from_ else {},
+                                     source_path=from_)
+
+    def remove(self):
+        return self.fh.r.data_remove(entity=self.sel, path=self)
+
+    # TODO type checking for data modify
+    # TODO change value into NBTTag
+    
+class NBTFormat(Compound):
+    @classmethod
+    def _get_annotations(cls):
+        return {k: v for c in cls.mro() if hasattr(c, '__annotations__') for k, v in c.__annotations__.items()}
+
     @property
     def py(self) -> dict:
         d = {}
-        for var, anno in type(self).__annotations__.items():
-            if var not in self.NBT_FORMAT: continue
+        for var, anno in type(self)._get_annotations().items():
+            #if var not in self.NBT_FORMAT: continue
             if anno == DictReprAsList:
                 d[var] = [v.as_json() for v in getattr(self, var)]
             else:
@@ -44,7 +163,7 @@ class NBTFormat(NBT):
             for subname, subformat_type in format_type.items():
                 subval = getattr(self, subname, None)
                 d[subname] = self._convert_to_nbt(subname, subval,
-                                                  type(self).__annotations__[subname], format_type)
+                                                  type(self)._get_annotations()[subname], format_type)
             return Compound(d)
         elif isinstance(format_type, _UnionGenericAlias):
             if type(None) in get_args(format_type) and val is None: return None
@@ -76,16 +195,55 @@ class NBTFormat(NBT):
 
     def as_nbt(self) -> Compound:
         d = {}
-        for var, anno in type(self).__annotations__.items():
-            var = var.removesuffix("_")
-            if var not in self.NBT_FORMAT: continue
-            format_type = self.NBT_FORMAT[var]
-            d[var] = self._convert_to_nbt(var, getattr(self, var), anno, format_type)
+        for var, anno in type(self)._get_annotations().items():
+            var = pascal_case_ify(var)
+            #if var not in self.NBT_FORMAT: continue
+            #format_type = self.NBT_FORMAT[var]
+            d[var] = self._convert_to_nbt(var, getattr(self, var), anno, anno)
         return Compound(d)
 
-    NBT_FORMAT: dict[str, Type[NBT] | dict[str, Type[NBT]]] | property = {}
+    #NBT_FORMAT: dict[str, Type[NBT] | dict[str, Type[NBT]]] | property = {}
+
+class RuntimeNBTFormat(Compound):
+    def __init__(self, *,
+                 fh: JavaFunctionHandler | None = None,
+                 sel: JavaSelector | None = None,
+                 block_pos: BlockCoord | None = None,
+                 rl: str | None = None):
+        self.fh = fh
+        self.sel = sel
+        self.block_pos = block_pos
+        self.rl = rl
+        super().__init__(self._get_annotations())
+
+    NBT_FORMAT = {}
+    _get_annotations = lambda self: self.NBT_FORMAT
+
+    attr_as_path = lambda self, item: \
+        self.NBTFormatPath[self._get_annotations()[item]](pascal_case_ify(item),
+                                                          self.fh, self.sel, self.block_pos, self.rl)
+
+    def __getattr__(self, item) -> NBTFormatPath:
+        if item not in self._get_annotations():
+            return super().__getattribute__(self, item)
+        return self.attr_as_path(item)
+
+    def __setattr__(self, item, value):
+        if item not in self._get_annotations():
+            super().__setattr__(item, value)
+        self.attr_as_path(item).set(value=value)
+
+    def __delattr__(self, item):
+        if item not in self._get_annotations():
+            super().__delattr__(item)
+        self.attr_as_path(item).remove()
+
 
 class JsonFormat:
+    @classmethod
+    def _get_annotations(cls):
+        return {k: v for c in cls.mro() if hasattr(c, '__annotations__') for k, v in c.__annotations__.items()}
+
     def _convert_to_json(self, name: str, val: Any, py_type: type, format_type: type) -> Any:
         if not isinstance(format_type, _LiteralGenericAlias) and not isinstance(val, py_type):
             raise TypeError(f"`{name}` must be of {py_type} (got {val})")
@@ -130,7 +288,7 @@ class JsonFormat:
 
     def as_json(self) -> dict:
         d = {}
-        for var, anno in type(self).__annotations__.items():
+        for var, anno in type(self)._get_annotations().items():
             var = var.removesuffix("_")
             if var not in self.JSON_FORMAT: continue
             format_type = self.JSON_FORMAT[var]

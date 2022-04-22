@@ -2,21 +2,21 @@ from __future__ import annotations
 
 from typing import Union, Literal, Any, TYPE_CHECKING, Optional
 
-from attr import define, field
+from attr import field, s
 
 from pymcfunc.data_formats.base_formats import JsonFormat
-from pymcfunc.data_formats.raw_json import JavaRawJson
-from pymcfunc.internal import base_class
 from pymcfunc.data_formats.loot_tables import LootTable
 from pymcfunc.data_formats.predicates import Predicate
+from pymcfunc.data_formats.raw_json import JavaRawJson
 from pymcfunc.data_formats.recipes import Recipe
+from pymcfunc.internal import base_class
 
 if TYPE_CHECKING: from pymcfunc.functions import Function
 from pymcfunc.data_formats.json_formats import ItemJson, EntityJson, DamageJson, DamageTypeJson, LocationJson, IntRangeJson, FloatRangeJson, \
     DoubleRangeJson
 from pymcfunc.data_formats.nbt import Compound, DictReprAsList
 
-@define(init=True)
+@s(kw_only=True, init=True)
 class Advancement(JsonFormat):
     namespace: str
     name: str
@@ -47,7 +47,7 @@ class Advancement(JsonFormat):
         self.rewards.function = func
         return func
 
-@define(init=True)
+@s(kw_only=True, init=True)
 class Icon(JsonFormat):
     item: str = "air"
     nbt: Compound | None = None
@@ -59,7 +59,7 @@ class Icon(JsonFormat):
             'nbt': str,
         }
 
-@define(init=True)
+@s(kw_only=True, init=True)
 class AdvancementDisplay(JsonFormat):
     icon_: Icon = Icon("")
     title: str | JavaRawJson = ""
@@ -83,7 +83,7 @@ class AdvancementDisplay(JsonFormat):
             'hidden': bool,
         }
 
-@define(init=True)
+@s(kw_only=True, init=True)
 class Rewards(JsonFormat):
     recipes: list[Recipe] | None = None
     loot: list[LootTable] | None = None
@@ -99,7 +99,7 @@ class Rewards(JsonFormat):
             'function': Optional[str]
         }
 
-@define(init=True)
+@s(kw_only=True, init=True)
 class Criterion(JsonFormat):
     conditions: Trigger
 
@@ -110,12 +110,12 @@ class Criterion(JsonFormat):
         'trigger': str
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 @base_class
 class Trigger(JsonFormat):
     type = property(lambda self: "")
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 @base_class
 class PlayerTrigger(Trigger):
     player: EntityJson | list[Predicate] | None = None
@@ -124,7 +124,7 @@ class PlayerTrigger(Trigger):
         'player': Optional[Union[EntityJson, list[Predicate]]]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class AllayDropItemOnBlockTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:allay_drop_item_on_block")
     location: LocationJson | None = None
@@ -136,11 +136,11 @@ class AllayDropItemOnBlockTrigger(PlayerTrigger):
         'item': Optional[ItemJson]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class AvoidVibrationTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:avoid_vibration")
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class BeeNestDestroyedTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:bee_nest_destroyed")
     block: str | None = None
@@ -154,7 +154,7 @@ class BeeNestDestroyedTrigger(PlayerTrigger):
         'num_bees_inside': Optional[int]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class BredAnimalsTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:bred_animals")
     child: EntityJson | list[Predicate] | None = None
@@ -168,7 +168,7 @@ class BredAnimalsTrigger(PlayerTrigger):
         'partner': Optional[Union[EntityJson, list[Predicate]]]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class BrewedPotionTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:brewed_potion")
     potion: str | None = None
@@ -178,7 +178,7 @@ class BrewedPotionTrigger(PlayerTrigger):
         'potion': Optional[str]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class ChangedDimensionTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:changed_dimension")
     from_: Literal['overworld', 'the_nether', 'the_end'] | None = None
@@ -190,7 +190,7 @@ class ChangedDimensionTrigger(PlayerTrigger):
         'to': Optional[str]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class ChanelledLightningTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:chanelled_lightning")
     victims: list[EntityJson | list[Predicate]] | None = None
@@ -200,7 +200,7 @@ class ChanelledLightningTrigger(PlayerTrigger):
         'victims': Optional[list[Union[EntityJson, list[Predicate]]]]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class ConstructBeaconTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:construct_beacon")
     level: int | IntRangeJson | None = None
@@ -210,7 +210,7 @@ class ConstructBeaconTrigger(PlayerTrigger):
         'level': Optional[Union[IntRangeJson, int]]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class ConsumeItemTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:consume_item")
     item: ItemJson | None = None
@@ -220,7 +220,7 @@ class ConsumeItemTrigger(PlayerTrigger):
         'item': Optional[ItemJson]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class CuredZombieVillagerTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:cured_zombie_villager")
     villager: EntityJson | list[Predicate] | None = None
@@ -232,13 +232,13 @@ class CuredZombieVillagerTrigger(PlayerTrigger):
         'zombie': Optional[Union[EntityJson, list[Predicate]]]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class EffectsChangedTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:effects_changed")
     effect: list[Effect] | None = None
     source: EntityJson | list[Predicate] | None = None
 
-    @define(init=True)
+    @s(kw_only=True, init=True)
     class Effect(JsonFormat):
         name: str
         amplifier: int | IntRangeJson | None = None
@@ -255,7 +255,7 @@ class EffectsChangedTrigger(PlayerTrigger):
         'source': Optional[Union[EntityJson, list[Predicate]]]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class EnchantedItemTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:enchanted_item")
     item: ItemJson | None = None
@@ -267,7 +267,7 @@ class EnchantedItemTrigger(PlayerTrigger):
         'levels': Optional[Union[IntRangeJson, int]]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class EnterBlockTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:enter_block")
     block: str | None = None
@@ -279,7 +279,7 @@ class EnterBlockTrigger(PlayerTrigger):
         'state': Optional[dict[str, Any]]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class EntityHurtPlayerTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:entity_hurt_player")
     damage: DamageJson | None = None
@@ -289,7 +289,7 @@ class EntityHurtPlayerTrigger(PlayerTrigger):
         'damage': Optional[DamageJson]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class EntityKilledPlayerTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:entity_killed_player")
     entity: EntityJson | list[Predicate] | None = None
@@ -301,7 +301,7 @@ class EntityKilledPlayerTrigger(PlayerTrigger):
         'killing_blow': Optional[DamageJson]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class FallFromHeightTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:fall_from_height")
     start_position: LocationJson | None = None
@@ -313,7 +313,7 @@ class FallFromHeightTrigger(PlayerTrigger):
         'distance': Optional[dict[Literal['absolute', 'horizontal', 'x', 'y', 'z'], FloatRangeJson]]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class FilledBucketTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:filled_bucket")
     item: ItemJson | None = None
@@ -323,7 +323,7 @@ class FilledBucketTrigger(PlayerTrigger):
         'item': Optional[ItemJson]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class FishingRodHookedTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:fishing_rod_hooked")
     entity: EntityJson | list[Predicate] | None = None
@@ -337,7 +337,7 @@ class FishingRodHookedTrigger(PlayerTrigger):
         'rod': Optional[ItemJson]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class HeroOfTheVillageTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:hero_of_the_village")
     location: LocationJson | None = None
@@ -347,11 +347,11 @@ class HeroOfTheVillageTrigger(PlayerTrigger):
         'location': Optional[LocationJson]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class ImpossibleTrigger(Trigger):
     type = property(lambda self: "minecraft:impossible")
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class InventoryChangedTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:inventory_changed")
     items: list[ItemJson] | None = None
@@ -363,7 +363,7 @@ class InventoryChangedTrigger(PlayerTrigger):
         'slots': Optional[dict[Literal['empty', 'full', 'occupied'], Union[int, IntRangeJson]]]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class ItemDurabilityChangedTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:item_durability_changed")
     delta: int | IntRangeJson | None = None
@@ -377,7 +377,7 @@ class ItemDurabilityChangedTrigger(PlayerTrigger):
         'item': Optional[ItemJson]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class ItemUsedOnBlockTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:item_used_on_block")
     location: LocationJson | None = None
@@ -389,7 +389,7 @@ class ItemUsedOnBlockTrigger(PlayerTrigger):
         'item': Optional[ItemJson]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class KillMobNearSculkCatalystTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:kill_mob_near_sculk_catalyst")
     entity: EntityJson | list[Predicate] | None = None
@@ -401,7 +401,7 @@ class KillMobNearSculkCatalystTrigger(PlayerTrigger):
         'killing_blow': Optional[DamageTypeJson]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class KilledByCrossbowTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:killed_by_crossbow")
     unique_entity_types: int | IntRangeJson | None = None
@@ -413,7 +413,7 @@ class KilledByCrossbowTrigger(PlayerTrigger):
         'victims': Optional[Union[EntityJson, list[Union[EntityJson, list[Predicate]]]]]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class LevitationTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:levitation")
     distance: dict[Literal['absolute', 'horizontal', 'x', 'y', 'z'], IntRangeJson] | None = None
@@ -425,7 +425,7 @@ class LevitationTrigger(PlayerTrigger):
         'duration': Optional[Union[int, IntRangeJson]]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class LightningStrikeTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:lightning_strike")
     lightning: EntityJson | list[Predicate] | None = None
@@ -437,7 +437,7 @@ class LightningStrikeTrigger(PlayerTrigger):
         'bystander': Optional[Union[EntityJson, list[Predicate]]]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class LocationTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:location")
     location: LocationJson | None = None
@@ -447,7 +447,7 @@ class LocationTrigger(PlayerTrigger):
         'location': Optional[LocationJson]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class NetherTravelTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:nether_travel")
     start_position: LocationJson | None = None
@@ -459,7 +459,7 @@ class NetherTravelTrigger(PlayerTrigger):
         'distance': Optional[dict[Literal['absolute', 'horizontal', 'x', 'y', 'z'], FloatRangeJson]]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class PlacedBlockTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:placed_block")
     block: str | None = None
@@ -475,7 +475,7 @@ class PlacedBlockTrigger(PlayerTrigger):
         'state': Optional[dict[str, Any]]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class PlayerGeneratesContainerLootTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:player_generates_container_loot")
     loot_table: str | LootTable
@@ -485,7 +485,7 @@ class PlayerGeneratesContainerLootTrigger(PlayerTrigger):
         'loot_table': str
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class PlayerHurtEntityTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:player_hurt_entity")
     damage: DamageJson | None = None
@@ -497,7 +497,7 @@ class PlayerHurtEntityTrigger(PlayerTrigger):
         'entity': Optional[Union[EntityJson, list[Predicate]]]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class PlayerinteractedWithEntityTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:player_interacted_with_entity")
     item: ItemJson | None = None
@@ -509,7 +509,7 @@ class PlayerinteractedWithEntityTrigger(PlayerTrigger):
         'entity': Optional[Union[EntityJson, list[Predicate]]]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class PlayerKilledEntityTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:player_killed_entity")
     entity: EntityJson | list[Predicate] | None = None
@@ -521,7 +521,7 @@ class PlayerKilledEntityTrigger(PlayerTrigger):
         'killing_blow': Optional[DamageTypeJson]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class RecipeUnlockedTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:recipe_unlocked")
     recipe: str | Recipe
@@ -531,7 +531,7 @@ class RecipeUnlockedTrigger(PlayerTrigger):
         'recipe': str
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class RideEntityInLavaTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:ride_entity_in_lava")
     start_position: LocationJson | None = None
@@ -543,7 +543,7 @@ class RideEntityInLavaTrigger(PlayerTrigger):
         'distance': Optional[dict[Literal['absolute', 'horizontal', 'x', 'y', 'z'], FloatRangeJson]]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class ShotCrossbowTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:shot_crossbow")
     item: ItemJson | None = None
@@ -553,7 +553,7 @@ class ShotCrossbowTrigger(PlayerTrigger):
         'item': Optional[ItemJson]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class SleptInBedTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:slept_in_bed")
     location: LocationJson | None = None
@@ -563,7 +563,7 @@ class SleptInBedTrigger(PlayerTrigger):
         'location': Optional[LocationJson]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class SlideDownBlockTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:slide_down_block")
     block: str | None = None
@@ -573,11 +573,11 @@ class SlideDownBlockTrigger(PlayerTrigger):
         'block': Optional[str]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class StartedRidingTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:started_riding")
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class SummonedEntityTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:summoned_entity")
     entity: EntityJson | list[Predicate] | None = None
@@ -587,7 +587,7 @@ class SummonedEntityTrigger(PlayerTrigger):
         'entity': Optional[Union[EntityJson, list[Predicate]]]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class TameAnimalTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:tame_animal")
     entity: EntityJson | list[Predicate] | None = None
@@ -597,7 +597,7 @@ class TameAnimalTrigger(PlayerTrigger):
         'entity': Optional[Union[EntityJson, list[Predicate]]]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class TargetHitTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:target_hit")
     signal_strength: int | None = None
@@ -611,7 +611,7 @@ class TargetHitTrigger(PlayerTrigger):
         'shooter': Optional[Union[EntityJson, list[Predicate]]]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class ThrownItemPickedUpByEntityTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:thrown_item_picked_up_by_entity")
     item: ItemJson | None = None
@@ -623,7 +623,7 @@ class ThrownItemPickedUpByEntityTrigger(PlayerTrigger):
         'entity': Optional[Union[EntityJson, list[Predicate]]]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class ThrownItemPickedUpByPlayerTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:thrown_item_picked_up_by_player")
     entity: EntityJson | list[Predicate] | None = None
@@ -635,11 +635,11 @@ class ThrownItemPickedUpByPlayerTrigger(PlayerTrigger):
         'item': Optional[ItemJson]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class TickTrigger(Trigger):
     type = property(lambda self: "minecraft:tick")
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class UsedEnderEyeTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:used_ender_eye")
     distance: int | DoubleRangeJson | None = None
@@ -649,7 +649,7 @@ class UsedEnderEyeTrigger(PlayerTrigger):
         'distance': Optional[Union[int, DoubleRangeJson]]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class UsedTotemTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:used_totem")
     item: ItemJson | None = None
@@ -659,7 +659,7 @@ class UsedTotemTrigger(PlayerTrigger):
         'item': Optional[ItemJson]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class UsingItemTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:using_item")
     item: ItemJson | None = None
@@ -669,7 +669,7 @@ class UsingItemTrigger(PlayerTrigger):
         'item': Optional[ItemJson]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class VillagerTradeTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:villager_trade")
     item: ItemJson | None = None
@@ -681,7 +681,7 @@ class VillagerTradeTrigger(PlayerTrigger):
         'villager': Optional[Union[EntityJson, list[Predicate]]]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class VoluntaryExileTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:voluntary_exile")
     location: LocationJson | None = None
@@ -693,15 +693,15 @@ class VoluntaryExileTrigger(PlayerTrigger):
 
 # TODO deprecation notices for below triggers
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class ArbitraryPlayerTickTrigger(Trigger):
     type = property(lambda self: "minecraft:arbitrary_player_tick")
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class ItemDeliveredToPlayerTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:item_delivered_to_player")
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class PlayerDamagedTrigger(Trigger):
     type = property(lambda self: "minecraft:player_damaged")
     damage: DamageJson | None = None
@@ -711,7 +711,7 @@ class PlayerDamagedTrigger(Trigger):
         'damage': Optional[DamageJson]
     }
 
-@define(init=True, frozen=True)
+@s(kw_only=True, init=True, frozen=True)
 class SafelyHarvestHoneyTrigger(PlayerTrigger):
     type = property(lambda self: "minecraft:safely_harvest_honey")
     block: dict[Literal['block', 'tag'], str] | None = None

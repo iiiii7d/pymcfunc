@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Literal, Any, TypedDict, Annotated, Union, TYPE_CHECKING
 
 import pymcfunc.internal as internal
-from pymcfunc import BaseFunctionHandler
+from pymcfunc import BaseFunctionHandler, JavaFunctionHandler, BedrockFunctionHandler
 from pymcfunc.data_formats.advancements import Advancement
 
 if TYPE_CHECKING: from pymcfunc.command import ResourceLocation, ExecutedCommand
@@ -79,6 +79,12 @@ class BaseSelector:
 
 
 class JavaSelector(BaseSelector):
+    fh: JavaFunctionHandler
+    def __init__(self, var: Literal['p', 'r', 'a', 'e', 's'],
+                 fh: JavaFunctionHandler | None = None,
+                 **arguments: Any):
+        super().__init__(var, fh, **arguments)
+
     @property
     def singleonly(self) -> bool:
         self.arguments: JavaSelector.Arguments
@@ -196,10 +202,30 @@ class JavaSelector(BaseSelector):
                               criterion: str | None = None) -> ExecutedCommand:
             return self.fh.advancement_grant(self, mode, advancement, criterion)
 
+        def kill(self) -> ExecutedCommand:
+            return self.fh.kill(self)
+
+        @BaseSelector._ensure_fh_set
+        def tp(self, *,
+               coord: Coord | None = None,
+               entity: JavaSelector | None = None,
+               **kwargs):
+            if coord is not None:
+                self.fh.r.tp(entity=self, location=coord, **kwargs)
+            else:
+                self.fh.r.tp(entity=self, destination=entity, **kwargs)
+        teleport = tp
+
         # TODO more of this
 
 
 class BedrockSelector(BaseSelector):
+    fh: BedrockFunctionHandler
+    def __init__(self, var: Literal['p', 'r', 'a', 'e', 's'],
+                 fh: BedrockFunctionHandler | None = None,
+                 **arguments: Any):
+        super().__init__(var, fh, **arguments)
+
     @property
     def singleonly(self) -> bool:
         self.arguments: BedrockSelector.Arguments

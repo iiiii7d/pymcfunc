@@ -263,7 +263,7 @@ class Compound(NBTTag, dict):
         return self._val.items()
 
     def __str__(self) -> str:
-        return "{"+",".join(k+": "+str(v) for k, v in self.items())+"}"
+        return "{"+",".join(k+":"+str(v) for k, v in self.items())+"}"
 
     @property
     def py(self) -> dict[str, Any]:
