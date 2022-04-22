@@ -3,14 +3,14 @@ from __future__ import annotations
 from typing import Any, Callable, Optional
 
 from pymcfunc import selectors
-from pymcfunc.advancements import Advancement
+from pymcfunc.data_formats.advancements import Advancement
 from pymcfunc.functions import JavaFunctionHandler, Function
 from pymcfunc.internal import base_class
-from pymcfunc.loot_tables import LootTable
-from pymcfunc.predicates import Predicate
-from pymcfunc.recipes import Recipe
+from pymcfunc.data_formats.loot_tables import LootTable
+from pymcfunc.data_formats.predicates import Predicate
+from pymcfunc.data_formats.recipes import Recipe
 from pymcfunc.version import JavaVersion
-from pymcfunc.item_modifiers import ItemModifier
+from pymcfunc.data_formats.item_modifiers import ItemModifier
 
 
 @base_class

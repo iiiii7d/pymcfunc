@@ -4,25 +4,26 @@ from typing import Union, Literal, Optional
 
 from attr import define, field
 
+from pymcfunc.data_formats.base_formats import JsonFormat
 from pymcfunc.internal import base_class
-from pymcfunc.nbt import NBTFormat, String, Int, Float
 
 
 @define(init=True, frozen=True)
-class NumberProvider(NBTFormat):
+@base_class
+class NumberProvider(JsonFormat):
     type: str = field(init=False)
 
-    NBT_FORMAT = {
-        'type': String,
+    JSON_FORMAT = {
+        'type': str,
     }
 
 @define(init=True, frozen=True)
 class ConstantNumberProvider(NumberProvider):
     value: int | float
 
-    NBT_FORMAT = {
-        **NumberProvider.NBT_FORMAT,
-        'value': Union[Int, Float],
+    JSON_FORMAT = {
+        **NumberProvider.JSON_FORMAT,
+        'value': Union[int, float],
     }
 
 @define(init=True, frozen=True)
@@ -30,10 +31,10 @@ class UniformNumberProvider(NumberProvider):
     min: int | float | NumberProvider
     max: int | float | NumberProvider
 
-    NBT_FORMAT = {
-        **NumberProvider.NBT_FORMAT,
-        'min': Union[Int, Float, NumberProvider],
-        'max': Union[Int, Float, NumberProvider],
+    JSON_FORMAT = {
+        **NumberProvider.JSON_FORMAT,
+        'min': Union[int, float, NumberProvider],
+        'max': Union[int, float, NumberProvider],
     }
 
 @define(init=True, frozen=True)
@@ -41,10 +42,10 @@ class BinomialNumberProvider(NumberProvider):
     n: int | NumberProvider
     p: float | NumberProvider
 
-    NBT_FORMAT = {
-        **NumberProvider.NBT_FORMAT,
-        'n': Union[Int, NumberProvider],
-        'p': Union[Float, NumberProvider],
+    JSON_FORMAT = {
+        **NumberProvider.JSON_FORMAT,
+        'n': Union[int, NumberProvider],
+        'p': Union[float, NumberProvider],
     }
 
 @define(init=True, frozen=True)
@@ -55,33 +56,33 @@ class ScoreNumberProvider(NumberProvider):
 
     @define(init=True, frozen=True)
     @base_class
-    class Target(NBTFormat):
+    class Target(JsonFormat):
         type: Literal['fixed', 'context']
 
-        NBT_FORMAT = {
-            'type': String,
+        JSON_FORMAT = {
+            'type': str,
         }
     @define(init=True, frozen=True)
     class FixedTarget(Target):
         name: str
 
-        NBT_FORMAT = {
-            'type': String,
-            'name': String,
+        JSON_FORMAT = {
+            'type': str,
+            'name': str,
         }
 
     @define(init=True, frozen=True)
     class ContextTarget(Target):
         target: Literal['this', 'killer', 'direct_killer', 'player_killer']
 
-        NBT_FORMAT = {
-            'type': String,
-            'target': String,
+        JSON_FORMAT = {
+            'type': str,
+            'target': str,
         }
 
-    NBT_FORMAT = {
-        **NumberProvider.NBT_FORMAT,
+    JSON_FORMAT = {
+        **NumberProvider.JSON_FORMAT,
         'target': Target,
-        'score': String,
-        'scale': Optional[Float],
+        'score': str,
+        'scale': Optional[float],
     }

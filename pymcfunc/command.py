@@ -207,7 +207,7 @@ class Command:
 
                 # for eval
                 # noinspection PyUnresolvedReferences
-                from pymcfunc.advancements import Advancement
+                from pymcfunc.data_formats.advancements import Advancement
                 from pymcfunc.raw_commands import JavaRawCommands
                 # noinspection PyUnusedLocal
                 ExecuteSubcommandHandler = JavaRawCommands.ExecuteSubcommandHandler

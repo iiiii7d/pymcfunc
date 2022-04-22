@@ -8,17 +8,17 @@ from uuid import UUID
 
 from typing_extensions import Self
 
-from pymcfunc.advancements import Advancement
+from pymcfunc.data_formats.advancements import Advancement
 from pymcfunc.command import ExecutedCommand, Command, SE, AE, Range, NoSpace, Element, Player, Regex, \
     PlayerName, LE, _JavaPlayerTarget, _JavaSingleTarget, ResourceLocation, _BedrockSinglePlayerTarget, \
     _BedrockPlayerTarget, _BedrockTarget, _BedrockSingleTarget, Quoted, _JavaObjectiveName, _JavaTarget, \
     _BedrockObjectiveName, _JavaSinglePlayerTarget
-from pymcfunc.coord import BlockCoord, Coord, Rotation, ChunkCoord, Coord2d
+from pymcfunc.data_formats.coord import BlockCoord, Coord, Rotation, ChunkCoord, Coord2d
 from pymcfunc.errors import FutureCommandWarning, DeprecatedCommandWarning, EducationEditionWarning
 from pymcfunc.internal import base_class
-from pymcfunc.nbt import Int, Path, Compound, NBTTag, Float
-from pymcfunc.range import FloatRange
-from pymcfunc.rawjson import JavaRawJson
+from pymcfunc.data_formats.nbt import Int, Path, Compound, NBTTag, Float
+from pymcfunc.data_formats.range import FloatRange
+from pymcfunc.data_formats.raw_json import JavaRawJson
 from pymcfunc.selectors import BedrockSelector, JavaSelector
 from pymcfunc.version import JavaVersion, BedrockVersion
 

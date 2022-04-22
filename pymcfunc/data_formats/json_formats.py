@@ -4,22 +4,22 @@ from typing import Literal, Type, Optional, Union
 
 from attr import define
 
+from pymcfunc.data_formats.base_formats import JsonFormat
 from pymcfunc.internal import immutable
-from pymcfunc.nbt import Float, Int, Double, NBTTag, Compound, NBTFormat, Boolean, NBT, List, String, \
-    DictReprAsList
-from pymcfunc.number_providers import NumberProvider
+from pymcfunc.data_formats.nbt import NBTTag, Compound, NBT, DictReprAsList, Float, Double, Int
+from pymcfunc.data_formats.number_providers import NumberProvider
 
 
 @immutable
-class RangeJson(NBTFormat):
+class RangeJson(JsonFormat):
     def __new__(cls, min_: int | str, max_: int | str):
         if cls != RangeJson: return super().__new__(cls)
         if isinstance(min_, int) and Int.min <= min_ <= Int.max and \
            isinstance(max_, int) and Int.min <= max_ <= Int.max:
             return IntRangeJson.__new__(IntRangeJson, min_, max_)
-        if Float.min <= min_ <= Float.max and Float.min <= max_ <= Float.max:
-            return FloatRangeJson.__new__(FloatRangeJson, min_, max_)
         if Double.min <= min_ <= Double.max and Double.min <= max_ <= Double.max:
+            return FloatRangeJson.__new__(FloatRangeJson, min_, max_)
+        if Float.min <= min_ <= Float.max and Float.min <= max_ <= Float.max:
             return DoubleRangeJson.__new__(DoubleRangeJson, min_, max_)
 
     def __init__(self, min_: int | str, max_: int | str):
@@ -27,28 +27,28 @@ class RangeJson(NBTFormat):
         self.max: int | str = max_
 
 class FloatRangeJson(RangeJson):
-    NBT_FORMAT = {
-        'min': Float,
-        'max': Float
+    JSON_FORMAT = {
+        'min': float,
+        'max': float
     }
 class IntRangeJson(RangeJson):
-    NBT_FORMAT = {
-        'min': Int,
-        'max': Int
+    JSON_FORMAT = {
+        'min': int,
+        'max': int
     }
 class DoubleRangeJson(RangeJson):
-    NBT_FORMAT = {
-        'min': Double,
-        'max': Double
+    JSON_FORMAT = {
+        'min': float,
+        'max': float
     }
 class NumberProviderRangeJson(RangeJson):
-    NBT_FORMAT = {
+    JSON_FORMAT = {
         'min': NumberProvider,
         'max': NumberProvider
     }
 
 @define(init=True)
-class DamageJson(NBTFormat):
+class DamageJson(JsonFormat):
     blocked: bool | None = None
     dealt: float | DoubleRangeJson | None = None
     source_entity: EntityJson | None = None
@@ -56,17 +56,17 @@ class DamageJson(NBTFormat):
     type: DamageTypeJson | None = None
 
     @property
-    def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
+    def JSON_FORMAT(self) -> dict[str, Type[NBT]]:
         return {
-            'blocked': Optional[Boolean],
-            'dealt': Optional[Union[DoubleRangeJson, Double]],
+            'blocked': Optional[bool],
+            'dealt': Optional[Union[DoubleRangeJson, float]],
             'source_entity': Optional[EntityJson],
-            'taken': Optional[Union[DoubleRangeJson, Double]],
+            'taken': Optional[Union[DoubleRangeJson, float]],
             'type': Optional[DamageTypeJson]
         }
 
 @define(init=True)
-class DamageTypeJson(NBTFormat):
+class DamageTypeJson(JsonFormat):
     bypasses_armor: bool | None = None
     bypasses_invulnerability: bool | None = None
     bypasses_magic: bool | None = None
@@ -79,22 +79,22 @@ class DamageTypeJson(NBTFormat):
     source_entity: EntityJson | None = None
 
     @property
-    def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
+    def JSON_FORMAT(self) -> dict[str, Type[NBT]]:
         return {
-            'bypasses_armor': Optional[Boolean],
-            'bypasses_invulnerability': Optional[Boolean],
-            'bypasses_magic': Optional[Boolean],
+            'bypasses_armor': Optional[bool],
+            'bypasses_invulnerability': Optional[bool],
+            'bypasses_magic': Optional[bool],
             'direct_entity': Optional[EntityJson],
-            'is_explosion': Optional[Boolean],
-            'is_fire': Optional[Boolean],
-            'is_magic': Optional[Boolean],
-            'is_projectile': Optional[Boolean],
-            'is_lightning': Optional[Boolean],
+            'is_explosion': Optional[bool],
+            'is_fire': Optional[bool],
+            'is_magic': Optional[bool],
+            'is_projectile': Optional[bool],
+            'is_lightning': Optional[bool],
             'source_entity': Optional[EntityJson]
         }
 
 
-class EntityJson(NBTFormat):
+class EntityJson(JsonFormat):
     distance: dict[Literal["absolute", "horizontal", "x", "y", "z"], FloatRangeJson] | None = None
     effects: list[Effect] | None = None
     equipment: dict[Literal["mainhand", "offhand", "head", "chest", "legs", "feet"], ItemJson] | None = None
@@ -112,27 +112,27 @@ class EntityJson(NBTFormat):
     fishing_hook_in_open_water: bool | None = None
 
     @property
-    def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
+    def JSON_FORMAT(self) -> dict[str, Type[NBT]]:
         return {
             'distance': Optional[dict[Literal["absolute", "horizontal", "x", "y", "z"], FloatRangeJson]], # TODO format for distance
             'effects': Optional[DictReprAsList[self.Effect]],
             'equipment': Optional[dict[Literal["mainhand", "offhand", "head", "chest", "legs", "feet"], ItemJson]], #TODO same for below two
-            'flags': Optional[dict[Literal["is_on_fire", "is_sneaking", "is_sprinting", "is_swimming", "is_baby"], Boolean]],
+            'flags': Optional[dict[Literal["is_on_fire", "is_sneaking", "is_sprinting", "is_swimming", "is_baby"], bool]],
             'lightning_bolt': Optional[self.LightningBolt],
             'location': Optional[LocationJson],
-            'nbt': Optional[NBTTag],
+            'nbt': Optional[str],
             'passenger': Optional[EntityJson],
             'player': Optional[self.Player],
             'stepping_on': Optional[LocationJson],
-            'team': Optional[String],
-            'type': Optional[String],
+            'team': Optional[str],
+            'type': Optional[str],
             'targeted_entity': Optional[EntityJson],
-            'vehicle': Optional[String],
-            'fishing_hook_in_open_water': Optional[Boolean]
+            'vehicle': Optional[str],
+            'fishing_hook_in_open_water': Optional[bool]
         }
 
     @define(init=True)
-    class Effect(NBTFormat):
+    class Effect(JsonFormat):
         name: str
         ambient: bool | None = None
         amplifier: int | IntRangeJson | None = None
@@ -140,16 +140,16 @@ class EntityJson(NBTFormat):
         visible: bool | None = None
 
         @property
-        def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
+        def JSON_FORMAT(self) -> dict[str, Type[NBT]]:
             return {
-                'ambient': Optional[Boolean],
-                'amplifier': Optional[Union[IntRangeJson, Int]],
-                'duration': Optional[Union[IntRangeJson, Int]],
-                'visible': Optional[Boolean]
+                'ambient': Optional[bool],
+                'amplifier': Optional[Union[IntRangeJson, int]],
+                'duration': Optional[Union[IntRangeJson, int]],
+                'visible': Optional[bool]
             }
 
     @define(init=True)
-    class Player(NBTFormat):
+    class Player(JsonFormat):
         looking_at: EntityJson | None = None
         advancements: dict[str, bool | dict[str, bool]] | None = None
         gamemode: Literal["survival", "adventure", "creative", "spectator"] | None = None
@@ -158,13 +158,13 @@ class EntityJson(NBTFormat):
         stats: list[Statistic] | None = None
 
         @property
-        def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
+        def JSON_FORMAT(self) -> dict[str, Type[NBT]]:
             return {
                 'looking_at': Optional[EntityJson],
-                'advancements': Optional[dict[str, Union[Boolean, dict[str, Boolean]]]],
-                'gamemode': Optional[String],
-                'level': Optional[Union[IntRangeJson, Int]],
-                'recipes': Optional[dict[str, Boolean]],
+                'advancements': Optional[dict[str, Union[bool, dict[str, bool]]]],
+                'gamemode': Optional[str],
+                'level': Optional[Union[IntRangeJson, int]],
+                'recipes': Optional[dict[str, bool]],
                 'stats': Optional[DictReprAsList[self.Statistic]]
             }
 
@@ -177,28 +177,28 @@ class EntityJson(NBTFormat):
             value: int | IntRangeJson | None = None
 
             @property
-            def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
+            def JSON_FORMAT(self) -> dict[str, Type[NBT]]:
                 return {
-                    'type': Optional[String],
-                    'stat': Optional[String],
-                    'value': Optional[Union[IntRangeJson, Int]]
+                    'type': Optional[str],
+                    'stat': Optional[str],
+                    'value': Optional[Union[IntRangeJson, int]]
                 }
 
     @define(init=True)
-    class LightningBolt(NBTFormat):
+    class LightningBolt(JsonFormat):
         blocks_set_on_fire: int | None = None
         entity_struck: EntityJson | None = None
 
         @property
-        def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
+        def JSON_FORMAT(self) -> dict[str, Type[NBT]]:
             return {
-                'blocks_set_on_fire': Optional[Int],
+                'blocks_set_on_fire': Optional[int],
                 'entity_struck': Optional[EntityJson]
             }
 
 
 @define(init=True)
-class LocationJson(NBTFormat):
+class LocationJson(JsonFormat):
     biome: str | None = None
     block: Block | None = None
     dimension: str | None = None
@@ -209,48 +209,48 @@ class LocationJson(NBTFormat):
     smokey: bool | None = None
 
     @property
-    def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
+    def JSON_FORMAT(self) -> dict[str, Type[NBT]]:
         return {
-            'biome': Optional[String],
+            'biome': Optional[str],
             'block': Optional[self.Block],
-            'dimension': Optional[String],
-            'feature': Optional[String],
+            'dimension': Optional[str],
+            'feature': Optional[str],
             'fluid': Optional[self.Fluid],
-            'light': Optional[Union[IntRangeJson, Int]],
-            'position': Optional[dict[str, Union[DoubleRangeJson, Double]]],
-            'smokey': Optional[Boolean]
+            'light': Optional[Union[IntRangeJson, int]],
+            'position': Optional[dict[str, Union[DoubleRangeJson, float]]],
+            'smokey': Optional[bool]
         }
 
     @define(init=True)
-    class Block(NBTFormat):
+    class Block(JsonFormat):
         blocks: list[str] | None = None
         tag: str | None = None
         nbt: Compound | None = None
         state: dict[str, str | int | bool | IntRangeJson] | None = None
 
         @property
-        def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
+        def JSON_FORMAT(self) -> dict[str, Type[NBT]]:
             return {
-                'blocks': Optional[String],
-                'tag': Optional[String],
+                'blocks': Optional[str],
+                'tag': Optional[str],
                 'nbt': Optional[Compound],
-                'state': Optional[dict[str, Union[IntRangeJson, Int, Boolean, String]]]
+                'state': Optional[dict[str, Union[IntRangeJson, int, bool, str]]]
             }
 
     @define(init=True)
-    class Fluid(NBTFormat):
+    class Fluid(JsonFormat):
         fluid: str | None = None
         state: dict[str, str | int | bool | IntRangeJson] | None = None
 
         @property
-        def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
+        def JSON_FORMAT(self) -> dict[str, Type[NBT]]:
             return {
-                'fluid': Optional[String],
-                'state': Optional[dict[str, Union[IntRangeJson, Int, Boolean, String]]]
+                'fluid': Optional[str],
+                'state': Optional[dict[str, Union[IntRangeJson, int, bool, str]]]
             }
 
 @define(init=True)
-class ItemJson(NBTFormat):
+class ItemJson(JsonFormat):
     count: int | IntRangeJson | None = None
     durability: int | IntRangeJson | None = None
     enchantments: list[Enchantment] | None = None
@@ -261,26 +261,26 @@ class ItemJson(NBTFormat):
     tag: str | None = None
 
     @property
-    def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
+    def JSON_FORMAT(self) -> dict[str, Type[NBT]]:
         return {
-            'count': Optional[Union[IntRangeJson, Int]],
-            'durability': Optional[Union[IntRangeJson, Int]],
-            'enchantments': Optional[List[self.Enchantment]],
-            'stored_enchantments': Optional[List[self.Enchantment]],
-            'items': Optional[String],
+            'count': Optional[Union[IntRangeJson, int]],
+            'durability': Optional[Union[IntRangeJson, int]],
+            'enchantments': Optional[list[self.Enchantment]],
+            'stored_enchantments': Optional[list[self.Enchantment]],
+            'items': Optional[str],
             'nbt': Optional[Compound],
-            'potion': Optional[String],
-            'tag': Optional[String]
+            'potion': Optional[str],
+            'tag': Optional[str]
         }
 
     @define(init=True)
-    class Enchantment(NBTFormat):
+    class Enchantment(JsonFormat):
         enchantment: str | None = None
         levels: int | IntRangeJson | None = None
 
         @property
-        def NBT_FORMAT(self) -> dict[str, Type[NBT]]:
+        def JSON_FORMAT(self) -> dict[str, Type[NBT]]:
             return {
-                'enchantment': Optional[String],
-                'levels': Optional[Union[IntRangeJson, Int]]
+                'enchantment': Optional[str],
+                'levels': Optional[Union[IntRangeJson, int]]
             }

@@ -6,25 +6,26 @@ from uuid import UUID
 from attr import define, field
 
 from pymcfunc.command import ResourceLocation
+from pymcfunc.data_formats.base_formats import JsonFormat
 from pymcfunc.internal import base_class
-from pymcfunc.json_format import IntRangeJson, NumberProviderRangeJson
-from pymcfunc.rawjson import JavaRawJson
+from pymcfunc.data_formats.json_formats import IntRangeJson, NumberProviderRangeJson
+from pymcfunc.data_formats.raw_json import JavaRawJson
 
-if TYPE_CHECKING: from pymcfunc.loot_tables import Entry
-from pymcfunc.nbt import NBTFormat, List, String, Path, Int, Boolean, Float, Compound
-from pymcfunc.number_providers import NumberProvider
-from pymcfunc.predicates import Predicate
+if TYPE_CHECKING: from pymcfunc.data_formats.loot_tables import Entry
+from pymcfunc.data_formats.nbt import Path, Compound
+from pymcfunc.data_formats.number_providers import NumberProvider
+from pymcfunc.data_formats.predicates import Predicate
 
 
 @define(init=True)
 @base_class
-class ItemModifier(NBTFormat):
+class ItemModifier(JsonFormat):
     function = property(lambda self: "")
     conditions: list[Predicate]
 
-    NBT_FORMAT = {
-        'function': String,
-        'conditions': List[Predicate]
+    JSON_FORMAT = {
+        'function': str,
+        'conditions': list[Predicate]
     }
 
 @define(init=True)
@@ -34,11 +35,11 @@ class ApplyBonusItemModifier(ItemModifier):
     formula: Literal['binomial_with_bonus_count', 'uniform_bonus_count', 'ore_drops']
     parameters: tuple[int, float] | tuple[float] | None = None
 
-    NBT_FORMAT = {
-        **ItemModifier.NBT_FORMAT,
-        'enchantment': String,
+    JSON_FORMAT = {
+        **ItemModifier.JSON_FORMAT,
+        'enchantment': str,
         'formula': Literal['binomial_with_bonus_count', 'uniform_bonus_count', 'ore_drops'],
-        'parameters': Optional[Union[List[int, float], List[float]]]
+        'parameters': Optional[Union[list[int, float], list[float]]]
     }
 
 @define(init=True)
@@ -46,9 +47,9 @@ class CopyNameItemModifier(ItemModifier):
     function = property(lambda self: "copy_name")
     source: str = field(init=False, default="block_entity")
 
-    NBT_FORMAT = {
-        **ItemModifier.NBT_FORMAT,
-        'source': String,
+    JSON_FORMAT = {
+        **ItemModifier.JSON_FORMAT,
+        'source': str,
     }
 
 @define(init=True)
@@ -59,11 +60,11 @@ class CopyNBTItemModifier(ItemModifier):
 
     @define(init=True, frozen=True)
     @base_class
-    class Source(NBTFormat):
+    class Source(JsonFormat):
         type: str = field(init=False)
 
-        NBT_FORMAT = {
-            'type': String
+        JSON_FORMAT = {
+            'type': str
         }
 
     @define(init=True, frozen=True)
@@ -71,8 +72,8 @@ class CopyNBTItemModifier(ItemModifier):
         type = property(lambda self: "context")
         target: Literal['block_entity', 'this', 'killer', 'killer_player']
 
-        NBT_FORMAT = {
-            'type': String,
+        JSON_FORMAT = {
+            'type': str,
             'target': Literal['block_entity', 'this', 'killer', 'killer_player']
         }
 
@@ -81,26 +82,26 @@ class CopyNBTItemModifier(ItemModifier):
         type = property(lambda self: "storage")
         source: ResourceLocation
 
-        NBT_FORMAT = {
-            'type': String,
-            'target': String
+        JSON_FORMAT = {
+            'type': str,
+            'target': str
         }
 
     @define(init=True, frozen=True)
     @base_class
-    class NBTOperation(NBTFormat):
+    class NBTOperation(JsonFormat):
         source: Path
         target: Path
         op: Literal['replace', 'append', 'merge']
 
-        NBT_FORMAT = {
-            'source': String,
-            'target': String,
+        JSON_FORMAT = {
+            'source': str,
+            'target': str,
             'op': Literal['copy', 'remove']
         }
 
-    NBT_FORMAT = {
-        **ItemModifier.NBT_FORMAT,
+    JSON_FORMAT = {
+        **ItemModifier.JSON_FORMAT,
         'source': Union[Source, ContextSource, StorageSource],
         'ops': Union[Literal['block_entity', 'this', 'killer', 'killer_player'], Source]
     }
@@ -111,10 +112,10 @@ class CopyStateItemModifier(ItemModifier):
     block: str
     properties: list[str]
 
-    NBT_FORMAT = {
-        **ItemModifier.NBT_FORMAT,
-        'block': String,
-        'properties': List[String]
+    JSON_FORMAT = {
+        **ItemModifier.JSON_FORMAT,
+        'block': str,
+        'properties': list[str]
     }
 
 @define(init=True)
@@ -122,9 +123,9 @@ class EnchantRandomlyItemModifier(ItemModifier):
     function = property(lambda self: "enchant_randomly")
     enchantments: list[str]
 
-    NBT_FORMAT = {
-        **ItemModifier.NBT_FORMAT,
-        'enchantments': List[String]
+    JSON_FORMAT = {
+        **ItemModifier.JSON_FORMAT,
+        'enchantments': list[str]
     }
 
 @define(init=True)
@@ -133,10 +134,10 @@ class EnchantWithLevelsItemModifier(ItemModifier):
     treasure: bool
     levels: int | NumberProvider
 
-    NBT_FORMAT = {
-        **ItemModifier.NBT_FORMAT,
-        'treasure': Boolean,
-        'levels': Union[Int, NumberProvider]
+    JSON_FORMAT = {
+        **ItemModifier.JSON_FORMAT,
+        'treasure': bool,
+        'levels': Union[int, NumberProvider]
     }
 
 @define(init=True)
@@ -148,13 +149,13 @@ class ExplorationMapItemModifier(ItemModifier):
     search_radius: int = 50
     skip_existing_chunks = True
 
-    NBT_FORMAT = {
-        **ItemModifier.NBT_FORMAT,
-        'destination': String,
-        'decoration': String,
-        'zoom': Int,
-        'search_radius': Int,
-        'skip_existing_chunks': Boolean
+    JSON_FORMAT = {
+        **ItemModifier.JSON_FORMAT,
+        'destination': str,
+        'decoration': str,
+        'zoom': int,
+        'search_radius': int,
+        'skip_existing_chunks': bool
     }
 
 @define(init=True)
@@ -170,8 +171,8 @@ class FillPlayerHeadItemModifier(ItemModifier):
     function = property(lambda self: "fill_player_head")
     entity: Literal['this', 'killer', 'killer_player']
 
-    NBT_FORMAT = {
-        **ItemModifier.NBT_FORMAT,
+    JSON_FORMAT = {
+        **ItemModifier.JSON_FORMAT,
         'entity': Literal['this', 'killer', 'killer_player']
     }
 
@@ -180,9 +181,9 @@ class LimitCountItemModifier(ItemModifier):
     function = property(lambda self: "limit_count")
     limit: int | NumberProvider | IntRangeJson | NumberProviderRangeJson
 
-    NBT_FORMAT = {
-        **ItemModifier.NBT_FORMAT,
-        'limit': Union[Int, NumberProvider, IntRangeJson, NumberProviderRangeJson]
+    JSON_FORMAT = {
+        **ItemModifier.JSON_FORMAT,
+        'limit': Union[int, NumberProvider, IntRangeJson, NumberProviderRangeJson]
     }
 
 @define(init=True)
@@ -191,10 +192,10 @@ class LootingEnchantItemModifier(ItemModifier):
     count: int | NumberProvider
     limit: int
 
-    NBT_FORMAT = {
-        **ItemModifier.NBT_FORMAT,
-        'count': Union[Int, NumberProvider],
-        'limit': Int
+    JSON_FORMAT = {
+        **ItemModifier.JSON_FORMAT,
+        'count': Union[int, NumberProvider],
+        'limit': int
     }
 
 @define(init=True)
@@ -203,28 +204,28 @@ class SetAttributesItemModifier(ItemModifier):
     modifiers: list[Modifier]
 
     @define(init=True)
-    class Modifier(NBTFormat):
+    class Modifier(JsonFormat):
         name: str
         attribute: str
         operation: Literal['addition', 'multiply_base', 'multiply_total']
-        amount: Float | NumberProvider
+        amount: float | NumberProvider
         id: UUID
         slot: Literal['mainhand', 'offhand', 'head', 'chest', 'legs', 'feet'] |\
             list[Literal['mainhand', 'offhand', 'head', 'chest', 'legs', 'feet']]
 
-        NBT_FORMAT = {
-            'name': String,
-            'attribute': String,
+        JSON_FORMAT = {
+            'name': str,
+            'attribute': str,
             'operation': Literal['addition', 'multiply_base', 'multiply_total'],
-            'amount': Union[Float, NumberProvider],
-            'id': String,
+            'amount': Union[float, NumberProvider],
+            'id': str,
             'slot': Union[Literal['mainhand', 'offhand', 'head', 'chest', 'legs', 'feet'],
-                          List[Literal['mainhand', 'offhand', 'head', 'chest', 'legs', 'feet']]]
+                          list[Literal['mainhand', 'offhand', 'head', 'chest', 'legs', 'feet']]]
         }
 
-    NBT_FORMAT = {
-        **ItemModifier.NBT_FORMAT,
-        'modifiers': List[Modifier]
+    JSON_FORMAT = {
+        **ItemModifier.JSON_FORMAT,
+        'modifiers': list[Modifier]
     }
 
 @define(init=True)
@@ -233,21 +234,21 @@ class SetBannerPatternItemModifier(ItemModifier):
     patterns: list[Pattern]
 
     @define(init=True)
-    class Pattern(NBTFormat):
+    class Pattern(JsonFormat):
         color: Literal['white', 'orange', 'magenta', 'light_blue', 'yellow', 'lime', 'pink', 'gray', 'light_gray',
                        'cyan', 'purple', 'blue', 'brown', 'green', 'red', 'black']
-        pattern: String
+        pattern: str
 
-        NBT_FORMAT = {
-            'name': String,
+        JSON_FORMAT = {
+            'name': str,
             'color': Literal['white', 'orange', 'magenta', 'light_blue', 'yellow', 'lime', 'pink', 'gray', 'light_gray',
                              'cyan', 'purple', 'blue', 'brown', 'green', 'red', 'black'],
-            'pattern': String,
+            'pattern': str,
         }
 
-    NBT_FORMAT = {
-        **ItemModifier.NBT_FORMAT,
-        'patterns': List[Pattern]
+    JSON_FORMAT = {
+        **ItemModifier.JSON_FORMAT,
+        'patterns': list[Pattern]
     }
 
 @define(init=True)
@@ -257,12 +258,12 @@ class SetContentsItemModifier(ItemModifier):
     type: str
 
     @property
-    def NBT_FORMAT(self):
-        from pymcfunc.loot_tables import Entry
+    def JSON_FORMAT(self):
+        from pymcfunc.data_formats.loot_tables import Entry
         return {
-            **ItemModifier.NBT_FORMAT,
-            'entries': List[Entry],
-            'type': String
+            **ItemModifier.JSON_FORMAT,
+            'entries': list[Entry],
+            'type': str
         }
 
 @define(init=True)
@@ -271,10 +272,10 @@ class SetDamageItemModifier(ItemModifier):
     damage: float | NumberProvider
     add: bool
 
-    NBT_FORMAT = {
-        **ItemModifier.NBT_FORMAT,
-        'damage': Union[Float, NumberProvider],
-        'add': Boolean
+    JSON_FORMAT = {
+        **ItemModifier.JSON_FORMAT,
+        'damage': Union[float, NumberProvider],
+        'add': bool
     }
 
 @define(init=True)
@@ -283,10 +284,10 @@ class SetEnchantmentsItemModifier(ItemModifier):
     enchantments: dict[str, int | NumberProvider]
     add: bool
 
-    NBT_FORMAT = {
-        **ItemModifier.NBT_FORMAT,
-        'enchantments': dict[String, Union[Int, NumberProvider]],
-        'add': Boolean
+    JSON_FORMAT = {
+        **ItemModifier.JSON_FORMAT,
+        'enchantments': dict[str, Union[int, NumberProvider]],
+        'add': bool
     }
 
 @define(init=True)
@@ -296,11 +297,11 @@ class SetLootTableItemModifier(ItemModifier):
     type: str
     seed: int | None = None
 
-    NBT_FORMAT = {
-        **ItemModifier.NBT_FORMAT,
-        'name': String,
-        'seed': Optional[Int],
-        'type': String
+    JSON_FORMAT = {
+        **ItemModifier.JSON_FORMAT,
+        'name': str,
+        'seed': Optional[int],
+        'type': str
     }
 
 @define(init=True)
@@ -310,11 +311,11 @@ class SetLoreItemModifier(ItemModifier):
     entity: Literal['this', 'killer', 'killer_player']
     replace: bool
 
-    NBT_FORMAT = {
-        **ItemModifier.NBT_FORMAT,
-        'lore': List[Union[String, JavaRawJson]],
+    JSON_FORMAT = {
+        **ItemModifier.JSON_FORMAT,
+        'lore': list[Union[str, JavaRawJson]],
         'entity': Literal['this', 'killer', 'killer_player'],
-        'replace': Boolean
+        'replace': bool
     }
 
 @define(init=True)
@@ -323,9 +324,9 @@ class SetNameItemModifier(ItemModifier):
     name: str | JavaRawJson
     entity: Literal['this', 'killer', 'killer_player']
 
-    NBT_FORMAT = {
-        **ItemModifier.NBT_FORMAT,
-        'name': Union[String, JavaRawJson],
+    JSON_FORMAT = {
+        **ItemModifier.JSON_FORMAT,
+        'name': Union[str, JavaRawJson],
         'entity': Literal['this', 'killer', 'killer_player']
     }
 
@@ -334,9 +335,9 @@ class SetNBTItemModifier(ItemModifier):
     function = property(lambda self: "set_nbt")
     nbt: Compound
 
-    NBT_FORMAT = {
-        **ItemModifier.NBT_FORMAT,
-        'nbt': String
+    JSON_FORMAT = {
+        **ItemModifier.JSON_FORMAT,
+        'nbt': str
     }
 
 @define(init=True)
@@ -344,9 +345,9 @@ class SetPotionItemModifier(ItemModifier):
     function = property(lambda self: "set_potion")
     id: str
 
-    NBT_FORMAT = {
-        **ItemModifier.NBT_FORMAT,
-        'id': String
+    JSON_FORMAT = {
+        **ItemModifier.JSON_FORMAT,
+        'id': str
     }
 
 @define(init=True)
@@ -355,16 +356,16 @@ class SetStewEffectItemModifier(ItemModifier):
     effects: list[Effect]
 
     @define(init=True, frozen=True)
-    class Effect(NBTFormat):
+    class Effect(JsonFormat):
         type: str
         duration: int | NumberProvider
 
-        NBT_FORMAT = {
-            'type': String,
-            'duration': Union[Int, NumberProvider]
+        JSON_FORMAT = {
+            'type': str,
+            'duration': Union[int, NumberProvider]
         }
 
-    NBT_FORMAT = {
-        **ItemModifier.NBT_FORMAT,
-        'effects': List[Effect]
+    JSON_FORMAT = {
+        **ItemModifier.JSON_FORMAT,
+        'effects': list[Effect]
     }

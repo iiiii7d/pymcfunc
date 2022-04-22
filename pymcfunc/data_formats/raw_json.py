@@ -6,9 +6,10 @@ from uuid import UUID
 from attr import define, field
 
 from pymcfunc.command import ResourceLocation
-from pymcfunc.coord import Coord
+from pymcfunc.data_formats.base_formats import JsonFormat
+from pymcfunc.data_formats.coord import Coord
 from pymcfunc.internal import base_class
-from pymcfunc.nbt import NBTFormat, String, Int, List, Path, Boolean
+from pymcfunc.data_formats.nbt import Path
 from pymcfunc.selectors import JavaSelector, BedrockSelector
 
 
@@ -20,11 +21,13 @@ class JavaRawJson:
 
     def __str__(self):
         pass
+
+    # TODO make JsonFormat
 JRawJson = JavaRawJson
     
 @define(init=True)
 @base_class
-class JavaTextComponent(JavaRawJson, NBTFormat):
+class JavaTextComponent(JavaRawJson, JsonFormat):
     extra: list[JavaRawJson] = field(default=list)
     color: Literal["black", "dark_blue", "dark_green", "dark_aqua", "dark_red", "dark_purple", "gold", "gray",
                    "dark_gray", "blue", "green", "aqua", "red", "light_purple", "yellow", "white",
@@ -90,13 +93,13 @@ class JavaTextComponent(JavaRawJson, NBTFormat):
 
     @define(init=True)
     @base_class
-    class ClickEvent(NBTFormat):
+    class ClickEvent(JsonFormat):
         action: str = property(lambda self: "")
         value: str
 
-        NBT_FORMAT = {
-            "action": String,
-            "value": String
+        JSON_FORMAT = {
+            "action": str,
+            "value": str
         }
 
     @define(init=True)
@@ -131,11 +134,11 @@ class JavaTextComponent(JavaRawJson, NBTFormat):
 
     @define(init=True)
     @base_class
-    class HoverEvent(NBTFormat):
+    class HoverEvent(JsonFormat):
         action: str = property(lambda self: "")
 
-        NBT_FORMAT = {
-            "action": String
+        JSON_FORMAT = {
+            "action": str
         }
 
     @define(init=True)
@@ -143,8 +146,8 @@ class JavaTextComponent(JavaRawJson, NBTFormat):
         action: str = property(lambda self: "show_text")
         contents: JavaRawJson
 
-        NBT_FORMAT = {
-            "action": String,
+        JSON_FORMAT = {
+            "action": str,
             "contents": JavaRawJson
         }
     ShowText = ShowTextHoverEvent
@@ -155,19 +158,19 @@ class JavaTextComponent(JavaRawJson, NBTFormat):
         contents: Item
 
         @define(init=True)
-        class Item(NBTFormat):
+        class Item(JsonFormat):
             id: str
             count: int | None = None
             tag: str | None = None
 
-            NBT_FORMAT = {
-                "id": String,
-                "count": Int,
-                "tag": String
+            JSON_FORMAT = {
+                "id": str,
+                "count": int,
+                "tag": str
             }
 
-        NBT_FORMAT = {
-            "action": String,
+        JSON_FORMAT = {
+            "action": str,
             "contents": Item
         }
     ShowItem = ShowItemHoverEvent
@@ -178,36 +181,36 @@ class JavaTextComponent(JavaRawJson, NBTFormat):
         contents: Entity
 
         @define(init=True)
-        class Entity(NBTFormat):
+        class Entity(JsonFormat):
             type: str
             id: UUID
             name: JavaRawJson | None = None
 
-            NBT_FORMAT = {
-                "type": String,
+            JSON_FORMAT = {
+                "type": str,
                 "id": UUID,
                 "name": JavaRawJson
             }
 
-        NBT_FORMAT = {
-            "action": String,
+        JSON_FORMAT = {
+            "action": str,
             "contents": Entity
         }
     ShowEntity = ShowEntityHoverEvent
 
-    NBT_FORMAT = {
-        "extra": List[JavaRawJson],
+    JSON_FORMAT = {
+        "extra": list[JavaRawJson],
         "color": Optional[
             Union[Literal["black", "dark_blue", "dark_green", "dark_aqua", "dark_red", "dark_purple", "gold", "gray",
                           "dark_gray", "blue", "green", "aqua", "red", "light_purple", "yellow", "white",
-                          "reset"], String]],
+                          "reset"], str]],
         "font": Optional[ResourceLocation],
-        "bold": Optional[Boolean],
-        "italic": Optional[Boolean],
-        "underlined": Optional[Boolean],
-        "strikethrough": Optional[Boolean],
-        "obfuscated": Optional[Boolean],
-        "insertion": Optional[String],
+        "bold": Optional[bool],
+        "italic": Optional[bool],
+        "underlined": Optional[bool],
+        "strikethrough": Optional[bool],
+        "obfuscated": Optional[bool],
+        "insertion": Optional[str],
         "clickEvent": Optional[ClickEvent],
         "hoverEvent": Optional[HoverEvent]
     }
@@ -217,9 +220,9 @@ JComp = JavaTextComponent
 class JavaPlainTextComponent(JavaTextComponent):
     text: str
 
-    NBT_FORMAT = {
-        **JavaTextComponent.NBT_FORMAT,
-        "text": String
+    JSON_FORMAT = {
+        **JavaTextComponent.JSON_FORMAT,
+        "text": str
     }
 
 JPlainText = JavaPlainTextComponent
@@ -227,12 +230,12 @@ JPlainText = JavaPlainTextComponent
 @define(init=True)
 class JavaTranslatedTextComponent(JavaTextComponent):
     translate: str
-    with_: Optional[List[JavaTextComponent]]
+    with_: Optional[list[JavaTextComponent]]
 
-    NBT_FORMAT = {
-        **JavaTextComponent.NBT_FORMAT,
-        "translate": String,
-        "with": Optional[List[JavaTextComponent]]
+    JSON_FORMAT = {
+        **JavaTextComponent.JSON_FORMAT,
+        "translate": str,
+        "with": Optional[list[JavaTextComponent]]
     }
 JTranslatedText = JavaTranslatedTextComponent
 
@@ -241,20 +244,20 @@ class JavaScoreboardValueComponent(JavaTextComponent):
     score: Score
 
     @define(init=True)
-    class Score(NBTFormat):
+    class Score(JsonFormat):
         objective: str
         name: JavaSelector | Literal['*']
         value: str | None = None
 
-        NBT_FORMAT = {
-            **JavaTextComponent.NBT_FORMAT,
-            "objective": String,
-            "name": String,
-            "value": String
+        JSON_FORMAT = {
+            **JavaTextComponent.JSON_FORMAT,
+            "objective": str,
+            "name": str,
+            "value": str
         }
 
-    NBT_FORMAT = {
-        **JavaTextComponent.NBT_FORMAT,
+    JSON_FORMAT = {
+        **JavaTextComponent.JSON_FORMAT,
         "score": Score,
     }
 JScoreboardValue = JavaScoreboardValueComponent
@@ -264,8 +267,8 @@ class JavaEntityNamesComponent(JavaTextComponent):
     selector: JavaSelector
     separator: JavaTextComponent | None = None
 
-    NBT_FORMAT = {
-        **JavaTextComponent.NBT_FORMAT,
+    JSON_FORMAT = {
+        **JavaTextComponent.JSON_FORMAT,
         "selector": JavaSelector,
         "separator": JavaTextComponent
     }
@@ -275,9 +278,9 @@ JEntityNames = JavaEntityNamesComponent
 class JavaKeybindComponent(JavaTextComponent):
     key: str
 
-    NBT_FORMAT = {
-        **JavaTextComponent.NBT_FORMAT,
-        "key": String
+    JSON_FORMAT = {
+        **JavaTextComponent.JSON_FORMAT,
+        "key": str
     }
 JKeybind = JavaKeybindComponent
 
@@ -291,14 +294,14 @@ class JavaNBTValuesComponent(JavaTextComponent):
     entity: JavaSelector | None = None
     storage: ResourceLocation | None = None
 
-    NBT_FORMAT = {
-        **JavaTextComponent.NBT_FORMAT,
-        "nbt": String,
-        "interpret": Optional[Boolean],
+    JSON_FORMAT = {
+        **JavaTextComponent.JSON_FORMAT,
+        "nbt": str,
+        "interpret": Optional[bool],
         "separator": JavaTextComponent,
-        "block": String,
-        "entity": String,
-        "storage": String
+        "block": str,
+        "entity": str,
+        "storage": str
     }
 JNBTValues = JavaNBTValuesComponent
 
@@ -312,7 +315,7 @@ BRawJson = BedrockRawJson
 
 @define(init=True)
 @base_class
-class BedrockTextComponent(NBTFormat):
+class BedrockTextComponent(JsonFormat):
     pass
 BComp = BedrockTextComponent
 
@@ -320,19 +323,19 @@ BComp = BedrockTextComponent
 class BedrockPlainTextComponent(BedrockTextComponent):
     text: str
 
-    NBT_FORMAT = {
-        "text": String
+    JSON_FORMAT = {
+        "text": str
     }
 BPlainText = BedrockPlainTextComponent
 
 @define(init=True)
 class BedrockTranslatedTextComponent(BedrockTextComponent):
     translate: str
-    with_: Optional[List[BedrockTextComponent]]
+    with_: Optional[list[BedrockTextComponent]]
 
-    NBT_FORMAT = {
-        "translate": String,
-        "with": Optional[List[BedrockTextComponent]]
+    JSON_FORMAT = {
+        "translate": str,
+        "with": Optional[list[BedrockTextComponent]]
     }
 BTranslatedText = BedrockTranslatedTextComponent
 
@@ -341,18 +344,18 @@ class BedrockScoreboardValueComponent(BedrockTextComponent):
     score: Score
 
     @define(init=True)
-    class Score(NBTFormat):
+    class Score(JsonFormat):
         objective: str
         name: BedrockSelector | Literal['*']
         value: str | None = None
 
-        NBT_FORMAT = {
-            "objective": String,
-            "name": String,
-            "value": String
+        JSON_FORMAT = {
+            "objective": str,
+            "name": str,
+            "value": str
         }
 
-    NBT_FORMAT = {
+    JSON_FORMAT = {
         "score": Score,
     }
 BScoreboardValue = BedrockScoreboardValueComponent
@@ -361,7 +364,7 @@ BScoreboardValue = BedrockScoreboardValueComponent
 class BedrockEntityNamesComponent(BedrockTextComponent):
     selector: BedrockSelector
 
-    NBT_FORMAT = {
+    JSON_FORMAT = {
         "selector": BedrockSelector
     }
 BEntityNames = BedrockEntityNamesComponent

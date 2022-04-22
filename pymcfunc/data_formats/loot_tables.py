@@ -5,28 +5,28 @@ from typing import Union, Optional
 from attr import define
 
 from pymcfunc.command import ResourceLocation
+from pymcfunc.data_formats.base_formats import JsonFormat
 from pymcfunc.internal import base_class
-from pymcfunc.item_modifiers import ItemModifier
-from pymcfunc.nbt import NBTFormat, List, String, Int, Float, Boolean
-from pymcfunc.number_providers import NumberProvider
-from pymcfunc.predicates import Predicate
+from pymcfunc.data_formats.item_modifiers import ItemModifier
+from pymcfunc.data_formats.number_providers import NumberProvider
+from pymcfunc.data_formats.predicates import Predicate
 
 
 @define(init=True)
 @base_class
-class Entry(NBTFormat):
+class Entry(JsonFormat):
     conditions: list[Predicate]
     functions: list[ItemModifier]
     type = property(lambda self: "")
     weight: int
     quality: int
 
-    NBT_FORMAT = {
-        "conditions": List[Predicate],
-        "functions": List[ItemModifier],
-        "type": String,
-        "weight": Int,
-        "quality": Int
+    JSON_FORMAT = {
+        "conditions": list[Predicate],
+        "functions": list[ItemModifier],
+        "type": str,
+        "weight": int,
+        "quality": int
     }
 
 @define(init=True)
@@ -34,9 +34,9 @@ class ItemEntry(Entry):
     type = property(lambda self: "item")
     name: ResourceLocation
 
-    NBT_FORMAT = {
-        **Entry.NBT_FORMAT,
-        "name": String
+    JSON_FORMAT = {
+        **Entry.JSON_FORMAT,
+        "name": str
     }
 
 @define(init=True)
@@ -45,31 +45,31 @@ class TagEntry(Entry):
     name: ResourceLocation
     expand: bool
 
-    NBT_FORMAT = {
-        **Entry.NBT_FORMAT,
-        "name": String,
-        "expand": Boolean
+    JSON_FORMAT = {
+        **Entry.JSON_FORMAT,
+        "name": str,
+        "expand": bool
     }
 
 @define(init=True)
-class LootTableEntry(NBTFormat):
+class LootTableEntry(JsonFormat):
     type = property(lambda self: "loot_table")
     name: ResourceLocation | LootTable
 
-    NBT_FORMAT = {
-        **Entry.NBT_FORMAT,
-        "type": String,
-        "name": String
+    JSON_FORMAT = {
+        **Entry.JSON_FORMAT,
+        "type": str,
+        "name": str
     }
 
 @define(init=True)
 @base_class
-class ChildrenEntry(NBTFormat):
+class ChildrenEntry(JsonFormat):
     children: list[Entry]
 
-    NBT_FORMAT = {
-        **Entry.NBT_FORMAT,
-        "type": String,
+    JSON_FORMAT = {
+        **Entry.JSON_FORMAT,
+        "type": str,
         "children": list[Entry]
     }
 
@@ -90,45 +90,45 @@ class DynamicEntry(Entry):
     type = property(lambda self: "dynamic")
     name: str
 
-    NBT_FORMAT = {
-        **ChildrenEntry.NBT_FORMAT,
-        "type": String,
-        "name": String,
+    JSON_FORMAT = {
+        **ChildrenEntry.JSON_FORMAT,
+        "type": str,
+        "name": str,
     }
 
 @define(init=True)
 class EmptyEntry(Entry):
     type = property(lambda self: "empty")
 
-    NBT_FORMAT = {
-        **Entry.NBT_FORMAT
+    JSON_FORMAT = {
+        **Entry.JSON_FORMAT
     }
 
 @define(init=True)
-class Pool(NBTFormat):
+class Pool(JsonFormat):
     conditions: list[Predicate]
     functions: list[ItemModifier]
     rolls: int | NumberProvider
     bonus_rolls: float | NumberProvider
     entries: list[Entry]
 
-    NBT_FORMAT = {
-        "conditions": List[Predicate],
-        "functions": List[ItemModifier],
-        "rolls": Union[Int, NumberProvider],
-        "bonus_rolls": Union[Float, NumberProvider],
-        "entries": List[String]
+    JSON_FORMAT = {
+        "conditions": list[Predicate],
+        "functions": list[ItemModifier],
+        "rolls": Union[int, NumberProvider],
+        "bonus_rolls": Union[float, NumberProvider],
+        "entries": list[str]
     }
 
 @define(init=True)
 @base_class
-class LootTable(NBTFormat):
+class LootTable(JsonFormat):
     functions: list[ItemModifier]
     pools: list[Pool]
     type: str | None = None
 
-    NBT_FORMAT = {
-        "type": Optional[String],
-        "functions": List[ItemModifier],
-        "pools": List[Pool]
+    JSON_FORMAT = {
+        "type": Optional[str],
+        "functions": list[ItemModifier],
+        "pools": list[Pool]
     }

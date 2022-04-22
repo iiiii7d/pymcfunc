@@ -4,13 +4,14 @@ from typing import Optional, Union, Sequence, Literal
 
 from attr import define
 
+from pymcfunc.data_formats.base_formats import JsonFormat
 from pymcfunc.internal import base_class, immutable
-from pymcfunc.nbt import NBTFormat, String, Double, Int, Compound, List, DictReprAsList
+from pymcfunc.data_formats.nbt import Compound, DictReprAsList
 
 
 @define(init=True)
 @base_class
-class Recipe(NBTFormat):
+class Recipe(JsonFormat):
     name: str
     namespace: str
     type = property(lambda self: "")
@@ -19,7 +20,7 @@ class Recipe(NBTFormat):
     def namespaced(self) -> str: return f'{self.namespace}:{self.name}'
 
     NBT_FORMAT = {
-        'type': String
+        'type': str
     }
 
 @define(init=True)
@@ -28,8 +29,8 @@ class GroupedRecipe(Recipe):
     group: str | None = None
 
     NBT_FORMAT = {
-        'type': String,
-        'group': Optional[String],
+        'type': str,
+        'group': Optional[str],
     }
 
 @define(init=True)
@@ -41,21 +42,21 @@ class CookingRecipe(GroupedRecipe):
     cookingtime: int | None = None
 
     @define(init=True)
-    class Ingredient(NBTFormat):
+    class Ingredient(JsonFormat):
         item: str
         tag: str
 
-        NBT_Format = {
-            'item': String,
-            'tag': String,
+        JSON_FORMAT = {
+            'item': str,
+            'tag': str,
         }
 
     NBT_FORMAT = {
         **GroupedRecipe.NBT_FORMAT,
         'ingredient': Union[Ingredient, list[Ingredient]],
-        'result': String,
-        'experience': Double,
-        'cookingtime': Optional[Int],
+        'result': str,
+        'experience': float,
+        'cookingtime': Optional[int],
     }
 
 
@@ -73,18 +74,18 @@ class CraftingRecipe(GroupedRecipe):
     result: Result
 
     @define(init=True)
-    class Result(NBTFormat):
+    class Result(JsonFormat):
         item: str
         count: int = 1
 
-        NBT_Format = {
+        JSON_FORMAT = {
             **GroupedRecipe.NBT_FORMAT,
-            'count': Int,
-            'item': String,
+            'count': int,
+            'item': str,
         }
 
     @immutable
-    class Key(NBTFormat):
+    class Key(JsonFormat):
         key: str
         item: str | None = None
         tag: str | None = None
@@ -98,13 +99,13 @@ class CraftingRecipe(GroupedRecipe):
                 self.tag = tag
             self.key = key
 
-        NBT_Format = {
-            'item': Optional[String],
-            'tag': Optional[String],
+        JSON_FORMAT = {
+            'item': Optional[str],
+            'tag': Optional[str],
         }
 
     @immutable
-    class KeyGroup(NBTFormat):
+    class KeyGroup(JsonFormat):
         key: str
         values: list[CraftingRecipe.Key]
 
@@ -119,8 +120,8 @@ class CraftingRecipe(GroupedRecipe):
                     self.values.append(CraftingRecipe.Key(key, tag=tag))
             self.key = key
 
-        def as_nbt(self) -> List[Compound]:
-            return List[Compound](a.as_nbt() for a in self.values)
+        def as_json(self) -> list[dict]:
+            return [a.as_json() for a in self.values]
 
 @define(init=True)
 class CraftingShapedRecipe(CraftingRecipe):
@@ -143,9 +144,9 @@ class CraftingShapedRecipe(CraftingRecipe):
         self._pattern = [''.join(a.key for a in row for row in col) for col in value]
         self.key = list({*value[0], *value[1], *value[2]})
 
-    NBT_Format = {
+    JSON_FORMAT = {
         **CraftingRecipe.NBT_FORMAT,
-        'pattern': List[String],
+        'pattern': list[str],
         'key': DictReprAsList[CraftingRecipe.Key | CraftingRecipe.KeyGroup]
     }
 
@@ -154,9 +155,9 @@ class CraftingShapelessRecipe(CraftingRecipe):
     type = property(lambda self: "crafting_shapeless")
     ingredients: list[CraftingRecipe.Key | CraftingRecipe.KeyGroup]
 
-    NBT_Format = {
+    JSON_FORMAT = {
         **CraftingRecipe.NBT_FORMAT,
-        'ingredients': List[Compound],
+        'ingredients': list[Compound],
     }
 
 @define(init=True)
@@ -180,7 +181,7 @@ class SmithingRecipe(GroupedRecipe):
     result: Item
 
     @immutable
-    class Item(NBTFormat):
+    class Item(JsonFormat):
         item: str | None = None
         tag: str | None = None
 
@@ -191,12 +192,12 @@ class SmithingRecipe(GroupedRecipe):
             else:
                 self.tag = tag
 
-        NBT_Format = {
-            'item': Optional[String],
-            'tag': Optional[String],
+        JSON_FORMAT = {
+            'item': Optional[str],
+            'tag': Optional[str],
         }
 
-    NBT_Format = {
+    JSON_FORMAT = {
         **GroupedRecipe.NBT_FORMAT,
         'base': Item,
         'addition': Item,
@@ -214,9 +215,9 @@ class StonecuttingRecipe(CraftingRecipe):
     result: str
     count: int
 
-    NBT_Format = {
+    JSON_FORMAT = {
         **CraftingRecipe.NBT_FORMAT,
-        'ingredient': Union[CraftingRecipe.Key, List[CraftingRecipe.Key]],
-        'result': String,
-        'count': Int,
+        'ingredient': Union[CraftingRecipe.Key, list[CraftingRecipe.Key]],
+        'result': str,
+        'count': int,
     }
