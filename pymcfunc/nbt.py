@@ -288,6 +288,49 @@ class NBTFormat(NBT):
                 else:
                     d[var] = getattr(self, var)
         return d
+
+    def _convert_to_nbt(self, name: str,
+                        val: Any,
+                        py_type: type,
+                        format_type: Type[NBT]) -> NBT | None:
+        if not isinstance(val, py_type):
+            raise TypeError(f"`{name}` must be of {py_type} (got {val})")
+        if issubclass(format_type, NBTFormat) and isinstance(val, format_type):
+            return val.as_nbt()
+        elif issubclass(format_type, NBT) and isinstance(val, format_type):
+            return val
+        elif isinstance(format_type, _LiteralGenericAlias):
+            if val not in get_args(format_type):
+                raise ValueError(f"{val} is not in {get_args(format_type)}")
+            return String(val)
+        elif isinstance(format_type, _UnionGenericAlias):
+            if type(None) in get_args(format_type) and val is None: return None
+            for format_subtype in get_args(format_type):
+                try:
+                    return self._convert_to_nbt(name, val, py_type, format_subtype)
+                except Exception:
+                    pass
+            else:
+                raise TypeError(
+                    f"`{name}` is not one of types {', '.join(str(a) for a in get_args(format_type))} (got {val})")
+        elif isinstance(format_type, _GenericAlias):
+            if isinstance(get_origin(format_type), DictReprAsList):
+                val: list
+                ft = get_origin(format_type)
+                pt = get_origin(py_type)[0]
+                return Compound({v.name: self._convert_to_nbt(name, v, pt, ft) for v in val})
+            elif isinstance(get_origin(format_type), dict):
+                val: dict
+                kft, vft = get_args(format_type)
+                _, vpt = get_args(py_type)
+                if isinstance(kft, _LiteralGenericAlias):
+                    for k in val.keys():
+                        if not isinstance(k, kft):
+                            raise TypeError(f"{k} is not of type {kft}")
+                return Compound({k: self._convert_to_nbt(name, v, vpt, vft) for k, v in val.items()})
+        else:
+            # noinspection PyArgumentList
+            return self.NBT_FORMAT[name](val)
     
     def as_nbt(self) -> Compound:
         d = {}
@@ -304,6 +347,15 @@ class NBTFormat(NBT):
                 if var not in get_args(format_type):
                     raise ValueError(f"{var} is not in {get_args(format_type)}")
                 d[var] = String(getattr(self, var))
+            elif isinstance(format_type, _UnionGenericAlias):
+                if type(None) in get_args(format_type) and getattr(self, var, None) is None: continue
+                for format_subtype in get_args(format_type):
+                    try:
+                        d[var] = format_subtype(getattr(self, var))
+                        break
+                    except Exception: pass
+                else:
+                    raise TypeError(f"`{var}` is not one of types {', '.join(str(a) for a in get_args(format_type))} (Got {getattr(self, var)})")
             elif isinstance(format_type, _GenericAlias):
                 if isinstance(get_origin(format_type), DictReprAsList):
                     d[var] = Compound({v.name: v.as_nbt() for v in getattr(self, var)})
@@ -317,15 +369,6 @@ class NBTFormat(NBT):
                     for v in d[var].values():
                         if not isinstance(v, vt):
                             raise TypeError(f"{v} is not of type {vt}")
-            elif isinstance(format_type, _UnionGenericAlias):
-                if type(None) in get_args(format_type) and getattr(self, var, None) is None: continue
-                for format_subtype in get_args(format_type):
-                    try:
-                        d[var] = format_subtype(getattr(self, var))
-                        break
-                    except Exception: pass
-                else:
-                    raise TypeError(f"`{var}` is not one of types {', '.join(str(a) for a in get_args(format_type))} (Got {getattr(self, var)})")
             else:
                 # noinspection PyArgumentList
                 d[var] = self.NBT_FORMAT[var](getattr(self, var))
@@ -337,25 +380,5 @@ class NBTFormat(NBT):
 
     NBT_FORMAT: dict[str, Type[NBT]] | property = {}
 
-def make_nbt_representable(anno: type) -> Type[NBT] | Union:
-    if isinstance(anno, (_UnionGenericAlias, UnionType)):
-        return Union[tuple(make_nbt_representable(i) for i in get_args(anno))]
-    elif issubclass(anno, (NBT, NBTTag)):
-        return anno
-    elif issubclass(anno, float):
-        return Double
-    elif issubclass(anno, int):
-        return Int
-    elif issubclass(anno, bool):
-        return Boolean
-    elif isinstance(anno, GenericAlias):
-        if get_origin(anno) == list:
-            return List[make_nbt_representable(get_args(anno)[0])]
-        elif get_origin(anno) == dict:
-            return Compound
-    elif issubclass(anno, (str, _LiteralGenericAlias)) or hasattr(anno, "__str__"):
-        return String
-    else:
-        return anno
-
 # TODO JsonFormat wrapper around NBTFormat
+
