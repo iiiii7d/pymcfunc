@@ -6,19 +6,21 @@ from typing import _LiteralGenericAlias, Any, _UnionGenericAlias, get_args, get_
 
 from pymcfunc import JavaFunctionHandler, ExecutedCommand
 from pymcfunc.data_formats.coord import BlockCoord
-from pymcfunc.data_formats.nbt import NBT, DictReprAsList, Compound, String, Path
+from pymcfunc.data_formats.nbt import NBT, DictReprAsList, Compound, String, Path, Byte
 from pymcfunc.data_formats.raw_json import JNBTValues, JavaTextComponent
 from pymcfunc.proxies.selectors import JavaSelector
 
 _T = TypeVar('_T')
-def pascal_case_ify(var: str):
+def pascal_case_ify(var: str, is_potion_effect: bool = False) -> str:
     var = var.removesuffix("_")
     if var == 'uuid':
         return 'UUID'
-    elif var != 'id':
-        return ''.join(x.title() for x in var.split('_'))
+    elif var == 'no_ai':
+        return 'NoAI'
+    elif var == 'id' and not is_potion_effect:
+        return 'id'
     else:
-        return var
+        return ''.join(x.title() for x in var.split('_'))
 
 class NBTFormatPath(Path, Generic[_T]):
     def __init__(self, root: str | None,
@@ -122,6 +124,10 @@ class NBTFormatPath(Path, Generic[_T]):
     # TODO change value into NBTTag
     
 class NBTFormat(Compound):
+    def __init_subclass__(cls, do_pascal_case_ify: bool = True, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls._do_pascal_case_ify = do_pascal_case_ify
+
     @classmethod
     def _get_annotations(cls):
         return {k: v for c in cls.mro() if hasattr(c, '__annotations__') for k, v in c.__annotations__.items()}
@@ -196,16 +202,25 @@ class NBTFormat(Compound):
     def as_nbt(self) -> Compound:
         d = {}
         for var, anno in type(self)._get_annotations().items():
-            var = pascal_case_ify(var)
+            if self._do_pascal_case_ify: var = pascal_case_ify(var, isinstance(anno, Byte))
             #if var not in self.NBT_FORMAT: continue
             #format_type = self.NBT_FORMAT[var]
             d[var] = self._convert_to_nbt(var, getattr(self, var), anno, anno)
+            if d[var] is None: del d[var]
         return Compound(d)
+
+    @classmethod
+    def runtime(cls, *,
+                fh: JavaFunctionHandler | None = None,
+                sel: JavaSelector | None = None,
+                block_pos: BlockCoord | None = None,
+                rl: str | None = None) -> RuntimeNBTFormat:
+        return RuntimeNBTFormat(cls, fh=fh, sel=sel, block_pos=block_pos, rl=rl)
 
     #NBT_FORMAT: dict[str, Type[NBT] | dict[str, Type[NBT]]] | property = {}
 
 class RuntimeNBTFormat(Compound):
-    def __init__(self, *,
+    def __init__(self, from_format: Type[NBTFormat], *,
                  fh: JavaFunctionHandler | None = None,
                  sel: JavaSelector | None = None,
                  block_pos: BlockCoord | None = None,
@@ -214,10 +229,8 @@ class RuntimeNBTFormat(Compound):
         self.sel = sel
         self.block_pos = block_pos
         self.rl = rl
-        super().__init__(self._get_annotations())
-
-    NBT_FORMAT = {}
-    _get_annotations = lambda self: self.NBT_FORMAT
+        self._get_annotations = classmethod(lambda _: from_format._get_annotations())
+        super().__init__(from_format._get_annotations())
 
     attr_as_path = lambda self, item: \
         self.NBTFormatPath[self._get_annotations()[item]](pascal_case_ify(item),
@@ -293,6 +306,7 @@ class JsonFormat:
             if var not in self.JSON_FORMAT: continue
             format_type = self.JSON_FORMAT[var]
             d[var] = self._convert_to_json(var, getattr(self, var), anno, format_type)
+            if d[var] is None: del d[var]
         return d
 
     JSON_FORMAT: dict[str, type] | property = {}
