@@ -1875,7 +1875,7 @@ class JavaEnderman(JavaMob, type_='enderman'):
                 return self.nbt.carried_block_state
             @carried_block_state.setter
             def carried_block_state(self, value: StateNBT):
-                self.nbt.carried_block_state = StateNBT(value)
+                self.nbt.carried_block_state = value
 
 class JavaEndermite(JavaMob, type_='endermite'):
     class NBT(JavaMob.NBT):
