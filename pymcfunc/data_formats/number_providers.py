@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from typing import Union, Literal, Optional
 
-from attr import field, s
+from attr import field, define
 
 from pymcfunc.data_formats.base_formats import JsonFormat
 from pymcfunc.internal import base_class
 
 
-@s(kw_only=True, init=True, frozen=True)
+@define(kw_only=True, init=True, frozen=True)
 @base_class
 class NumberProvider(JsonFormat):
     type: str = field(init=False)
@@ -17,7 +17,7 @@ class NumberProvider(JsonFormat):
         'type': str,
     }
 
-@s(kw_only=True, init=True, frozen=True)
+@define(kw_only=True, init=True, frozen=True)
 class ConstantNumberProvider(NumberProvider):
     value: int | float
 
@@ -26,7 +26,7 @@ class ConstantNumberProvider(NumberProvider):
         'value': Union[int, float],
     }
 
-@s(kw_only=True, init=True, frozen=True)
+@define(kw_only=True, init=True, frozen=True)
 class UniformNumberProvider(NumberProvider):
     min: int | float | NumberProvider
     max: int | float | NumberProvider
@@ -37,7 +37,7 @@ class UniformNumberProvider(NumberProvider):
         'max': Union[int, float, NumberProvider],
     }
 
-@s(kw_only=True, init=True, frozen=True)
+@define(kw_only=True, init=True, frozen=True)
 class BinomialNumberProvider(NumberProvider):
     n: int | NumberProvider
     p: float | NumberProvider
@@ -48,13 +48,13 @@ class BinomialNumberProvider(NumberProvider):
         'p': Union[float, NumberProvider],
     }
 
-@s(kw_only=True, init=True, frozen=True)
+@define(kw_only=True, init=True, frozen=True)
 class ScoreNumberProvider(NumberProvider):
     target: Target
     score: str
     scale: float | None = None
 
-    @s(kw_only=True, init=True, frozen=True)
+    @define(kw_only=True, init=True, frozen=True)
     @base_class
     class Target(JsonFormat):
         type: Literal['fixed', 'context']
@@ -62,7 +62,7 @@ class ScoreNumberProvider(NumberProvider):
         JSON_FORMAT = {
             'type': str,
         }
-    @s(kw_only=True, init=True, frozen=True)
+    @define(kw_only=True, init=True, frozen=True)
     class FixedTarget(Target):
         name: str
 
@@ -71,7 +71,7 @@ class ScoreNumberProvider(NumberProvider):
             'name': str,
         }
 
-    @s(kw_only=True, init=True, frozen=True)
+    @define(kw_only=True, init=True, frozen=True)
     class ContextTarget(Target):
         target: Literal['this', 'killer', 'direct_killer', 'player_killer']
 

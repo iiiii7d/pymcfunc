@@ -143,7 +143,7 @@ class Command:
                     cmd.arg_namelist.append(name)
 
                 cmd.eles = cls._process_order(order, func)
-            cmd.__call__ = wraps(func)(cmd.__call__)
+            cmd.__call__ = wraps(func)(cmd)
             return cmd
         return decorator
 

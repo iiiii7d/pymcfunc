@@ -13,8 +13,6 @@ from typing import Any, get_args, Type, TypeVar, Generic, _UnionGenericAlias, Un
 
 from typing_extensions import Self
 
-if TYPE_CHECKING: from pymcfunc.data_formats.base_formats import NBTFormat
-
 
 class Path:
     def __init__(self, root: str | None = None):
@@ -24,12 +22,13 @@ class Path:
         return "".join(self._components)
 
     def __getattr__(self, attr: str) -> Self:
+        if attr == '_components': return super().__getattribute__(attr)
         str_attr = attr if re.search(r"^[a-zA-Z\d]*$", attr) is not None else "\""+attr+"\""
         self._components.append("."+str_attr)
         return self
 
     def __getitem__(self, index: int | Ellipsis | NBTTag) -> Self:
-        str_index = str(int) if isinstance(index, (str, NBTTag)) else ""
+        str_index = str(index) if isinstance(index, (str, NBTTag)) else ""
         self._components.append("["+str(str_index)+"]")
         return self
 
@@ -136,27 +135,27 @@ class NBT:
 
 class NBTTag(NBT):
     val_type: type
-    def __new__(cls, val: val_type):
+    def __new__(cls, val: val_type, *args, **kwargs):
         if cls != NBTTag: return super().__new__(cls)
         if isinstance(val, bool):
-            return Boolean.__new__(Boolean, val)
+            return Boolean.__new__(Boolean, val, *args, **kwargs)
         elif isinstance(val, int):
             if Int.min <= val <= Int.max:
                 # noinspection PyArgumentList
-                return Int.__new__(Int, val)
+                return Int.__new__(Int, val, *args, **kwargs)
             else:
                 # noinspection PyArgumentList
-                return Long.__new__(Long, val)
+                return Long.__new__(Long, val, *args, **kwargs)
         elif isinstance(val, float):
             # noinspection PyArgumentList
-            return Double.__new__(Double, val)
+            return Double.__new__(Double, val, *args, **kwargs)
         elif isinstance(val, list):
             # noinspection PyArgumentList
-            return List.__new__(List, val)
+            return List.__new__(List, val, *args, **kwargs)
         elif isinstance(val, dict):
-            return Compound.__new__(Compound, val)
+            return Compound.__new__(Compound, val, *args, **kwargs)
         elif isinstance(val, str) or hasattr(val, '__str__'):
-            return String.__new__(String, str(val))
+            return String.__new__(String, str(val), *args, **kwargs)
         raise TypeError(f"Type {type(val).__name__} not supported as NBTTag value (Got {val})")
 
     def __init__(self, val: val_type):
@@ -224,6 +223,7 @@ class Compound(NBTTag, dict):
 
     # noinspection PyMissingConstructor
     def __init__(self, val: dict[str, Any]):
+        from pymcfunc.data_formats.base_formats import NBTFormat
         self._val = {str(k): (v if isinstance(v, NBTTag)
                               else v.as_nbt() if isinstance(v, NBTFormat)
                               else NBTTag(v)) for k, v in val.items()}

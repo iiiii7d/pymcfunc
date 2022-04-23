@@ -3,10 +3,10 @@ from __future__ import annotations
 from typing import Literal, Any, TypedDict, Annotated, Union, TYPE_CHECKING
 
 import pymcfunc.internal as internal
-from pymcfunc import BaseFunctionHandler, JavaFunctionHandler, BedrockFunctionHandler
-from pymcfunc.data_formats.advancements import Advancement
-
-if TYPE_CHECKING: from pymcfunc.command import ResourceLocation, ExecutedCommand
+if TYPE_CHECKING:
+    from pymcfunc import BaseFunctionHandler, JavaFunctionHandler, BedrockFunctionHandler
+    from pymcfunc.data_formats.advancements import Advancement
+    from pymcfunc.command import ResourceLocation, ExecutedCommand
 from pymcfunc.data_formats.coord import _FloatIntCoord, Coord
 from pymcfunc.data_formats.nbt import Compound, Int
 from pymcfunc.data_formats.range import FloatRange

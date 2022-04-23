@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Literal, Union, Optional
 
-from attr import s
+from attr import define
 
 from pymcfunc.command import ResourceLocation
 from pymcfunc.data_formats.base_formats import JsonFormat
@@ -11,7 +11,7 @@ from pymcfunc.data_formats.number_providers import NumberProvider
 from pymcfunc.internal import base_class
 
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 @base_class
 class Predicate(JsonFormat):
     condition: str = property(lambda self: "")
@@ -20,7 +20,7 @@ class Predicate(JsonFormat):
         "condition": str
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class AlternativePredicate(Predicate):
     condition = property(lambda self: "alternative")
     terms: list[Predicate]
@@ -31,7 +31,7 @@ class AlternativePredicate(Predicate):
         "terms": list[Predicate]
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class BlockStatePropertyPredicate(Predicate):
     condition = property(lambda self: "block_state_property")
     block: str
@@ -44,7 +44,7 @@ class BlockStatePropertyPredicate(Predicate):
         "properties": dict[str, str]
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class DamageSourcePropertiesPredicate(Predicate):
     condition = property(lambda self: "damage_source_properties")
     predicate: DamageJson
@@ -54,7 +54,7 @@ class DamageSourcePropertiesPredicate(Predicate):
         "predicate": DamageJson
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class EntityPropertiesPredicate(Predicate):
     condition = property(lambda self: "entity_properties")
     entity: Literal["this", "killer", "killer_player"]
@@ -66,7 +66,7 @@ class EntityPropertiesPredicate(Predicate):
         "predicate": DamageJson
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class EntityScoresPredicate(Predicate):
     condition = property(lambda self: "entity_scores")
     entity: Literal["this", "killer", "killer_player"]
@@ -78,7 +78,7 @@ class EntityScoresPredicate(Predicate):
         "scores": dict[str, Union[int, IntRangeJson, NumberProviderRangeJson]]
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class InvertedPredicate(Predicate):
     condition = property(lambda self: "inverted")
     term: Predicate
@@ -88,7 +88,7 @@ class InvertedPredicate(Predicate):
         "term": Predicate
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class KilledByPlayerPredicate(Predicate):
     condition = property(lambda self: "killed_by_player")
     inverse: bool
@@ -98,7 +98,7 @@ class KilledByPlayerPredicate(Predicate):
         "inverse": bool
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class LocationCheckPredicate(Predicate):
     condition = property(lambda self: "location_check")
     offsetX: int
@@ -114,7 +114,7 @@ class LocationCheckPredicate(Predicate):
         "predicate": LocationJson
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class MatchToolPredicate(Predicate):
     condition = property(lambda self: "match_tool")
     predicate: ItemJson
@@ -124,7 +124,7 @@ class MatchToolPredicate(Predicate):
         "predicate": ItemJson
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class RandomChancePredicate(Predicate):
     condition = property(lambda self: "random_chance")
     chance: float
@@ -134,7 +134,7 @@ class RandomChancePredicate(Predicate):
         "chance": float
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class RandomChanceWithLootingPredicate(Predicate):
     condition = property(lambda self: "random_chance_with_looting")
     chance: float
@@ -146,7 +146,7 @@ class RandomChanceWithLootingPredicate(Predicate):
         "looting_multiplier": float,
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class ReferencePredicate(Predicate):
     condition = property(lambda self: "reference")
     reference: ResourceLocation | Predicate
@@ -156,11 +156,11 @@ class ReferencePredicate(Predicate):
         "reference": str
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class SurvivesExplosionPredicate(Predicate):
     condition = property(lambda self: "survives_explosion")
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class TableBonusPredicate(Predicate):
     condition = property(lambda self: "table_bonus")
     enchantment: int
@@ -172,7 +172,7 @@ class TableBonusPredicate(Predicate):
         "chances": list[float]
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class TimeCheckPredicate(Predicate):
     condition = property(lambda self: "time_check")
     value: int | IntRangeJson | NumberProviderRangeJson
@@ -184,7 +184,7 @@ class TimeCheckPredicate(Predicate):
         "period": Optional[int]
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class ValueCheckPredicate(Predicate):
     condition = property(lambda self: "value_check")
     value: int | NumberProvider
@@ -196,7 +196,7 @@ class ValueCheckPredicate(Predicate):
         "range": Union[int, IntRangeJson, NumberProviderRangeJson]
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class WeatherCheckPredicate(Predicate):
     condition = property(lambda self: "weather_check")
     raining: bool

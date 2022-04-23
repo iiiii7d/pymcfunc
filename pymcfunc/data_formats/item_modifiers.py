@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Literal, Union, Optional, TYPE_CHECKING
 from uuid import UUID
 
-from attr import field, s
+from attr import field, define
 
 from pymcfunc.command import ResourceLocation
 from pymcfunc.data_formats.base_formats import JsonFormat
@@ -17,7 +17,7 @@ from pymcfunc.data_formats.number_providers import NumberProvider
 from pymcfunc.data_formats.predicates import Predicate
 
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 @base_class
 class ItemModifier(JsonFormat):
     function = property(lambda self: "")
@@ -28,7 +28,7 @@ class ItemModifier(JsonFormat):
         'conditions': list[Predicate]
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class ApplyBonusItemModifier(ItemModifier):
     function = property(lambda self: "apply_bonus")
     enchantment: str
@@ -42,7 +42,7 @@ class ApplyBonusItemModifier(ItemModifier):
         'parameters': Optional[Union[list[int, float], list[float]]]
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class CopyNameItemModifier(ItemModifier):
     function = property(lambda self: "copy_name")
     source: str = field(init=False, default="block_entity")
@@ -52,13 +52,13 @@ class CopyNameItemModifier(ItemModifier):
         'source': str,
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class CopyNBTItemModifier(ItemModifier):
     function = property(lambda self: "copy_nbt")
     source: Literal['block_entity', 'this', 'killer', 'killer_player'] | Source
     ops: list[NBTOperation]
 
-    @s(kw_only=True, init=True, frozen=True)
+    @define(kw_only=True, init=True, frozen=True)
     @base_class
     class Source(JsonFormat):
         type: str = field(init=False)
@@ -67,7 +67,7 @@ class CopyNBTItemModifier(ItemModifier):
             'type': str
         }
 
-    @s(kw_only=True, init=True, frozen=True)
+    @define(kw_only=True, init=True, frozen=True)
     class ContextSource(Source):
         type = property(lambda self: "context")
         target: Literal['block_entity', 'this', 'killer', 'killer_player']
@@ -77,7 +77,7 @@ class CopyNBTItemModifier(ItemModifier):
             'target': Literal['block_entity', 'this', 'killer', 'killer_player']
         }
 
-    @s(kw_only=True, init=True, frozen=True)
+    @define(kw_only=True, init=True, frozen=True)
     class StorageSource(Source):
         type = property(lambda self: "storage")
         source: ResourceLocation
@@ -87,7 +87,7 @@ class CopyNBTItemModifier(ItemModifier):
             'target': str
         }
 
-    @s(kw_only=True, init=True, frozen=True)
+    @define(kw_only=True, init=True, frozen=True)
     @base_class
     class NBTOperation(JsonFormat):
         source: Path
@@ -106,7 +106,7 @@ class CopyNBTItemModifier(ItemModifier):
         'ops': Union[Literal['block_entity', 'this', 'killer', 'killer_player'], Source]
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class CopyStateItemModifier(ItemModifier):
     function = property(lambda self: "copy_state")
     block: str
@@ -118,7 +118,7 @@ class CopyStateItemModifier(ItemModifier):
         'properties': list[str]
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class EnchantRandomlyItemModifier(ItemModifier):
     function = property(lambda self: "enchant_randomly")
     enchantments: list[str]
@@ -128,7 +128,7 @@ class EnchantRandomlyItemModifier(ItemModifier):
         'enchantments': list[str]
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class EnchantWithLevelsItemModifier(ItemModifier):
     function = property(lambda self: "enchant_with_levels")
     treasure: bool
@@ -140,7 +140,7 @@ class EnchantWithLevelsItemModifier(ItemModifier):
         'levels': Union[int, NumberProvider]
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class ExplorationMapItemModifier(ItemModifier):
     function = property(lambda self: "exploration_map")
     destination: str
@@ -158,15 +158,15 @@ class ExplorationMapItemModifier(ItemModifier):
         'skip_existing_chunks': bool
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class ExplosionDecayItemModifier(ItemModifier):
     function = property(lambda self: "explosion_decay")
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class FurnaceSmeltItemModifier(ItemModifier):
     function = property(lambda self: "furnace_smelt")
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class FillPlayerHeadItemModifier(ItemModifier):
     function = property(lambda self: "fill_player_head")
     entity: Literal['this', 'killer', 'killer_player']
@@ -176,7 +176,7 @@ class FillPlayerHeadItemModifier(ItemModifier):
         'entity': Literal['this', 'killer', 'killer_player']
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class LimitCountItemModifier(ItemModifier):
     function = property(lambda self: "limit_count")
     limit: int | NumberProvider | IntRangeJson | NumberProviderRangeJson
@@ -186,7 +186,7 @@ class LimitCountItemModifier(ItemModifier):
         'limit': Union[int, NumberProvider, IntRangeJson, NumberProviderRangeJson]
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class LootingEnchantItemModifier(ItemModifier):
     function = property(lambda self: "looting_enchant")
     count: int | NumberProvider
@@ -198,12 +198,12 @@ class LootingEnchantItemModifier(ItemModifier):
         'limit': int
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class SetAttributesItemModifier(ItemModifier):
     function = property(lambda self: "set_attributes")
     modifiers: list[Modifier]
 
-    @s(kw_only=True, init=True)
+    @define(kw_only=True, init=True)
     class Modifier(JsonFormat):
         name: str
         attribute: str
@@ -228,12 +228,12 @@ class SetAttributesItemModifier(ItemModifier):
         'modifiers': list[Modifier]
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class SetBannerPatternItemModifier(ItemModifier):
     function = property(lambda self: "set_banner_pattern")
     patterns: list[Pattern]
 
-    @s(kw_only=True, init=True)
+    @define(kw_only=True, init=True)
     class Pattern(JsonFormat):
         color: Literal['white', 'orange', 'magenta', 'light_blue', 'yellow', 'lime', 'pink', 'gray', 'light_gray',
                        'cyan', 'purple', 'blue', 'brown', 'green', 'red', 'black']
@@ -251,7 +251,7 @@ class SetBannerPatternItemModifier(ItemModifier):
         'patterns': list[Pattern]
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class SetContentsItemModifier(ItemModifier):
     function = property(lambda self: "set_contents")
     entries: list[Entry]
@@ -266,7 +266,7 @@ class SetContentsItemModifier(ItemModifier):
             'type': str
         }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class SetDamageItemModifier(ItemModifier):
     function = property(lambda self: "set_damage")
     damage: float | NumberProvider
@@ -278,7 +278,7 @@ class SetDamageItemModifier(ItemModifier):
         'add': bool
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class SetEnchantmentsItemModifier(ItemModifier):
     function = property(lambda self: "set_enchantments")
     enchantments: dict[str, int | NumberProvider]
@@ -290,7 +290,7 @@ class SetEnchantmentsItemModifier(ItemModifier):
         'add': bool
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class SetLootTableItemModifier(ItemModifier):
     function = property(lambda self: "set_loot_table")
     name: str
@@ -304,7 +304,7 @@ class SetLootTableItemModifier(ItemModifier):
         'type': str
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class SetLoreItemModifier(ItemModifier):
     function = property(lambda self: "set_lore")
     lore: list[str | JavaRawJson]
@@ -318,7 +318,7 @@ class SetLoreItemModifier(ItemModifier):
         'replace': bool
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class SetNameItemModifier(ItemModifier):
     function = property(lambda self: "set_name")
     name: str | JavaRawJson
@@ -330,7 +330,7 @@ class SetNameItemModifier(ItemModifier):
         'entity': Literal['this', 'killer', 'killer_player']
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class SetNBTItemModifier(ItemModifier):
     function = property(lambda self: "set_nbt")
     nbt: Compound
@@ -340,7 +340,7 @@ class SetNBTItemModifier(ItemModifier):
         'nbt': str
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class SetPotionItemModifier(ItemModifier):
     function = property(lambda self: "set_potion")
     id: str
@@ -350,12 +350,12 @@ class SetPotionItemModifier(ItemModifier):
         'id': str
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class SetStewEffectItemModifier(ItemModifier):
     function = property(lambda self: "set_stew_effect")
     effects: list[Effect]
 
-    @s(kw_only=True, init=True, frozen=True)
+    @define(kw_only=True, init=True, frozen=True)
     class Effect(JsonFormat):
         type: str
         duration: int | NumberProvider

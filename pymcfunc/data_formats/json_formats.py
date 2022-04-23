@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Literal, Type, Optional, Union
 
-from attr import s
+from attr import define
 
 from pymcfunc.data_formats.base_formats import JsonFormat
 from pymcfunc.data_formats.nbt import NBTTag, Compound, NBT, DictReprAsList, Float, Double, Int
@@ -47,7 +47,7 @@ class NumberProviderRangeJson(RangeJson):
         'max': NumberProvider
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class DamageJson(JsonFormat):
     blocked: bool | None = None
     dealt: float | DoubleRangeJson | None = None
@@ -65,7 +65,7 @@ class DamageJson(JsonFormat):
             'type': Optional[DamageTypeJson]
         }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class DamageTypeJson(JsonFormat):
     bypasses_armor: bool | None = None
     bypasses_invulnerability: bool | None = None
@@ -131,7 +131,7 @@ class EntityJson(JsonFormat):
             'fishing_hook_in_open_water': Optional[bool]
         }
 
-    @s(kw_only=True, init=True)
+    @define(kw_only=True, init=True)
     class Effect(JsonFormat):
         name: str
         ambient: bool | None = None
@@ -148,7 +148,7 @@ class EntityJson(JsonFormat):
                 'visible': Optional[bool]
             }
 
-    @s(kw_only=True, init=True)
+    @define(kw_only=True, init=True)
     class Player(JsonFormat):
         looking_at: EntityJson | None = None
         advancements: dict[str, bool | dict[str, bool]] | None = None
@@ -168,7 +168,7 @@ class EntityJson(JsonFormat):
                 'stats': Optional[DictReprAsList[self.Statistic]]
             }
 
-        @s(kw_only=True, init=True)
+        @define(kw_only=True, init=True)
         class Statistic:
             type: Literal["minecraft:custom", "minecraft:crafted", "minecraft:used", "minecraft:broken",
                           "minecraft:mined", "minecraft:killed", "minecraft:picked_up", "minecraft:dropped",
@@ -184,7 +184,7 @@ class EntityJson(JsonFormat):
                     'value': Optional[Union[IntRangeJson, int]]
                 }
 
-    @s(kw_only=True, init=True)
+    @define(kw_only=True, init=True)
     class LightningBolt(JsonFormat):
         blocks_set_on_fire: int | None = None
         entity_struck: EntityJson | None = None
@@ -197,7 +197,7 @@ class EntityJson(JsonFormat):
             }
 
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class LocationJson(JsonFormat):
     biome: str | None = None
     block: Block | None = None
@@ -221,7 +221,7 @@ class LocationJson(JsonFormat):
             'smokey': Optional[bool]
         }
 
-    @s(kw_only=True, init=True)
+    @define(kw_only=True, init=True)
     class Block(JsonFormat):
         blocks: list[str] | None = None
         tag: str | None = None
@@ -237,7 +237,7 @@ class LocationJson(JsonFormat):
                 'state': Optional[dict[str, Union[IntRangeJson, int, bool, str]]]
             }
 
-    @s(kw_only=True, init=True)
+    @define(kw_only=True, init=True)
     class Fluid(JsonFormat):
         fluid: str | None = None
         state: dict[str, str | int | bool | IntRangeJson] | None = None
@@ -249,7 +249,7 @@ class LocationJson(JsonFormat):
                 'state': Optional[dict[str, Union[IntRangeJson, int, bool, str]]]
             }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class ItemJson(JsonFormat):
     count: int | IntRangeJson | None = None
     durability: int | IntRangeJson | None = None
@@ -273,7 +273,7 @@ class ItemJson(JsonFormat):
             'tag': Optional[str]
         }
 
-    @s(kw_only=True, init=True)
+    @define(kw_only=True, init=True)
     class Enchantment(JsonFormat):
         enchantment: str | None = None
         levels: int | IntRangeJson | None = None

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Union, Optional
 
-from attr import s
+from attr import define
 
 from pymcfunc.command import ResourceLocation
 from pymcfunc.data_formats.base_formats import JsonFormat
@@ -12,7 +12,7 @@ from pymcfunc.data_formats.predicates import Predicate
 from pymcfunc.internal import base_class
 
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 @base_class
 class Entry(JsonFormat):
     conditions: list[Predicate]
@@ -29,7 +29,7 @@ class Entry(JsonFormat):
         "quality": int
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class ItemEntry(Entry):
     type = property(lambda self: "item")
     name: ResourceLocation
@@ -39,7 +39,7 @@ class ItemEntry(Entry):
         "name": str
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class TagEntry(Entry):
     type = property(lambda self: "tag")
     name: ResourceLocation
@@ -51,7 +51,7 @@ class TagEntry(Entry):
         "expand": bool
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class LootTableEntry(JsonFormat):
     type = property(lambda self: "loot_table")
     name: ResourceLocation | LootTable
@@ -62,7 +62,7 @@ class LootTableEntry(JsonFormat):
         "name": str
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 @base_class
 class ChildrenEntry(JsonFormat):
     children: list[Entry]
@@ -73,19 +73,19 @@ class ChildrenEntry(JsonFormat):
         "children": list[Entry]
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class GroupEntry(ChildrenEntry):
     type = property(lambda self: "group")
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class AlternativesEntry(ChildrenEntry):
     type = property(lambda self: "alternatives")
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class SequenceEntry(ChildrenEntry):
     type = property(lambda self: "group")
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class DynamicEntry(Entry):
     type = property(lambda self: "dynamic")
     name: str
@@ -96,7 +96,7 @@ class DynamicEntry(Entry):
         "name": str,
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class EmptyEntry(Entry):
     type = property(lambda self: "empty")
 
@@ -104,7 +104,7 @@ class EmptyEntry(Entry):
         **Entry.JSON_FORMAT
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class Pool(JsonFormat):
     conditions: list[Predicate]
     functions: list[ItemModifier]
@@ -120,7 +120,7 @@ class Pool(JsonFormat):
         "entries": list[str]
     }
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 @base_class
 class LootTable(JsonFormat):
     functions: list[ItemModifier]

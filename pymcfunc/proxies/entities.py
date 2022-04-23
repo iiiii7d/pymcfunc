@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Literal, Any
 
 from pymcfunc import JavaFunctionHandler
-from pymcfunc.data_formats.base_formats import NBTFormatPath, NBTFormat
+from pymcfunc.data_formats.base_formats import RuntimeNBTPath, NBTFormat
 from pymcfunc.data_formats.coord import Rotation
 from pymcfunc.data_formats.nbt import String, Short, Byte, IntArray, Int, List, Double, Float, Long
 from pymcfunc.data_formats.nbt_formats import PotionEffectNBT, ItemNBT, BrainNBT, AttributeNBT, LeashNBT
@@ -40,7 +40,7 @@ class JavaEntity(JavaSelector):
         self.nbt = self.NBT.runtime(fh=fh)
 
     @property
-    def display_name(self) -> NBTFormatPath[String]:
+    def display_name(self) -> RuntimeNBTPath[String]:
         return self.nbt.custom_name
     @display_name.setter
     def display_name(self, value: str | None):
@@ -52,14 +52,14 @@ class JavaEntity(JavaSelector):
             self.nbt.custom_name_visible = 1
 
     @property
-    def pitch(self) -> NBTFormatPath[Float]:
+    def pitch(self) -> RuntimeNBTPath[Float]:
         return self.nbt.rotation[0]
     @pitch.setter
     def pitch(self, value: float):
         self.nbt.rotation[0] = Float(value)
 
     @property
-    def yaw(self) -> NBTFormatPath[Float]:
+    def yaw(self) -> RuntimeNBTPath[Float]:
         return self.nbt.rotation[1]
     @yaw.setter
     def yaw(self, value: float):
@@ -147,7 +147,10 @@ class JavaRaidMob(JavaMob):
             z: Int
 
 class JavaProjectile(JavaEntity):
-    pass
+    class NBT(JavaEntity.NBT):
+        has_been_shot: Byte
+        left_owner: Byte
+        owner: IntArray
 
 class JavaPotionEffects(JavaEntity):
     pass
@@ -162,6 +165,9 @@ class JavaHangable(JavaEntity):
     pass
 
 class JavaFireball(JavaEntity):
+    pass
+
+class JavaArrowGroup(JavaEntity):
     pass
 
 class JavaPlayer(JavaMob):

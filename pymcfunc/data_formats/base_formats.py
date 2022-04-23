@@ -2,12 +2,15 @@ from __future__ import annotations
 
 # noinspection PyUnresolvedReferences
 from typing import _LiteralGenericAlias, Any, _UnionGenericAlias, get_args, get_origin, _GenericAlias, Type, TypeVar, \
-    Generic
+    Generic, TYPE_CHECKING
 
-from pymcfunc import JavaFunctionHandler, ExecutedCommand
+from attr._make import _get_annotations
+
+if TYPE_CHECKING: from pymcfunc.functions import JavaFunctionHandler
+if TYPE_CHECKING: from pymcfunc.command import ExecutedCommand
 from pymcfunc.data_formats.coord import BlockCoord
-from pymcfunc.data_formats.nbt import NBT, DictReprAsList, Compound, String, Path, Byte
-from pymcfunc.data_formats.raw_json import JNBTValues, JavaTextComponent
+from pymcfunc.data_formats.nbt import NBT, DictReprAsList, Compound, String, Path, Byte, List
+if TYPE_CHECKING: from pymcfunc.data_formats.raw_json import JNBTValues, JavaTextComponent
 from pymcfunc.proxies.selectors import JavaSelector
 
 _T = TypeVar('_T')
@@ -22,107 +25,6 @@ def pascal_case_ify(var: str, is_potion_effect: bool = False) -> str:
     else:
         return ''.join(x.title() for x in var.split('_'))
 
-class NBTFormatPath(Path, Generic[_T]):
-    def __init__(self, root: str | None,
-                 fh: JavaFunctionHandler | None = None,
-                 sel: JavaSelector | None = None,
-                 block_pos: BlockCoord | None = None,
-                 rl: str | None = None):
-        super().__init__(root)
-        self.fh = fh
-        self.sel = sel
-        self.block_pos = block_pos
-        self.rl = rl
-
-    @property
-    def _target(self):
-        return {'entity': self.sel} if self.sel \
-            else {'block': self.block_pos} if self.block_pos \
-            else {'storage': self.rl} if self.rl \
-            else {}
-
-    @property
-    def _target_with_prefix_target(self):
-        return {'target_entity': self.sel} if self.sel \
-            else {'target_block': self.block_pos} if self.block_pos \
-            else {'target_storage': self.rl} if self.rl \
-            else {}
-
-    @property
-    def _target_with_prefix_source(self):
-        return {'source_entity': self.sel} if self.sel \
-            else {'source_block': self.block_pos} if self.block_pos \
-            else {'source_storage': self.rl} if self.rl \
-            else {}
-
-    def raw_json(self, interpret: bool | None = None,
-                 separator: JavaTextComponent | None = None) -> JNBTValues:
-        return JNBTValues(nbt=self,
-                          entity=self.sel,
-                          interpret=interpret,
-                          separator=separator)
-
-    def get(self, scale: float | None = None) -> ExecutedCommand:
-        return self.fh.r.data_get(**self._target,
-                                  path=self.root,
-                                  scale=scale)
-
-    def append(self, *,
-               value: _T | None = None,
-               from_: NBTFormatPath | None = None) -> ExecutedCommand:
-        return self.fh.r.data_modify(**self._target_with_prefix_target,
-                                     target_path=self,
-                                     mode='append',
-                                     value=value,
-                                     **from_._target_with_prefix_source if from_ else {},
-                                     source_path=from_)
-
-    def insert(self, index: int, *,
-               value: _T | None = None,
-               from_: NBTFormatPath | None = None) -> ExecutedCommand:
-        return self.fh.r.data_modify(**self._target_with_prefix_target,
-                                     target_path=self,
-                                     mode='insert', index=index,
-                                     value=value,
-                                     **from_._target_with_prefix_source if from_ else {},
-                                     source_path=from_)
-
-    def merge(self, *,
-              value: _T | None = None,
-              from_: NBTFormatPath | None = None) -> ExecutedCommand:
-        return self.fh.r.data_modify(**self._target_with_prefix_target,
-                                     target_path=self,
-                                     mode='merge',
-                                     value=value,
-                                     **from_._target_with_prefix_source if from_ else {},
-                                     source_path=from_)
-
-    def prepend(self, *,
-                value: _T | None = None,
-                from_: NBTFormatPath | None = None) -> ExecutedCommand:
-        return self.fh.r.data_modify(**self._target_with_prefix_target,
-                                     target_path=self,
-                                     mode='prepend',
-                                     value=value,
-                                     **from_._target_with_prefix_source if from_ else {},
-                                     source_path=from_)
-
-    def set(self, *,
-            value: _T | None = None,
-            from_: NBTFormatPath | None = None) -> ExecutedCommand:
-        return self.fh.r.data_modify(**self._target_with_prefix_target,
-                                     target_path=self,
-                                     mode='set',
-                                     value=value,
-                                     **from_._target_with_prefix_source if from_ else {},
-                                     source_path=from_)
-
-    def remove(self):
-        return self.fh.r.data_remove(entity=self.sel, path=self)
-
-    # TODO type checking for data modify
-    # TODO change value into NBTTag
-    
 class NBTFormat(Compound):
     def __init_subclass__(cls, do_pascal_case_ify: bool = True, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -219,37 +121,205 @@ class NBTFormat(Compound):
 
     #NBT_FORMAT: dict[str, Type[NBT] | dict[str, Type[NBT]]] | property = {}
 
-class RuntimeNBTFormat(Compound):
-    def __init__(self, from_format: Type[NBTFormat], *,
+class RuntimeNBTPath(Path, Generic[_T]):
+    def __new__(cls, *args, _path_type: Type[NBT] | None = None, **kwargs):
+        if cls != RuntimeNBTPath: return super().__new__(cls)
+        if _path_type and isinstance(_path_type, List):
+            return RuntimeNBTList[get_args(_path_type)[0]].__new__(RuntimeNBTList, *args, **kwargs)
+        elif _path_type and isinstance(_path_type, NBTFormat):
+            # noinspection PyArgumentList
+            return RuntimeNBTFormat.__new__(RuntimeNBTFormat, _path_type, *args, **kwargs)
+        else:
+            return super().__new__(cls)
+
+    def __init__(self, root: str | None,
                  fh: JavaFunctionHandler | None = None,
                  sel: JavaSelector | None = None,
                  block_pos: BlockCoord | None = None,
-                 rl: str | None = None):
+                 rl: str | None = None,
+                 **_):
+        super().__init__(root)
         self.fh = fh
         self.sel = sel
         self.block_pos = block_pos
         self.rl = rl
-        self._get_annotations = classmethod(lambda _: from_format._get_annotations())
-        super().__init__(from_format._get_annotations())
 
-    attr_as_path = lambda self, item: \
-        self.NBTFormatPath[self._get_annotations()[item]](pascal_case_ify(item),
-                                                          self.fh, self.sel, self.block_pos, self.rl)
-
-    def __getattr__(self, item) -> NBTFormatPath:
-        if item not in self._get_annotations():
-            return super().__getattribute__(self, item)
-        return self.attr_as_path(item)
+    def __getattr__(self, item) -> RuntimeNBTPath:
+        if item in {"_get_annotations"}:
+            return object.__getattribute__(self, item)
+        else:
+            return super().__getattr__(item)
 
     def __setattr__(self, item, value):
-        if item not in self._get_annotations():
-            super().__setattr__(item, value)
-        self.attr_as_path(item).set(value=value)
+        if item in {"_get_annotations"}:
+            return object.__setattr__(self, item, value)
+        else:
+            return super().__setattr__(item, value)
 
     def __delattr__(self, item):
-        if item not in self._get_annotations():
+        if item in {"_get_annotations"}:
+            return object.__delattr__(self, item)
+        else:
+            return super().__delattr__(item)
+
+    @property
+    def _target(self):
+        return {'entity': self.sel} if self.sel \
+            else {'block': self.block_pos} if self.block_pos \
+            else {'storage': self.rl} if self.rl \
+            else {}
+
+    @property
+    def _target_with_prefix_target(self):
+        return {'target_entity': self.sel} if self.sel \
+            else {'target_block': self.block_pos} if self.block_pos \
+            else {'target_storage': self.rl} if self.rl \
+            else {}
+
+    @property
+    def _target_with_prefix_source(self):
+        return {'source_entity': self.sel} if self.sel \
+            else {'source_block': self.block_pos} if self.block_pos \
+            else {'source_storage': self.rl} if self.rl \
+            else {}
+
+    def raw_json(self, interpret: bool | None = None,
+                 separator: JavaTextComponent | None = None) -> JNBTValues:
+        from pymcfunc.data_formats.raw_json import JNBTValues
+        # noinspection PyArgumentList
+        return JNBTValues(nbt=self,
+                          entity=self.sel,
+                          interpret=interpret,
+                          separator=separator)
+
+    def get(self, scale: float | None = None) -> ExecutedCommand:
+        return self.fh.r.data_get(**self._target,
+                                  path=self.root,
+                                  scale=scale)
+
+    def append(self, *,
+               value: _T | None = None,
+               from_: RuntimeNBTPath | None = None) -> ExecutedCommand:
+        return self.fh.r.data_modify(**self._target_with_prefix_target,
+                                     target_path=self,
+                                     mode='append',
+                                     value=value,
+                                     **from_._target_with_prefix_source if from_ else {},
+                                     source_path=from_)
+
+    def insert(self, index: int, *,
+               value: _T | None = None,
+               from_: RuntimeNBTPath | None = None) -> ExecutedCommand:
+        return self.fh.r.data_modify(**self._target_with_prefix_target,
+                                     target_path=self,
+                                     mode='insert', index=index,
+                                     value=value,
+                                     **from_._target_with_prefix_source if from_ else {},
+                                     source_path=from_)
+
+    def merge(self, *,
+              value: _T | None = None,
+              from_: RuntimeNBTPath | None = None) -> ExecutedCommand:
+        return self.fh.r.data_modify(**self._target_with_prefix_target,
+                                     target_path=self,
+                                     mode='merge',
+                                     value=value,
+                                     **from_._target_with_prefix_source if from_ else {},
+                                     source_path=from_)
+
+    def prepend(self, *,
+                value: _T | None = None,
+                from_: RuntimeNBTPath | None = None) -> ExecutedCommand:
+        return self.fh.r.data_modify(**self._target_with_prefix_target,
+                                     target_path=self,
+                                     mode='prepend',
+                                     value=value,
+                                     **from_._target_with_prefix_source if from_ else {},
+                                     source_path=from_)
+
+    def set(self, *,
+            value: _T | None = None,
+            from_: RuntimeNBTPath | None = None) -> ExecutedCommand:
+        return self.fh.r.data_modify(**self._target_with_prefix_target,
+                                     target_path=self,
+                                     mode='set',
+                                     value=value,
+                                     **from_._target_with_prefix_source if from_ else {},
+                                     source_path=from_)
+
+    def remove(self):
+        return self.fh.r.data_remove(entity=self.sel, path=self)
+
+    # TODO type checking for data modify
+    # TODO change value into NBTTag
+
+class RuntimeNBTList(RuntimeNBTPath[List[_T]], Generic[_T]):
+    def __init__(self, root: str | None,
+                 fh: JavaFunctionHandler | None = None,
+                 sel: JavaSelector | None = None,
+                 block_pos: BlockCoord | None = None,
+                 rl: str | None = None,
+                 _path_type: Type[NBT] | None = None):
+        self._path_type = _path_type
+        super().__init__(root, fh, sel, block_pos, rl)
+
+    def __getitem__(self, index: int) -> RuntimeNBTPath[_T]:
+        rnp = RuntimeNBTPath[self._path_type](self.root, self.fh, self.sel,
+                                              self.block_pos, self.rl, index,
+                                              _path_type=get_args(self._path_type)[0])
+        Path.__getitem__(rnp, index)
+        return rnp
+
+    def __setitem__(self, index: int, value: _T | None = None):
+        self[index].set(value=value)
+
+    def __delitem__(self, index: int):
+        self[index].remove()
+
+
+class RuntimeNBTFormat(RuntimeNBTPath[Compound]):
+    def __init__(self, from_format: Type[NBTFormat], *,
+                 fh: JavaFunctionHandler | None = None,
+                 sel: JavaSelector | None = None,
+                 block_pos: BlockCoord | None = None,
+                 rl: str | None = None,
+                 root: str | None = None):
+        super().__init__(root, fh, sel, block_pos, rl, _path_type=Compound)
+        self.original_format = from_format
+        self._get_annotations = from_format._get_annotations
+        RuntimeNBTPath.__init__(self, fh=fh, sel=sel, block_pos=block_pos, rl=rl, root=root)
+
+    attr_as_path = lambda self, item: \
+        RuntimeNBTPath[self.original_format._get_annotations()[item]](
+            pascal_case_ify(item),
+            fh=self.fh,
+            sel=self.sel,
+            block_pos=self.block_pos,
+            rl=self.rl,
+            _path_type=self.original_format._get_annotations()[item]
+        )
+
+    def __getattr__(self, item) -> RuntimeNBTPath:
+        if item in {"_get_annotations", 'original_format', '_components', 'fh', 'sel', 'block_pos', 'rl'} or\
+           item not in self.original_format._get_annotations():
+            return super().__getattribute__(item)
+        rnp = self.attr_as_path(item)
+        Path.__getattr__(self, item)
+        return rnp
+
+    def __setattr__(self, item, value):
+        if item in {"_get_annotations", 'original_format', '_components', 'fh', 'sel', 'block_pos', 'rl'} or\
+           item not in self.original_format._get_annotations():
+            super().__setattr__(item, value)
+        else:
+            getattr(self, item).set(value=value)
+
+    def __delattr__(self, item):
+        if item in {"_get_annotations", 'original_format', '_components', 'fh', 'sel', 'block_pos', 'rl'} or\
+           item not in self.original_format._get_annotations():
             super().__delattr__(item)
-        self.attr_as_path(item).remove()
+        else:
+            getattr(self, item).remove()
 
 
 class JsonFormat:

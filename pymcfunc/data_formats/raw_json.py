@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from typing import Literal, Optional, Union, Self
+from typing import Literal, Optional, Union
+from typing_extensions import Self
 from uuid import UUID
 
-from attr import field, s
+from attr import field, define
 
 from pymcfunc.command import ResourceLocation
 from pymcfunc.data_formats.base_formats import JsonFormat
@@ -16,8 +17,8 @@ from pymcfunc.proxies.selectors import JavaSelector, BedrockSelector
 class JavaRawJson:
     def __init__(self, *components: int | float | str | bool | list[JavaTextComponent] | JavaTextComponent):
         self.components = [comp if isinstance(comp, JavaTextComponent)
-                           else JavaPlainTextComponent('true' if comp else 'false') if isinstance(comp, bool)
-                           else JavaPlainTextComponent(comp) for comp in components]
+                           else JavaPlainTextComponent(text='true' if comp else 'false') if isinstance(comp, bool)
+                           else JavaPlainTextComponent(text=comp) for comp in components]
 
     def __str__(self):
         pass
@@ -26,7 +27,7 @@ class JavaRawJson:
 JRawJson = JavaRawJson
 
 @base_class
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class JavaTextComponent(JavaRawJson, JsonFormat):
     extra: list[JavaRawJson] = field(default=list)
     color: Literal["black", "dark_blue", "dark_green", "dark_aqua", "dark_red", "dark_purple", "gold", "gray",
@@ -119,7 +120,7 @@ class JavaTextComponent(JavaRawJson, JsonFormat):
         return self
 
     @base_class
-    @s(kw_only=True, init=True)
+    @define(kw_only=True, init=True)
     class ClickEvent(JsonFormat):
         action: str = property(lambda self: "")
         value: str
@@ -129,38 +130,38 @@ class JavaTextComponent(JavaRawJson, JsonFormat):
             "value": str
         }
 
-    @s(kw_only=True, init=True)
+    @define(kw_only=True, init=True)
     class OpenUrlClickEvent(ClickEvent):
         action: str = property(lambda self: "open_url")
     OpenUrl = OpenUrlClickEvent
 
-    @s(kw_only=True, init=True)
+    @define(kw_only=True, init=True)
     class OpenFileClickEvent(ClickEvent):
         action: str = property(lambda self: "open_file")
     OpenFile = OpenFileClickEvent
 
-    @s(kw_only=True, init=True)
+    @define(kw_only=True, init=True)
     class RunCommandClickEvent(ClickEvent):
         action: str = property(lambda self: "run_command")
     RunCommand = RunCommandClickEvent
 
-    @s(kw_only=True, init=True)
+    @define(kw_only=True, init=True)
     class SuggestCommandClickEvent(ClickEvent):
         action: str = property(lambda self: "suggest_command")
     SuggestCommand = SuggestCommandClickEvent
 
-    @s(kw_only=True, init=True)
+    @define(kw_only=True, init=True)
     class ChangePageClickEvent(ClickEvent):
         action: str = property(lambda self: "change_page")
     ChangePage = ChangePageClickEvent
 
-    @s(kw_only=True, init=True)
+    @define(kw_only=True, init=True)
     class CopyToClipboardClickEvent(ClickEvent):
         action: str = property(lambda self: "copy_to_clipboard")
     CopyToClipboard = CopyToClipboardClickEvent
 
     @base_class
-    @s(kw_only=True, init=True)
+    @define(kw_only=True, init=True)
     class HoverEvent(JsonFormat):
         action: str = property(lambda self: "")
 
@@ -168,7 +169,7 @@ class JavaTextComponent(JavaRawJson, JsonFormat):
             "action": str
         }
 
-    @s(kw_only=True, init=True)
+    @define(kw_only=True, init=True)
     class ShowTextHoverEvent(HoverEvent):
         action: str = property(lambda self: "show_text")
         contents: JavaRawJson
@@ -179,12 +180,12 @@ class JavaTextComponent(JavaRawJson, JsonFormat):
         }
     ShowText = ShowTextHoverEvent
 
-    @s(kw_only=True, init=True)
+    @define(kw_only=True, init=True)
     class ShowItemHoverEvent(HoverEvent):
         action: str = property(lambda self: "show_item")
         contents: Item
 
-        @s(kw_only=True, init=True)
+        @define(kw_only=True, init=True)
         class Item(JsonFormat):
             id: str
             count: int | None = None
@@ -202,12 +203,12 @@ class JavaTextComponent(JavaRawJson, JsonFormat):
         }
     ShowItem = ShowItemHoverEvent
 
-    @s(kw_only=True, init=True)
+    @define(kw_only=True, init=True)
     class ShowEntityHoverEvent(HoverEvent):
         action: str = property(lambda self: "show_entity")
         contents: Entity
 
-        @s(kw_only=True, init=True)
+        @define(kw_only=True, init=True)
         class Entity(JsonFormat):
             type: str
             id: UUID
@@ -243,7 +244,7 @@ class JavaTextComponent(JavaRawJson, JsonFormat):
     }
 JComp = JavaTextComponent
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class JavaPlainTextComponent(JavaTextComponent):
     text: str
 
@@ -254,7 +255,7 @@ class JavaPlainTextComponent(JavaTextComponent):
 
 JPlainText = JavaPlainTextComponent
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class JavaTranslatedTextComponent(JavaTextComponent):
     translate: str
     with_: Optional[list[JavaTextComponent]]
@@ -266,11 +267,11 @@ class JavaTranslatedTextComponent(JavaTextComponent):
     }
 JTranslatedText = JavaTranslatedTextComponent
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class JavaScoreboardValueComponent(JavaTextComponent):
     score: Score
 
-    @s(kw_only=True, init=True)
+    @define(kw_only=True, init=True)
     class Score(JsonFormat):
         objective: str
         name: JavaSelector | Literal['*']
@@ -289,7 +290,7 @@ class JavaScoreboardValueComponent(JavaTextComponent):
     }
 JScoreboardValue = JavaScoreboardValueComponent
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class JavaEntityNamesComponent(JavaTextComponent):
     selector: JavaSelector
     separator: JavaTextComponent | None = None
@@ -301,7 +302,7 @@ class JavaEntityNamesComponent(JavaTextComponent):
     }
 JEntityNames = JavaEntityNamesComponent
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class JavaKeybindComponent(JavaTextComponent):
     key: str
 
@@ -312,7 +313,7 @@ class JavaKeybindComponent(JavaTextComponent):
 JKeybind = JavaKeybindComponent
 
 # TODO CommandStorage maybe?
-@s(init=True)
+@define(kw_only=True, init=True)
 class JavaNBTValuesComponent(JavaTextComponent):
     nbt: Path
     interpret: bool | None = None
@@ -340,13 +341,13 @@ class BedrockRawJson:
         pass
 BRawJson = BedrockRawJson
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 @base_class
 class BedrockTextComponent(JsonFormat):
     pass
 BComp = BedrockTextComponent
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class BedrockPlainTextComponent(BedrockTextComponent):
     text: str
 
@@ -355,7 +356,7 @@ class BedrockPlainTextComponent(BedrockTextComponent):
     }
 BPlainText = BedrockPlainTextComponent
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class BedrockTranslatedTextComponent(BedrockTextComponent):
     translate: str
     with_: Optional[list[BedrockTextComponent]]
@@ -366,11 +367,11 @@ class BedrockTranslatedTextComponent(BedrockTextComponent):
     }
 BTranslatedText = BedrockTranslatedTextComponent
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class BedrockScoreboardValueComponent(BedrockTextComponent):
     score: Score
 
-    @s(kw_only=True, init=True)
+    @define(kw_only=True, init=True)
     class Score(JsonFormat):
         objective: str
         name: BedrockSelector | Literal['*']
@@ -387,7 +388,7 @@ class BedrockScoreboardValueComponent(BedrockTextComponent):
     }
 BScoreboardValue = BedrockScoreboardValueComponent
 
-@s(kw_only=True, init=True)
+@define(kw_only=True, init=True)
 class BedrockEntityNamesComponent(BedrockTextComponent):
     selector: BedrockSelector
 
