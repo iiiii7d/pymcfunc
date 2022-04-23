@@ -14,6 +14,18 @@ from pymcfunc.data_formats.nbt_formats import HideablePotionEffectNBT, ItemNBT, 
 from pymcfunc.proxies.selectors import JavaSelector
 
 class JavaEntity(JavaSelector):
+    def __init_subclass__(cls, type_: str | None = None, **kwargs):
+        super().__init_subclass__(**kwargs)
+        if type_ is not None:
+            def __init__(self, var: Literal['p', 'r', 'a', 'e', 's'],
+                         fh: JavaFunctionHandler | None = None,
+                         **arguments: Any):
+                if ('type_' in arguments and 'type_' not in arguments['type_']) or 'type_' not in arguments:
+                    JavaEntity.__init__(self, var, fh, **arguments, type_=type_)
+                else:
+                    JavaEntity.__init__(self, var, fh, **arguments)
+            cls.__init__ = __init__
+
     class NBT(NBTFormat):
         air: Short
         custom_name: String
@@ -601,7 +613,7 @@ class JavaTameableMob(JavaMob):
             def sitting(self, value: bool):
                 self.nbt.sitting = Byte(value)
 
-class JavaZombieMob(JavaMob):
+class JavaZombieGroup(JavaMob):
     class NBT(JavaMob.NBT):
         can_break_doors: Byte
         drowned_conversion_time: Int
@@ -1036,9 +1048,11 @@ class JavaPlayer(JavaMob):
     def __init__(self, var: Literal['p', 'r', 'a', 'e', 's'],
                  fh: JavaFunctionHandler | None = None,
                  **arguments: Any):
-        super().__init__(var, fh, **arguments)
-        if not self.playeronly:
-            raise ValueError(f'Non-player entities might be selected with {self}')
+        if ('type_' in arguments and arguments['type_'] != 'player') or 'type_' not in arguments \
+           or var not in {'p', 'r', 'a'}:
+            super().__init__(self, var, fh, **arguments, type_='player')
+        else:
+            super().__init__(self, var, fh, **arguments)
 
     class NBT(JavaMob.NBT):
         abilities: AbilitiesNBT
@@ -1529,3 +1543,937 @@ class JavaPlayer(JavaMob):
                 self.nbt.xp_total = Int(value)
 
 # TODO logic for all mobs
+
+class JavaAllay(JavaMob, type_='allay'): pass
+
+class JavaAxolotl(JavaBreedableMob, type_='axolotl'):
+    class NBT(JavaBreedableMob.NBT):
+        from_bucket: Byte
+        variant: Int
+
+        class Proxy(JavaBreedableMob.NBT.Proxy):
+            @property
+            def from_bucket(self) -> Path[Byte]:
+                return self.nbt.from_bucket
+            @from_bucket.setter
+            def from_bucket(self, value: int):
+                self.nbt.from_bucket = Byte(value)
+
+            @property
+            def variant(self) -> Path[Int]:
+                return self.nbt.variant
+            @variant.setter
+            def variant(self, value: int):
+                self.nbt.variant = Int(value)
+
+class JavaBat(JavaMob, type_='bat'):
+    class NBT(JavaMob.NBT):
+        bat_flags: Byte
+
+        class Proxy(JavaMob.NBT.Proxy):
+            @property
+            def bat_flags(self) -> Path[Byte]:
+                return self.nbt.bat_flags
+            @bat_flags.setter
+            def bat_flags(self, value: int):
+                self.nbt.bat_flags = Byte(value)
+
+class JavaBee(JavaAngerableMob, JavaBreedableMob, type_='bee'):
+    class NBT(JavaAngerableMob.NBT, JavaBreedableMob.NBT):
+        cannot_enter_hive_ticks: Int
+        crops_grown_since_pollination: Int
+        flower_pos: CoordNBT
+        has_nectar: Byte
+        has_stung: Byte
+        hive_pos: CoordNBT
+        ticks_since_pollination: Int
+
+        class CoordNBT(NBTFormat):
+            x: Int
+            y: Int
+            z: Int
+
+        class Proxy(JavaAngerableMob.NBT.Proxy, JavaBreedableMob.NBT.Proxy):
+            @property
+            def cannot_enter_hive_ticks(self) -> Path[Int]:
+                return self.nbt.cannot_enter_hive_ticks
+            @cannot_enter_hive_ticks.setter
+            def cannot_enter_hive_ticks(self, value: int):
+                self.nbt.cannot_enter_hive_ticks = Int(value)
+
+            @property
+            def crops_grown_since_pollination(self) -> Path[Int]:
+                return self.nbt.crops_grown_since_pollination
+            @crops_grown_since_pollination.setter
+            def crops_grown_since_pollination(self, value: int):
+                self.nbt.crops_grown_since_pollination = Int(value)
+
+            @property
+            def flower_pos(self) -> Path[JavaBee.NBT.CoordNBT]:
+                return self.nbt.flower_pos
+            @property
+            def flower_pos_x(self) -> Path[Int]:
+                return self.nbt.flower_pos.x
+            @property
+            def flower_pos_y(self) -> Path[Int]:
+                return self.nbt.flower_pos.y
+            @property
+            def flower_pos_z(self) -> Path[Int]:
+                return self.nbt.flower_pos.z
+            def set_flower_pos(self, *,
+                               coord: Coord | None = None,
+                               x: int | None = None,
+                               y: int | None = None,
+                               z: int | None = None):
+                if coord is not None:
+                    self.nbt.flower_pos.x = Int(coord.x)
+                    self.nbt.flower_pos.y = Int(coord.y)
+                    self.nbt.flower_pos.z = Int(coord.z)
+                else:
+                    if x is not None: self.nbt.flower_pos.x = Int(x)
+                    if y is not None: self.nbt.flower_pos.y = Int(y)
+                    if z is not None: self.nbt.flower_pos.z = Int(z)
+
+            @property
+            def has_nectar(self) -> Path[Byte]:
+                return self.nbt.has_nectar
+            @has_nectar.setter
+            def has_nectar(self, value: bool):
+                self.nbt.has_nectar = Byte(value)
+
+            @property
+            def has_stung(self) -> Path[Byte]:
+                return self.nbt.has_stung
+            @has_stung.setter
+            def has_stung(self, value: bool):
+                self.nbt.has_stung = Byte(value)
+
+            @property
+            def hive_pos(self) -> Path[JavaBee.NBT.CoordNBT]:
+                return self.nbt.flower_pos
+            @property
+            def hive_pos_x(self) -> Path[Int]:
+                return self.nbt.flower_pos.x
+            @property
+            def hive_pos_y(self) -> Path[Int]:
+                return self.nbt.flower_pos.y
+            @property
+            def hive_pos_z(self) -> Path[Int]:
+                return self.nbt.flower_pos.z
+            def set_hive_pos(self, *,
+                             coord: Coord | None = None,
+                             x: int | None = None,
+                             y: int | None = None,
+                             z: int | None = None):
+                if coord is not None:
+                    self.nbt.hive_pos.x = Int(coord.x)
+                    self.nbt.hive_pos.y = Int(coord.y)
+                    self.nbt.hive_pos.z = Int(coord.z)
+                else:
+                    if x is not None: self.nbt.hive_pos.x = Int(x)
+                    if y is not None: self.nbt.hive_pos.y = Int(y)
+                    if z is not None: self.nbt.hive_pos.z = Int(z)
+
+            @property
+            def ticks_since_pollination(self) -> Path[Int]:
+                return self.nbt.ticks_since_pollination
+            @ticks_since_pollination.setter
+            def ticks_since_pollination(self, value: int):
+                self.nbt.ticks_since_pollination = Int(value)
+
+class JavaBlaze(JavaMob, type_='blaze'): pass
+
+class JavaCat(JavaTameableMob, JavaBreedableMob, type_='cat'):
+    class NBT(JavaTameableMob.NBT, JavaBreedableMob.NBT):
+        cat_type: Int
+        collar_color: Byte
+        variant: String
+
+        class Proxy(JavaTameableMob.NBT.Proxy, JavaBreedableMob.NBT.Proxy):
+            @property
+            def cat_type(self) -> Path[Int]:
+                return self.nbt.cat_type
+            @cat_type.setter
+            def cat_type(self, value: int):
+                self.nbt.cat_type = Int(value)
+
+            @property
+            def collar_color(self) -> Path[Byte]:
+                return self.nbt.collar_color
+            @collar_color.setter
+            def collar_color(self, value: int):
+                self.nbt.collar_color = Byte(value)
+
+            @property
+            def variant(self) -> Path[String]:
+                return self.nbt.variant
+            @variant.setter
+            def variant(self, value: str):
+                self.nbt.variant = String(value)
+
+class JavaCaveSpider(JavaMob, type_='cavespider'): pass
+
+class JavaChicken(JavaBreedableMob, type_='chicken'):
+    class NBT(JavaBreedableMob.NBT):
+        egg_lay_time: Int
+        is_chicken_jockey: Byte
+
+        class Proxy(JavaBreedableMob.NBT.Proxy):
+            @property
+            def egg_lay_time(self) -> Path[Int]:
+                return self.nbt.egg_lay_time
+            @egg_lay_time.setter
+            def egg_lay_time(self, value: int):
+                self.nbt.egg_lay_time = Int(value)
+
+            @property
+            def is_chicken_jockey(self) -> Path[Byte]:
+                return self.nbt.is_chicken_jockey
+            @is_chicken_jockey.setter
+            def is_chicken_jockey(self, value: int):
+                self.nbt.is_chicken_jockey = Byte(value)
+
+class JavaCod(JavaMob, type_='cod'):
+    class NBT(JavaMob.NBT):
+        from_bucket: Byte
+
+        class Proxy(JavaMob.NBT.Proxy):
+            @property
+            def from_bucket(self) -> Path[Byte]:
+                return self.nbt.from_bucket
+            @from_bucket.setter
+            def from_bucket(self, value: int):
+                self.nbt.from_bucket = Byte(value)
+
+class JavaCow(JavaBreedableMob, type_='cow'): pass
+
+class JavaCreeper(JavaMob, type_='creeper'):
+    class NBT(JavaMob.NBT):
+        explosion_radius: Byte
+        fuse: Short
+        powered: Byte
+        ignited: Byte
+
+        class Proxy(JavaMob.NBT.Proxy):
+            @property
+            def explosion_radius(self) -> Path[Byte]:
+                return self.nbt.explosion_radius
+            @explosion_radius.setter
+            def explosion_radius(self, value: int):
+                self.nbt.explosion_radius = Byte(value)
+
+            @property
+            def fuse(self) -> Path[Short]:
+                return self.nbt.fuse
+            @fuse.setter
+            def fuse(self, value: int):
+                self.nbt.fuse = Short(value)
+
+            @property
+            def powered(self) -> Path[Byte]:
+                return self.nbt.powered
+            @powered.setter
+            def powered(self, value: int):
+                self.nbt.powered = Byte(value)
+
+            @property
+            def ignited(self) -> Path[Byte]:
+                return self.nbt.ignited
+            @ignited.setter
+            def ignited(self, value: int):
+                self.nbt.ignited = Byte(value)
+
+class JavaDolphin(JavaMob, type_='dolphin'):
+    class NBT(JavaMob.NBT):
+        can_find_treasure: Byte
+        got_fish: Byte
+        treasure_pos_x: Int
+        treasure_pos_y: Int
+        treasure_pos_z: Int
+
+        class Proxy(JavaMob.NBT.Proxy):
+            @property
+            def can_find_treasure(self) -> Path[Byte]:
+                return self.nbt.can_find_treasure
+            @can_find_treasure.setter
+            def can_find_treasure(self, value: int):
+                self.nbt.can_find_treasure = Byte(value)
+
+            @property
+            def got_fish(self) -> Path[Byte]:
+                return self.nbt.got_fish
+            @got_fish.setter
+            def got_fish(self, value: int):
+                self.nbt.got_fish = Byte(value)
+
+            @property
+            def treasure_pos_x(self) -> Path[Int]:
+                return self.nbt.treasure_pos_x
+            @property
+            def treasure_pos_y(self) -> Path[Int]:
+                return self.nbt.treasure_pos_y
+            @property
+            def treasure_pos_z(self) -> Path[Int]:
+                return self.nbt.treasure_pos_z
+            def set_treasure_pos(self, *,
+                                 coord: Coord | None = None,
+                                 x: int = None,
+                                 y: int = None,
+                                 z: int = None):
+                if coord is not None:
+                    self.nbt.treasure_pos_x = Int(coord.x)
+                    self.nbt.treasure_pos_y = Int(coord.y)
+                    self.nbt.treasure_pos_z = Int(coord.z)
+                else:
+                    if x is not None: self.nbt.treasure_pos_x = Int(x)
+                    if y is not None: self.nbt.treasure_pos_y = Int(y)
+                    if z is not None: self.nbt.treasure_pos_z = Int(z)
+
+class JavaDonkey(JavaHorseGroup, type_='donkey'):
+    class NBT(JavaHorseGroup.NBT):
+        chested_horse: Byte
+        items: List[ItemNBT]
+
+        class Proxy(JavaHorseGroup.NBT.Proxy):
+            @property
+            def chested_horse(self) -> Path[Byte]:
+                return self.nbt.chested_horse
+            @chested_horse.setter
+            def chested_horse(self, value: int):
+                self.nbt.chested_horse = Byte(value)
+
+            @property
+            def items(self) -> Path[List[ItemNBT]]:
+                return self.nbt.items
+            @items.setter
+            def items(self, value: list[ItemNBT]):
+                self.nbt.items = List[ItemNBT](value)
+
+class JavaDrowned(JavaZombieGroup, type_='drowned'): pass
+
+class JavaElderGuardian(JavaMob, type_='elder_guardian'): pass
+
+class JavaEnderDragon(JavaMob, type_='ender_dragon'):
+    class NBT(JavaMob.NBT):
+        dragon_phase: Int
+
+        class Proxy(JavaMob.NBT.Proxy):
+            @property
+            def dragon_phase(self) -> Path[Int]:
+                return self.nbt.dragon_phase
+            @dragon_phase.setter
+            def dragon_phase(self, value: int):
+                self.nbt.dragon_phase = Int(value)
+
+class JavaEnderman(JavaMob, type_='enderman'):
+    class NBT(JavaMob.NBT):
+        carried_block_state: StateNBT
+
+        class Proxy(JavaMob.NBT.Proxy):
+            @property
+            def carried_block_state(self) -> Path[StateNBT]:
+                return self.nbt.carried_block_state
+            @carried_block_state.setter
+            def carried_block_state(self, value: StateNBT):
+                self.nbt.carried_block_state = StateNBT(value)
+
+class JavaEndermite(JavaMob, type_='endermite'):
+    class NBT(JavaMob.NBT):
+        lifetime: Int
+
+        class Proxy(JavaMob.NBT.Proxy):
+            @property
+            def carriable(self) -> Path[Int]:
+                return self.nbt.lifetime
+            @carriable.setter
+            def carriable(self, value: int):
+                self.nbt.lifetime = Int(value)
+
+class JavaEvoker(JavaRaidMob, type_='evoker'):
+    class NBT(JavaRaidMob.NBT):
+        spell_ticks: Int
+
+        class Proxy(JavaRaidMob.NBT.Proxy):
+            @property
+            def spell_ticks(self) -> Path[Int]:
+                return self.nbt.spell_ticks
+            @spell_ticks.setter
+            def spell_ticks(self, value: int):
+                self.nbt.spell_ticks = Int(value)
+
+class JavaFox(JavaBreedableMob, type_='fox'):
+    class NBT(JavaBreedableMob.NBT):
+        type: String
+        crouching: Byte
+        sitting: Byte
+        sleeping: Byte
+        trusted: List[IntArray]
+
+        class Proxy(JavaBreedableMob.NBT.Proxy):
+            @property
+            def type(self) -> Path[String]:
+                return self.nbt.type
+            @type.setter
+            def type(self, value: str):
+                self.nbt.type = String(value)
+
+            @property
+            def crouching(self) -> Path[Byte]:
+                return self.nbt.crouching
+            @crouching.setter
+            def crouching(self, value: int):
+                self.nbt.crouching = Byte(value)
+
+            @property
+            def sitting(self) -> Path[Byte]:
+                return self.nbt.sitting
+            @sitting.setter
+            def sitting(self, value: int):
+                self.nbt.sitting = Byte(value)
+
+            @property
+            def sleeping(self) -> Path[Byte]:
+                return self.nbt.sleeping
+            @sleeping.setter
+            def sleeping(self, value: int):
+                self.nbt.sleeping = Byte(value)
+
+            @property
+            def trusted(self) -> Path[List[IntArray]]:
+                return self.nbt.trusted
+            @trusted.setter
+            def trusted(self, value: list[UUID]):
+                self.nbt.trusted = List[IntArray](value)
+
+class JavaFrog(JavaBreedableMob, type_='frog'):
+    class NBT(JavaBreedableMob.NBT):
+        variant: Int
+
+        class Proxy(JavaBreedableMob.NBT.Proxy):
+            @property
+            def variant(self) -> Path[Int]:
+                return self.nbt.variant
+            @variant.setter
+            def variant(self, value: str):
+                self.nbt.variant = Int(value)
+
+class JavaGhast(JavaMob, type_='ghast'):
+    class NBT(JavaMob.NBT):
+        explosion_power: Byte
+
+        class Proxy(JavaMob.NBT.Proxy):
+            @property
+            def explosion_power(self) -> Path[Byte]:
+                return self.nbt.explosion_power
+            @explosion_power.setter
+            def explosion_power(self, value: int):
+                self.nbt.explosion_power = Byte(value)
+
+class JavaGiant(JavaMob, type_='giant'): pass
+
+class JavaGlowSquid(JavaMob, type_='glow_squid'):
+    class NBT(JavaMob.NBT):
+        dark_ticks_remaining: Int
+
+        class Proxy(JavaMob.NBT.Proxy):
+            @property
+            def dark_ticks_remaining(self) -> Path[Int]:
+                return self.nbt.dark_ticks_remaining
+            @dark_ticks_remaining.setter
+            def dark_ticks_remaining(self, value: int):
+                self.nbt.dark_ticks_remaining = Int(value)
+
+class JavaGoat(JavaBreedableMob, type_='goat'):
+    class NBT(JavaBreedableMob.NBT):
+        is_screaming_goat: Byte
+
+        class Proxy(JavaBreedableMob.NBT.Proxy):
+            @property
+            def is_screaming_goat(self) -> Path[Int]:
+                return self.nbt.is_screaming_goat
+            @is_screaming_goat.setter
+            def is_screaming_goat(self, value: bool):
+                self.nbt.is_screaming_goat = Byte(value)
+
+class JavaGuardian(JavaMob, type_='guardian'): pass
+
+class JavaHoglin(JavaBreedableMob, type_='hoglin'):
+    class NBT(JavaBreedableMob.NBT):
+        cannot_be_hunted: Byte
+        is_immune_to_zombification: Byte
+        time_in_overworld: Int
+
+        class Proxy(JavaBreedableMob.NBT.Proxy):
+            @property
+            def cannot_be_hunted(self) -> Path[Byte]:
+                return self.nbt.cannot_be_hunted
+            @cannot_be_hunted.setter
+            def cannot_be_hunted(self, value: bool):
+                self.nbt.cannot_be_hunted = Byte(value)
+
+            @property
+            def is_immune_to_zombification(self) -> Path[Byte]:
+                return self.nbt.is_immune_to_zombification
+            @is_immune_to_zombification.setter
+            def is_immune_to_zombification(self, value: bool):
+                self.nbt.is_immune_to_zombification = Byte(value)
+
+            @property
+            def time_in_overworld(self) -> Path[Int]:
+                return self.nbt.time_in_overworld
+            @time_in_overworld.setter
+            def time_in_overworld(self, value: int):
+                self.nbt.time_in_overworld = Int(value)
+
+class JavaHorse(JavaHorseGroup, type_='horse'):
+    class NBT(JavaHorseGroup.NBT):
+        variant: Byte
+
+        class Proxy(JavaHorseGroup.NBT.Proxy):
+            @property
+            def variant(self) -> Path[Int]:
+                return self.nbt.variant
+            @variant.setter
+            def variant(self, value: int):
+                self.nbt.variant = Int(value)
+
+class JavaHusk(JavaZombieGroup, type_='husk'): pass
+
+class JavaIllusioner(JavaMob, type_='illusioner'):
+    class NBT(JavaMob.NBT):
+        spell_ticks: Int
+
+        class Proxy(JavaMob.NBT.Proxy):
+            @property
+            def spell_ticks(self) -> Path[Int]:
+                return self.nbt.spell_ticks
+            @spell_ticks.setter
+            def spell_ticks(self, value: bool):
+                self.nbt.spell_ticks = Int(value)
+
+class JavaIronGolem(JavaMob, type_='iron_golem'):
+    class NBT(JavaMob.NBT):
+        player_created: Byte
+
+        class Proxy(JavaMob.NBT.Proxy):
+            @property
+            def player_created(self) -> Path[Byte]:
+                return self.nbt.player_created
+            @player_created.setter
+            def player_created(self, value: bool):
+                self.nbt.player_created = Byte(value)
+
+class JavaLlama(JavaBreedableMob, type_='llama'):
+    class NBT(JavaBreedableMob.NBT):
+        bred: Byte
+        chested_horse: Byte
+        decor_item: ItemNBT
+        despawn_decay: Int | None
+        eating_haystack: Byte
+        items: List[ItemNBT] | None
+        owner: IntArray | None
+        variant: Int
+        strength: Int
+        tame: Byte
+        temper: Int
+
+        class Proxy(JavaBreedableMob.NBT.Proxy):
+            @property
+            def bred(self) -> Path[Byte]:
+                return self.nbt.bred
+            @bred.setter
+            def bred(self, value: bool):
+                self.nbt.bred = Byte(value)
+
+            @property
+            def chested_horse(self) -> Path[Byte]:
+                return self.nbt.chested_horse
+            @chested_horse.setter
+            def chested_horse(self, value: bool):
+                self.nbt.chested_horse = Byte(value)
+
+            @property
+            def decor_item(self) -> Path[ItemNBT]:
+                return self.nbt.decor_item
+            @decor_item.setter
+            def decor_item(self, value: ItemNBT):
+                self.nbt.decor_item = value
+
+            @property
+            def despawn_decay(self) -> Path[Int]:
+                return self.nbt.despawn_decay
+            @despawn_decay.setter
+            def despawn_decay(self, value: int):
+                self.nbt.despawn_decay = Int(value)
+            @despawn_decay.deleter
+            def despawn_decay(self):
+                del self.nbt.despawn_decay
+
+            @property
+            def eating_haystack(self) -> Path[Byte]:
+                return self.nbt.eating_haystack
+            @eating_haystack.setter
+            def eating_haystack(self, value: bool):
+                self.nbt.eating_haystack = Byte(value)
+
+            @property
+            def items(self) -> Path[List[ItemNBT]]:
+                return self.nbt.items
+            @items.setter
+            def items(self, value: List[ItemNBT]):
+                self.nbt.items = value
+            @items.deleter
+            def items(self):
+                del self.nbt.items
+
+            @property
+            def owner(self) -> Path[IntArray]:
+                return self.nbt.owner
+            @owner.setter
+            def owner(self, value: UUID):
+                self.nbt.owner = value
+            @owner.deleter
+            def owner(self):
+                del self.nbt.owner
+
+            @property
+            def variant(self) -> Path[Int]:
+                return self.nbt.variant
+            @variant.setter
+            def variant(self, value: int):
+                self.nbt.variant = Int(value)
+
+            @property
+            def strength(self) -> Path[Int]:
+                return self.nbt.strength
+            @strength.setter
+            def strength(self, value: int):
+                self.nbt.strength = Int(value)
+
+            @property
+            def tame(self) -> Path[Byte]:
+                return self.nbt.tame
+            @tame.setter
+            def tame(self, value: bool):
+                self.nbt.tame = Byte(value)
+
+            @property
+            def temper(self) -> Path[Int]:
+                return self.nbt.temper
+            @temper.setter
+            def temper(self, value: int):
+                self.nbt.temper = Int(value)
+
+class JavaMagmaCube(JavaMob, type_='magma_cube'):
+    class NBT(JavaMob.NBT):
+        size: Int
+        was_on_ground: Byte
+
+        class Proxy(JavaMob.NBT.Proxy):
+            @property
+            def size(self) -> Path[Int]:
+                return self.nbt.size
+            @size.setter
+            def size(self, value: int):
+                self.nbt.size = Int(value)
+
+            @property
+            def was_on_ground(self) -> Path[Byte]:
+                return self.nbt.was_on_ground
+            @was_on_ground.setter
+            def was_on_ground(self, value: bool):
+                self.nbt.was_on_ground = Byte(value)
+
+class JavaMooshroom(JavaBreedableMob, type_='mooshroom'):
+    class NBT(JavaBreedableMob.NBT):
+        effect_duration: Int
+        effect_id: Int
+        type: String
+
+        class Proxy(JavaBreedableMob.NBT.Proxy):
+            @property
+            def effect_duration(self) -> Path[Int]:
+                return self.nbt.effect_duration
+            @effect_duration.setter
+            def effect_duration(self, value: int):
+                self.nbt.effect_duration = Int(value)
+
+            @property
+            def effect_id(self) -> Path[Int]:
+                return self.nbt.effect_id
+            @effect_id.setter
+            def effect_id(self, value: int):
+                self.nbt.effect_id = Int(value)
+
+            @property
+            def type(self) -> Path[String]:
+                return self.nbt.type
+            @type.setter
+            def type(self, value: str):
+                self.nbt.type = String(value)
+
+class JavaMule(JavaHorseGroup, type_='mule'):
+    class NBT(JavaHorseGroup.NBT):
+        chested_horse: Byte
+        items: List[ItemNBT] | None
+
+        class Proxy(JavaHorseGroup.NBT.Proxy):
+            @property
+            def chested_horse(self) -> Path[Byte]:
+                return self.nbt.chested_horse
+            @chested_horse.setter
+            def chested_horse(self, value: bool):
+                self.nbt.chested_horse = Byte(value)
+
+            @property
+            def items(self) -> Path[List[ItemNBT]]:
+                return self.nbt.items
+            @items.setter
+            def items(self, value: List[ItemNBT]):
+                self.nbt.items = List(value)
+            @items.deleter
+            def items(self):
+                self.nbt.items = None
+
+class JavaOcelot(JavaBreedableMob, type_='ocelot'):
+    class NBT(JavaBreedableMob.NBT):
+        trusting: Byte
+
+        class Proxy(JavaBreedableMob.NBT.Proxy):
+            @property
+            def trusting(self) -> Path[Byte]:
+                return self.nbt.trusting
+            @trusting.setter
+            def trusting(self, value: bool):
+                self.nbt.trusting = Byte(value)
+
+class JavaPanda(JavaBreedableMob, type_='panda'):
+    class NBT(JavaBreedableMob.NBT):
+        hidden_gene: String
+        main_gene: String
+
+        class Proxy(JavaBreedableMob.NBT.Proxy):
+            @property
+            def hidden_gene(self) -> Path[String]:
+                return self.nbt.hidden_gene
+            @hidden_gene.setter
+            def hidden_gene(self, value: str):
+                self.nbt.hidden_gene = String(value)
+
+            @property
+            def main_gene(self) -> Path[String]:
+                return self.nbt.main_gene
+            @main_gene.setter
+            def main_gene(self, value: str):
+                self.nbt.main_gene = String(value)
+
+class JavaParrot(JavaTameableMob, type_='parrot'):
+    class NBT(JavaTameableMob.NBT):
+        variant: Int
+
+        class Proxy(JavaTameableMob.NBT.Proxy):
+            @property
+            def variant(self) -> Path[Int]:
+                return self.nbt.variant
+            @variant.setter
+            def variant(self, value: int):
+                self.nbt.variant = Int(value)
+
+class JavaPhantom(JavaMob, type_='phantom'):
+    class NBT(JavaMob.NBT):
+        a_x: Int
+        a_y: Int
+        a_z: Int
+        size: Int
+
+        class Proxy(JavaMob.NBT.Proxy):
+            @property
+            def a_x(self) -> Path[Int]:
+                return self.nbt.a_x
+            @property
+            def a_y(self) -> Path[Int]:
+                return self.nbt.a_y
+            @property
+            def a_z(self) -> Path[Int]:
+                return self.nbt.a_z
+            def set_a(self, *,
+                      coord: Coord | None = None,
+                      x: int | None = None,
+                      y: int | None = None,
+                      z: int | None = None):
+                if coord is not None:
+                    self.nbt.a_x = Int(coord.x)
+                    self.nbt.a_y = Int(coord.y)
+                    self.nbt.a_z = Int(coord.z)
+                else:
+                    if x is not None: self.nbt.a_x = Int(x)
+                    if y is not None: self.nbt.a_y = Int(y)
+                    if z is not None: self.nbt.a_z = Int(z)
+
+            @property
+            def size(self) -> Path[Int]:
+                return self.nbt.size
+            @size.setter
+            def size(self, value: int):
+                self.nbt.size = Int(value)
+
+class JavaPig(JavaBreedableMob, type_='pig'):
+    class NBT(JavaBreedableMob.NBT):
+        saddle: Byte
+
+        class Proxy(JavaBreedableMob.NBT.Proxy):
+            @property
+            def saddle(self) -> Path[Byte]:
+                return self.nbt.saddle
+            @saddle.setter
+            def saddle(self, value: bool):
+                self.nbt.saddle = Byte(value)
+
+class JavaPiglin(JavaMob, type_='piglin'):
+    class NBT(JavaMob.NBT):
+        cannot_hunt: Byte
+        inventory: List[ItemNBT]
+        is_baby: Byte
+        is_immune_to_zombification: Byte
+        time_in_overworld: Int
+
+        class Proxy(JavaMob.NBT.Proxy):
+            @property
+            def cannot_hunt(self) -> Path[Byte]:
+                return self.nbt.cannot_hunt
+            @cannot_hunt.setter
+            def cannot_hunt(self, value: bool):
+                self.nbt.cannot_hunt = Byte(value)
+
+            @property
+            def inventory(self) -> Path[List[ItemNBT]]:
+                return self.nbt.inventory
+            @inventory.setter
+            def inventory(self, value: list[ItemNBT]):
+                self.nbt.inventory = List[ItemNBT](value)
+
+            @property
+            def is_baby(self) -> Path[Byte]:
+                return self.nbt.is_baby
+            @is_baby.setter
+            def is_baby(self, value: bool):
+                self.nbt.is_baby = Byte(value)
+
+            @property
+            def is_immune_to_zombification(self) -> Path[Byte]:
+                return self.nbt.is_immune_to_zombification
+            @is_immune_to_zombification.setter
+            def is_immune_to_zombification(self, value: bool):
+                self.nbt.is_immune_to_zombification = Byte(value)
+
+            @property
+            def time_in_overworld(self) -> Path[Int]:
+                return self.nbt.time_in_overworld
+            @time_in_overworld.setter
+            def time_in_overworld(self, value: int):
+                self.nbt.time_in_overworld = Int(value)
+
+class JavaPiglinBrute(JavaMob, type_='piglin_brute'):
+    class NBT(JavaMob.NBT):
+        is_immune_to_zombification: Byte
+        time_in_overworld: Int
+
+        class Proxy(JavaMob.NBT.Proxy):
+            @property
+            def is_immune_to_zombification(self) -> Path[Byte]:
+                return self.nbt.is_immune_to_zombification
+
+            @is_immune_to_zombification.setter
+            def is_immune_to_zombification(self, value: bool):
+                self.nbt.is_immune_to_zombification = Byte(value)
+
+            @property
+            def time_in_overworld(self) -> Path[Int]:
+                return self.nbt.time_in_overworld
+
+            @time_in_overworld.setter
+            def time_in_overworld(self, value: int):
+                self.nbt.time_in_overworld = Int(value)
+
+class JavaPillager(JavaRaidMob, type_='pillager'):
+    class NBT(JavaRaidMob.NBT):
+        inventory: List[ItemNBT]
+
+        class Proxy(JavaRaidMob.NBT.Proxy):
+            @property
+            def inventory(self) -> Path[List[ItemNBT]]:
+                return self.nbt.inventory
+            @inventory.setter
+            def inventory(self, value: list[ItemNBT]):
+                self.nbt.inventory = List[ItemNBT](value)
+
+class JavaPolarBear(JavaAngerableMob, JavaBreedableMob, type_='polar_bear'): pass
+
+class JavaPufferfish(JavaMob, type_='pufferfish'):
+    class NBT(JavaMob.NBT):
+        from_bucket: Byte
+        puff_state: Int
+
+        class Proxy(JavaMob.NBT.Proxy):
+            @property
+            def from_bucket(self) -> Path[Byte]:
+                return self.nbt.from_bucket
+            @from_bucket.setter
+            def from_bucket(self, value: bool):
+                self.nbt.from_bucket = Byte(value)
+
+            @property
+            def puff_state(self) -> Path[Int]:
+                return self.nbt.puff_state
+            @puff_state.setter
+            def puff_state(self, value: int):
+                self.nbt.puff_state = Int(value)
+
+class JavaRabbit(JavaBreedableMob, type_='rabbit'):
+    class NBT(JavaBreedableMob.NBT):
+        more_carrot_ticks: Int
+        rabbit_type: Int
+
+        class Proxy(JavaBreedableMob.NBT.Proxy):
+            @property
+            def more_carrot_ticks(self) -> Path[Int]:
+                return self.nbt.more_carrot_ticks
+            @more_carrot_ticks.setter
+            def more_carrot_ticks(self, value: int):
+                self.nbt.more_carrot_ticks = Int(value)
+
+            @property
+            def rabbit_type(self) -> Path[Int]:
+                return self.nbt.rabbit_type
+            @rabbit_type.setter
+            def rabbit_type(self, value: int):
+                self.nbt.rabbit_type = Int(value)
+
+class JavaRavager(JavaRaidMob, type_='ravager'):
+    class NBT(JavaRaidMob.NBT):
+        attack_tick: Int
+        roar_tick: Int
+        stun_tick: Int
+
+        class Proxy(JavaRaidMob.NBT.Proxy):
+            @property
+            def attack_tick(self) -> Path[Int]:
+                return self.nbt.attack_tick
+            @attack_tick.setter
+            def attack_tick(self, value: int):
+                self.nbt.attack_tick = Int(value)
+
+            @property
+            def roar_tick(self) -> Path[Int]:
+                return self.nbt.roar_tick
+            @roar_tick.setter
+            def roar_tick(self, value: int):
+                self.nbt.roar_tick = Int(value)
+
+            @property
+            def stun_tick(self) -> Path[Int]:
+                return self.nbt.stun_tick
+            @stun_tick.setter
+            def stun_tick(self, value: int):
+                self.nbt.stun_tick = Int(value)
+
