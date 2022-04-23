@@ -24,7 +24,11 @@ def pascal_case_ify(var: str, is_potion_effect: bool = False) -> str:
     else:
         return ''.join(x.title() for x in var.split('_'))
 
-class NBTFormat(Compound):
+class NBTFormat(NBT):
+    class Proxy:
+        def __init__(self, nbt: TypedCompoundPath):
+            self.nbt = nbt
+
     def __init_subclass__(cls, do_pascal_case_ify: bool = True, **kwargs):
         super().__init_subclass__(**kwargs)
         cls._do_pascal_case_ify = do_pascal_case_ify

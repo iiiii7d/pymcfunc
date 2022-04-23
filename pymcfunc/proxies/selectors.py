@@ -29,7 +29,7 @@ class BaseSelector:
 
     @property
     def playeronly(self) -> bool:
-        return self.var in ['p', 'r', 'a']
+        return self.var in ['p', 'r', 'a'] or self.type_ == 'player'
 
     @classmethod
     def nearest_player(cls, **kwargs):

@@ -277,6 +277,11 @@ class TypedCompoundPath(CompoundPath, Generic[_T]):
         # noinspection PyUnresolvedReferences
         return get_args(self.__orig_class__)[0]
 
+    @property
+    def proxy(self) -> NBTFormat.Proxy:
+        return self.T.Proxy(self)
+    px = proxy
+
     def __getattr__(self, item) -> Path:
         if item not in self.T.get_format():
             return object.__getattribute__(self, item)
