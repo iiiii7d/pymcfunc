@@ -3,8 +3,9 @@ from __future__ import annotations
 from typing import Literal, Any
 
 from pymcfunc import JavaFunctionHandler
-from pymcfunc.data_formats.base_formats import RuntimeNBTPath, NBTFormat
+from pymcfunc.data_formats.base_formats import NBTFormat
 from pymcfunc.data_formats.coord import Rotation
+from pymcfunc.data_formats.nbt_path import Path
 from pymcfunc.data_formats.nbt_tags import String, Short, Byte, IntArray, Int, List, Double, Float, Long, Compound
 from pymcfunc.data_formats.nbt_formats import HideablePotionEffectNBT, ItemNBT, BrainNBT, AttributeNBT, LeashNBT, \
     PotionEffectNBT, SlottedItemNBT, LocationNBT
@@ -38,10 +39,10 @@ class JavaEntity(JavaSelector):
                  fh: JavaFunctionHandler | None = None,
                  **arguments: Any):
         super().__init__(var, fh, **arguments)
-        self.nbt = self.NBT.runtime(fh=fh)
+        self.nbt = self.NBT.as_path(fh=fh)
 
     @property
-    def display_name(self) -> RuntimeNBTPath[String]:
+    def display_name(self) -> Path[String]:
         return self.nbt.custom_name
     @display_name.setter
     def display_name(self, value: str | None):
@@ -53,14 +54,14 @@ class JavaEntity(JavaSelector):
             self.nbt.custom_name_visible = 1
 
     @property
-    def pitch(self) -> RuntimeNBTPath[Float]:
+    def pitch(self) -> Path[Float]:
         return self.nbt.rotation[0]
     @pitch.setter
     def pitch(self, value: float):
         self.nbt.rotation[0] = Float(value)
 
     @property
-    def yaw(self) -> RuntimeNBTPath[Float]:
+    def yaw(self) -> Path[Float]:
         return self.nbt.rotation[1]
     @yaw.setter
     def yaw(self, value: float):

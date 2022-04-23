@@ -33,8 +33,15 @@ class Path:
         self.rl = rl
 
     def __class_getitem__(cls, item: Type[NBT] | Ellipsis) -> Type[Path]:
-        if item == TypedCompoundPath:
+        if isinstance(item, TypedCompoundPath):
             return TypedCompoundPath
+        elif isinstance(item, NBTFormat):
+            return item._path()
+        elif isinstance(item, _UnionGenericAlias):
+            for anno in get_args(item):
+                if issubclass(anno, NBT): return cls[anno]
+            else:
+                raise TypeError(f"{item} is not a valid NBT Path type")
         elif get_origin(item) == List:
             return ListPath[get_args(item)[0]]
         elif get_origin(item) == Compound or get_origin(item) == CompoundReprAsList:

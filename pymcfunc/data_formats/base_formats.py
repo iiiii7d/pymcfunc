@@ -118,6 +118,10 @@ class NBTFormat(Compound):
                 rl: str | None = None) -> TypedCompoundPath:
         return TypedCompoundPath[cls](fh=fh, sel=sel, block_pos=block_pos, rl=rl)
 
+    @classmethod
+    def _path(cls) -> Type[TypedCompoundPath[NBTFormat]]:
+        return TypedCompoundPath[cls]
+
 class JsonFormat:
     @classmethod
     def _get_annotations(cls):
