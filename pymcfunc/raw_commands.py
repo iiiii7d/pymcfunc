@@ -10,6 +10,9 @@ from typing_extensions import Self
 
 from pymcfunc.data_formats.advancements import Advancement
 from pymcfunc.data_formats.coord import BlockCoord, Coord, Rotation, ChunkCoord, Coord2d
+from pymcfunc.data_formats.loot_tables import LootTable
+from pymcfunc.data_formats.predicates import Predicate
+from pymcfunc.data_formats.recipes import Recipe
 from pymcfunc.errors import FutureCommandWarning, DeprecatedCommandWarning, EducationEditionWarning
 from pymcfunc.data_formats.nbt_tags import Int, Compound, NBTTag, Float
 from pymcfunc.data_formats.nbt_path import Path
@@ -24,7 +27,7 @@ from pymcfunc.version import JavaVersion, BedrockVersion
 from pymcfunc.proxies.selectors import BedrockSelector, JavaSelector
 
 if TYPE_CHECKING:
-    from pymcfunc.functions import BaseFunctionHandler
+    from pymcfunc.functions import BaseFunctionHandler, Function
 
 def _command(order: list[Element], cmd_name: str | None = None, segment_name: str | None = None):
     def decorator(func: Callable[..., Any]):
@@ -313,8 +316,8 @@ class BedrockRawCommands(BaseRawCommands):
             user_provided_id: Annotated[str, Quoted]) -> ExecutedCommand: pass
 
     @_command([AE("name")])
-    @_version(introduced="1.8.0.8")  # TODO Function class
-    def function(self, name: str) -> ExecutedCommand: pass
+    @_version(introduced="1.8.0.8")
+    def function(self, name: Function) -> ExecutedCommand: pass
 
     @_command([AE("mode"), AE("target", True)])
     @_version(introduced="0.16.0b1")
@@ -394,7 +397,7 @@ class BedrockRawCommands(BaseRawCommands):
              give_player: _BedrockSinglePlayerTarget | None = None,
              spawn_position: Coord | None = None,
              kill_entity: _BedrockSingleTarget | None = None,
-             loot_table: ResourceLocation | None = None, # TODO LootTable
+             loot_table: LootTable | None = None,
              tool: str | Literal['mainhand', 'offhand'] | None = None) -> ExecutedCommand: pass
 
     @_command([AE("message")])
@@ -572,7 +575,7 @@ class BedrockRawCommands(BaseRawCommands):
                                     circle_center: Coord | None = None,
                                     circle_radius: Annotated[int, Range(0, Int.max)] | None = None,
                                     tickingarea_name: Annotated[str, Quoted] | None = None,
-                                    function: str) -> ExecutedCommand: pass # TODO Function class
+                                    function: Function) -> ExecutedCommand: pass
 
     @_command([])
     @_version(introduced="1.7.0.2")
@@ -1392,11 +1395,11 @@ class JavaRawCommands(BaseRawCommands):
 
         @_check_run
         @_subcommand([AE("predicate")])
-        def if_predicate(self, predicate: ResourceLocation) -> Self: pass # TODO Predicate class
+        def if_predicate(self, predicate: Predicate) -> Self: pass
 
         @_check_run
         @_subcommand([AE("predicate")])
-        def unless_predicate(self, predicate: ResourceLocation) -> Self: pass  # TODO Predicate class
+        def unless_predicate(self, predicate: Predicate) -> Self: pass
 
         @_check_run
         @_subcommand([AE("target"),
@@ -1545,8 +1548,8 @@ class JavaRawCommands(BaseRawCommands):
                   pos: ChunkCoord | None = None) -> ExecutedCommand: pass
 
     @_command([AE("name")])
-    @_version(introduced="1.12pre1") # TODO Function class
-    def function(self, name: ResourceLocation) -> ExecutedCommand: pass
+    @_version(introduced="1.12pre1")
+    def function(self, name: Function) -> ExecutedCommand: pass
 
     @_command([AE("mode"), AE("target", True)])
     @_version(introduced="12w16a") # TODO old syntax
@@ -1673,10 +1676,10 @@ class JavaRawCommands(BaseRawCommands):
              replace_count: Annotated[int, Range(0, Int.max)] | None = None,
              give_players: _JavaPlayerTarget | None = None,
              insert_target_pos: BlockCoord | None = None,
-             fish_loot_table: ResourceLocation | None = None, # TODO LootTable
+             fish_loot_table: LootTable | None = None,
              fish_pos: BlockCoord | None = None,
              fish_tool: str | Literal['mainhand', 'offhand'] | None = None,
-             loot_loot_table: ResourceLocation | None = None, # TODO LootTable,
+             loot_loot_table: LootTable | None = None,
              kill_target: _JavaSingleTarget | None = None,
              mine_pos: BlockCoord | None = None,
              mine_tool: str | Literal['mainhand', 'offhand'] | None = None) -> ExecutedCommand: pass
@@ -1755,7 +1758,7 @@ class JavaRawCommands(BaseRawCommands):
     @_version(introduced="17w13a")
     def recipe(self, action: Literal['give', 'take'],
                targets: _JavaPlayerTarget,
-               recipe: ResourceLocation | Literal['*']) -> ExecutedCommand: pass # TODO GroupedRecipe class
+               recipe: Recipe | Literal['*']) -> ExecutedCommand: pass
 
     @_command([])
     @_version(introduced="17w18a")
@@ -1784,13 +1787,13 @@ class JavaRawCommands(BaseRawCommands):
 
     @_command([AE("function"), AE("time"), AE("action", True)])
     @_version(introduced="18w43a") # TODO old syntax? idk
-    def schedule_function(self, function: ResourceLocation, # TODO Function
+    def schedule_function(self, function: Function,
                           time: int | float | Annotated[str, Regex(r"^\d+(?:\.\d+)?[dst]?$")],
                           action: Literal['append', 'replace'] = 'replace') -> ExecutedCommand: pass
 
     @_command([AE("function")])
     @_version(introduced="18w43a")
-    def schedule_clear(self, function: ResourceLocation) -> ExecutedCommand: pass
+    def schedule_clear(self, function: Function) -> ExecutedCommand: pass
 
     @_command([])
     @_version(introduced="13w04a")

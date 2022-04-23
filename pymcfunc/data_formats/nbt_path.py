@@ -6,20 +6,20 @@ from copy import copy
 from functools import singledispatchmethod
 # noinspection PyUnresolvedReferences
 from typing import _LiteralGenericAlias, Any, _UnionGenericAlias, get_args, get_origin, _GenericAlias, Type, TypeVar, \
-    Generic, TYPE_CHECKING
+    Generic, TYPE_CHECKING, Literal
 
 from typing_extensions import Self
 
-from pymcfunc import JavaFunctionHandler, ExecutedCommand
-from pymcfunc.data_formats.base_formats import NBTFormat
+if TYPE_CHECKING: from pymcfunc import JavaFunctionHandler, ExecutedCommand
+if TYPE_CHECKING: from pymcfunc.data_formats.base_formats import NBTFormat
 from pymcfunc.data_formats.coord import BlockCoord
 from pymcfunc.data_formats.nbt_tags import Compound, NBT, List, Int, Short, Long, Float, \
     Double, Byte, String, IntArray, LongArray, ByteArray, Boolean, CompoundReprAsList
-from pymcfunc.data_formats.raw_json import JavaTextComponent
+if TYPE_CHECKING: from pymcfunc.data_formats.raw_json import JavaTextComponent
 if TYPE_CHECKING: from pymcfunc.data_formats.raw_json import JNBTValues
 from pymcfunc.proxies.selectors import JavaSelector
 
-
+_T = TypeVar('_T')
 class Path:
     def __init__(self, root: str | None = None,
                  fh: JavaFunctionHandler | None = None,
@@ -33,6 +33,7 @@ class Path:
         self.rl = rl
 
     def __class_getitem__(cls, item: Type[NBT] | Ellipsis) -> Type[Path]:
+        from pymcfunc.data_formats.base_formats import NBTFormat
         if isinstance(item, TypedCompoundPath):
             return TypedCompoundPath
         elif isinstance(item, NBTFormat):
@@ -173,47 +174,6 @@ class Path:
     # TODO type checking for data modify
     # TODO change value into NBTTag
 
-_T = TypeVar('_T')
-class ListPath(Path, Generic[_T]):
-    @property
-    def T(self) -> Type[_T]:
-        try:
-            # noinspection PyUnresolvedReferences
-            return get_args(self.__orig_class__)[0]
-        except Exception:
-            return Any
-
-    @singledispatchmethod
-    def __getitem__(self, index: int | Ellipsis) -> Path[_T]:
-        raise NotImplementedError
-    @__getitem__.register
-    def _(self, index: int) -> Path[_T]:
-        path = Path[self.T](None, self.fh, self.sel, self.block_pos, self.rl)
-        path._components = self._components.copy()
-        path._components.append("["+str(index)+"]")
-        return path
-    @__getitem__.register
-    def _(self, _: Ellipsis) -> Path[...][_T]:
-        path = Path[self.T](None, self.fh, self.sel, self.block_pos, self.rl)
-        path._components = self._components.copy()
-        path._components.append("[]")
-        return path
-    @__getitem__.register
-    def _(self, index: Compound) -> Path[...][_T]:
-        path = Path[self.T](None, self.fh, self.sel, self.block_pos, self.rl)
-        path._components = self._components.copy()
-        path._components.append("[" + str(index) + "]")
-        return path
-
-    def __setitem__(self, index: int, value: _T | None = None):
-        self[index].set(value=value)
-
-    def __delitem__(self, index: int):
-        self[index].remove()
-
-class Collection(ListPath, Generic[_T], ABC):
-    pass # TODO collection class for every type
-
 class CompoundPath(Path, Generic[_T]):
     @property
     def T(self) -> Type[_T]:
@@ -236,6 +196,61 @@ class CompoundPath(Path, Generic[_T]):
         path = ListPath[Compound]()
         path._components.append(str(tag))
         return path
+
+class TypedCompoundPath(CompoundPath, Generic[_T]):
+    @property
+    def T(self) -> Type[NBTFormat]:
+        # noinspection PyUnresolvedReferences
+        return get_args(self.__orig_class__)[0]
+
+    @property
+    def proxy(self) -> NBTFormat.Proxy:
+        return self.T.Proxy(self)
+    px = proxy
+
+    def __getattr__(self, item) -> Path:
+        if item not in self.T.get_format():
+            return object.__getattribute__(self, item)
+        else:
+            return super().__getattr__(item)
+
+    def __setattr__(self, item, value):
+        if item not in self.T.get_format():
+            return object.__setattr__(self, item, value)
+        else:
+            return super().__setattr__(item, value)
+
+    def __delattr__(self, item):
+        if item not in self.T.get_format():
+            return object.__delattr__(self, item)
+        else:
+            return super().__delattr__(item)
+
+class ListPath(Path, Generic[_T]):
+    @property
+    def T(self) -> Type[_T]:
+        try:
+            # noinspection PyUnresolvedReferences
+            return get_args(self.__orig_class__)[0]
+        except Exception:
+            return Any
+
+    def __getitem__(self, index: int | Ellipsis | Compound) -> Path[_T] | Path[...][_T]:
+        path = Path[self.T](None, self.fh, self.sel, self.block_pos, self.rl) \
+            if isinstance(index, int) else \
+            Path[...][self.T](None, self.fh, self.sel, self.block_pos, self.rl)
+        path._components = self._components.copy()
+        path._components.append("["+(str(index) if index is not ... else "")+"]")
+        return path
+
+    def __setitem__(self, index: int, value: _T | None = None):
+        self[index].set(value=value)
+
+    def __delitem__(self, index: int):
+        self[index].remove()
+
+class Collection(ListPath, Generic[_T], ABC):
+    pass # TODO collection class for every type
 
 class BytePath(Path):
     pass
@@ -269,33 +284,3 @@ class LongArrayPath(Path):
 
 class BooleanPath(Path):
     pass
-
-
-class TypedCompoundPath(CompoundPath, Generic[_T]):
-    @property
-    def T(self) -> Type[NBTFormat]:
-        # noinspection PyUnresolvedReferences
-        return get_args(self.__orig_class__)[0]
-
-    @property
-    def proxy(self) -> NBTFormat.Proxy:
-        return self.T.Proxy(self)
-    px = proxy
-
-    def __getattr__(self, item) -> Path:
-        if item not in self.T.get_format():
-            return object.__getattribute__(self, item)
-        else:
-            return super().__getattr__(item)
-
-    def __setattr__(self, item, value):
-        if item not in self.T.get_format():
-            return object.__setattr__(self, item, value)
-        else:
-            return super().__setattr__(item, value)
-
-    def __delattr__(self, item):
-        if item not in self.T.get_format():
-            return object.__delattr__(self, item)
-        else:
-            return super().__delattr__(item)

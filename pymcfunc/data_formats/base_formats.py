@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import _LiteralGenericAlias, Any, _UnionGenericAlias, get_args, get_origin, _GenericAlias, Type, TypeVar, \
     Generic, TYPE_CHECKING
 
-from pymcfunc.data_formats.nbt_path import TypedCompoundPath
+if TYPE_CHECKING: from pymcfunc.data_formats.nbt_path import TypedCompoundPath
 
 if TYPE_CHECKING: from pymcfunc.functions import JavaFunctionHandler
 from pymcfunc.data_formats.coord import BlockCoord
@@ -120,10 +120,12 @@ class NBTFormat(NBT):
                 sel: JavaSelector | None = None,
                 block_pos: BlockCoord | None = None,
                 rl: str | None = None) -> TypedCompoundPath:
+        from pymcfunc.data_formats.nbt_path import TypedCompoundPath
         return TypedCompoundPath[cls](fh=fh, sel=sel, block_pos=block_pos, rl=rl)
 
     @classmethod
     def _path(cls) -> Type[TypedCompoundPath[NBTFormat]]:
+        from pymcfunc.data_formats.nbt_path import TypedCompoundPath
         return TypedCompoundPath[cls]
 
 class JsonFormat:
