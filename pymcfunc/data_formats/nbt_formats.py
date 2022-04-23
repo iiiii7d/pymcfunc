@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pymcfunc.data_formats.base_formats import NBTFormat
-from pymcfunc.data_formats.nbt import Byte, Int, String, DictReprAsList, Long, IntArray, Compound, Double, List
+from pymcfunc.data_formats.nbt_tags import Byte, Int, String, CompoundReprAsList, Long, IntArray, Compound, Double, List
 from pymcfunc.internal import base_class
 
 
@@ -9,25 +9,30 @@ class PotionEffectNBT(NBTFormat):
     ambient: Byte
     amplifier: Byte
     duration: Int
-    hidden_effect: PotionEffectNBT
     id: Byte
     show_icon: Byte
     show_particles: Byte
+
+class HideablePotionEffectNBT(PotionEffectNBT):
+    hidden_effect: HideablePotionEffectNBT
 
 class ItemNBT(NBTFormat): # TODO move this to its own page maybe?
     count: Byte
     id: String
     tag: ItemTagNBT
 
+class SlottedItemNBT(ItemNBT):
+    slot: Byte
+
 class ItemTagNBT(NBTFormat):
     pass
 
-class BrainNBT(NBTFormat):
-    memories: DictReprAsList[Memory]
+class LocationNBT(NBTFormat):
+    dimension: String
+    pos: IntArray
 
-    class LocationNBT(NBTFormat):
-        dimension: String
-        pos: IntArray
+class BrainNBT(NBTFormat):
+    memories: CompoundReprAsList[Memory]
 
     @base_class
     class Memory(NBTFormat, do_pascal_case_ify=False):

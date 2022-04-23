@@ -5,8 +5,9 @@ from typing import Literal, Any
 from pymcfunc import JavaFunctionHandler
 from pymcfunc.data_formats.base_formats import RuntimeNBTPath, NBTFormat
 from pymcfunc.data_formats.coord import Rotation
-from pymcfunc.data_formats.nbt import String, Short, Byte, IntArray, Int, List, Double, Float, Long
-from pymcfunc.data_formats.nbt_formats import PotionEffectNBT, ItemNBT, BrainNBT, AttributeNBT, LeashNBT
+from pymcfunc.data_formats.nbt_tags import String, Short, Byte, IntArray, Int, List, Double, Float, Long, Compound
+from pymcfunc.data_formats.nbt_formats import HideablePotionEffectNBT, ItemNBT, BrainNBT, AttributeNBT, LeashNBT, \
+    PotionEffectNBT, SlottedItemNBT, LocationNBT
 from pymcfunc.proxies.selectors import JavaSelector
 
 
@@ -84,7 +85,7 @@ class JavaEntity(JavaSelector):
 class JavaMob(JavaEntity):
     class NBT(JavaEntity.NBT):
         absorption_amount: Float
-        active_effects: List[PotionEffectNBT] | None
+        active_effects: List[HideablePotionEffectNBT] | None
         armor_drop_chances: List[Float]
         armor_items: List[ItemNBT]
         attributes: List[AttributeNBT]
@@ -152,23 +153,122 @@ class JavaProjectile(JavaEntity):
         left_owner: Byte
         owner: IntArray
 
+
 class JavaPotionEffects(JavaEntity):
-    pass
+    class NBT(JavaEntity.NBT):
+        custom_potion_effects: List[PotionEffectNBT]
+        potion: String
+        custom_potion_color: Int
 
 class JavaMinecart(JavaEntity):
-    pass
+    class NBT(JavaEntity.NBT):
+        custom_display_tile: Byte
+        display_offset: Int
+        display_state: DisplayStateNBT
+
+        class DisplayStateNBT(NBTFormat):
+            name: String
+            properties: Compound
 
 class JavaContainer(JavaEntity):
-    pass
+    class NBT(JavaEntity.NBT):
+        items: List[ItemNBT]
+        loot_table: String
+        loot_table_seed: Long
 
 class JavaHangable(JavaEntity):
-    pass
+    class NBT(JavaEntity.NBT):
+        facing: Byte
+        tile_x: Float
+        tile_y: Float
+        tile_z: Float
 
 class JavaFireball(JavaEntity):
-    pass
+    class NBT(JavaEntity.NBT):
+        power: List[Double]
 
-class JavaArrowGroup(JavaEntity):
-    pass
+class JavaArrowGroup(JavaEntity): # TODO fix case
+    class NBT(JavaEntity.NBT):
+        crit: Byte
+        damage: Double
+        in_block_state: BlockStateNBT
+        in_ground: Byte
+        life: Short
+        pickup: Byte
+        pierce_level: Byte
+        shake: Byte
+        shot_from_crossbow: Byte
+        sound_event: String
+
+        class BlockStateNBT(NBTFormat):
+            name: String
+            properties: Compound
 
 class JavaPlayer(JavaMob):
-    pass
+    class NBT(JavaMob.NBT):
+        abilities: AbilitiesNBT
+        data_version: Int
+        dimension: String
+        ender_items: List[SlottedItemNBT]
+        enteredNetherPosition: CoordNBT
+        food_exhaustion_level: Float
+        food_level: Int
+        food_saturation_level: Float
+        food_tick_timer: Int
+        inventory: List[SlottedItemNBT]
+        last_death_location: LocationNBT
+        player_game_type: Int
+        previous_player_game_type: Int
+        recipe_book: RecipeBookNBT
+        root_vehicle: RootVehicleNBT
+        score: Int
+        seen_credits: Byte # TODO case
+        selected_item: ItemNBT
+        shoulder_entity_left: JavaEntity.NBT
+        shoulder_entity_right: JavaEntity.NBT
+        sleep_timer: Short
+        spawn_dimension: String | None
+        spawn_forced: Byte
+        spawn_x: Int
+        spawn_y: Int | None
+        spawn_z: Int
+        warden_spawn_tracker: WardenSpawnTrackerNBT
+        xp_level: Int
+        xp_p: float
+        xp_seed: Int
+        xp_total: Int
+
+        class AbilitiesNBT(NBTFormat):
+            flying: Byte
+            fly_speed: Float
+            instabuild: Byte
+            invulnerable: Byte
+            may_build: Byte
+            may_fly: Byte
+            walk_speed: Float
+
+        class CoordNBT(NBTFormat):
+            x: Double
+            y: Double
+            z: Double
+
+        class RecipeBookNBT(NBTFormat):
+            recipes: List[String]
+            to_be_displayed: List[String]
+            is_filtering_craftable: Byte
+            is_gui_open: Byte
+            is_furnace_filtering_craftable: Byte
+            is_furnace_gui_open: Byte
+            is_blasting_furnace_filtering_craftable: Byte
+            is_blasting_furnace_gui_open: Byte
+            is_smoker_filtering_craftable: Byte
+            is_smoker_gui_open: Byte
+
+        class RootVehicleNBT(NBTFormat):
+            attach: IntArray
+            entity: JavaEntity.NBT
+
+        class WardenSpawnTrackerNBT(NBTFormat):
+            cooldown_ticks: Int
+            ticks_since_last_warning: Int
+            warning_level: Int

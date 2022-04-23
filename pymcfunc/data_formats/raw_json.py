@@ -9,7 +9,7 @@ from attr import field, define
 from pymcfunc.command import ResourceLocation
 from pymcfunc.data_formats.base_formats import JsonFormat
 from pymcfunc.data_formats.coord import Coord
-from pymcfunc.data_formats.nbt import Path
+from pymcfunc.data_formats.nbt_path import Path
 from pymcfunc.internal import base_class
 from pymcfunc.proxies.selectors import JavaSelector, BedrockSelector
 

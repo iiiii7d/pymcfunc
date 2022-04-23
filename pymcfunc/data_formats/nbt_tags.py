@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import functools
 import json
-import re
 from abc import ABC
 from collections.abc import MutableSequence, Sequence
 # noinspection PyUnresolvedReferences
@@ -11,35 +10,6 @@ from types import UnionType, GenericAlias
 from typing import Any, get_args, Type, TypeVar, Generic, _UnionGenericAlias, Union, get_origin, _LiteralGenericAlias, \
     _GenericAlias, TYPE_CHECKING
 
-from typing_extensions import Self
-
-
-class Path:
-    def __init__(self, root: str | None = None):
-        self._components = [root or "{}"]
-
-    def __str__(self) -> str:
-        return "".join(self._components)
-
-    def __getattr__(self, attr: str) -> Self:
-        if attr == '_components': return super().__getattribute__(attr)
-        str_attr = attr if re.search(r"^[a-zA-Z\d]*$", attr) is not None else "\""+attr+"\""
-        self._components.append("."+str_attr)
-        return self
-
-    def __getitem__(self, index: int | Ellipsis | NBTTag) -> Self:
-        str_index = str(index) if isinstance(index, (str, NBTTag)) else ""
-        self._components.append("["+str(str_index)+"]")
-        return self
-
-    def __call__(self, tag: Compound) -> Self:
-        self._components.append(str(tag))
-        return self
-
-    def parent(self) -> Path:
-        obj = Path()
-        obj._components = self._components[:-1]
-        return obj
 
 def _numerical(min_: str | float, max_: str | float, type_: type, suffix: str=""):
     def decorator(cls):
@@ -270,4 +240,4 @@ class Compound(NBTTag, dict):
         return {k: v.py for k, v in self._val}
 
 _I = TypeVar('_I')
-class DictReprAsList(Generic[_I]): pass
+class CompoundReprAsList(Generic[_I]): pass

@@ -5,7 +5,7 @@ from typing import Optional, Union, Sequence, Literal
 from attr import define
 
 from pymcfunc.data_formats.base_formats import JsonFormat
-from pymcfunc.data_formats.nbt import Compound, DictReprAsList
+from pymcfunc.data_formats.nbt_tags import Compound, CompoundReprAsList
 from pymcfunc.internal import base_class, immutable
 
 
@@ -147,7 +147,7 @@ class CraftingShapedRecipe(CraftingRecipe):
     JSON_FORMAT = {
         **CraftingRecipe.NBT_FORMAT,
         'pattern': list[str],
-        'key': DictReprAsList[CraftingRecipe.Key | CraftingRecipe.KeyGroup]
+        'key': CompoundReprAsList[CraftingRecipe.Key | CraftingRecipe.KeyGroup]
     }
 
 @define(kw_only=True, init=True)

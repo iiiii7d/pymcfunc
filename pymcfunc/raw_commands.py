@@ -11,7 +11,8 @@ from typing_extensions import Self
 from pymcfunc.data_formats.advancements import Advancement
 from pymcfunc.data_formats.coord import BlockCoord, Coord, Rotation, ChunkCoord, Coord2d
 from pymcfunc.errors import FutureCommandWarning, DeprecatedCommandWarning, EducationEditionWarning
-from pymcfunc.data_formats.nbt import Int, Path, Compound, NBTTag, Float
+from pymcfunc.data_formats.nbt_tags import Int, Compound, NBTTag, Float
+from pymcfunc.data_formats.nbt_path import Path
 from pymcfunc.data_formats.range import FloatRange
 from pymcfunc.data_formats.raw_json import JavaRawJson
 from pymcfunc.command import ExecutedCommand, Command, SE, AE, Range, NoSpace, Element, Player, Regex, \

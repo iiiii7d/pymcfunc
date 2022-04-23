@@ -14,7 +14,7 @@ from pymcfunc.internal import base_class
 if TYPE_CHECKING: from pymcfunc.functions import Function
 from pymcfunc.data_formats.json_formats import ItemJson, EntityJson, DamageJson, DamageTypeJson, LocationJson, IntRangeJson, FloatRangeJson, \
     DoubleRangeJson
-from pymcfunc.data_formats.nbt import Compound, DictReprAsList
+from pymcfunc.data_formats.nbt_tags import Compound, CompoundReprAsList
 
 @define(kw_only=True, init=True)
 class Advancement(JsonFormat):
@@ -35,8 +35,8 @@ class Advancement(JsonFormat):
         return {
             'display': AdvancementDisplay,
             'parent': Optional[str],
-            'criteria': DictReprAsList[Criterion],
-            'requirements': Optional[list[DictReprAsList[Criterion]]],
+            'criteria': CompoundReprAsList[Criterion],
+            'requirements': Optional[list[CompoundReprAsList[Criterion]]],
             'rewards': Optional[Rewards]
         }
 
@@ -251,7 +251,7 @@ class EffectsChangedTrigger(PlayerTrigger):
 
     JSON_FORMAT = {
         **PlayerTrigger.JSON_FORMAT,
-        'effect': Optional[DictReprAsList[Effect]],
+        'effect': Optional[CompoundReprAsList[Effect]],
         'source': Optional[Union[EntityJson, list[Predicate]]]
     }
 

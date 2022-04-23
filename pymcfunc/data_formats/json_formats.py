@@ -5,7 +5,7 @@ from typing import Literal, Type, Optional, Union
 from attr import define
 
 from pymcfunc.data_formats.base_formats import JsonFormat
-from pymcfunc.data_formats.nbt import NBTTag, Compound, NBT, DictReprAsList, Float, Double, Int
+from pymcfunc.data_formats.nbt_tags import NBTTag, Compound, NBT, CompoundReprAsList, Float, Double, Int
 from pymcfunc.data_formats.number_providers import NumberProvider
 from pymcfunc.internal import immutable
 
@@ -115,7 +115,7 @@ class EntityJson(JsonFormat):
     def JSON_FORMAT(self) -> dict[str, Type[NBT]]:
         return {
             'distance': Optional[dict[Literal["absolute", "horizontal", "x", "y", "z"], FloatRangeJson]], # TODO format for distance
-            'effects': Optional[DictReprAsList[self.Effect]],
+            'effects': Optional[CompoundReprAsList[self.Effect]],
             'equipment': Optional[dict[Literal["mainhand", "offhand", "head", "chest", "legs", "feet"], ItemJson]], #TODO same for below two
             'flags': Optional[dict[Literal["is_on_fire", "is_sneaking", "is_sprinting", "is_swimming", "is_baby"], bool]],
             'lightning_bolt': Optional[self.LightningBolt],
@@ -165,7 +165,7 @@ class EntityJson(JsonFormat):
                 'gamemode': Optional[str],
                 'level': Optional[Union[IntRangeJson, int]],
                 'recipes': Optional[dict[str, bool]],
-                'stats': Optional[DictReprAsList[self.Statistic]]
+                'stats': Optional[CompoundReprAsList[self.Statistic]]
             }
 
         @define(kw_only=True, init=True)

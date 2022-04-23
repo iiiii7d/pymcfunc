@@ -13,7 +13,7 @@ from pymcfunc.data_formats.coord import Coord2d, Coord, BlockCoord, ChunkCoord
 from pymcfunc.data_formats import item_modifiers as im
 from pymcfunc.data_formats import json_formats as jf
 from pymcfunc.data_formats import loot_tables as lt
-from pymcfunc.data_formats import nbt
+from pymcfunc.data_formats import nbt_tags
 from pymcfunc.data_formats import number_providers as np
 from pymcfunc.data_formats import predicates as pdc
 from pymcfunc.data_formats.range import FloatRange

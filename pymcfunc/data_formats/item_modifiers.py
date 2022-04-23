@@ -12,7 +12,8 @@ from pymcfunc.data_formats.raw_json import JavaRawJson
 from pymcfunc.internal import base_class
 
 if TYPE_CHECKING: from pymcfunc.data_formats.loot_tables import Entry
-from pymcfunc.data_formats.nbt import Path, Compound
+from pymcfunc.data_formats.nbt_tags import Compound
+from pymcfunc.data_formats.nbt_path import Path
 from pymcfunc.data_formats.number_providers import NumberProvider
 from pymcfunc.data_formats.predicates import Predicate
 
