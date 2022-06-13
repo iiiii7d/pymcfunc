@@ -661,7 +661,7 @@ class JavaHorseGroup(JavaBreedableMob):
         tame: Byte
         temper: Int
 
-        class Proxy(JavaBreedableMob.Proxy):
+        class Proxy(JavaBreedableMob.NBT.Proxy):
             @property
             def armor_item(self) -> Path[ItemNBT]:
                 return self.nbt.armor_item
