@@ -22,7 +22,7 @@ Changelogs: https://pymcfunc.readthedocs.io/en/latest/changelog.html
 
 **Documentation: https://pymcfunc.readthedocs.io/en/latest/**
 
-## Note: currently being rewritten for v0.5
+## Note: currently being rewritten for v0.5, 99% chance `main` branch will not run
 
 ## Why pymcfunc?
 It would seem pretty obvious to program directly with Minecraft commands into functions;
