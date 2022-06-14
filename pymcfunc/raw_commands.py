@@ -1153,7 +1153,7 @@ class JavaRawCommands(BaseRawCommands):
                     source_entity: _JavaSingleTarget | None = None,
                     source_storage: ResourceLocation | None = None,
                     source_path: Path | None = None,
-                    value: NBTTag) -> ExecutedCommand: pass
+                    value: NBTTag | None = None) -> ExecutedCommand: pass
 
     @_command([SE([LE("block"), AE("block")],
                   [LE("entity"), AE("entity")],

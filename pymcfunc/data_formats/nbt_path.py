@@ -1,13 +1,18 @@
 from __future__ import annotations
 
+from abc import ABC
 from copy import copy
+from functools import singledispatch
 from typing import Self
 
 from pymcfunc.data_formats.nbt_tags import NBT
+from pymcfunc.internal import base_class, _generic
 
 
+@base_class
+@_generic(NBT)
 class Path:
-    def __init__(self, root: str | None = None):
+    def __init__(self, root: str | None = None): # TODO maybe a source parameter for direct resolution?
         self._components = [f"\"{root}\"" if ' ' in root else (root or "")]
 
     def __str__(self):
@@ -21,8 +26,8 @@ class Path:
     def copy(self) -> Self:
         return copy(self)
 
-    def __getattr__(self, attr: str):
-        tag = NamedTag(attr)
+    def __getattr__(self, attr: str) -> NamedTag:
+        tag = NamedTag("."+attr)
         tag._components = self._components + tag._components
         return tag
 
@@ -39,26 +44,35 @@ class NamedTag(Path):
         tag._components = self._components + [str(item)]
         return tag
 
-    def __getitem__(self, item: int | Ellipsis | dict) -> NamedListTag: # TODO overloading
-        if item is ...:
-            tag = NamedListTag("")
-            tag._components = self._components + ["[]"]
-        elif isinstance(item, dict):
-            tag = NamedCompoundTag("")
-            tag._components = self._components + ["["+str(item)+"]"]
-        else:
-            tag = NamedListTag("")
-            tag._components = self._components + ["["+str(item)+"]"]
-        return tag
+    @singledispatch
+    def __getitem__(self, item):
+        raise NotImplementedError
 
-class NamedCompoundTag(NamedTag):
+    @__getitem__.register
+    def __getitem__(self, item: int) -> NamedListTag:
+        tag = NamedListTag("", "")
+        tag._components = self._components + ["["+str(item)+"]"]
+        return tag
+    @__getitem__.register
+    def __getitem__(self, item: Ellipsis) -> NamedListTag:
+        tag = NamedListTag("", "")
+        tag._components = self._components + ["[]"]
+        return tag
+    @__getitem__.register
+    def __getitem__(self, item: dict) -> NamedCompoundTag:
+        tag = NamedCompoundTag("")
+        tag._components = self._components + ["["+str(item)+"]"]
+        return tag
+    @__getitem__.register
+    def __getitem__(self, item: str) -> NamedTag:
+        return self.__getattr__(item)
+
+class NamedCompoundTag(NamedTag, ABC):
+    # noinspection PyMissingConstructor
     def __init__(self, root: str, item: dict[str, NBT] | None = None):
         self._components = NamedTag(root)(item)._components
 
-class NamedListTag(NamedTag):
+class NamedListTag(NamedTag, ABC):
+    # noinspection PyMissingConstructor
     def __init__(self, root: str, item: int | Ellipsis):
-        self._components = NamedTag(root)[item]._components
-
-class NamedListCompoundElementsTag(NamedTag):
-    def __init__(self, root: str, item: dict | None):
         self._components = NamedTag(root)[item]._components

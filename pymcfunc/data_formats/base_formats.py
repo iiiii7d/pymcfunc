@@ -4,13 +4,8 @@ from __future__ import annotations
 from typing import _LiteralGenericAlias, Any, _UnionGenericAlias, get_args, get_origin, _GenericAlias, Type, TypeVar, \
     Generic, TYPE_CHECKING
 
-if TYPE_CHECKING: from pymcfunc.data_formats.nbt_path import TypedCompoundPath
-
-if TYPE_CHECKING: from pymcfunc.functions import JavaFunctionHandler
-from pymcfunc.data_formats.coord import BlockCoord
+if TYPE_CHECKING: pass
 from pymcfunc.data_formats.nbt_tags import NBT, CompoundReprAsList, Compound, String, Byte
-
-from pymcfunc.proxies.selectors import JavaSelector
 
 
 def pascal_case_ify(var: str, is_potion_effect: bool = False) -> str:
@@ -25,10 +20,6 @@ def pascal_case_ify(var: str, is_potion_effect: bool = False) -> str:
         return ''.join(x.title() for x in var.split('_'))
 
 class NBTFormat(NBT):
-    class Proxy:
-        def __init__(self, nbt: TypedCompoundPath):
-            self.nbt = nbt
-
     def __init_subclass__(cls, do_pascal_case_ify: bool = True, **kwargs):
         super().__init_subclass__(**kwargs)
         cls._do_pascal_case_ify = do_pascal_case_ify
@@ -113,20 +104,6 @@ class NBTFormat(NBT):
             d[var] = self._convert_to_nbt(var, getattr(self, var), anno, anno)
             if d[var] is None: del d[var]
         return Compound(d)
-
-    @classmethod
-    def as_path(cls, *,
-                fh: JavaFunctionHandler | None = None,
-                sel: JavaSelector | None = None,
-                block_pos: BlockCoord | None = None,
-                rl: str | None = None) -> TypedCompoundPath:
-        from pymcfunc.data_formats.nbt_path import TypedCompoundPath
-        return TypedCompoundPath[cls](fh=fh, sel=sel, block_pos=block_pos, rl=rl)
-
-    @classmethod
-    def _path(cls) -> Type[TypedCompoundPath[NBTFormat]]:
-        from pymcfunc.data_formats.nbt_path import TypedCompoundPath
-        return TypedCompoundPath[cls]
 
 class JsonFormat:
     @classmethod

@@ -3,12 +3,14 @@ from __future__ import annotations
 from typing import Literal, Any, TypedDict, Annotated, Union, TYPE_CHECKING
 
 import pymcfunc.internal as internal
+from pymcfunc.data_formats.nbt_path import Path
+
 if TYPE_CHECKING:
     from pymcfunc import BaseFunctionHandler, JavaFunctionHandler, BedrockFunctionHandler
     from pymcfunc.data_formats.advancements import Advancement
-    from pymcfunc.command import ResourceLocation, ExecutedCommand
-from pymcfunc.data_formats.coord import _FloatIntCoord, Coord
-from pymcfunc.data_formats.nbt_tags import Compound, Int
+    from pymcfunc.command import ResourceLocation, ExecutedCommand, _JavaSingleTarget, Range
+from pymcfunc.data_formats.coord import _FloatIntCoord, Coord, BlockCoord
+from pymcfunc.data_formats.nbt_tags import Compound, Int, NBT
 from pymcfunc.data_formats.range import FloatRange
 
 
@@ -195,28 +197,54 @@ class JavaSelector(BaseSelector):
                 s.append(f"advancements={{{d}}}")
             return '['+','.join(s)+']'
 
-        @BaseSelector._ensure_fh_set
-        def grant_advancement(self,
-                              mode: Literal["everything", "only", "from", "through", "until"],
-                              advancement: Advancement | None = None,
-                              criterion: str | None = None) -> ExecutedCommand:
-            return self.fh.advancement_grant(self, mode, advancement, criterion)
+    @BaseSelector._ensure_fh_set
+    def grant_advancement(self,
+                          mode: Literal["everything", "only", "from", "through", "until"],
+                          advancement: Advancement | None = None,
+                          criterion: str | None = None) -> ExecutedCommand:
+        return self.fh.advancement_grant(self, mode, advancement, criterion)
 
-        def kill(self) -> ExecutedCommand:
-            return self.fh.kill(self)
+    def kill(self) -> ExecutedCommand:
+        return self.fh.kill(self)
 
-        @BaseSelector._ensure_fh_set
-        def tp(self, *,
-               coord: Coord | None = None,
-               entity: JavaSelector | None = None,
-               **kwargs):
-            if coord is not None:
-                self.fh.r.tp(entity=self, location=coord, **kwargs)
-            else:
-                self.fh.r.tp(entity=self, destination=entity, **kwargs)
-        teleport = tp
+    @BaseSelector._ensure_fh_set
+    def print_nbt(self, path: Path | None = None, scale: float | None = None) -> ExecutedCommand:
+        return self.fh.r.data_get(entity=self, path=path, scale=scale)
 
-        # TODO more of this
+    @BaseSelector._ensure_fh_set
+    def merge_nbt(self, nbt: NBT) -> ExecutedCommand:
+        return self.fh.r.data_merge(entity=self, nbt=nbt)
+
+    @BaseSelector._ensure_fh_set
+    def modify_nbt(self, target_path: Path,
+                   mode: Literal['append', 'insert', 'merge', 'prepend', 'set'], *,
+                   index: Annotated[int, Range(Int.min, Int.max)] | None = None,
+                   source_block: BlockCoord | None = None,
+                   source_entity: _JavaSingleTarget | None = None,
+                   source_storage: ResourceLocation | None = None,
+                   source_path: Path | None = None,
+                   value: NBT | None = None) -> ExecutedCommand:
+        return self.fh.r.data_modify(target_entity=self,
+                                     target_path=target_path,
+                                     mode=mode, index=index,
+                                     source_block=source_block,
+                                     source_entity=source_entity,
+                                     source_storage=source_storage,
+                                     source_path=source_path,
+                                     value=value)
+
+    @BaseSelector._ensure_fh_set
+    def tp(self, *,
+           coord: Coord | None = None,
+           entity: JavaSelector | None = None,
+           **kwargs):
+        if coord is not None:
+            self.fh.r.tp(entity=self, location=coord, **kwargs)
+        else:
+            self.fh.r.tp(entity=self, destination=entity, **kwargs)
+    teleport = tp
+
+    # TODO more of this
 
 
 class BedrockSelector(BaseSelector):
