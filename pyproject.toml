@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "pocketknife-mc"
+version = "0.5.0"
+description = ""
+authors = ["7d <i.third.7d@protonmail.com>"]
+license = "GNU-GPLv3"
+readme = "README.md"
+packages = [{include = "pkmc"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.group.dev.dependencies]
+wheel = "^0.37.1"
+pip = "^22.1.2"
+black = "^22.8.0"
+pytest = "^7.1.3"
+mypy = "^0.982"
+isort = "^5.10.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

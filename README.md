@@ -1,4 +1,4 @@
-# pymcfunc
+# pocket-knife-mc
 
 [![Build Status](https://travis-ci.com/iiiii7d/pymcfunc.svg?branch=main)](https://travis-ci.com/iiiii7d/pymcfunc)
 [![Documentation Status](https://readthedocs.org/projects/pymcfunc/badge/?version=latest)](https://pymcfunc.readthedocs.io/en/latest/?badge=latest)
@@ -15,60 +15,4 @@
 [![Codecov](https://codecov.io/gh/iiiii7d/pymcfunc/branch/main/graph/badge.svg?token=BS3UCSBO41)](https://codecov.io/gh/iiiii7d/pymcfunc)
 [![CodeFactor](https://www.codefactor.io/repository/github/iiiii7d/pymcfunc/badge)](https://www.codefactor.io/repository/github/iiiii7d/pymcfunc)
 
-Minecraft functions, pythonised. Made by 7d
-
-**Latest release version: v0.4**
-Changelogs: https://pymcfunc.readthedocs.io/en/latest/changelog.html
-
-**Documentation: https://pymcfunc.readthedocs.io/en/latest/**
-
-## Note: currently being rewritten for v0.5
-
-## Why pymcfunc?
-It would seem pretty obvious to program directly with Minecraft commands into functions;
-however things start to get complicated when you try to do things that are simple in regular
-programming but are cumbersome in Minecraft commands.
-
-Hence pymcfunc, which translates Python code into Minecraft commands. The code is aimed to be
-short, brief and concise so that it does not become another troublesome job.
-
-Progress: Raw commands are complete, currently working on features to make programming functions easier,
-and tools to build datapacks :)
-
-## Usage
-
-```python
-import pymcfunc_old as pmf
-p = pmf.Pack("pack name")
-
-@p.function
-def diamond(f: pmf.JavaFunctionHandler):
-    f.r.tell("@s", "Enjoy your free diamonds! :D")
-    f.r.give("@s", "diamond", 64)
-
-@p.function
-def make_sheep_jump(f: pmf.JavaFunctionHandler):
-    f.r.execute(
-      as_="@e[type=sheep]",
-      run=lambda sf: [
-        sf.r.tp(destxyz="~ ~1 ~"),
-        sf.r.say("boingg")
-      ]
-    )
-
-@p.function
-def addition(f: pmf.JavaFunctionHandler):
-    val1 = f.v('val1', '@s')
-    val1.set(10)
-    val2 = f.v('val2', '@s')
-    val2.set(20)
-    val1 += val2
-    f.r.tellraw('@s', pmf.rt.java("§aThe value is now ¶s[val1|@s]"))
-
-@p.function
-@p.t.repeat_every(6000)
-def five_min_alert(f: pmf.JavaFunctionHandler):
-    f.r.tellraw('@a', pmf.rt.java("§c§l§w[This is 6000 ticks]5 minutes§xw have passed!"))
-
-print(p.funcs)
-```
+If you're seeing this: pymcfunc is currently being rewritten from a library focused around Minecraft functions to a library focusing around game files in general :)
