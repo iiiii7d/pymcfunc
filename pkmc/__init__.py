@@ -1,11 +1,12 @@
 from importlib import metadata
 
-import toml
+import tomlkit
 
 try:
     __version__ = metadata.version(__package__)
 except metadata.PackageNotFoundError:
     try:
-        __version__ = toml.load("pyproject.toml")["tool"]["poetry"]["version"]
+        with open("pyproject.toml", "r") as f:
+            __version__ = tomlkit.load(f)["tool"]["poetry"]["version"]
     except FileNotFoundError:
         __version__ = "unknown"

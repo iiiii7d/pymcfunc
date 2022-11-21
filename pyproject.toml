@@ -9,6 +9,9 @@ packages = [{include = "pkmc"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
+tomlkit = "^0.11.6"
+nbt = "^1.5.1"
+beartype = "^0.11.0"
 
 [tool.poetry.group.dev.dependencies]
 wheel = "^0.37.1"
