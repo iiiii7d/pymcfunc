@@ -12,6 +12,8 @@ python = "^3.10"
 tomlkit = "^0.11.6"
 nbt = "^1.5.1"
 beartype = "^0.11.0"
+attrs = "^22.1.0"
+msgspec = "^0.9.1"
 
 [tool.poetry.group.dev.dependencies]
 wheel = "^0.37.1"

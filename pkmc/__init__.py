@@ -2,6 +2,9 @@ from importlib import metadata
 
 import tomlkit
 
+import pkmc.nbt
+import pkmc.world
+
 try:
     __version__ = metadata.version(__package__)
 except metadata.PackageNotFoundError:

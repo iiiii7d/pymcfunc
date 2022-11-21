@@ -1,20 +1,26 @@
 from __future__ import annotations
 
+from enum import Enum
+from pathlib import Path
 from typing import (
     Annotated,
     Any,
     Final,
     Generic,
+    Literal,
     MutableMapping,
     MutableSequence,
+    Optional,
     Type,
     TypeVar,
     get_args,
 )
 
 from beartype import beartype
+from beartype.door import is_bearable
 from beartype.vale import Is
 from nbt.nbt import (
+    TAG,
     NBTFile,
     TAG_Byte,
     TAG_Byte_Array,
@@ -22,15 +28,34 @@ from nbt.nbt import (
     TAG_Double,
     TAG_Float,
     TAG_Int,
+    TAG_Int_Array,
     TAG_List,
     TAG_Long,
+    TAG_Long_Array,
     TAG_Short,
     TAG_String,
 )
 
 
 class Tag:
-    pass
+    @staticmethod
+    def from_id(i: str | None) -> Type[Tag] | None:
+        if i is None or i == 0:
+            return None
+        return {
+            1: Byte,
+            2: Short,
+            3: Int,
+            4: Long,
+            5: Float,
+            6: Double,
+            7: ByteArray,
+            8: String,
+            9: List,
+            10: Compound,
+            11: IntArray,
+            12: LongArray,
+        }[i]
 
 
 @beartype
@@ -108,10 +133,10 @@ class ByteArray(Tag, TAG_Byte_Array, MutableSequence[int]):
     def __init__(self, name: str | None = None, buffer=None):
         super().__init__(name, buffer)
 
-    def insert(self, key: str, value: Byte.RANGE):
+    def insert(self, key: str, value: ByteArray.RANGE):
         super().insert(key, value)
 
-    def append(self, value: Byte.RANGE):
+    def append(self, value: ByteArray.RANGE):
         super().append(value)
 
 
@@ -121,7 +146,7 @@ class String(Tag, TAG_String):
         super().__init__(value, name, buffer)
 
 
-_T1 = TypeVar("_T1", bound=Tag)
+_T1 = TypeVar("_T1", bound=Optional[Tag])
 
 
 @beartype
@@ -130,7 +155,7 @@ class List(Tag, TAG_List, Generic[_T1], MutableSequence[_T1]):
     def ele_type(self) -> Type[_T1] | None:
         # noinspection PyUnresolvedReferences
         try:
-            return get_args(self.__orig_class__)[0]
+            return get_args(self.__orig_bases__)[0]
         except IndexError:
             return None
 
@@ -143,55 +168,168 @@ class List(Tag, TAG_List, Generic[_T1], MutableSequence[_T1]):
 @beartype
 class Compound(Tag, TAG_Compound, MutableMapping[str, Tag]):
     def __init__(self, name: str | None = None, buffer=None):
+        super().__init__(buffer, name)
+
+
+@beartype
+class IntArray(Tag, TAG_Int_Array, MutableSequence[Int.RANGE]):
+    def __init__(self, name: str | None = None, buffer=None):
         super().__init__(name, buffer)
 
-    pass
+    def insert(self, key: str, value: Int.RANGE):
+        super().insert(key, value)
+
+    def append(self, value: Int.RANGE):
+        super().append(value)
+
+
+@beartype
+class LongArray(Tag, TAG_Long_Array, MutableSequence[Long.RANGE]):
+    def __init__(self, name: str | None = None, buffer=None):
+        super().__init__(name, buffer)
+
+    def insert(self, key: str, value: Long.RANGE):
+        super().insert(key, value)
+
+    def append(self, value: Long.RANGE):
+        super().append(value)
 
 
 @beartype
 class File(Compound, NBTFile):
-    pass
+    def __init__(self, filename: Path | None = None, buffer=None, fileobj=None):
+        NBTFile.__init__(self, str(filename), buffer, fileobj)
+
+        def transform(tag: TAG) -> Tag:
+            if isinstance(tag, TAG_Byte):
+                return Byte(tag.value, tag.name)
+            if isinstance(tag, TAG_Short):
+                return Short(tag.value, tag.name)
+            if isinstance(tag, TAG_Int):
+                return Int(tag.value, tag.name)
+            if isinstance(tag, TAG_Long):
+                return Long(tag.value, tag.name)
+            if isinstance(tag, TAG_Float):
+                return Float(tag.value, tag.name)
+            if isinstance(tag, TAG_Double):
+                return Double(tag.value, tag.name)
+            if isinstance(tag, TAG_Byte_Array):
+                new = ByteArray(tag.name)
+                new.value = tag.value
+                return new
+            if isinstance(tag, TAG_String):
+                return String(tag.value, tag.name)
+            if isinstance(tag, TAG_List):
+                id_ = (
+                    tag.tagID
+                    if tag.tagID is not None and tag.tagID != 0
+                    else tag.value[0].id
+                    if len(tag) > 0
+                    else None
+                )
+                new = List[Tag.from_id(id_)](tag.value, tag.name)
+                new.value = (
+                    None if tag.value is None else [transform(t) for t in tag.value]
+                )
+                return new
+            if isinstance(tag, TAG_Compound):
+                new = Compound(tag.name)
+                new.tags = (
+                    None if tag.tags is None else [transform(t) for t in tag.tags]
+                )
+                return new
+            if isinstance(tag, TAG_Int_Array):
+                new = IntArray(tag.name)
+                new.value = tag.value
+                return new
+            if isinstance(tag, TAG_Long_Array):
+                new = IntArray(tag.name)
+                new.value = tag.value
+                return new
+            raise TypeError(f"Invalid tag {tag}")
+
+        self.tags = None if self.tags is None else [transform(t) for t in self.tags]
 
 
 _T2 = TypeVar("_T2", bound=Compound)
 
 
+def raw_attr_name(attr: str, t: type) -> str:
+    annos = get_args(t)
+    return annos[1] if len(annos) >= 2 else attr
+
+
 @beartype
-class TypedCompound(Generic[_T2]):
+class TypedCompound(Compound):
+    def __init__(self, val: Compound):
+        for field, ty in type(self).fields().items():
+            field = raw_attr_name(field, ty)
+            if field not in val.keys() and None not in get_args(ty):
+                raise KeyError(f"No tag for {field}")
+            try:
+                field_val = val[field]
+                if issubclass(ty, TypedCompound) and isinstance(field_val, Compound):
+                    val[field] = ty(field_val)
+                    continue
+            except TypeError:
+                pass
+            if not is_bearable(val[field], ty):
+                raise TypeError(
+                    f"Invalid type for {field}, expected {ty.__name__} but got {type(val[field]).__name__}"
+                )
+        super().__init__(val.name)
+        self.tags = val.tags
+
     @classmethod
     def fields(cls) -> dict[str, Type[Tag]]:
+        fields = {}
         for c in cls.__mro__:
-            fields = {}
             if issubclass(c, TypedCompound):
                 c: Type[TypedCompound]
                 fields.update(c.__annotations__)
         return fields
 
-    __slots__ = ("val",)
-
-    def __init__(self, val: _T2):
-        self.val = val
-
-    def __getitem__(self, item: str) -> Tag:
-        return self.val[item]
-
-    def __setitem__(self, key: str, value: Tag):
-        self.val[key] = value
-
-    def __delitem__(self, key: str):
-        del self.val[key]
-
     def __getattr__(self, item: str) -> Tag | Any:
         if item in self.fields():
-            return self[item]
+            attribute = raw_attr_name(item, self.fields()[item])
+            return self[attribute]
         super().__getattribute__(item)
 
-    def __setattr__(self, key: str, value: Tag | Any):
+    def __setattr__(self, key: str, value: Tag | Enum | Any):
         if key in self.fields():
-            self[key] = value
+            attribute = raw_attr_name(key, self.fields()[key])
+            self[attribute] = value
+        if isinstance(value, Enum):
+            value = value.value
         super().__setattr__(key, value)
 
     def __delattr__(self, item: str):
         if item in self.fields():
-            del self[item]
+            attribute = raw_attr_name(item, self.fields()[item])
+            del self[attribute]
         super().__delattr__(item)
+
+
+@beartype
+class TypedFile(TypedCompound):
+    @classmethod
+    def parse_file(cls, file: Path):
+        val = File(file)
+        return cls(val)
+
+    def write_file(self, path: Path):
+        if isinstance(self.val, File):
+            self.val.write_file(path)
+        else:
+            raise TypeError(f"{type(self).__name__} is not an NBT file")
+
+
+@beartype
+class Boolean(Byte):
+    def __init__(
+        self,
+        value: Literal[1, 0, True, False] | None = None,
+        name: str | None = None,
+        buffer=None,
+    ):
+        super().__init__(int(value), name, buffer)
