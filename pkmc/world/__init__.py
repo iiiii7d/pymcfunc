@@ -7,6 +7,8 @@ from attr import define
 from beartype import beartype
 
 from pkmc.dimensions import Dimension
+from pkmc.formats.level import LevelFile
+from pkmc.formats.player import PlayerFile
 from pkmc.formats.raids import RaidFile
 
 
@@ -35,11 +37,15 @@ class World:
     def entities(self) -> None:
         pass
 
-    def level_dat(self, old: bool = False) -> None:
-        pass
+    def level_dat(self, old: bool = False) -> LevelFile:
+        path = self.path / ("level.dat_old" if old else "level.dat")
+        return LevelFile.parse_file(path)
 
-    def player_data(self, player: UUID, old: bool = False) -> None:
-        pass
+    def player_data(self, player: UUID, old: bool = False) -> PlayerFile:
+        path = (
+            self.path / "playerdata" / (f"{player}.dat_old" if old else f"{player}.dat")
+        )
+        return PlayerFile.parse_file(path)
 
     def poi(self) -> None:
         pass

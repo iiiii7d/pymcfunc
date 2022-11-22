@@ -5,7 +5,7 @@ from typing import Annotated
 
 from beartype.vale import Is
 
-from pkmc.formats.player import Player
+from pkmc.formats.player import PlayerFile
 from pkmc.nbt import (
     Boolean,
     Byte,
@@ -173,7 +173,7 @@ class LevelFile(TypedFile):
     last_played: Annotated[Long, Case.PASCAL]
     level_name: Annotated[String, Case.PASCAL]
     map_features: Annotated[Boolean, Case.PASCAL]
-    player: Annotated[Player | None, Case.PASCAL]
+    player: Annotated[PlayerFile | None, Case.PASCAL]
     raining: Boolean
     rain_time: Annotated[Int, Case.CAMEL]
     random_seed: Annotated[Long, Case.PASCAL]

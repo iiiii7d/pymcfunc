@@ -68,7 +68,7 @@ class WardenSpawnTracker(TypedCompound):
     warning_level: Annotated[Int, Is[lambda x: 0 <= x.value <= 3]]
 
 
-class Player(Entity, Mob, TypedFile):
+class PlayerFile(Entity, Mob, TypedFile):
     abilities: Abilities
     data_version: Annotated[Int, Case.PASCAL]
     dimension: Annotated[String, Case.PASCAL]
