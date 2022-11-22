@@ -165,8 +165,11 @@ class List(Tag, TAG_List, Generic[_T1], MutableSequence[_T1]):
         super().__init__(self.ele_type, value, name, buffer)
 
 
+_T3 = TypeVar("_T3", bound=Tag)
+
+
 @beartype
-class Compound(Tag, TAG_Compound, MutableMapping[str, Tag]):
+class Compound(Tag, TAG_Compound, Generic[_T3], MutableMapping[str, _T3]):
     def __init__(self, name: str | None = None, buffer=None):
         super().__init__(buffer, name)
 
@@ -254,9 +257,27 @@ class File(Compound, NBTFile):
 _T2 = TypeVar("_T2", bound=Compound)
 
 
-def raw_attr_name(attr: str, t: type) -> str:
+def raw_attr_name(attr: str, t: Type[Case] | Type[str]) -> str:
     annos = get_args(t)
-    return annos[1] if len(annos) >= 2 else attr
+    if len(annos) < 2:
+        return attr
+    anno = annos[1]
+    if isinstance(anno, str):
+        return anno
+    elif isinstance(anno, Case):
+        if anno == Case.PASCAL:
+            return "".join(x.title() for x in attr.split("_"))
+        elif anno == Case.CAMEL:
+            return "".join(
+                (x.title() if i != 0 else x.lower())
+                for i, x in enumerate(attr.split("_"))
+            )
+        elif anno == Case.UPPER:
+            return attr.upper()
+        elif anno == Case.NOCASE:
+            return attr.replace("_", "")
+    else:
+        raise ValueError(f"Invalid annotation {anno}")
 
 
 @beartype
@@ -333,3 +354,10 @@ class Boolean(Byte):
         buffer=None,
     ):
         super().__init__(int(value), name, buffer)
+
+
+class Case(Enum):
+    PASCAL = 0
+    CAMEL = 1
+    UPPER = 2
+    NOCASE = 3
