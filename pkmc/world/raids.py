@@ -14,17 +14,19 @@ from pkmc.nbt import (
 )
 
 
+class Status(Enum):
+    ONGOING = String("ongoing", "Status")
+    VICTORY = String("victory", "Status")
+    LOSS = String("loss", "Status")
+    STOPPED = String("stopped", "Status")
+
+
+class NbtUuid(TypedCompound):
+    least: Annotated[Long, "UUIDLeast"]
+    most: Annotated[Long, "UUIDMost"]
+
+
 class Raid(TypedCompound):
-    class Status(Enum):
-        ONGOING = String("ongoing", "Status")
-        VICTORY = String("victory", "Status")
-        LOSS = String("loss", "Status")
-        STOPPED = String("stopped", "Status")
-
-    class NbtUuid(TypedCompound):
-        least: Annotated[Long, "UUIDLeast"]
-        most: Annotated[Long, "UUIDMost"]
-
     active: Annotated[Boolean, Case.PASCAL]
     bad_omen_level: Annotated[Int, Case.PASCAL]
     cx: Annotated[Int, Case.UPPER]

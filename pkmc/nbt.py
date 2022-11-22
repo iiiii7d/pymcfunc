@@ -257,7 +257,7 @@ class File(Compound, NBTFile):
 _T2 = TypeVar("_T2", bound=Compound)
 
 
-def raw_attr_name(attr: str, t: Type[Case] | Type[str]) -> str:
+def raw_attr_name(attr: str, t: Type[Tag]) -> str:
     annos = get_args(t)
     if len(annos) < 2:
         return attr
@@ -285,19 +285,22 @@ class TypedCompound(Compound):
     def __init__(self, val: Compound):
         for field, ty in type(self).fields().items():
             field = raw_attr_name(field, ty)
-            if field not in val.keys() and None not in get_args(ty):
+            if field not in val.keys() and not is_bearable(None, ty):
                 raise KeyError(f"No tag for {field}")
-            try:
-                field_val = val[field]
-                if issubclass(ty, TypedCompound) and isinstance(field_val, Compound):
-                    val[field] = ty(field_val)
-                    continue
-            except TypeError:
-                pass
-            if not is_bearable(val[field], ty):
-                raise TypeError(
-                    f"Invalid type for {field}, expected {ty.__name__} but got {type(val[field]).__name__}"
-                )
+            elif field in val.keys():
+                try:
+                    field_val = val[field]
+                    if issubclass(ty, TypedCompound) and isinstance(
+                        field_val, Compound
+                    ):
+                        val[field] = ty(field_val)
+                        continue
+                except TypeError:
+                    pass
+                if not is_bearable(val[field], ty):
+                    raise TypeError(
+                        f"Invalid type for {field}, expected {ty.__name__} but got {type(val[field]).__name__}"
+                    )
         super().__init__(val.name)
         self.tags = val.tags
 

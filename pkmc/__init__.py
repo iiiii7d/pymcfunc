@@ -1,4 +1,8 @@
-from importlib import metadata
+try:
+    from importlib import metadata
+except ImportError:
+    metadata = None
+    pass
 
 import tomlkit
 
@@ -7,7 +11,7 @@ import pkmc.world
 
 try:
     __version__ = metadata.version(__package__)
-except metadata.PackageNotFoundError:
+except (metadata.PackageNotFoundError, AttributeError):
     try:
         with open("pyproject.toml", "r") as f:
             __version__ = tomlkit.load(f)["tool"]["poetry"]["version"]
