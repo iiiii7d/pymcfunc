@@ -3,6 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Annotated
 
+from pkmc.formats.block import BlockState
 from pkmc.formats.entity import Entity
 from pkmc.formats.item import IntCoords, Item, ItemTag, SlottedItem
 from pkmc.nbt import (
@@ -239,10 +240,6 @@ class MobSpawner(BlockEntity):
 
 
 class Piston(BlockEntity):
-    class BlockState(TypedCompound):  # TODO move somewhere
-        name: Annotated[String, Case.PASCAL]
-        properties: Annotated[Compound[String], Case.PASCAL]
-
     class Facing(Enum):
         DOWN = Int(0)
         UP = Int(1)
