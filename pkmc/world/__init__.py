@@ -7,7 +7,7 @@ from attr import define
 from beartype import beartype
 
 from pkmc.dimensions import Dimension
-from pkmc.world.raids import RaidFile
+from pkmc.formats.raids import RaidFile
 
 
 @beartype
@@ -48,6 +48,9 @@ class World:
         pass
 
     def stats(self, player: UUID) -> None:
+        pass
+
+    def session_lock(self) -> int | None:
         pass
 
     @property

@@ -6,7 +6,6 @@ from typing import (
     Annotated,
     Any,
     Final,
-    Generic,
     Literal,
     MutableMapping,
     MutableSequence,
@@ -35,6 +34,8 @@ from nbt.nbt import (
     TAG_Short,
     TAG_String,
 )
+
+from pkmc._type_utils import Generic, is_union
 
 
 class Tag:
@@ -151,18 +152,10 @@ _T1 = TypeVar("_T1", bound=Optional[Tag])
 
 @beartype
 class List(Tag, TAG_List, Generic[_T1], MutableSequence[_T1]):
-    @property
-    def ele_type(self) -> Type[_T1] | None:
-        # noinspection PyUnresolvedReferences
-        try:
-            return get_args(self.__orig_bases__)[0]
-        except IndexError:
-            return None
-
     def __init__(
         self, value: list[_T1] | None = None, name: str | None = None, buffer=None
     ):
-        super().__init__(self.ele_type, value, name, buffer)
+        super().__init__(self.T(), value, name, buffer)
 
 
 _T3 = TypeVar("_T3", bound=Tag)
@@ -258,10 +251,11 @@ _T2 = TypeVar("_T2", bound=Compound)
 
 
 def raw_attr_name(attr: str, t: Type[Tag]) -> str:
-    annos = get_args(t)
-    if len(annos) < 2:
+    # noinspection PyUnresolvedReferences
+    annos = t.__metadata__ if hasattr(t, "__metadata__") else []
+    if len(annos) == 0:
         return attr
-    anno = annos[1]
+    anno = annos[0]
     if isinstance(anno, str):
         return anno
     elif isinstance(anno, Case):
@@ -288,19 +282,27 @@ class TypedCompound(Compound):
             if field not in val.keys() and not is_bearable(None, ty):
                 raise KeyError(f"No tag for {field}")
             elif field in val.keys():
-                try:
-                    field_val = val[field]
-                    if issubclass(ty, TypedCompound) and isinstance(
-                        field_val, Compound
-                    ):
-                        val[field] = ty(field_val)
-                        continue
-                except TypeError:
-                    pass
                 if not is_bearable(val[field], ty):
                     raise TypeError(
                         f"Invalid type for {field}, expected {ty.__name__} but got {type(val[field]).__name__}"
                     )
+                field_val = val[field]
+                found = False
+                if hasattr(ty, "__metadata__"):
+                    # noinspection PyUnresolvedReferences
+                    ty = ty.__origin__
+                for sub_ty in get_args(ty) if is_union(ty) else (ty,):
+                    if issubclass(sub_ty, TypedCompound) and isinstance(
+                        field_val, Compound
+                    ):
+                        try:
+                            val[field] = sub_ty(field_val)
+                            found = True
+                            break
+                        except (KeyError, TypeError):
+                            pass
+                if found:
+                    continue
         super().__init__(val.name)
         self.tags = val.tags
 
@@ -315,16 +317,23 @@ class TypedCompound(Compound):
 
     def __getattr__(self, item: str) -> Tag | Any:
         if item in self.fields():
-            attribute = raw_attr_name(item, self.fields()[item])
-            return self[attribute]
+            ty = self.fields()[item]
+            attribute = raw_attr_name(item, ty)
+            val = self[attribute]
+            for sub_ty in get_args(ty) if is_union(ty) else (ty,):
+                if issubclass(sub_ty, Enum):
+                    # noinspection PyArgumentList
+                    val = sub_ty(val)
+            return val
         super().__getattribute__(item)
 
     def __setattr__(self, key: str, value: Tag | Enum | Any):
         if key in self.fields():
-            attribute = raw_attr_name(key, self.fields()[key])
+            ty = self.fields()[key]
+            attribute = raw_attr_name(key, ty)
+            if isinstance(value, Enum):
+                value = value.value
             self[attribute] = value
-        if isinstance(value, Enum):
-            value = value.value
         super().__setattr__(key, value)
 
     def __delattr__(self, item: str):

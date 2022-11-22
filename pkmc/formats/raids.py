@@ -15,10 +15,10 @@ from pkmc.nbt import (
 
 
 class Status(Enum):
-    ONGOING = String("ongoing", "Status")
-    VICTORY = String("victory", "Status")
-    LOSS = String("loss", "Status")
-    STOPPED = String("stopped", "Status")
+    ONGOING = String("ongoing")
+    VICTORY = String("victory")
+    LOSS = String("loss")
+    STOPPED = String("stopped")
 
 
 class NbtUuid(TypedCompound):

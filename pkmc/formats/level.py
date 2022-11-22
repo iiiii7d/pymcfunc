@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from enum import Enum
 from typing import Annotated
 
@@ -14,6 +16,7 @@ from pkmc.nbt import (
     List,
     Long,
     LongArray,
+    Short,
     String,
     TypedCompound,
     TypedFile,
@@ -21,36 +24,36 @@ from pkmc.nbt import (
 
 
 class Difficulty(Enum):
-    PEACEFUL = Byte(0, "Difficulty")
-    EASY = Byte(1, "Difficulty")
-    NORMAL = Byte(2, "Difficulty")
-    HARD = Byte(3, "Difficulty")
+    PEACEFUL = Byte(0)
+    EASY = Byte(1)
+    NORMAL = Byte(2)
+    HARD = Byte(3)
 
 
 class GameType(Enum):
-    SURVIVAL = Byte(0, "GameType")
-    CREATIVE = Byte(1, "GameType")
-    ADVENTURE = Byte(2, "GameType")
-    SPECTATOR = Byte(3, "GameType")
+    SURVIVAL = Byte(0)
+    CREATIVE = Byte(1)
+    ADVENTURE = Byte(2)
+    SPECTATOR = Byte(3)
 
 
 class GeneratorName(Enum):
-    DEFAULT = String("default", "GeneratorName")
-    FLAT = String("flat", "GeneratorName")
-    LARGE_BIOMES = String("largebiomes", "GeneratorName")
-    AMPLIFIED = String("amplified", "GeneratorName")
-    BUFFET = String("buffet", "GeneratorName")
-    DEBUG_ALL_BLOCK_STATES = String("debug_all_block_states", "GeneratorName")
-    DEFAULT_1_1 = String("default_1_1", "GeneratorName")
-    CUSTOMIZED = String("customized", "GeneratorName")
+    DEFAULT = String("default")
+    FLAT = String("flat")
+    LARGE_BIOMES = String("largebiomes")
+    AMPLIFIED = String("amplified")
+    BUFFET = String("buffet")
+    DEBUG_ALL_BLOCK_STATES = String("debug_all_block_states")
+    DEFAULT_1_1 = String("default_1_1")
+    CUSTOMIZED = String("customized")
 
 
 class Overlay(Enum):
-    PROGRESS = String("progress", "Overlay")
-    NOTCHED_6 = String("notched_6", "Overlay")
-    NOTCHED_10 = String("notched_10", "Overlay")
-    NOTCHED_12 = String("notched_12", "Overlay")
-    NOTCHED_20 = String("notched_20", "Overlay")
+    PROGRESS = String("progress")
+    NOTCHED_6 = String("notched_6")
+    NOTCHED_10 = String("notched_10")
+    NOTCHED_12 = String("notched_12")
+    NOTCHED_20 = String("notched_20")
 
 
 class BossBar(TypedCompound):
@@ -98,7 +101,7 @@ class WorldGenSettigs(TypedCompound):
     bonus_chest: Boolean
     seed: Long
     generate_features: Boolean
-    dimensions: Compound[GeneratorSetting]
+    # dimensions: Compound[GeneratorSetting] TODO
 
 
 class Version(TypedCompound):
@@ -108,9 +111,33 @@ class Version(TypedCompound):
     snapshot: Annotated[Boolean, Case.PASCAL]
 
 
-class GeneratorOptions(TypedCompound):
+class BuffetGeneratorOptions(TypedCompound):
     class BiomeSource(TypedCompound):
-        pass
+        class Options(TypedCompound):
+            biomes: List[String]
+            size: Byte
+
+        options: Options
+        type: String  # TODO biome source IDs
+
+    class ChunkGenerator(TypedCompound):
+        class Options(TypedCompound):
+            default_block: String
+            default_fluid: String
+
+        options: Options
+        type: String  # TODO chunk gen IDs
+
+
+class SuperflatGeneratorOptions(TypedCompound):
+    class Layer(TypedCompound):
+        block: String
+        height: Int | Byte | Short
+
+    structures: Compound[String]
+    layers: List[Layer]
+    biome: String
+    flat_world_options: String
 
 
 class LevelFile(TypedFile):
@@ -136,7 +163,9 @@ class LevelFile(TypedFile):
     world_gen_settings: Annotated[WorldGenSettigs, Case.PASCAL]
     game_type: Annotated[GameType, Case.PASCAL]
     generator_name: Annotated[GeneratorName, Case.CAMEL]
-    generator_options: Annotated[GeneratorOptions, Case.CAMEL]
+    generator_options: Annotated[
+        BuffetGeneratorOptions | SuperflatGeneratorOptions, Case.CAMEL
+    ]
     generator_version: Annotated[Int, Case.CAMEL]
     hardcore: Boolean
     initialized: Boolean
