@@ -5,7 +5,7 @@ from typing import Annotated
 from beartype.vale import Is
 
 from pkmc.formats.entity import Entity
-from pkmc.formats.item import Item
+from pkmc.formats.item import SlottedItem
 from pkmc.formats.level import GameType
 from pkmc.formats.mob import Mob
 from pkmc.nbt import (
@@ -72,13 +72,13 @@ class Player(Entity, Mob, TypedFile):
     abilities: Abilities
     data_version: Annotated[Int, Case.PASCAL]
     dimension: Annotated[String, Case.PASCAL]
-    ender_items: Annotated[List[Item], Case.PASCAL]
+    ender_items: Annotated[List[SlottedItem], Case.PASCAL]
     entered_nether_position: Annotated[DoubleCoords, Case.CAMEL]
     food_exhaustion_level: Annotated[Float, Case.CAMEL]
     food_level: Annotated[Int, Case.CAMEL]
     food_saturation_level: Annotated[Float, Case.CAMEL]
     food_tick_timer: Annotated[Int, Case.CAMEL]
-    inventory: Annotated[List[Item], Case.PASCAL]
+    inventory: Annotated[List[SlottedItem], Case.PASCAL]
     last_death_location: Annotated[LastDeathLocation, Case.PASCAL]
     player_game_type: Annotated[GameType, Case.CAMEL]
     previous_player_game_type: Annotated[GameType, Case.CAMEL]
@@ -86,7 +86,7 @@ class Player(Entity, Mob, TypedFile):
     root_vehicle: Annotated[RootVehicle | None, Case.PASCAL]
     score: Annotated[Int, Case.PASCAL]
     seen_credits: Annotated[Boolean, Case.CAMEL]
-    selected_item: Annotated[Item, Case.PASCAL]
+    selected_item: Annotated[SlottedItem, Case.PASCAL]
     selected_item_slot: Annotated[Int, Case.PASCAL]
     shoulder_entity_left: Annotated[Entity, Case.PASCAL]
     shoulder_entity_right: Annotated[Entity, Case.PASCAL]

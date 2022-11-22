@@ -5,6 +5,7 @@ from typing import Annotated
 
 from beartype.vale import Is
 
+from pkmc.formats.player import Player
 from pkmc.nbt import (
     Boolean,
     Byte,

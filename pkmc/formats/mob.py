@@ -6,6 +6,7 @@ from typing import Annotated
 from pkmc.formats.item import Item
 from pkmc.nbt import (
     Boolean,
+    Byte,
     Case,
     Compound,
     Double,
@@ -22,7 +23,7 @@ from pkmc.nbt import (
 
 class PotionEffect(TypedCompound):
     ambient: Annotated[Boolean, Case.PASCAL]
-    amplifier: Annotated[Boolean, Case.PASCAL]
+    amplifier: Annotated[Byte, Case.PASCAL]
     duration: Annotated[Int, Case.PASCAL]
     hidden_effect: Annotated[PotionEffect, Case.PASCAL]
     id: Annotated[Int, Case.PASCAL]

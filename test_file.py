@@ -7,14 +7,17 @@ from pkmc.nbt import Compound, TypedCompound
 T = TypeVar("T")
 
 
-class B(Generic[T]):
+class A(TypedCompound, Generic[T]):
+    a: T | None
+
+
+class B(TypedCompound):
+    e: Compound
     pass
 
 
 def main():
-    a = B[int]
-    b = B[str]
-    print(a.T())
+    print(T.__dict__)
 
 
 if __name__ == "__main__":
