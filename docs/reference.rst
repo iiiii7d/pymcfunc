@@ -562,7 +562,7 @@ Raw commands
 
       **Syntax:** *gamerule <rule> [value]*
 
-      A complete list of game rules are available at https://minecraft.fandom.com/wiki/Game_rule#List_of_game_rules.
+      A complete list of game rules are available at https://minecraft.wiki/w/Game_rule#List_of_game_rules.
 
       :param str rule: ``rule``
       :param value: ``value``

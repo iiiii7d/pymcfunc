@@ -101,7 +101,7 @@ class UniversalRawCommands:
 
     def gamerule(self, rule: str, value: Union[bool, int]=None):
         """**Syntax:** *gamerule <rule> [value]*\n
-        A complete list of game rules are available at https://minecraft.fandom.com/wiki/Game_rule#List_of_game_rules\n
+        A complete list of game rules are available at https://minecraft.wiki/w/Game_rule#List_of_game_rules\n
         More info: https://pymcfunc.rtfd.io/en/latest/reference.html#pymcfunc.UniversalRawCommands.gamerule"""
         BEDROCK = {
             bool: ['commandBlocksEnabled', 'commandBlockOutput', 'doDaylightCycle', 'doEntityDrops', 'doFireTick', 'doInsomnia',
